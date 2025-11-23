@@ -49,6 +49,59 @@ export function resetNameCounters(): void {
 }
 
 /**
+ * Detect if a Figma node is likely an icon or vector graphic
+ *
+ * Heuristics:
+ * 1. Has SVG export settings → icon
+ * 2. Is a vector-type node → icon
+ * 3. Is small (≤64px) shape → likely icon
+ *
+ * @param node - Figma node to check
+ * @returns true if node should be treated as icon/SVG, false otherwise
+ *
+ * @example
+ * isLikelyIcon({ type: 'VECTOR', ... }) // true
+ * isLikelyIcon({ type: 'RECTANGLE', absoluteBoundingBox: { width: 32, height: 32 } }) // true
+ * isLikelyIcon({ type: 'FRAME', absoluteBoundingBox: { width: 200, height: 200 } }) // false
+ */
+function isLikelyIcon(node: FigmaNode): boolean {
+  const ALWAYS_ICON_TYPES: string[] = [
+    'VECTOR',
+    'BOOLEAN_OPERATION',
+    'POLYGON',
+    'STAR',
+  ];
+  const SIZE_CONSTRAINED_TYPES: string[] = [
+    'ELLIPSE',
+    'RECTANGLE',
+    'LINE',
+    'FRAME',
+    'GROUP',
+  ];
+  const MAX_ICON_SIZE = 64;
+
+  // Check for explicit SVG export settings (Note: exportSettings not yet in FigmaNode type)
+  // if (node.exportSettings?.some((s) => s.format === 'SVG')) return true;
+
+  // Always treat vectors as icons
+  if (ALWAYS_ICON_TYPES.includes(node.type)) return true;
+
+  // Small shapes are likely icons
+  if (SIZE_CONSTRAINED_TYPES.includes(node.type)) {
+    const bounds = node.absoluteBoundingBox;
+    if (
+      bounds &&
+      bounds.width <= MAX_ICON_SIZE &&
+      bounds.height <= MAX_ICON_SIZE
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Transform Figma node tree to normalized AltNode tree
  *
  * Entry point for transformation engine. Recursively processes tree and applies
@@ -69,12 +122,37 @@ export function transformToAltNode(figmaNode: FigmaNode): AltNode | null {
   }
 
   // Initialize base AltNode structure
+  const uniqueName = generateUniqueName(figmaNode.name);
+  const canBeFlattened = isLikelyIcon(figmaNode);
+
+  // Convert rotation from radians to degrees (Figma uses radians, CSS uses degrees)
+  const rotation = figmaNode.rotation
+    ? -figmaNode.rotation * (180 / Math.PI)
+    : undefined;
+
   const altNode: AltNode = {
     id: figmaNode.id,
-    name: generateUniqueName(figmaNode.name),
-    type: normalizeNodeType(figmaNode.type),
+    name: figmaNode.name,
+    type: normalizeNodeType(figmaNode),
     styles: {},
     originalNode: figmaNode,
+    uniqueName,
+    canBeFlattened,
+    visible: figmaNode.visible ?? true,
+    ...(rotation !== undefined && { rotation }),
+    ...(figmaNode.layoutSizingHorizontal && {
+      layoutSizingHorizontal: figmaNode.layoutSizingHorizontal,
+    }),
+    ...(figmaNode.layoutSizingVertical && {
+      layoutSizingVertical: figmaNode.layoutSizingVertical,
+    }),
+    ...(figmaNode.layoutWrap && { layoutWrap: figmaNode.layoutWrap }),
+    ...(figmaNode.primaryAxisAlignItems && {
+      primaryAxisAlignItems: figmaNode.primaryAxisAlignItems,
+    }),
+    ...(figmaNode.counterAxisAlignItems && {
+      counterAxisAlignItems: figmaNode.counterAxisAlignItems,
+    }),
     figmaProperties: {
       type: figmaNode.type,
       layoutMode: figmaNode.layoutMode,
@@ -125,12 +203,25 @@ export function transformToAltNode(figmaNode: FigmaNode): AltNode | null {
  *
  * Maps Figma's verbose node types to simplified categories
  *
- * @param figmaType - Figma node type
+ * Optimization: Empty containers (FRAME/INSTANCE/COMPONENT with no children)
+ * are treated as 'image' to avoid generating flex properties
+ *
+ * @param figmaNode - Full Figma node (need children info for optimization)
  * @returns Normalized AltNode type
  */
-function normalizeNodeType(
-  figmaType: FigmaNode['type']
-): AltNodeType {
+function normalizeNodeType(figmaNode: FigmaNode): AltNodeType {
+  const figmaType = figmaNode.type;
+
+  // Optimize empty containers → treat as simple shapes (no flex properties)
+  if (
+    (figmaType === 'FRAME' ||
+      figmaType === 'INSTANCE' ||
+      figmaType === 'COMPONENT') &&
+    (!figmaNode.children || figmaNode.children.length === 0)
+  ) {
+    return 'image'; // Empty container = no flex needed
+  }
+
   switch (figmaType) {
     case 'TEXT':
       return 'text';

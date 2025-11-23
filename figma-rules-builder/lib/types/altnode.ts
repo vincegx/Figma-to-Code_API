@@ -36,6 +36,40 @@ export interface AltNode {
   /** Complete original Figma node for property lookup */
   originalNode: FigmaNode;
 
+  /** Unique component name with collision suffix (e.g., Button_01) */
+  uniqueName: string;
+
+  /** Whether node can be flattened to SVG (icons, vectors) */
+  canBeFlattened: boolean;
+
+  /** Pre-rendered SVG string if canBeFlattened is true */
+  svg?: string;
+
+  /** Base64-encoded image data for IMAGE nodes */
+  base64?: string;
+
+  /** Rotation in degrees (converted from Figma's radians) */
+  rotation?: number;
+
+  /** Cumulative rotation inherited from GROUP parents */
+  cumulativeRotation?: number;
+
+  /** Visibility flag (defaults to true) */
+  visible: boolean;
+
+  /** Layout sizing behavior (auto-layout) */
+  layoutSizingHorizontal?: 'FIXED' | 'HUG' | 'FILL';
+  layoutSizingVertical?: 'FIXED' | 'HUG' | 'FILL';
+
+  /** Layout wrapping behavior (auto-layout) */
+  layoutWrap?: 'WRAP' | 'NO_WRAP';
+
+  /** Primary axis alignment (auto-layout) */
+  primaryAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+
+  /** Counter axis alignment (auto-layout) */
+  counterAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'BASELINE';
+
   /** Original Figma properties for reference (deprecated - use originalNode instead) */
   figmaProperties?: Record<string, unknown>;
 }

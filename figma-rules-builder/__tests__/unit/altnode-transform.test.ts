@@ -32,7 +32,8 @@ describe('AltNode Transformation', () => {
 
       expect(altNode.id).toBe('1:2');
       expect(altNode.name).toBe('Test Frame');
-      expect(altNode.type).toBe('container');
+      // Empty FRAME is optimized to 'image' (T098: avoid generating flex properties)
+      expect(altNode.type).toBe('image');
       expect(altNode.styles).toBeDefined();
       expect(altNode.figmaProperties).toBeDefined();
     });

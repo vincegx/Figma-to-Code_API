@@ -2,26 +2,49 @@
  * Code Generation Helper Functions
  *
  * Utilities for converting names, CSS properties, and generating code formatting
+ *
+ * TODO (WP13 Phase 2 - Remaining tasks):
+ * - T101: Context-aware FILL sizing (flex-1 vs w-full based on parent)
+ * - T102: Individual border width support (border-t-2, border-b-2, etc.)
+ * - T103: Hex-to-Tailwind color mapping (nearest color match algorithm)
+ * - T104: Shadow pattern matching (standard shadow → shadow-sm/md/lg)
+ * - T105: Blend mode conversion (mix-blend-multiply, etc.)
  */
 
 /**
  * Convert kebab-case or space-separated name to PascalCase
  *
- * @param name - Input name (e.g., "primary-button", "Primary Button")
- * @returns PascalCase name (e.g., "PrimaryButton")
+ * Handles edge cases:
+ * - Empty names → "Component"
+ * - Names starting with digits → "Component" + name (e.g., "2Column" → "Component2Column")
+ *
+ * @param name - Input name (e.g., "primary-button", "Primary Button", "2-Column")
+ * @returns Valid PascalCase name for React components (e.g., "PrimaryButton", "Component2Column")
  *
  * @example
  * toPascalCase("primary-button") // "PrimaryButton"
  * toPascalCase("Button Label") // "ButtonLabel"
  * toPascalCase("my_component") // "MyComponent"
+ * toPascalCase("2-Column Layout") // "Component2ColumnLayout"
+ * toPascalCase("") // "Component"
  */
 export function toPascalCase(name: string): string {
-  return name
+  let result = name
     .replace(/[^a-zA-Z0-9]+/g, ' ') // Replace non-alphanumeric with spaces
     .split(' ')
     .filter((word) => word.length > 0)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
+
+  // Handle empty result
+  if (result.length === 0) return 'Component';
+
+  // Handle names starting with digits (invalid for React components)
+  if (/^\d/.test(result)) {
+    result = 'Component' + result;
+  }
+
+  return result;
 }
 
 /**
@@ -98,11 +121,24 @@ export function convertToTailwindClasses(
       if (value === 'column') classes.push('flex-col');
     }
 
-    // Gap (assume px values, convert to Tailwind scale)
+    // Flex wrap (T106)
+    if (key === 'flexWrap') {
+      if (value === 'wrap') classes.push('flex-wrap');
+      if (value === 'nowrap') classes.push('flex-nowrap');
+    }
+
+    // Gap (assume px values, convert to Tailwind scale or use arbitrary value)
     if (key === 'gap') {
       const pixels = parsePixelValue(String(value));
       if (pixels !== null) {
-        classes.push(`gap-${pixelsToTailwindScale(pixels)}`);
+        const scale = pixelsToTailwindScale(pixels);
+        const standardValue = scale * 4; // Convert back to pixels
+        // Use arbitrary value if doesn't match standard scale (precision loss)
+        if (standardValue !== pixels) {
+          classes.push(`gap-[${pixels}px]`);
+        } else {
+          classes.push(`gap-${scale}`);
+        }
       }
     }
 
