@@ -259,6 +259,71 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 
 ---
 
+## Work Package WP13: FigmaToCode Improvements (Priority: P0) 🔥 CRITICAL - Complete Before WP08
+
+**Goal**: Integrate 23 recommendations from FigmaToCode analysis to fix critical gaps and improve transformation quality before continuing with Monaco Editor and preview features.
+**Independent Test**: Run existing tests with enhanced types and edge case handling; verify invisible nodes filtered, GROUP nodes inlined, rotation preserved.
+**Prompt**: `/tasks/planned/WP13-figmatocode-improvements.md`
+
+### Included Subtasks
+
+#### CRITICAL Fixes (Block WP08-WP12)
+- [ ] T090 Add `originalNode: FigmaNode` property to `AltNode` interface (lib/types/altnode.ts)
+- [ ] T091 Add missing Figma properties to `FigmaNode` type: strokeTopWeight, strokeBottomWeight, strokeLeftWeight, strokeRightWeight, layoutSizingHorizontal, layoutSizingVertical, layoutWrap, primaryAxisAlignItems, counterAxisAlignItems, rotation, visible, blendMode, opacity (lib/types/figma.ts)
+- [ ] T092 Implement invisible node filtering in `lib/altnode-transform.ts`: early return null when `visible === false`
+- [ ] T093 Implement GROUP node inlining: skip GROUP wrapper, process children directly with cumulative rotation parameter
+- [ ] T094 Add unique name generation with suffix counters (e.g., "Button_01" for second Button)
+
+#### HIGH Priority Enhancements (Quality Improvements)
+- [ ] T095 Add metadata properties to AltNode: `canBeFlattened`, `svg`, `base64`, `uniqueName`, `cumulativeRotation`
+- [ ] T096 Implement `isLikelyIcon()` function: type check (VECTOR, BOOLEAN_OPERATION, etc.), size check (≤64px), export settings check
+- [ ] T097 Add rotation conversion from radians to degrees: `-rotation * (180 / Math.PI)`
+- [ ] T098 Optimize empty containers: convert empty FRAME/INSTANCE/COMPONENT to RECTANGLE, reprocess
+- [ ] T099 Fix `toPascalCase()` validation in lib/code-generators/helpers.ts: prefix numeric-leading names with "Component"
+- [ ] T100 Add arbitrary value fallback for Tailwind: generate `gap-[13px]` when no standard class matches
+- [ ] T101 Implement context-aware FILL sizing: generate `flex-1` instead of `w-full` when parent is horizontal flex container
+- [ ] T102 Add individual border width support: separate handling for `strokeTopWeight`, `strokeBottomWeight`, etc. → `border-t-2 border-b-0`
+- [ ] T103 Implement hex-to-Tailwind color mapping: `nearestColorFromRgb()` function with color distance calculation
+- [ ] T104 Add shadow pattern matching: map standard Figma shadows to `shadow-sm`, `shadow-md`, `shadow-lg`
+- [ ] T105 Add blend mode conversion: map Figma blend modes to `mix-blend-multiply`, `mix-blend-screen`, etc.
+- [ ] T106 Add layout wrap support: detect `layoutWrap: "WRAP"` and generate `flex-wrap` class
+
+#### MEDIUM Priority Enhancements (Nice-to-Have)
+- [ ] T107 [P] Create TailwindBuilder class in lib/code-generators/tailwind-builder.ts: progressive accumulation with chained methods
+- [ ] T108 [P] Optimize padding classes: consolidate to `px-4` when left===right, `py-4` when top===bottom
+- [ ] T109 [P] Add opacity conversion: map 0-1 opacity to Tailwind scale (0, 25, 50, 75, 100)
+- [ ] T110 [P] Add debug data attributes: `data-figma-id`, `data-figma-name`, `data-figma-type` in development mode
+- [ ] T111 [P] Add Tailwind v4 optimizations: use `size-X` when width===height
+- [ ] T112 [P] Add rotation Tailwind classes: map rotation values to `rotate-45`, `rotate-[47deg]`, etc.
+
+#### Testing & Validation
+- [ ] T113 Add edge case tests: invisible node filtering, GROUP inlining, rotation conversion, empty container optimization, icon detection
+- [ ] T114 Update existing altnode-transform tests to verify new properties and behaviors
+- [ ] T115 Add Tailwind generator tests: arbitrary values, color mapping, shadow matching, context-aware sizing
+- [ ] T116 Run full test suite and verify 0 regressions, all 23 improvements functional
+
+### Implementation Notes
+- **Phased approach**: CRITICAL fixes first (T090-T094), then HIGH priority (T095-T106), finally MEDIUM (T107-T112)
+- **Test continuously**: Run tests after each subtask group to catch regressions early
+- **Reference FigmaToCode**: See research.md Decision 7 for code examples and detailed implementation guidance
+- **Update documentation**: Inline comments for complex edge case logic (GROUP inlining, rotation calculation)
+
+### Parallel Opportunities
+- T095-T106 (enhancements) can be developed in parallel after CRITICAL fixes complete
+- T107-T112 (MEDIUM priority) can be developed concurrently (different files/concerns)
+- T113-T116 (testing) can be written in parallel with implementation
+
+### Dependencies
+- Depends on WP02 (TypeScript types baseline), WP04 (AltNode transformation baseline), WP06 (Code generators baseline)
+- Blocks WP08, WP09, WP10, WP11, WP12 (must complete CRITICAL fixes before proceeding)
+
+### Risks & Mitigations
+- **Breaking changes**: Types expansion may require updates to existing transformation logic → Run tests continuously
+- **Scope creep**: 27 subtasks is large → Focus on CRITICAL (5) + HIGH (12) first, MEDIUM (6) optional
+- **Time investment**: Estimated 8-12 hours for complete implementation → Can ship MVP with CRITICAL only if time-constrained
+
+---
+
 ## Work Package WP08: Monaco Editor Integration & Rule Editing (Priority: P1) 🎯 MVP - User Story 2
 
 **Goal**: Integrate Monaco Editor with JSON schema validation, real-time syntax checking, and rule library persistence.
