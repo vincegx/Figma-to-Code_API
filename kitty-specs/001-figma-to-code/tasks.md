@@ -97,13 +97,13 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 **Prompt**: `/tasks/planned/WP03-figma-api-client-and-caching.md`
 
 ### Included Subtasks
-- [ ] T017 Create `lib/figma-client.ts` with fetchNode(), fetchVariables(), fetchScreenshot() functions
-- [ ] T018 Create `lib/utils/file-storage.ts` with saveFigmaData(), loadFigmaData() functions
-- [ ] T019 Implement `app/api/figma/fetch/route.ts` (POST: fetch node, save to cache)
-- [ ] T020 Implement `app/api/figma/refresh/route.ts` (POST: re-fetch with cache invalidation)
-- [ ] T021 Add error handling for API failures (auth, rate limits, network issues)
-- [ ] T022 Test with mock Figma API responses (use msw or similar)
-- [ ] T023 Verify offline mode: Load cached data without API call
+- [x] T017 Create `lib/figma-client.ts` with fetchNode(), fetchVariables(), fetchScreenshot() functions
+- [x] T018 Create `lib/utils/file-storage.ts` with saveFigmaData(), loadFigmaData() functions
+- [x] T019 Implement `app/api/figma/fetch/route.ts` (POST: fetch node, save to cache)
+- [x] T020 Implement `app/api/figma/refresh/route.ts` (POST: re-fetch with cache invalidation)
+- [x] T021 Add error handling for API failures (auth, rate limits, network issues)
+- [x] T022 Test with mock Figma API responses (use msw or similar)
+- [x] T023 Verify offline mode: Load cached data without API call
 
 ### Implementation Notes
 - Use `process.env.FIGMA_ACCESS_TOKEN` (server-side only, never expose to browser)
