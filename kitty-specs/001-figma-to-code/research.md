@@ -508,6 +508,64 @@ export function resolveConflicts(matches: RuleMatch[]): ResolvedProperties {
 
 **Timeline**: Complete analysis before implementing WP08 (Monaco Editor Integration)
 
+---
+
+### Analysis Findings (Completed: 2025-11-23)
+
+**Executive Summary**: FigmaToCode uses a sophisticated intermediate representation with extensive edge case handling and precise Tailwind conversion mappings. Most critical findings: (1) Generic wrapper pattern with metadata flags, (2) 15+ edge cases in auto-layout normalization we're missing (rotation, GROUP inlining, invisible node filtering), (3) Precise px-to-rem Tailwind conversion with arbitrary value fallbacks.
+
+#### Critical Gaps Identified (5 items - BLOCK WP08-WP12)
+
+1. **Missing `originalNode` property** - No reference to complete Figma data after transformation; lose access to `constraints`, `exportSettings`, `blendMode`
+2. **No invisible node filtering** - Generate code for hidden elements (`visible: false`)
+3. **No GROUP node inlining** - Generate unnecessary wrapper `<div>` for every GROUP
+4. **No rotation handling** - Rotation property completely lost in transformation
+5. **No unique name generation** - Component naming collisions possible
+
+#### High Priority Gaps (12 items - Quality improvements)
+
+6. Missing AltNode properties: `canBeFlattened`, `svg`, `base64`, `layoutSizingHorizontal/Vertical`, `layoutWrap`, `primaryAxisAlignItems`, `counterAxisAlignItems`
+7. Missing Figma type properties: `strokeTopWeight/Bottom/Left/Right`, `visible`, `rotation`, `opacity`, `blendMode`, `exportSettings`, `styledTextSegments`
+8. No icon detection (`isLikelyIcon()` with type/size/export checks)
+9. No empty container optimization (empty FRAME → RECTANGLE)
+10. PascalCase validation missing (numeric-leading names like "2Column" invalid React component)
+11. No Tailwind arbitrary value fallback (`gap-[13px]` when no standard class matches)
+12. No context-aware FILL sizing (`flex-1` vs `w-full` based on parent)
+13. No individual border width support (`border-t-2 border-b-0`)
+14. No hex-to-Tailwind color mapping (`bg-blue-500` instead of `bg-[#3B82F6]`)
+15. No shadow pattern matching (standard Figma shadows → `shadow-sm`, `shadow-md`)
+16. No blend mode conversion (`mix-blend-multiply`, etc.)
+17. No layout wrap support (`flex-wrap` for `layoutWrap: "WRAP"`)
+
+#### Medium Priority Enhancements (6 items - Nice-to-have)
+
+18. TailwindBuilder class for progressive accumulation (cleaner than current approach)
+19. Padding class optimization (consolidate `px-4` instead of `pl-4 pr-4`)
+20. Opacity conversion (0-1 → Tailwind scale: 0, 25, 50, 75, 100)
+21. Debug data attributes (`data-figma-id`, `data-figma-name` in dev mode)
+22. Tailwind v4 optimizations (`size-X` when width===height)
+23. Rotation Tailwind classes (`rotate-45`, `rotate-[47deg]`)
+
+#### Actionable Next Steps
+
+**Before WP08** (CRITICAL):
+1. Add `originalNode: FigmaNode` to `lib/types/altnode.ts` (line 18-36)
+2. Add missing properties to `lib/types/figma.ts`: `strokeTopWeight`, `strokeBottomWeight`, `strokeLeftWeight`, `strokeRightWeight`, `layoutSizingHorizontal`, `layoutSizingVertical`, `layoutWrap`, `primaryAxisAlignItems`, `counterAxisAlignItems`, `rotation`, `visible`, `blendMode`, `opacity`
+3. Implement invisible node filtering in `lib/altnode-transform.ts`: `if (figmaNode.visible === false) return null;`
+4. Implement GROUP node inlining: skip GROUP wrapper, process children directly with cumulative rotation
+5. Add unique name generation with suffix counters
+
+**HIGH Priority** (improve quality):
+6. Implement `isLikelyIcon()` function (type check, size check ≤64px, export settings)
+7. Add rotation conversion: `-rotation * (180 / Math.PI)`
+8. Optimize empty containers: convert empty FRAME/INSTANCE to RECTANGLE
+9. Fix `toPascalCase()` validation: prefix numeric-leading names with "Component"
+10. Add arbitrary value fallback in Tailwind converter: `gap-[13px]` when no match
+11. Context-aware sizing: generate `flex-1` when parent is flex container with FILL child
+12. Individual border width support for non-uniform borders
+
+**Full Implementation Details**: See complete analysis document with code examples, comparison tables, and test patterns in research/figma-to-code-analysis.md
+
 **Alternatives considered**:
 - L **Build from scratch without reference**: Rejected - reinventing solved problems, high risk of missing edge cases
 - L **Copy FigmaToCode wholesale**: Rejected - different architecture (automatic vs rule-based), violates constitution principle "Simple Before Clever"
@@ -515,10 +573,11 @@ export function resolveConflicts(matches: RuleMatch[]): ResolvedProperties {
 
 **Sources**:
 - FigmaToCode repository: https://github.com/bernaferrari/FigmaToCode
-- To be added: research/evidence-log.csv #007 (analysis findings)
-- To be added: research/source-register.csv (FigmaToCode source files referenced)
+- Analysis completed: 2025-11-23 (full findings in research/figma-to-code-analysis.md)
+- Evidence log: research/evidence-log.csv #007
+- Source files: packages/backend/src/altNodes/jsonNodeConversion.ts, tailwindMain.ts, iconDetection.ts
 
-**Status**: 🔄 **PENDING** - Analysis not yet started. Complete before proceeding to WP08.
+**Status**: ✅ **COMPLETE** - Analysis finished. 23 actionable recommendations identified (5 CRITICAL, 12 HIGH, 6 MEDIUM). Ready to update tasks.md.
 
 ---
 
@@ -529,8 +588,9 @@ export function resolveConflicts(matches: RuleMatch[]): ResolvedProperties {
 3. ✅ Create proof-of-concept rule matching in `lib/rule-engine.ts` (WP05 - DONE)
 4. ✅ Implement code generators for React/Tailwind/HTML (WP06 - DONE)
 5. ✅ Build main UI layout with three-panel interface (WP07 - DONE)
-6. 🔄 **NEXT**: Analyze FigmaToCode repository (Decision 7) - Complete before WP08
-7. 🔜 Integrate Monaco Editor in `components/rule-editor.tsx` with JSON schema (WP08)
-8. 🔜 Build live preview tabs with <100ms update requirement (WP09)
+6. ✅ **COMPLETED**: Analyze FigmaToCode repository (Decision 7) - 23 recommendations identified
+7. 🔄 **NEXT**: Update tasks.md with new work packages for FigmaToCode improvements (run `/spec-kitty.tasks`)
+8. 🔜 Integrate Monaco Editor in `components/rule-editor.tsx` with JSON schema (WP08)
+9. 🔜 Build live preview tabs with <100ms update requirement (WP09)
 
 **References**: See `research/evidence-log.csv` and `research/source-register.csv` for full source list.
