@@ -9,6 +9,12 @@
  * - T103: Hex-to-Tailwind color mapping (nearest color match algorithm)
  * - T104: Shadow pattern matching (standard shadow → shadow-sm/md/lg)
  * - T105: Blend mode conversion (mix-blend-multiply, etc.)
+ *
+ * TODO (WP13 Phase 3 - Remaining tasks):
+ * - T107: Create TailwindBuilder class (new file, builder pattern)
+ * - T108: Optimize padding classes (consolidate px/py when left===right)
+ * - T110: Add debug data attributes (data-figma-id, data-figma-name in dev mode)
+ * - T111: Tailwind v4 size-X optimization (when width===height)
  */
 
 /**
@@ -280,6 +286,39 @@ export function convertToTailwindClasses(
       if (value === 'center') classes.push('items-center');
       if (value === 'baseline') classes.push('items-baseline');
       if (value === 'stretch') classes.push('items-stretch');
+    }
+
+    // Opacity (T109)
+    if (key === 'opacity') {
+      const opacityValue = typeof value === 'number' ? value : parseFloat(String(value));
+      if (!isNaN(opacityValue)) {
+        // Map to nearest Tailwind opacity scale (0, 25, 50, 75, 100)
+        if (opacityValue === 0) classes.push('opacity-0');
+        else if (opacityValue <= 0.25) classes.push('opacity-25');
+        else if (opacityValue <= 0.5) classes.push('opacity-50');
+        else if (opacityValue <= 0.75) classes.push('opacity-75');
+        else classes.push('opacity-100');
+      }
+    }
+
+    // Rotation (T112) - expects degrees from T097 conversion
+    if (key === 'rotation') {
+      const degrees = typeof value === 'number' ? value : parseFloat(String(value));
+      if (!isNaN(degrees) && degrees !== 0) {
+        // Standard Tailwind rotations: 0, 1, 2, 3, 6, 12, 45, 90, 180
+        const standardRotations = [0, 1, 2, 3, 6, 12, 45, 90, 180];
+        const absDegrees = Math.abs(degrees);
+        const isNegative = degrees < 0;
+
+        // Check if matches standard rotation
+        if (standardRotations.includes(absDegrees)) {
+          const prefix = isNegative ? '-rotate-' : 'rotate-';
+          classes.push(`${prefix}${absDegrees}`);
+        } else {
+          // Use arbitrary value for non-standard rotations
+          classes.push(`rotate-[${degrees}deg]`);
+        }
+      }
     }
   }
 
