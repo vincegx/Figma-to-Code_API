@@ -77,14 +77,14 @@ export async function POST(request: Request) {
 
 | Figma Property | AltNode Property | Transformation Logic |
 |---|---|---|
-| `layoutMode: "HORIZONTAL"` | `display: "flex"`, `flexDirection: "row"` | Auto-layout ’ Flexbox |
-| `layoutMode: "VERTICAL"` | `display: "flex"`, `flexDirection: "column"` | Auto-layout ’ Flexbox |
-| `itemSpacing: 16` | `gap: "16px"` | Spacing ’ CSS gap |
-| `paddingLeft/Right/Top/Bottom` | `padding: "8px 16px"` | Individual values ’ CSS shorthand |
-| `fills: [{ type: "SOLID", color: {...} }]` | `background: "#FF0000"` | Paint array ’ CSS color |
-| `strokes: [...]` | `border: "1px solid #000"` | Stroke ’ CSS border |
-| `effects: [{ type: "DROP_SHADOW", ... }]` | `boxShadow: "2px 2px 4px rgba(0,0,0,0.1)"` | Effects ’ CSS shadow |
-| `fontSize: 16`, `fontFamily: "Inter"` | `fontSize: "16px"`, `fontFamily: "'Inter', sans-serif"` | Text properties ’ CSS |
+| `layoutMode: "HORIZONTAL"` | `display: "flex"`, `flexDirection: "row"` | Auto-layout ï¿½ Flexbox |
+| `layoutMode: "VERTICAL"` | `display: "flex"`, `flexDirection: "column"` | Auto-layout ï¿½ Flexbox |
+| `itemSpacing: 16` | `gap: "16px"` | Spacing ï¿½ CSS gap |
+| `paddingLeft/Right/Top/Bottom` | `padding: "8px 16px"` | Individual values ï¿½ CSS shorthand |
+| `fills: [{ type: "SOLID", color: {...} }]` | `background: "#FF0000"` | Paint array ï¿½ CSS color |
+| `strokes: [...]` | `border: "1px solid #000"` | Stroke ï¿½ CSS border |
+| `effects: [{ type: "DROP_SHADOW", ... }]` | `boxShadow: "2px 2px 4px rgba(0,0,0,0.1)"` | Effects ï¿½ CSS shadow |
+| `fontSize: 16`, `fontFamily: "Inter"` | `fontSize: "16px"`, `fontFamily: "'Inter', sans-serif"` | Text properties ï¿½ CSS |
 
 **Edge cases handled**:
 1. **Groups without explicit constraints**: Treat as `position: relative` container
@@ -111,7 +111,7 @@ export function transformToAltNode(figmaNode: FigmaNode): AltNode {
     altNode.styles.gap = `${figmaNode.itemSpacing}px`;
   }
 
-  // Normalize fills ’ background
+  // Normalize fills ï¿½ background
   if (figmaNode.fills?.length > 0) {
     altNode.styles.background = convertFillToCSS(figmaNode.fills[0]);
   }
@@ -348,7 +348,7 @@ function selectorMatches(altNode: AltNode, selector: Selector): boolean {
 // lib/rule-engine.ts
 export function resolveConflicts(matches: RuleMatch[]): ResolvedProperties {
   const resolved: ResolvedProperties = {};
-  const propertyProvenance: Record<string, string> = {}; // property ’ ruleId
+  const propertyProvenance: Record<string, string> = {}; // property ï¿½ ruleId
 
   // Matches already sorted by priority (descending)
   for (const match of matches) {
@@ -403,13 +403,134 @@ export function resolveConflicts(matches: RuleMatch[]): ResolvedProperties {
 
 ---
 
+## Decision 7: FigmaToCode Reference Implementation Analysis
+
+**Decision**: Study FigmaToCode repository (https://github.com/bernaferrari/FigmaToCode) to identify proven patterns and improvements for our Rule Builder
+
+**Rationale**:
+- **Similar problem domain**: FigmaToCode solves automatic Figma-to-Code transformation (same core transformation as our Rule Builder, but without user-defined rules)
+- **Production-tested**: They've already solved edge cases and optimization challenges we'll encounter
+- **Open source**: Can study their TypeScript implementation directly
+- **Complementary approach**: Their automatic transformation insights can improve our rule-based system
+
+**Research Areas**:
+
+### 1. AltNode Transformation Strategy
+**What to analyze**:
+- Property normalization patterns (auto-layout, spacing, fills, strokes, effects)
+- Edge case handling (absolute positioning in auto-layout, z-index calculation, overlapping elements, masks, constraints)
+- Responsive design approach (how they handle Figma constraints)
+- Text handling (multi-style text runs, font fallbacks)
+
+**Expected learnings**:
+- Comprehensive mapping tables for Figma â†’ CSS properties
+- Edge cases we haven't covered in Decision 2 (current AltNode transformation)
+- Performance optimizations for large node trees
+
+**Priority**: HIGH - Directly impacts WP04 (AltNode Transformation Engine) quality
+
+---
+
+### 2. Code Generation Patterns
+**What to analyze**:
+- React/JSX component structure and naming conventions
+- Tailwind CSS utility class mapping strategy (which Figma properties â†’ which Tailwind classes)
+- Component composition logic (how they handle nested elements, prop drilling)
+- Code formatting and readability optimizations
+
+**Expected learnings**:
+- Proven Tailwind class mappings (e.g., `itemSpacing: 16` â†’ `gap-4` vs manual `gap: 16px`)
+- React component patterns that produce cleaner output
+- How to handle components with many children (flattening vs nesting)
+
+**Priority**: HIGH - Directly impacts WP06 (Code Generators) completeness
+
+---
+
+### 3. TypeScript Data Models
+**What to analyze**:
+- AltNode structure (compare with our current `lib/types/altnode.ts`)
+- Figma API type definitions (compare with our `lib/types/figma.ts`)
+- Validation strategies and type guards
+- Interface design for extensibility
+
+**Expected learnings**:
+- Missing properties in our current AltNode type
+- Type-safe patterns for handling Figma API responses
+- Discriminated union patterns for node types
+
+**Priority**: MEDIUM - Could improve WP02 (TypeScript Types) if gaps found
+
+---
+
+### 4. Performance & Edge Cases
+**What to analyze**:
+- Large Figma file handling (1000+ nodes)
+- Memory management strategies
+- Transformation caching or memoization patterns
+- Test coverage and example files (what edge cases do they test?)
+
+**Expected learnings**:
+- Performance benchmarks to compare against our targets
+- Edge cases not covered in our spec (masks, boolean operations, component variants)
+- Test patterns for Figma transformation logic
+
+**Priority**: MEDIUM - Informs optimization strategies for WP04, WP05
+
+---
+
+**Implementation Plan**:
+
+1. **Repository Analysis** (1-2 hours):
+   - Clone FigmaToCode repo: `git clone https://github.com/bernaferrari/FigmaToCode.git`
+   - Identify key source files:
+     - AltNode transformation logic
+     - Code generators (React, Tailwind)
+     - Type definitions
+     - Test files with example Figma nodes
+
+2. **Comparative Study** (2-3 hours):
+   - Compare their AltNode structure with ours (`lib/types/altnode.ts`)
+   - Extract Tailwind mapping table (Figma property â†’ Tailwind class)
+   - Document edge cases they handle that we don't
+   - Note performance optimizations (memoization, caching)
+
+3. **Integration Recommendations** (1 hour):
+   - List 5-10 concrete improvements to integrate before finalizing WP08-WP12
+   - Prioritize by impact (HIGH: affects core transformation, MEDIUM: nice-to-have)
+   - Create action items for updating affected work packages
+
+**Expected Deliverables**:
+- Updated AltNode type definition with missing properties
+- Enhanced Tailwind class mapping table for `lib/code-generators/react-tailwind.ts`
+- Additional edge case tests for `__tests__/unit/altnode-transform.test.ts`
+- Performance optimization notes for rule engine
+
+**Timeline**: Complete analysis before implementing WP08 (Monaco Editor Integration)
+
+**Alternatives considered**:
+- L **Build from scratch without reference**: Rejected - reinventing solved problems, high risk of missing edge cases
+- L **Copy FigmaToCode wholesale**: Rejected - different architecture (automatic vs rule-based), violates constitution principle "Simple Before Clever"
+- L **Analyze multiple Figma-to-Code tools**: Rejected - time constraint, FigmaToCode is most mature TypeScript implementation
+
+**Sources**:
+- FigmaToCode repository: https://github.com/bernaferrari/FigmaToCode
+- To be added: research/evidence-log.csv #007 (analysis findings)
+- To be added: research/source-register.csv (FigmaToCode source files referenced)
+
+**Status**: ðŸ”„ **PENDING** - Analysis not yet started. Complete before proceeding to WP08.
+
+---
+
 ## Next Steps
 
-1. Implement `lib/figma-client.ts` with basic GET `/v1/files/{key}/nodes` endpoint
-2. Build `lib/altnode-transform.ts` with auto-layout ’ flexbox transformation
-3. Integrate Monaco Editor in `components/rule-editor.tsx` with JSON schema
-4. Create proof-of-concept rule matching in `lib/rule-engine.ts`
-5. Benchmark performance with realistic Figma file (50-100 nodes)
-6. Iterate on transformation edge cases (absolute positioning, z-index, text runs)
+1. âœ… Implement `lib/figma-client.ts` with basic GET `/v1/files/{key}/nodes` endpoint (WP03 - DONE)
+2. âœ… Build `lib/altnode-transform.ts` with auto-layout â†’ flexbox transformation (WP04 - DONE)
+3. âœ… Create proof-of-concept rule matching in `lib/rule-engine.ts` (WP05 - DONE)
+4. âœ… Implement code generators for React/Tailwind/HTML (WP06 - DONE)
+5. âœ… Build main UI layout with three-panel interface (WP07 - DONE)
+6. ðŸ”„ **NEXT**: Analyze FigmaToCode repository (Decision 7) - Complete before WP08
+7. ðŸ”œ Integrate Monaco Editor in `components/rule-editor.tsx` with JSON schema (WP08)
+8. ðŸ”œ Build live preview tabs with <100ms update requirement (WP09)
 
 **References**: See `research/evidence-log.csv` and `research/source-register.csv` for full source list.
