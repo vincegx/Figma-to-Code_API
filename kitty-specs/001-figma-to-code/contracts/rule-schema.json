@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Figma-to-Code Mapping Rule Schema",
+  "description": "JSON schema for validating mapping rules in the rule editor",
+  "type": "object",
+  "required": ["version", "rules"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Rule library version (semantic versioning)",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0"
+    },
+    "rules": {
+      "type": "array",
+      "description": "Array of mapping rules",
+      "items": {
+        "$ref": "#/definitions/MappingRule"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the rule library",
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "MappingRule": {
+      "type": "object",
+      "required": ["id", "name", "selector", "transformer", "priority"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique rule identifier (kebab-case recommended)",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable rule name",
+          "minLength": 1
+        },
+        "selector": {
+          "$ref": "#/definitions/Selector"
+        },
+        "transformer": {
+          "$ref": "#/definitions/Transformer"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Conflict resolution order (higher priority wins)",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this rule is active",
+          "default": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Documentation for this rule"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Selector": {
+      "type": "object",
+      "description": "Pattern to match AltNodes (all properties use AND logic)",
+      "properties": {
+        "nodeType": {
+          "type": "string",
+          "description": "Match specific node type",
+          "enum": ["container", "text", "image", "group"]
+        },
+        "layoutMode": {
+          "type": "string",
+          "description": "Match layout direction (horizontal = flex-row, vertical = flex-column)",
+          "enum": ["horizontal", "vertical"]
+        },
+        "hasChildren": {
+          "type": "boolean",
+          "description": "Match nodes with/without children"
+        },
+        "customProperties": {
+          "type": "object",
+          "description": "Match specific CSS properties on the AltNode",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" }
+            ]
+          }
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "Transformer": {
+      "type": "object",
+      "description": "Output structure definition for matched nodes",
+      "required": ["htmlTag"],
+      "properties": {
+        "htmlTag": {
+          "type": "string",
+          "description": "HTML tag to generate (e.g., div, button, span)",
+          "enum": [
+            "div", "span", "p", "h1", "h2", "h3", "h4", "h5", "h6",
+            "button", "a", "img", "ul", "ol", "li", "section", "article",
+            "header", "footer", "nav", "main", "aside", "form", "input",
+            "label", "textarea", "select", "option"
+          ]
+        },
+        "cssClasses": {
+          "type": "array",
+          "description": "CSS classes to apply (for Tailwind or external CSS)",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "inlineStyles": {
+          "type": "object",
+          "description": "Inline CSS properties (camelCase keys)",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "description": "HTML attributes to add (e.g., aria-label, data-* attributes)",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

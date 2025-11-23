@@ -1,0 +1,329 @@
+openapi: 3.0.3
+info:
+  title: Figma REST API (Subset Used)
+  description: Figma API endpoints used by Figma-to-Code Rule Builder
+  version: 1.0.0
+  externalDocs:
+    url: https://www.figma.com/developers/api
+servers:
+  - url: https://api.figma.com/v1
+    description: Figma REST API v1
+
+security:
+  - FigmaToken: []
+
+paths:
+  /files/{file_key}:
+    get:
+      summary: Get file metadata
+      description: Fetch full Figma file structure (used to get initial file info)
+      operationId: getFile
+      parameters:
+        - name: file_key
+          in: path
+          required: true
+          description: Figma file key from URL (e.g., abc123def456)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileResponse'
+        '403':
+          description: Forbidden - invalid or missing access token
+        '404':
+          description: File not found
+
+  /files/{file_key}/nodes:
+    get:
+      summary: Get specific nodes
+      description: Fetch specific nodes by ID with all children and properties
+      operationId: getNodes
+      parameters:
+        - name: file_key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ids
+          in: query
+          required: true
+          description: Comma-separated list of node IDs (e.g., "123:456,789:012")
+          schema:
+            type: string
+        - name: depth
+          in: query
+          description: How many levels of children to return (default: all)
+          schema:
+            type: integer
+            default: -1
+      responses:
+        '200':
+          description: Nodes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodesResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: File or nodes not found
+
+  /files/{file_key}/variables/local:
+    get:
+      summary: Get local variables (design tokens)
+      description: Fetch design tokens/variables defined in the file
+      operationId: getLocalVariables
+      parameters:
+        - name: file_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Variables retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariablesResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: File not found
+
+  /images/{file_key}:
+    get:
+      summary: Get node screenshots
+      description: Render specific nodes as images (PNG)
+      operationId: getImages
+      parameters:
+        - name: file_key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ids
+          in: query
+          required: true
+          description: Comma-separated list of node IDs
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Image format
+          schema:
+            type: string
+            enum: [png, jpg, svg, pdf]
+            default: png
+        - name: scale
+          in: query
+          description: Scale factor (1 = 1x, 2 = 2x)
+          schema:
+            type: number
+            default: 1
+      responses:
+        '200':
+          description: Image URLs generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagesResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: File or nodes not found
+
+components:
+  securitySchemes:
+    FigmaToken:
+      type: http
+      scheme: bearer
+      bearerFormat: Personal Access Token
+      description: Figma personal access token (stored in .env.local as FIGMA_ACCESS_TOKEN)
+
+  schemas:
+    FileResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: File name
+        lastModified:
+          type: string
+          format: date-time
+        thumbnailUrl:
+          type: string
+        document:
+          $ref: '#/components/schemas/FigmaNode'
+
+    NodesResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        nodes:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              document:
+                $ref: '#/components/schemas/FigmaNode'
+
+    FigmaNode:
+      type: object
+      required: [id, name, type]
+      properties:
+        id:
+          type: string
+          description: Node ID (e.g., "123:456")
+        name:
+          type: string
+        type:
+          type: string
+          enum: [FRAME, GROUP, TEXT, RECTANGLE, ELLIPSE, VECTOR, COMPONENT, INSTANCE]
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/FigmaNode'
+        layoutMode:
+          type: string
+          enum: [HORIZONTAL, VERTICAL]
+          nullable: true
+        itemSpacing:
+          type: number
+          description: Gap between children (pixels)
+        paddingLeft:
+          type: number
+        paddingRight:
+          type: number
+        paddingTop:
+          type: number
+        paddingBottom:
+          type: number
+        fills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Paint'
+        strokes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Paint'
+        effects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Effect'
+        fontSize:
+          type: number
+        fontFamily:
+          type: string
+        characters:
+          type: string
+          description: Text content
+        absoluteBoundingBox:
+          $ref: '#/components/schemas/Rectangle'
+        constraints:
+          $ref: '#/components/schemas/Constraints'
+
+    Paint:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [SOLID, GRADIENT_LINEAR, GRADIENT_RADIAL, IMAGE]
+        color:
+          $ref: '#/components/schemas/Color'
+        opacity:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    Color:
+      type: object
+      required: [r, g, b, a]
+      properties:
+        r:
+          type: number
+          minimum: 0
+          maximum: 1
+        g:
+          type: number
+          minimum: 0
+          maximum: 1
+        b:
+          type: number
+          minimum: 0
+          maximum: 1
+        a:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    Effect:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [DROP_SHADOW, INNER_SHADOW, LAYER_BLUR]
+        color:
+          $ref: '#/components/schemas/Color'
+        offset:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+        radius:
+          type: number
+
+    Rectangle:
+      type: object
+      required: [x, y, width, height]
+      properties:
+        x:
+          type: number
+        y:
+          type: number
+        width:
+          type: number
+        height:
+          type: number
+
+    Constraints:
+      type: object
+      properties:
+        horizontal:
+          type: string
+          enum: [LEFT, RIGHT, CENTER, LEFT_RIGHT, SCALE]
+        vertical:
+          type: string
+          enum: [TOP, BOTTOM, CENTER, TOP_BOTTOM, SCALE]
+
+    VariablesResponse:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            variables:
+              type: object
+              additionalProperties:
+                type: object
+        status:
+          type: integer
+
+    ImagesResponse:
+      type: object
+      properties:
+        images:
+          type: object
+          additionalProperties:
+            type: string
+            description: URL to rendered image
+            example: "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/..."
