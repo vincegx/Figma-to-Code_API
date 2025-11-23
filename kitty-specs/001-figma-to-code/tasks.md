@@ -229,16 +229,18 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 
 **Goal**: Build three-panel interface (tree, editor, previews) and implement Figma node fetch workflow.
 **Independent Test**: Enter Figma URL + node ID, click fetch, see AltNode tree in left panel.
-**Prompt**: `/tasks/planned/WP07-main-ui-layout-and-fetch-flow.md`
+**Prompt**: `/tasks/done/WP07-main-ui-layout.md`
+
+**Status**: ✅ DONE - Reviewed and approved (2025-11-23)
 
 ### Included Subtasks
-- [ ] T047 Create `app/page.tsx` with three-panel layout (Shadcn/ui ResizablePanels)
-- [ ] T048 Create input form for Figma URL and node ID (Shadcn/ui Input, Button components)
-- [ ] T049 Implement fetch handler: call `/api/figma/fetch`, handle loading/error states
-- [ ] T050 Create `components/figma-tree-view.tsx` for recursive AltNode tree display
-- [ ] T051 Add visual indicators (colored badges) for rule match counts on tree nodes
-- [ ] T052 Style panels with Tailwind CSS (responsive, clean dev tool aesthetic)
-- [ ] T053 Test full fetch flow: valid URL → loading → success → tree displayed
+- [x] T047 Create `app/page.tsx` with three-panel layout (Shadcn/ui ResizablePanels)
+- [x] T048 Create input form for Figma URL and node ID (Shadcn/ui Input, Button components)
+- [x] T049 Implement fetch handler: call `/api/figma/fetch`, handle loading/error states
+- [x] T050 Create `components/figma-tree-view.tsx` for recursive AltNode tree display
+- [x] T051 Add visual indicators (colored badges) for rule match counts on tree nodes
+- [x] T052 Style panels with Tailwind CSS (responsive, clean dev tool aesthetic)
+- [x] T053 Test full fetch flow: valid URL → loading → success → tree displayed
 
 ### Implementation Notes
 - Use Next.js App Router `useState` for client-side state (Figma URL, fetched data, loading)
