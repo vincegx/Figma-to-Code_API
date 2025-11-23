@@ -3,7 +3,9 @@ work_package_id: "WP07"
 subtasks: ["T047-T053"]
 title: "Main UI Layout & Fetch Flow"
 phase: "Phase 2 - UI Components"
-lane: "planned"
+lane: "doing"
+agent: "claude"
+shell_pid: "24916"
 history:
   - timestamp: "2025-11-23T00:00:00Z"
     lane: "planned"
@@ -28,3 +30,7 @@ Refer to tasks.md WP07 section for complete subtask list and implementation note
 - [ ] Component tests passing
 - [ ] Integration with existing UI verified
 - [ ] Documentation updated
+
+## Activity Log
+
+- 2025-11-23T19:33:41Z – claude – shell_pid=24916 – lane=doing – Started WP07: Main UI Layout & Fetch Flow implementation

@@ -1,65 +1,152 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FigmaTreeView } from '@/components/figma-tree-view';
+import type { AltNode } from '@/lib/types/altnode';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function Home() {
+  const [figmaUrl, setFigmaUrl] = useState('');
+  const [nodeId, setNodeId] = useState('');
+  const [altNodeTree, setAltNodeTree] = useState<AltNode | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFetch = async () => {
+    if (!figmaUrl || !nodeId) {
+      setError('Please provide both Figma URL and Node ID');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/figma/fetch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ figmaUrl, nodeId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch Figma data');
+      }
+
+      const data = await response.json();
+      setAltNodeTree(data.altNode);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="h-screen w-full bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card px-6 py-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-semibold">Figma Rules Builder</h1>
+          <div className="flex flex-1 items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Figma URL (e.g., https://figma.com/file/...)"
+              value={figmaUrl}
+              onChange={(e) => setFigmaUrl(e.target.value)}
+              className="flex-1 max-w-md"
+              disabled={loading}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <Input
+              type="text"
+              placeholder="Node ID (e.g., 1:2)"
+              value={nodeId}
+              onChange={(e) => setNodeId(e.target.value)}
+              className="w-32"
+              disabled={loading}
+            />
+            <Button onClick={handleFetch} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Fetch'
+              )}
+            </Button>
+          </div>
         </div>
-      </main>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </header>
+
+      {/* Three-Panel Layout */}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="h-[calc(100vh-80px)]"
+      >
+        {/* Left Panel: Figma Tree View */}
+        <ResizablePanel defaultSize={25} minSize={15}>
+          <div className="h-full overflow-auto border-r border-border bg-card p-4">
+            <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+              FIGMA TREE
+            </h2>
+            {altNodeTree ? (
+              <FigmaTreeView node={altNodeTree} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No tree loaded. Enter Figma URL and Node ID, then click Fetch.
+              </p>
+            )}
+          </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Middle Panel: Rule Editor */}
+        <ResizablePanel defaultSize={40} minSize={30}>
+          <div className="h-full overflow-auto bg-card p-4">
+            <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+              RULE EDITOR
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Monaco Editor will be integrated here (WP08)
+            </p>
+          </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Right Panel: Code Previews */}
+        <ResizablePanel defaultSize={35} minSize={25}>
+          <div className="h-full overflow-auto border-l border-border bg-card p-4">
+            <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+              CODE PREVIEW
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Preview tabs will be integrated here (WP09)
+            </p>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
