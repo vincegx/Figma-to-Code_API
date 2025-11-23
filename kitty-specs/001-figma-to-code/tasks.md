@@ -331,13 +331,16 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 **Prompt**: `/tasks/planned/WP08-monaco-editor-integration-and-rule-editing.md`
 
 ### Included Subtasks
-- [ ] T054 Create `components/rule-editor.tsx` wrapping `@monaco-editor/react`
-- [ ] T055 Configure Monaco with JSON language server and rule-schema.json for validation
-- [ ] T056 Implement rule library save/load (call `/api/rules/save` and `/api/rules/load`)
-- [ ] T057 Create `app/api/rules/save/route.ts` (POST: write mapping-rules.json)
-- [ ] T058 Create `app/api/rules/load/route.ts` (GET: read mapping-rules.json)
-- [ ] T059 Add autocomplete for common rule patterns (Monaco suggestions API)
-- [ ] T060 Test real-time validation: syntax errors highlighted with line numbers
+- [x] T054 Create `components/rule-editor.tsx` wrapping `@monaco-editor/react`
+- [x] T055 Configure Monaco with JSON language server and rule-schema.json for validation
+- [x] T056 Implement rule library save/load (call `/api/rules/save` and `/api/rules/load`)
+- [x] T057 Create `app/api/rules/save/route.ts` (POST: write mapping-rules.json)
+- [x] T058 Create `app/api/rules/load/route.ts` (GET: read mapping-rules.json)
+- [x] T059 Add autocomplete for common rule patterns (Monaco suggestions API)
+- [x] T060 Test real-time validation: syntax errors highlighted with line numbers
+
+**Status**: ✅ DONE - Reviewed and approved (2025-11-23)
+**Prompt File**: `tasks/done/WP08-monaco-editor-integration.md`
 
 ### Implementation Notes
 - Load `@monaco-editor/react` with dynamic import to reduce bundle size
