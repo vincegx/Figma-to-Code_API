@@ -3,7 +3,9 @@ work_package_id: "WP04"
 subtasks: ["T024", "T025", "T026", "T027", "T028", "T029", "T030", "T031", "T032"]
 title: "AltNode Transformation Engine"
 phase: "Phase 1 - Core Library"
-lane: "planned"
+lane: "doing"
+agent: "claude"
+shell_pid: "82299"
 history:
   - timestamp: "2025-11-23T00:00:00Z"
     lane: "planned"
@@ -38,3 +40,7 @@ Transform Figma JSON to normalized AltNode with CSS-familiar properties. Handle 
 - [ ] Edge cases handled gracefully
 - [ ] Performance < 50ms for 100 nodes
 - [ ] Unit tests pass
+
+## Activity Log
+
+- 2025-11-23T18:32:45Z – claude – shell_pid=82299 – lane=doing – Started WP04: AltNode Transformation Engine implementation
