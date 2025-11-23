@@ -196,13 +196,16 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 **Prompt**: `/tasks/planned/WP06-code-generators.md`
 
 ### Included Subtasks
-- [ ] T040 [P] Create `lib/code-generators/react.ts` for React JSX with inline styles
-- [ ] T041 [P] Create `lib/code-generators/react-tailwind.ts` for React with Tailwind utility classes
-- [ ] T042 [P] Create `lib/code-generators/html-css.ts` for HTML + separate CSS
-- [ ] T043 Implement helper functions: toPascalCase(), cssObjectToString(), convertToTailwindClasses()
-- [ ] T044 Add syntax highlighting preparation (Prism.js or Shiki integration research)
-- [ ] T045 Test generated code compiles/renders correctly (React JSX → JSX parser, HTML → DOM parser)
-- [ ] T046 Verify generated code readability (proper indentation, line breaks)
+- [X] T040 [P] Create `lib/code-generators/react.ts` for React JSX with inline styles
+- [X] T041 [P] Create `lib/code-generators/react-tailwind.ts` for React with Tailwind utility classes
+- [X] T042 [P] Create `lib/code-generators/html-css.ts` for HTML + separate CSS
+- [X] T043 Implement helper functions: toPascalCase(), cssObjectToString(), convertToTailwindClasses()
+- [X] T044 Add syntax highlighting preparation (Prism.js or Shiki integration research)
+- [X] T045 Test generated code compiles/renders correctly (React JSX → JSX parser, HTML → DOM parser)
+- [X] T046 Verify generated code readability (proper indentation, line breaks)
+
+**Status**: ✅ DONE - Reviewed and approved (2025-11-23)
+**Prompt File**: `tasks/done/WP06-code-generators.md`
 
 ### Implementation Notes
 - Template-based generation (string interpolation, not AST manipulation)

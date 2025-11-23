@@ -89,7 +89,6 @@ function generateHtml(
   );
 
   const indent = '  '.repeat(indentLevel);
-  const hasChildren = childrenHtml.length > 0 || textContent.length > 0;
 
   // Always use open/close tags for HTML (self-closing only for void elements like img, br, hr)
   const voidElements = ['img', 'br', 'hr', 'input', 'meta', 'link'];
