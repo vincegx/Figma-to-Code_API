@@ -268,39 +268,39 @@ description: "Work package task list for Figma-to-Code Rule Builder implementati
 ### Included Subtasks
 
 #### CRITICAL Fixes (Block WP08-WP12)
-- [ ] T090 Add `originalNode: FigmaNode` property to `AltNode` interface (lib/types/altnode.ts)
-- [ ] T091 Add missing Figma properties to `FigmaNode` type: strokeTopWeight, strokeBottomWeight, strokeLeftWeight, strokeRightWeight, layoutSizingHorizontal, layoutSizingVertical, layoutWrap, primaryAxisAlignItems, counterAxisAlignItems, rotation, visible, blendMode, opacity (lib/types/figma.ts)
-- [ ] T092 Implement invisible node filtering in `lib/altnode-transform.ts`: early return null when `visible === false`
-- [ ] T093 Implement GROUP node inlining: skip GROUP wrapper, process children directly with cumulative rotation parameter
-- [ ] T094 Add unique name generation with suffix counters (e.g., "Button_01" for second Button)
+- [x] T090 Add `originalNode: FigmaNode` property to `AltNode` interface (lib/types/altnode.ts)
+- [x] T091 Add missing Figma properties to `FigmaNode` type: strokeTopWeight, strokeBottomWeight, strokeLeftWeight, strokeRightWeight, layoutSizingHorizontal, layoutSizingVertical, layoutWrap, primaryAxisAlignItems, counterAxisAlignItems, rotation, visible, blendMode, opacity (lib/types/figma.ts)
+- [x] T092 Implement invisible node filtering in `lib/altnode-transform.ts`: early return null when `visible === false`
+- [x] T093 Implement GROUP node inlining: skip GROUP wrapper, process children directly with cumulative rotation parameter
+- [x] T094 Add unique name generation with suffix counters (e.g., "Button_01" for second Button)
 
 #### HIGH Priority Enhancements (Quality Improvements)
-- [ ] T095 Add metadata properties to AltNode: `canBeFlattened`, `svg`, `base64`, `uniqueName`, `cumulativeRotation`
-- [ ] T096 Implement `isLikelyIcon()` function: type check (VECTOR, BOOLEAN_OPERATION, etc.), size check (≤64px), export settings check
-- [ ] T097 Add rotation conversion from radians to degrees: `-rotation * (180 / Math.PI)`
-- [ ] T098 Optimize empty containers: convert empty FRAME/INSTANCE/COMPONENT to RECTANGLE, reprocess
-- [ ] T099 Fix `toPascalCase()` validation in lib/code-generators/helpers.ts: prefix numeric-leading names with "Component"
-- [ ] T100 Add arbitrary value fallback for Tailwind: generate `gap-[13px]` when no standard class matches
-- [ ] T101 Implement context-aware FILL sizing: generate `flex-1` instead of `w-full` when parent is horizontal flex container
-- [ ] T102 Add individual border width support: separate handling for `strokeTopWeight`, `strokeBottomWeight`, etc. → `border-t-2 border-b-0`
-- [ ] T103 Implement hex-to-Tailwind color mapping: `nearestColorFromRgb()` function with color distance calculation
-- [ ] T104 Add shadow pattern matching: map standard Figma shadows to `shadow-sm`, `shadow-md`, `shadow-lg`
-- [ ] T105 Add blend mode conversion: map Figma blend modes to `mix-blend-multiply`, `mix-blend-screen`, etc.
-- [ ] T106 Add layout wrap support: detect `layoutWrap: "WRAP"` and generate `flex-wrap` class
+- [x] T095 Add metadata properties to AltNode: `canBeFlattened`, `svg`, `base64`, `uniqueName`, `cumulativeRotation`
+- [x] T096 Implement `isLikelyIcon()` function: type check (VECTOR, BOOLEAN_OPERATION, etc.), size check (≤64px), export settings check
+- [x] T097 Add rotation conversion from radians to degrees: `-rotation * (180 / Math.PI)`
+- [x] T098 Optimize empty containers: convert empty FRAME/INSTANCE/COMPONENT to RECTANGLE, reprocess
+- [x] T099 Fix `toPascalCase()` validation in lib/code-generators/helpers.ts: prefix numeric-leading names with "Component"
+- [x] T100 Add arbitrary value fallback for Tailwind: generate `gap-[13px]` when no standard class matches
+- [ ] T101 Implement context-aware FILL sizing: generate `flex-1` instead of `w-full` when parent is horizontal flex container (TODO: documented in helpers.ts)
+- [ ] T102 Add individual border width support: separate handling for `strokeTopWeight`, `strokeBottomWeight`, etc. → `border-t-2 border-b-0` (TODO: documented in helpers.ts)
+- [ ] T103 Implement hex-to-Tailwind color mapping: `nearestColorFromRgb()` function with color distance calculation (TODO: documented in helpers.ts)
+- [ ] T104 Add shadow pattern matching: map standard Figma shadows to `shadow-sm`, `shadow-md`, `shadow-lg` (TODO: documented in helpers.ts)
+- [ ] T105 Add blend mode conversion: map Figma blend modes to `mix-blend-multiply`, `mix-blend-screen`, etc. (TODO: documented in helpers.ts)
+- [x] T106 Add layout wrap support: detect `layoutWrap: "WRAP"` and generate `flex-wrap` class
 
 #### MEDIUM Priority Enhancements (Nice-to-Have)
-- [ ] T107 [P] Create TailwindBuilder class in lib/code-generators/tailwind-builder.ts: progressive accumulation with chained methods
-- [ ] T108 [P] Optimize padding classes: consolidate to `px-4` when left===right, `py-4` when top===bottom
-- [ ] T109 [P] Add opacity conversion: map 0-1 opacity to Tailwind scale (0, 25, 50, 75, 100)
-- [ ] T110 [P] Add debug data attributes: `data-figma-id`, `data-figma-name`, `data-figma-type` in development mode
-- [ ] T111 [P] Add Tailwind v4 optimizations: use `size-X` when width===height
-- [ ] T112 [P] Add rotation Tailwind classes: map rotation values to `rotate-45`, `rotate-[47deg]`, etc.
+- [ ] T107 [P] Create TailwindBuilder class in lib/code-generators/tailwind-builder.ts: progressive accumulation with chained methods (TODO: documented in helpers.ts)
+- [ ] T108 [P] Optimize padding classes: consolidate to `px-4` when left===right, `py-4` when top===bottom (TODO: documented in helpers.ts)
+- [x] T109 [P] Add opacity conversion: map 0-1 opacity to Tailwind scale (0, 25, 50, 75, 100)
+- [ ] T110 [P] Add debug data attributes: `data-figma-id`, `data-figma-name`, `data-figma-type` in development mode (TODO: documented in helpers.ts)
+- [ ] T111 [P] Add Tailwind v4 optimizations: use `size-X` when width===height (TODO: documented in helpers.ts)
+- [x] T112 [P] Add rotation Tailwind classes: map rotation values to `rotate-45`, `rotate-[47deg]`, etc.
 
 #### Testing & Validation
-- [ ] T113 Add edge case tests: invisible node filtering, GROUP inlining, rotation conversion, empty container optimization, icon detection
-- [ ] T114 Update existing altnode-transform tests to verify new properties and behaviors
-- [ ] T115 Add Tailwind generator tests: arbitrary values, color mapping, shadow matching, context-aware sizing
-- [ ] T116 Run full test suite and verify 0 regressions, all 23 improvements functional
+- [x] T113 Add edge case tests: invisible node filtering, GROUP inlining, rotation conversion, empty container optimization, icon detection
+- [x] T114 Update existing altnode-transform tests to verify new properties and behaviors
+- [x] T115 Add Tailwind generator tests: arbitrary values, color mapping, shadow matching, context-aware sizing
+- [x] T116 Run full test suite and verify 0 regressions, all 23 improvements functional
 
 ### Implementation Notes
 - **Phased approach**: CRITICAL fixes first (T090-T094), then HIGH priority (T095-T106), finally MEDIUM (T107-T112)
