@@ -46,6 +46,19 @@ export interface FigmaNode {
   /** Gap between children in auto-layout (pixels) */
   itemSpacing?: number;
 
+  /** Layout sizing behavior (auto-layout) */
+  layoutSizingHorizontal?: 'FIXED' | 'HUG' | 'FILL';
+  layoutSizingVertical?: 'FIXED' | 'HUG' | 'FILL';
+
+  /** Layout wrapping behavior (auto-layout) */
+  layoutWrap?: 'WRAP' | 'NO_WRAP';
+
+  /** Primary axis alignment (auto-layout) */
+  primaryAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+
+  /** Counter axis alignment (auto-layout) */
+  counterAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'BASELINE';
+
   /** Left padding (pixels) */
   paddingLeft?: number;
 
@@ -64,6 +77,12 @@ export interface FigmaNode {
   /** Border strokes */
   strokes?: Paint[];
 
+  /** Individual stroke weights for variable borders */
+  strokeTopWeight?: number;
+  strokeBottomWeight?: number;
+  strokeLeftWeight?: number;
+  strokeRightWeight?: number;
+
   /** Visual effects (shadows, blurs) */
   effects?: Effect[];
 
@@ -81,6 +100,18 @@ export interface FigmaNode {
 
   /** Layout constraints for responsive behavior */
   constraints?: Constraints;
+
+  /** Rotation angle in degrees */
+  rotation?: number;
+
+  /** Visibility flag (hidden elements) */
+  visible?: boolean;
+
+  /** Blend mode for compositing */
+  blendMode?: 'NORMAL' | 'MULTIPLY' | 'SCREEN' | 'OVERLAY' | string;
+
+  /** Opacity (0-1) */
+  opacity?: number;
 }
 
 /**

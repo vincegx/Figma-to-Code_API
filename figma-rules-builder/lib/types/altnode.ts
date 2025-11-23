@@ -5,6 +5,8 @@
  * Computed on-the-fly from FigmaNode via altnode-transform.ts
  */
 
+import type { FigmaNode } from './figma';
+
 /**
  * Normalized node types
  */
@@ -31,7 +33,10 @@ export interface AltNode {
   /** Transformed child nodes */
   children?: AltNode[];
 
-  /** Original Figma properties for reference */
+  /** Complete original Figma node for property lookup */
+  originalNode: FigmaNode;
+
+  /** Original Figma properties for reference (deprecated - use originalNode instead) */
   figmaProperties?: Record<string, unknown>;
 }
 

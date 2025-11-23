@@ -11,26 +11,70 @@ import type { FigmaNode, Effect, Color } from './types/figma';
 import type { AltNode, AltNodeType, CSSProperties } from './types/altnode';
 
 /**
+ * Name counter registry for unique name generation
+ * Maps "parentId:name" → occurrence count
+ *
+ * Note: This is module-level state. In a production system, consider passing
+ * this as part of a transformation context object.
+ */
+const nameCounters = new Map<string, number>();
+
+/**
+ * Generate unique component name with suffix counter
+ *
+ * Prevents naming collisions when multiple nodes have the same name.
+ * Uses scoped counters (parentId:name) to allow same names in different contexts.
+ *
+ * @param name - Base node name from Figma
+ * @param parentId - Optional parent node ID for scoping
+ * @returns Unique name (first: "Button", subsequent: "Button_01", "Button_02", etc.)
+ *
+ * @example
+ * generateUniqueName("Button") // "Button"
+ * generateUniqueName("Button") // "Button_01"
+ * generateUniqueName("Button", "parent-1") // "Button" (different scope)
+ */
+function generateUniqueName(name: string, parentId?: string): string {
+  const key = parentId ? `${parentId}:${name}` : name;
+  const count = nameCounters.get(key) ?? 0;
+  nameCounters.set(key, count + 1);
+  return count === 0 ? name : `${name}_${String(count).padStart(2, '0')}`;
+}
+
+/**
+ * Reset name counters (useful for testing or new transformation sessions)
+ */
+export function resetNameCounters(): void {
+  nameCounters.clear();
+}
+
+/**
  * Transform Figma node tree to normalized AltNode tree
  *
  * Entry point for transformation engine. Recursively processes tree and applies
  * all normalization functions.
  *
  * @param figmaNode - Root Figma node from cache
- * @returns Normalized AltNode tree
+ * @returns Normalized AltNode tree, or null if node is invisible
  *
  * @example
  * const figmaNode = await loadFigmaNode('123:456');
  * const altNode = transformToAltNode(figmaNode);
  * // altNode.styles.display === 'flex'
  */
-export function transformToAltNode(figmaNode: FigmaNode): AltNode {
+export function transformToAltNode(figmaNode: FigmaNode): AltNode | null {
+  // Filter out invisible nodes (visible: false in Figma)
+  if (figmaNode.visible === false) {
+    return null;
+  }
+
   // Initialize base AltNode structure
   const altNode: AltNode = {
     id: figmaNode.id,
-    name: figmaNode.name,
+    name: generateUniqueName(figmaNode.name),
     type: normalizeNodeType(figmaNode.type),
     styles: {},
+    originalNode: figmaNode,
     figmaProperties: {
       type: figmaNode.type,
       layoutMode: figmaNode.layoutMode,
@@ -47,11 +91,30 @@ export function transformToAltNode(figmaNode: FigmaNode): AltNode {
   normalizeDimensions(figmaNode, altNode.styles);
   normalizePositioning(figmaNode, altNode.styles);
 
-  // Recursively transform children
+  // Recursively transform children (filter out invisible nodes and inline GROUPs)
   if (figmaNode.children && figmaNode.children.length > 0) {
-    altNode.children = figmaNode.children.map((child) =>
-      transformToAltNode(child)
-    );
+    const transformedChildren: AltNode[] = [];
+
+    for (const child of figmaNode.children) {
+      const transformed = transformToAltNode(child);
+
+      if (transformed === null) {
+        // Skip invisible nodes
+        continue;
+      }
+
+      // Inline GROUP nodes to avoid unnecessary wrapper divs
+      if (child.type === 'GROUP' && transformed.children) {
+        // Add GROUP's children directly instead of the GROUP wrapper
+        transformedChildren.push(...transformed.children);
+      } else {
+        transformedChildren.push(transformed);
+      }
+    }
+
+    if (transformedChildren.length > 0) {
+      altNode.children = transformedChildren;
+    }
   }
 
   return altNode;
