@@ -3,7 +3,9 @@ work_package_id: "WP05"
 subtasks: ["T033", "T034", "T035", "T036", "T037", "T038", "T039"]
 title: "Rule Engine & Conflict Resolution"
 phase: "Phase 1 - Core Library"
-lane: "planned"
+lane: "doing"
+agent: "claude"
+shell_pid: "98819"
 history:
   - timestamp: "2025-11-23T00:00:00Z"
     lane: "planned"
@@ -36,3 +38,7 @@ Implement rule matching, priority-based conflict resolution, property compositio
 - [ ] Conflicts resolve by priority
 - [ ] Property composition works
 - [ ] Performance < 10ms for typical workload
+
+## Activity Log
+
+- 2025-11-23T19:01:19Z – claude – shell_pid=98819 – lane=doing – Started WP05: Rule Engine & Conflict Resolution implementation
