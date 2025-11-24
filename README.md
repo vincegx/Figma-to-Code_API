@@ -40,9 +40,15 @@ This application is a multi-node library manager that allows you to:
    npm install
    ```
 
-3. Create a `.env.local` file in the root directory:
-   ```
-   FIGMA_ACCESS_TOKEN=your_figma_personal_access_token
+3. Set up Figma API access:
+   ```bash
+   # Copy the example environment file
+   cp .env.local.example .env.local
+
+   # Edit .env.local and add your Figma personal access token
+   # Get your token from: https://www.figma.com/settings
+   # Navigate to: Settings → Account → Personal Access Tokens → Generate new token
+   FIGMA_ACCESS_TOKEN=your_actual_figma_token_here
    ```
 
 ## Development
@@ -114,10 +120,45 @@ This project follows a set of constitutional principles:
 3. **Simple Before Clever** - Start with working setup, not complex abstractions
 4. **Separation of Pages** - Distinct pages for viewing, editing, and management
 
+## API Routes
+
+### Figma Integration
+
+**POST /api/figma/import**
+- Import a Figma node by URL
+- Request: `{ "url": "https://www.figma.com/file/{fileKey}/...?node-id={nodeId}" }`
+- Response: `{ "success": true, "nodeId": "123:456", "metadata": {...} }`
+
+**GET /api/figma/library**
+- Get all nodes in the library with filtering and sorting
+- Query params: `search`, `type`, `coverage`, `sortBy`, `sortOrder`
+- Response: `{ "success": true, "nodes": [...], "totalNodes": 10 }`
+
+**GET /api/figma/node/[id]**
+- Get a specific node's data and metadata
+- Response: `{ "success": true, "metadata": {...}, "nodeData": {...} }`
+
+**POST /api/figma/node/[id]**
+- Refresh node data from Figma API
+- Response: `{ "success": true, "metadata": {...}, "updated": true }`
+
+**PATCH /api/figma/node/[id]**
+- Update node metadata (tags, category, description)
+- Request: `{ "tags": ["ui", "button"], "category": "Components" }`
+
+**DELETE /api/figma/library**
+- Delete a node from the library
+- Request: `{ "nodeId": "lib-123-456" }`
+
 ## Features
 
 - ✅ Multi-node library management
-- ✅ Offline-first architecture
+- ✅ Offline-first architecture (fetch once, operate offline)
+- ✅ File-based storage (no database required)
+- ✅ Figma REST API v1 integration
+- ✅ Automatic retry with exponential backoff
+- ✅ Multi-node directory structure
+- ✅ Library index management
 - ✅ Rule-based code generation
 - ✅ Real-time preview updates
 - ✅ Monaco Editor integration

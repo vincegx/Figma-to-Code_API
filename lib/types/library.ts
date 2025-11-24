@@ -71,13 +71,20 @@ export interface SearchQuery {
   readonly exactMatch: boolean;
 }
 
-export type SortField = 'name' | 'addedAt' | 'lastModified' | 'viewCount' | 'exportCount';
+export type SortField = 'name' | 'addedAt' | 'lastModified' | 'viewCount' | 'exportCount' | 'date' | 'type' | 'coverage';
 
 export type SortDirection = 'asc' | 'desc';
+
+// Aliases for backward compatibility
+export type LibrarySortCriteria = SortField;
+export type SortOrder = SortDirection;
+export type LibraryFilters = FilterOptions;
 
 export interface FilterOptions {
   readonly categories?: readonly string[];
   readonly tags?: readonly string[];
+  readonly type?: readonly string[]; // Figma node types (FRAME, COMPONENT, etc.)
+  readonly coverage?: 'full' | 'partial' | 'none'; // Rule coverage level
   readonly dateRange?: {
     readonly start: string;
     readonly end: string;
