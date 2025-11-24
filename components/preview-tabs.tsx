@@ -12,6 +12,7 @@ interface PreviewTabsProps {
   altNode: SimpleAltNode | null;
   rules: SimpleMappingRule[];
   onCodeChange?: (code: string) => void;
+  scopedNode?: SimpleAltNode | null; // T154: Generate code for selected subtree only
 }
 
 type CodeFormat = 'react-jsx' | 'react-tailwind' | 'html-css';
@@ -20,12 +21,16 @@ export default function PreviewTabs({
   altNode,
   rules,
   onCodeChange,
+  scopedNode,
 }: PreviewTabsProps) {
   const [selectedFormat, setSelectedFormat] = useState<CodeFormat>('react-jsx');
 
+  // T154: Use scoped node if provided, otherwise use full altNode
+  const targetNode = scopedNode || altNode;
+
   // Generate code for selected format
   const generatedCode = useMemo(() => {
-    if (!altNode) return '';
+    if (!targetNode) return '';
 
     const startTime = performance.now();
     let codeOutput = '';
@@ -38,15 +43,15 @@ export default function PreviewTabs({
       let result;
       switch (selectedFormat) {
         case 'react-jsx':
-          result = generateReactJSX(altNode, resolvedProperties);
+          result = generateReactJSX(targetNode, resolvedProperties);
           codeOutput = result.code;
           break;
         case 'react-tailwind':
-          result = generateReactTailwind(altNode, resolvedProperties);
+          result = generateReactTailwind(targetNode, resolvedProperties);
           codeOutput = result.code;
           break;
         case 'html-css':
-          result = generateHTMLCSS(altNode, resolvedProperties);
+          result = generateHTMLCSS(targetNode, resolvedProperties);
           // For HTML/CSS, combine HTML and CSS
           codeOutput = result.code;
           if (result.css) {
@@ -66,7 +71,7 @@ export default function PreviewTabs({
     console.log(`Code generation (${selectedFormat}): ${duration.toFixed(2)}ms`);
 
     return codeOutput;
-  }, [altNode, selectedFormat]);
+  }, [targetNode, selectedFormat]);
 
   // Notify parent of code change via useEffect (not during render)
   // This fixes: "Cannot update a component while rendering a different component"
@@ -89,7 +94,7 @@ export default function PreviewTabs({
     }
   }, [selectedFormat]);
 
-  if (!altNode) {
+  if (!targetNode) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
@@ -147,10 +152,17 @@ export default function PreviewTabs({
             </div>
           </div>
 
-          {/* Code stats */}
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {generatedCode.split('\n').length} lines •{' '}
-            {generatedCode.length} characters
+          {/* Code stats and scope indicator */}
+          <div className="flex items-center gap-4">
+            {scopedNode && (
+              <div className="text-sm text-blue-600 dark:text-blue-400">
+                Generating for: <span className="font-medium">{scopedNode.name}</span>
+              </div>
+            )}
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {generatedCode.split('\n').length} lines •{' '}
+              {generatedCode.length} characters
+            </div>
           </div>
         </div>
       </div>

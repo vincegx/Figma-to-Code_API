@@ -384,6 +384,7 @@ export default function ViewerPage() {
             altNode={altNode}
             rules={rules}
             onCodeChange={setGeneratedCode}
+            scopedNode={selectedNode}
           />
         </TabsContent>
       </Tabs>
