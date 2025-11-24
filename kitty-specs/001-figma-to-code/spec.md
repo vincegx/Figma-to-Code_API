@@ -3,128 +3,151 @@
 
 **Feature Branch**: `001-figma-to-code`
 **Created**: 2025-11-23
+**Last Updated**: 2025-11-23
 **Status**: Draft
-**Input**: User description: "Build a web-based Figma-to-Code Mapping Rule Builder. This is a developer workbench for creating and testing transformation rules that map Figma design properties to code."
+**Input**: "Build a multi-node library manager for creating, testing, and managing reusable Figma-to-Code mapping rules. Users import multiple Figma nodes, build one global rule library, and test rules against the entire library to ensure consistency across design systems."
+
+---
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Load Figma Node and See Normalized Structure (Priority: P1)
+### User Story 1 - Import Figma Nodes into Library (Priority: P0)
 
-Developer provides a Figma file URL and node ID. The system fetches the design data via Figma API, stores it locally, transforms it into the AltNode intermediate representation, and displays the normalized tree structure.
+Developer visits the homepage, pastes a Figma URL in the import field, and clicks "Import Node". The system auto-parses the file_key and node_id, fetches design data via Figma API, stores it locally with metadata and thumbnail, and adds it to the node library. The homepage dashboard updates to show the new node in recent imports.
 
-**Why this priority**: Without the ability to load and visualize Figma data, no other functionality is possible. This is the foundational capability that enables all rule creation and testing.
+**Why this priority**: Multi-node library management requires the ability to import and store multiple nodes. This is the foundational capability that enables all other workflows.
 
-**Independent Test**: Can be fully tested by entering a valid Figma URL and node ID, confirming the fetch completes successfully, and verifying the left panel displays the AltNode tree with CSS-familiar properties (e.g., `display: flex`, `gap`, `background`).
+**Independent Test**: Paste a valid Figma URL (e.g., `https://www.figma.com/file/ABC123/...?node-id=1-2`), click Import, verify the node appears in the library grid with thumbnail, name, type, and import date. Navigate to Node Library page and confirm the new node is listed.
 
 **Acceptance Scenarios**:
 
-1. **Given** valid Figma file URL and node ID, **When** user submits the fetch request, **Then** system retrieves node tree, geometry, design tokens, and screenshot via Figma API
-2. **Given** Figma data retrieved, **When** transformation completes, **Then** left panel displays AltNode tree with normalized CSS-equivalent properties
-3. **Given** Figma data fetched once, **When** user works offline, **Then** all operations use cached local data without additional API calls
-4. **Given** invalid Figma URL or unauthorized access, **When** fetch attempted, **Then** system displays clear error message explaining the issue
+1. **Given** valid Figma URL, **When** user pastes it in import field and clicks Import, **Then** system auto-parses file_key and node_id
+2. **Given** parsed URL, **When** import starts, **Then** system fetches node tree, geometry, variables, and screenshot via Figma API
+3. **Given** Figma data fetched, **When** save completes, **Then** system creates `figma-data/{nodeId}/data.json`, `metadata.json`, and `screenshot.png`
+4. **Given** node saved, **When** library updates, **Then** new node appears in homepage recent imports and Node Library page
+5. **Given** invalid URL or missing token, **When** import attempted, **Then** system shows toast error with clear message and option to navigate to Settings
 
 ---
 
-### User Story 2 - Create and Edit Mapping Rules (Priority: P1)
+### User Story 2 - Browse and Manage Node Library (Priority: P0)
 
-Developer writes mapping rules in JSON format in the center panel editor. Each rule defines a selector (pattern matching AltNode properties) and a transformer (output structure with HTML tag, CSS classes, styles). Rules have explicit priorities for conflict resolution.
+Developer navigates to Node Library page and sees a grid or list view of all imported nodes with thumbnails, names, types, import dates, and rule coverage percentage. Developer can search by name, filter by type or coverage, sort by various criteria, and perform bulk actions (delete multiple, export selected). Clicking a node card navigates to the Viewer page.
 
-**Why this priority**: Rule authoring is the core value proposition. Without the ability to create and edit rules, the tool provides no utility beyond viewing Figma data.
+**Why this priority**: Library management is essential for working with multiple nodes efficiently. Without search, filter, and bulk actions, managing 20+ nodes becomes cumbersome.
 
-**Independent Test**: Can be fully tested by typing a valid JSON rule in the editor, saving it, and confirming it appears in the rule library and can be applied to matching nodes.
+**Independent Test**: Import 5 nodes, navigate to Library page, toggle between grid and list view, search for a node by name, filter by type, sort by date, select 2 nodes and delete them. Verify the library updates correctly.
 
 **Acceptance Scenarios**:
 
-1. **Given** empty rule editor, **When** user writes valid JSON rule with selector and transformer, **Then** system validates syntax in real-time
-2. **Given** rule with syntax errors, **When** user attempts to save, **Then** editor highlights errors with specific line numbers and clear error messages
-3. **Given** multiple rules created, **When** user assigns priorities, **Then** system stores priority metadata with each rule
-4. **Given** saved rules, **When** user edits rule selector or transformer, **Then** changes persist to local storage immediately
-5. **Given** rule library, **When** user deletes a rule, **Then** rule is removed from library and no longer applied to nodes
+1. **Given** imported nodes, **When** user navigates to `/nodes`, **Then** page displays all nodes in grid view with thumbnails, names, types, and dates
+2. **Given** grid view active, **When** user clicks grid/list toggle, **Then** view switches to table format with additional columns (coverage, actions)
+3. **Given** search input, **When** user types node name, **Then** grid filters in real-time to show matching nodes
+4. **Given** filter dropdown, **When** user selects type (FRAME, TEXT, etc.), **Then** grid shows only nodes of that type
+5. **Given** sort dropdown, **When** user selects "Date (newest first)", **Then** nodes reorder with most recent at top
+6. **Given** multiple nodes selected, **When** user clicks "Delete Selected", **Then** confirmation dialog appears and nodes are removed after confirm
+7. **Given** node card, **When** user clicks it, **Then** browser navigates to `/viewer/{nodeId}`
+8. **Given** node card actions, **When** user clicks "Export", **Then** format selection dialog appears (React+CSS, React+Tailwind, HTML/CSS)
 
 ---
 
-### User Story 3 - See Live Preview with Instant Updates (Priority: P1)
+### User Story 3 - View Dashboard with Library Stats (Priority: P1)
 
-When user edits rules in the center panel, the right panel updates instantly (within 100ms) showing three preview tabs: React JSX, React with Tailwind, and HTML/CSS. Each tab displays both the rendered result in an iframe and the generated code with syntax highlighting.
+Developer visits the homepage and sees a dashboard displaying key metrics: total nodes imported, total active rules, average rule coverage across all nodes, and last import date. The dashboard includes quick access to recent nodes (5 most recent with thumbnails) and a chart showing rule usage (top 5 most-matched rules). A prominent "Import Figma Node" button with URL input field is always visible.
 
-**Why this priority**: Instant feedback is essential for productive rule iteration. Without live previews, users must manually test rules elsewhere, destroying the development workflow.
+**Why this priority**: Dashboard provides instant insight into library health and productivity. Developers can quickly assess coverage gaps and identify heavily-used rules without navigating through pages.
 
-**Independent Test**: Can be fully tested by modifying a rule property (e.g., changing HTML tag from `div` to `button`), observing the preview update within 100ms, and confirming all three tabs reflect the change.
+**Independent Test**: Import 10 nodes, create 5 rules, navigate to homepage. Verify stats show correct counts, coverage percentage is calculated, recent nodes are displayed with thumbnails, and rule usage chart shows match counts.
 
 **Acceptance Scenarios**:
 
-1. **Given** rule that matches current node, **When** user edits rule transformer, **Then** all three preview tabs update within 100ms
-2. **Given** preview tabs, **When** user switches between React JSX, React+Tailwind, and HTML/CSS, **Then** each shows appropriate syntax and rendering for that framework
-3. **Given** generated code, **When** displayed in preview, **Then** syntax highlighting makes structure clear and readable
-4. **Given** complex component tree, **When** rendered in iframe, **Then** visual output matches expected layout and styling
-5. **Given** rule that produces invalid code, **When** preview attempts to render, **Then** iframe shows clear error message without crashing
+1. **Given** imported nodes and rules, **When** user visits `/`, **Then** stats cards show: total nodes, total rules, avg coverage %, last import date
+2. **Given** recent imports exist, **When** dashboard renders, **Then** "Recent Nodes" section shows 5 most recent with thumbnails and names
+3. **Given** rules with matches, **When** dashboard renders, **Then** "Rule Usage" chart displays top 5 rules by match count across all nodes
+4. **Given** URL import field visible, **When** user pastes Figma URL and clicks Import, **Then** import flow starts and dashboard updates after completion
+5. **Given** quick actions, **When** user clicks "View All Nodes" or "Manage Rules", **Then** browser navigates to respective pages
 
 ---
 
-### User Story 4 - Understand Rule Matching and Conflicts (Priority: P2)
+### User Story 4 - Inspect Individual Nodes in Viewer (Priority: P1)
 
-When user clicks a node in the left panel AltNode tree, the system displays all matching rules ordered by priority, shows which properties each rule contributes, and highlights conflicts in yellow/red. Visual indicators (colored badges) on tree nodes show match count.
+Developer clicks a node in the library and navigates to the Viewer page showing read-only inspection. The Viewer has two tabs: "Code" tab displays Figma tree on the left with Applied Rules Inspector on the right (showing which rules matched, priority resolution, conflicts, coverage stats), "Render" tab shows full-width preview with format switcher (React JSX, React+Tailwind, HTML/CSS). Header includes prev/next navigation, thumbnail (expandable), re-fetch, export, and "Edit Rules" button that jumps to Rule Manager with this node pre-selected for testing.
 
-**Why this priority**: Understanding why code is generated a certain way is critical for debugging rules and building confidence in the rule library. Without visibility into matching and conflicts, rule creation becomes trial-and-error.
+**Why this priority**: Inspecting nodes with applied rules is critical for understanding transformation results and validating rule behavior. This is the primary debugging and verification interface.
 
-**Independent Test**: Can be fully tested by creating two rules that match the same node with conflicting properties, clicking the node, and verifying the sidebar shows both rules with conflict highlighting and priority resolution.
+**Independent Test**: Click a node, verify Viewer opens with two tabs. In Code tab, click nodes in Figma tree and verify Applied Rules Inspector updates showing matched rules, conflicts, and coverage. In Render tab, switch between formats and verify previews update. Click "Edit Rules" and verify Rule Manager opens with this node selected.
 
 **Acceptance Scenarios**:
 
-1. **Given** node in AltNode tree, **When** user clicks it, **Then** sidebar displays all rules that match the node ordered by priority
-2. **Given** multiple matching rules, **When** displayed in sidebar, **Then** each rule shows which properties it contributes (layout, colors, spacing, etc.)
-3. **Given** rules with conflicting properties, **When** displayed, **Then** conflicts are highlighted in yellow (minor) or red (major) with explanation
-4. **Given** priority-based resolution, **When** conflicts exist, **Then** sidebar clearly indicates which rule wins for each property
-5. **Given** tree nodes with matching rules, **When** viewed, **Then** colored badges show match count (e.g., green dot with "3" means 3 rules match)
-6. **Given** user edits rule, **When** matching changes, **Then** tree node badges update in real-time
+1. **Given** node selected, **When** Viewer page loads, **Then** header shows thumbnail, node name, prev/next buttons, re-fetch, export dropdown, "Edit Rules" button
+2. **Given** Code tab active, **When** page renders, **Then** left panel shows Figma tree, right panel shows Applied Rules Inspector
+3. **Given** node clicked in tree, **When** selection changes, **Then** Applied Rules Inspector updates to show:
+   - List of matched rules ordered by priority
+   - Priority resolution (which rule wins for each property)
+   - Conflicts highlighted (yellow for minor, red for major)
+   - Coverage stats (X/Y nodes have rules applied)
+   - Unused rules warning
+4. **Given** Render tab active, **When** page renders, **Then** full-width iframe shows preview with format switcher in header (React JSX, React+Tailwind, HTML/CSS)
+5. **Given** format switcher, **When** user selects different format, **Then** preview re-renders with selected framework output
+6. **Given** "Edit Rules" button, **When** user clicks it, **Then** browser navigates to `/rules` with this node pre-selected in test zone
+7. **Given** export dropdown, **When** user selects format, **Then** code export dialog appears with copy-to-clipboard and download options
 
 ---
 
-### User Story 5 - Test Rule Generality Across Multiple Nodes (Priority: P2)
+### User Story 5 - Manage Global Rule Library (Priority: P0)
 
-User enters a different Figma node ID in the input field. System fetches the new node, applies the existing rule library, and updates all previews. User manually verifies if rules behave as expected on the new test case.
+Developer navigates to Rule Manager page showing a sidebar with searchable rule list (each rule displays name, priority, match count across all nodes, and unused warning), and a main panel with rule details (selected rule shows ID, name, priority, selector preview, transformer preview, match count, actions: Edit JSON, Duplicate, Delete). Clicking "Edit JSON" opens Monaco editor modal. Top actions include "New Rule", "Import Rules", and "Export Rules" for sharing rule libraries between projects.
 
-**Why this priority**: Reusable rules must work across multiple examples. Testing on diverse nodes validates that rules match patterns (e.g., "all horizontal layouts") rather than specific instances.
+**Why this priority**: Rule management is the core value proposition. Without ability to create, edit, organize, and share rules, the tool provides no utility. Global rule library (not per-node rules) is a constitutional requirement.
 
-**Independent Test**: Can be fully tested by loading one node, creating rules, then loading a different node and confirming the same rules apply correctly with updated previews.
+**Independent Test**: Navigate to `/rules`, create a new rule via Monaco modal, verify it appears in sidebar with match count. Edit the rule, duplicate it, delete it. Import a rules JSON file, verify all rules load. Export rules, verify JSON file downloads with correct format.
 
 **Acceptance Scenarios**:
 
-1. **Given** rules created for initial node, **When** user enters different node ID, **Then** system fetches new node data and stores it locally
-2. **Given** new node loaded, **When** transformation completes, **Then** AltNode tree updates with new structure
-3. **Given** existing rule library, **When** applied to new node, **Then** previews update showing generated code for new test case
-4. **Given** rules that matched previous node, **When** applied to new node with different structure, **Then** matching indicators update to reflect new matches/mismatches
-5. **Given** new node that breaks rule assumptions, **When** rendered, **Then** user can identify issues through preview and matching feedback
+1. **Given** `/rules` page, **When** page loads, **Then** sidebar shows searchable rule list with name, priority, match count badges
+2. **Given** rule list, **When** rule has 0 matches across all nodes, **Then** it displays "⚠️ Unused" warning
+3. **Given** rule selected, **When** main panel updates, **Then** shows: ID, name, priority (editable), selector preview, transformer preview, match count, actions
+4. **Given** "Edit JSON" button, **When** clicked, **Then** Monaco editor modal opens with rule JSON, schema validation active, autocomplete enabled
+5. **Given** Monaco editor, **When** user edits rule and saves, **Then** rule updates in list and match counts re-calculate across all nodes
+6. **Given** "New Rule" button, **When** clicked, **Then** Monaco modal opens with template rule JSON
+7. **Given** "Import Rules" button, **When** user uploads JSON file, **Then** validation runs and rules merge into library (with conflict resolution dialog if duplicate IDs)
+8. **Given** "Export Rules" button, **When** clicked, **Then** `mapping-rules.json` downloads containing complete rule library
+9. **Given** "Duplicate" action, **When** clicked, **Then** new rule created with same selector/transformer but new ID and priority
+10. **Given** "Delete" action, **When** clicked, **Then** confirmation dialog appears and rule is removed after confirm
 
 ---
 
-### User Story 6 - Save and Load Rule Libraries (Priority: P2)
+### User Story 6 - Configure Application Settings (Priority: P2)
 
-User can save the complete rule library to a local JSON file (`mapping-rules.json`) and load previously saved rule sets. This enables version control via Git and sharing rule libraries across projects.
+Developer navigates to Settings page to configure: Figma API (token with masked input, test connection button, API base URL), Export Preferences (default framework, default language TypeScript/JavaScript, code formatting options), Rule Editor (auto-save toggle, default priority for new rules), Cache Management (view cache size, clear all cache, re-fetch all nodes), and Appearance (theme: Light, Dark, System).
 
-**Why this priority**: Rule libraries represent significant investment. Persistence and portability are essential for professional use, but the tool can function without this for initial prototyping.
+**Why this priority**: Settings enable personalization and workflow optimization. Not critical for initial usage, but essential for professional adoption (secure token storage, consistent export preferences, cache control).
 
-**Independent Test**: Can be fully tested by creating several rules, saving to JSON file, clearing the workspace, loading the same file, and confirming all rules are restored with correct priorities and definitions.
+**Independent Test**: Navigate to Settings, enter Figma token, click "Test Connection" and verify success/failure message. Change default framework to React+Tailwind, export a node from Viewer, verify it uses the default. Toggle auto-save, edit a rule in Rule Manager, verify it saves automatically. Clear cache, verify all cached data deleted.
 
 **Acceptance Scenarios**:
 
-1. **Given** rules in the editor, **When** user triggers save, **Then** system exports complete rule library as valid JSON to local filesystem
-2. **Given** saved JSON file, **When** user loads it, **Then** all rules populate the editor with original selectors, transformers, and priorities
-3. **Given** rule library as JSON, **When** committed to Git, **Then** file format is human-readable and produces clean diffs
-4. **Given** malformed JSON file, **When** user attempts to load, **Then** system displays validation errors without corrupting workspace
+1. **Given** Settings page at `/settings`, **When** page loads, **Then** displays 5 sections: Figma API, Export Preferences, Rule Editor, Cache Management, Appearance
+2. **Given** Figma API section, **When** user enters token, **Then** input is masked (shows dots), "Show" button toggles visibility
+3. **Given** token entered, **When** user clicks "Test Connection", **Then** system attempts API call and shows success/failure toast
+4. **Given** Export Preferences, **When** user sets defaults (framework, language, formatting), **Then** future exports use these settings
+5. **Given** Rule Editor section, **When** user enables auto-save, **Then** rule edits in Monaco save automatically on change
+6. **Given** Cache Management, **When** user clicks "Clear All Cache", **Then** confirmation dialog appears, all `figma-data/` files deleted after confirm
+7. **Given** Appearance section, **When** user selects Dark theme, **Then** entire app UI switches to dark mode immediately
 
 ---
 
 ### Edge Cases
 
-- What happens when Figma API rate limit is hit during fetch?
-- How does system handle Figma nodes with deeply nested structures (100+ levels)?
-- What happens when a rule selector matches zero nodes across multiple test cases?
-- How does system handle rules that produce framework-specific code incompatible with one preview tab (e.g., React-only features)?
-- What happens when user edits rules faster than the 100ms preview update throttle?
-- How does system handle Figma design tokens that don't map cleanly to CSS properties?
-- What happens when user loads a node that requires authentication to a Figma file they don't have access to?
-- How does system handle concurrent edits when user modifies rules while preview is still rendering previous change?
+- What happens when user imports a node that already exists in library (duplicate URL)?
+- How does system handle Figma API rate limit during import of 10 nodes simultaneously?
+- What happens when library index (`figma-data/library-index.json`) is corrupted or missing?
+- How does system handle nodes with deeply nested structures (100+ levels) in Viewer tree?
+- What happens when a rule matches zero nodes across entire library (unused rule)?
+- How does system handle rule priority conflicts (two rules with same priority matching same node)?
+- What happens when user deletes a node while Viewer page for that node is open in another tab?
+- How does system handle export of 50 nodes simultaneously (bulk export from Library page)?
+- What happens when user edits rules in Rule Manager while Viewer is open showing same node?
+- How does system handle navigation (browser back/forward) between pages with state (selected node, filters, search)?
 
 ---
 
@@ -132,89 +155,142 @@ User can save the complete rule library to a local JSON file (`mapping-rules.jso
 
 ### Functional Requirements
 
-#### Data Fetching & Storage
+#### Multi-Node Import & Storage
 
-- **FR-001**: System MUST accept Figma file URL and node ID as input
-- **FR-002**: System MUST fetch node tree, geometry data, design tokens/variables, and reference screenshot via Figma REST API
-- **FR-003**: System MUST store all fetched Figma data in local filesystem cache
-- **FR-004**: System MUST operate entirely from cached data after initial fetch without additional API calls
-- **FR-005**: System MUST provide explicit refresh command to re-fetch from Figma API
-- **FR-006**: System MUST read Figma personal access token from local configuration file
-- **FR-007**: System MUST display clear error messages for API failures (authentication, rate limits, network issues, invalid URLs)
+- **FR-001**: System MUST accept Figma URL in format `https://www.figma.com/file/{fileKey}/...?node-id={nodeId}` and auto-parse file_key and node_id
+- **FR-002**: System MUST fetch node tree, geometry, design tokens, and screenshot via Figma REST API during import
+- **FR-003**: System MUST store each imported node in separate directory: `figma-data/{nodeId}/data.json`, `metadata.json`, `screenshot.png`
+- **FR-004**: System MUST maintain library index at `figma-data/library-index.json` tracking all imported nodes with metadata (name, type, import date, thumbnail path)
+- **FR-005**: System MUST support re-fetching individual nodes to update cached data
+- **FR-006**: System MUST read Figma personal access token from Settings and store securely in local configuration
+- **FR-007**: System MUST display toast error messages for import failures (authentication, rate limits, network issues, invalid URLs)
 
-#### AltNode Transformation
+#### Homepage Dashboard
 
-- **FR-008**: System MUST transform raw Figma JSON into AltNode intermediate representation
-- **FR-009**: AltNode transformation MUST normalize Figma properties to CSS-familiar equivalents:
-  - `layoutMode: HORIZONTAL` → `display: flex; flex-direction: row`
-  - `layoutMode: VERTICAL` → `display: flex; flex-direction: column`
-  - `itemSpacing` → `gap`
-  - `fills` → `background` colors
-  - `paddingLeft/Right/Top/Bottom` → CSS padding properties
-- **FR-010**: AltNode transformation MUST compute on-the-fly from cached Figma JSON (not pre-computed and stored)
-- **FR-011**: System MUST preserve original Figma property names in AltNode for reference
+- **FR-008**: Homepage MUST display stats cards showing: total nodes imported, total active rules, average coverage percentage across all nodes, last import date
+- **FR-009**: Homepage MUST display "Recent Nodes" section showing 5 most recently imported nodes with thumbnails and names
+- **FR-010**: Homepage MUST display "Rule Usage" chart showing top 5 most-matched rules across all nodes with match counts
+- **FR-011**: Homepage MUST provide visible "Import Figma Node" input field and button for quick imports
+- **FR-012**: Homepage MUST provide "View All Nodes" and "Manage Rules" quick action buttons navigating to respective pages
 
-#### Rule Authoring
+#### Node Library Page
 
-- **FR-012**: System MUST provide code editor for writing mapping rules in JSON format
-- **FR-013**: Each rule MUST support selector that matches AltNode properties via pattern matching
-- **FR-014**: Each rule MUST support transformer that defines output structure (HTML tag, CSS classes, inline styles)
-- **FR-015**: Each rule MUST support explicit priority value for conflict resolution
-- **FR-016**: System MUST validate rule JSON syntax in real-time as user types
-- **FR-017**: System MUST highlight syntax errors with line numbers and descriptive messages
-- **FR-018**: System MUST persist rules to local storage immediately on save
-- **FR-019**: System MUST support creating, editing, and deleting rules
+- **FR-013**: Node Library page MUST display all imported nodes in grid view with: thumbnail, name, type, import date, coverage percentage
+- **FR-014**: Node Library page MUST support toggle between grid view and list view (table format with additional columns)
+- **FR-015**: Node Library page MUST provide search input filtering nodes by name in real-time
+- **FR-016**: Node Library page MUST provide filter dropdown by node type (FRAME, TEXT, GROUP, COMPONENT, etc.)
+- **FR-017**: Node Library page MUST provide sort dropdown with options: name (A-Z, Z-A), date (newest first, oldest first), type, coverage (high to low)
+- **FR-018**: Node Library page MUST support bulk selection with actions: delete selected, export selected
+- **FR-019**: Each node card/row MUST provide individual actions: view (navigate to Viewer), rename, duplicate, export, re-fetch, delete
+- **FR-020**: Clicking node card MUST navigate to `/viewer/{nodeId}`
 
-#### Rule Matching & Conflict Resolution
+#### Viewer Page (Read-Only Inspection)
 
-- **FR-020**: System MUST evaluate all rules against each AltNode in the tree
-- **FR-021**: System MUST apply priority-based conflict resolution when multiple rules match same node
-- **FR-022**: Higher priority rule properties MUST override lower priority properties on conflict
-- **FR-023**: Non-conflicting properties from multiple rules MUST merge (compose)
-- **FR-024**: System MUST track which properties came from which rule for each node
-- **FR-025**: System MUST display visual indicators (colored badges) on tree nodes showing match count
-- **FR-026**: When user clicks node, system MUST display all matching rules ordered by priority
-- **FR-027**: System MUST highlight conflicting properties in yellow (minor conflicts) or red (major conflicts)
-- **FR-028**: System MUST show which rule wins for each conflicting property
+- **FR-021**: Viewer page MUST display header with: Figma thumbnail (expandable modal on click), node name, prev/next navigation buttons, re-fetch button, export dropdown, "Edit Rules" button
+- **FR-022**: Viewer page MUST provide breadcrumbs: Home > Library > NodeName
+- **FR-023**: Viewer page MUST provide two tabs: "Code" and "Render"
+- **FR-024**: Code tab MUST display Figma tree on left panel showing hierarchical structure with normalized CSS properties
+- **FR-025**: Code tab MUST display Applied Rules Inspector on right panel showing for selected node:
+  - List of matched rules ordered by priority
+  - Priority resolution (which rule wins for each property)
+  - Conflicts highlighted (yellow for minor, red for major)
+  - Coverage stats (X/Y nodes have rules applied, Z% coverage)
+  - Unused rules warning (rules that never matched this node)
+- **FR-026**: Code tab MUST update Applied Rules Inspector when user clicks different nodes in tree
+- **FR-027**: Code tab MUST provide "Edit Rules" button navigating to `/rules` with this node pre-selected for testing
+- **FR-028**: Render tab MUST display full-width iframe showing rendered preview
+- **FR-029**: Render tab MUST provide format switcher in header: React JSX, React+Tailwind, HTML/CSS
+- **FR-030**: Render tab MUST update preview when user switches formats
+- **FR-031**: Export dropdown MUST provide format options and open code export dialog with copy-to-clipboard and download buttons
 
-#### User Interface
+#### Rule Manager Page
 
-- **FR-029**: Interface MUST provide three-panel layout:
-  - Left panel: AltNode tree navigation
-  - Center panel: Rule editor
-  - Right panel: Live previews
-- **FR-030**: Left panel MUST display hierarchical AltNode tree with normalized CSS properties
-- **FR-031**: Left panel MUST support clicking nodes to show matching rules and conflict details
-- **FR-032**: Center panel MUST provide code editor with JSON syntax highlighting
-- **FR-033**: Right panel MUST provide three tabs: React JSX, React with Tailwind, HTML/CSS
-- **FR-034**: Each preview tab MUST display both rendered result (in iframe) and generated code
-- **FR-035**: Generated code MUST include syntax highlighting appropriate to each framework
-- **FR-036**: System MUST update all three preview tabs within 100ms of rule changes
-- **FR-037**: Preview updates MUST not require page refresh or manual action
+- **FR-032**: Rule Manager page MUST display sidebar with searchable rule list showing: name, priority, match count across ALL nodes, unused warning (if 0 matches)
+- **FR-033**: Rule Manager page MUST display main panel with selected rule details: ID, name, priority (editable), selector preview, transformer preview, match count, actions (Edit JSON, Duplicate, Delete)
+- **FR-034**: Rule Manager page MUST provide top actions: "New Rule", "Import Rules", "Export Rules"
+- **FR-035**: "New Rule" button MUST open Monaco editor modal with template rule JSON
+- **FR-036**: "Edit JSON" button MUST open Monaco editor modal with selected rule JSON, schema validation active, autocomplete enabled
+- **FR-037**: Monaco editor MUST validate rule JSON against schema in real-time and display errors
+- **FR-038**: Monaco editor MUST provide autocomplete for common rule patterns (button-rule, text-rule, container-rule)
+- **FR-039**: Monaco editor save MUST update rule in library and re-calculate match counts across all nodes
+- **FR-040**: "Duplicate" action MUST create new rule with same selector/transformer but new ID and incremented priority
+- **FR-041**: "Delete" action MUST show confirmation dialog and remove rule after confirm
+- **FR-042**: "Import Rules" MUST accept JSON file upload, validate against schema, and merge into library with conflict resolution
+- **FR-043**: "Export Rules" MUST download `mapping-rules.json` containing complete rule library in portable JSON format
+- **FR-044**: Rule list sidebar MUST update match count badges in real-time when rules are edited or nodes are added/removed
 
-#### Data Persistence & Export
+#### Settings Page
 
-- **FR-038**: System MUST persist two data types locally: raw Figma data and mapping rules JSON
-- **FR-039**: System MUST export mapping rules as valid, portable JSON file
-- **FR-040**: Exported rules JSON MUST be framework-agnostic (no implementation-specific constructs)
-- **FR-041**: System MUST support loading previously saved rule libraries from JSON files
-- **FR-042**: Rule JSON format MUST be human-readable and Git-friendly (clean diffs)
+- **FR-045**: Settings page MUST provide 5 sections: Figma API, Export Preferences, Rule Editor, Cache Management, Appearance
+- **FR-046**: Figma API section MUST provide: masked token input with show/hide toggle, "Test Connection" button, API base URL input
+- **FR-047**: "Test Connection" button MUST attempt Figma API call and display success/failure toast message
+- **FR-048**: Export Preferences section MUST provide: default framework dropdown (React JSX, React+Tailwind, HTML/CSS), default language dropdown (TypeScript, JavaScript), code formatting toggles (Prettier, single quotes, semicolons, tab size)
+- **FR-049**: Rule Editor section MUST provide: auto-save toggle, default priority input for new rules
+- **FR-050**: Cache Management section MUST display: total cache size, number of cached nodes, "Clear All Cache" button, "Re-fetch All Nodes" button
+- **FR-051**: "Clear All Cache" button MUST show confirmation dialog and delete all `figma-data/` files after confirm
+- **FR-052**: Appearance section MUST provide theme selector: Light, Dark, System
+- **FR-053**: Theme changes MUST apply immediately to entire application UI
+
+#### Global Navigation
+
+- **FR-054**: Top navigation bar MUST be visible on all pages with links: [Logo] Home | Library | Rules | Settings
+- **FR-055**: System MUST preserve navigation state (active page, selected filters, search terms) when navigating between pages
+- **FR-056**: System MUST handle browser back/forward navigation correctly, restoring page state
+
+#### AltNode Transformation (Unchanged from previous spec)
+
+- **FR-057**: System MUST transform raw Figma JSON into AltNode intermediate representation
+- **FR-058**: AltNode transformation MUST normalize Figma properties to CSS-familiar equivalents (layoutMode → flexbox, itemSpacing → gap, fills → background, etc.)
+- **FR-059**: AltNode transformation MUST incorporate FigmaToCode learnings:
+  - Filter invisible nodes (`visible: false`)
+  - Inline GROUP nodes (avoid unnecessary wrappers)
+  - Convert rotation (radians → degrees with cumulative tracking)
+  - Detect icons (type + size + export settings)
+  - Optimize empty containers
+  - Generate unique component names
+- **FR-060**: AltNode transformation MUST preserve original Figma properties in `originalNode` reference
+- **FR-061**: AltNode transformation MUST compute on-the-fly from cached Figma JSON (not pre-computed and stored)
+
+#### Rule Matching & Conflict Resolution (Unchanged)
+
+- **FR-062**: System MUST evaluate all rules against each AltNode in every imported node tree
+- **FR-063**: System MUST apply priority-based conflict resolution when multiple rules match same node
+- **FR-064**: Higher priority rule properties MUST override lower priority properties on conflict
+- **FR-065**: Non-conflicting properties from multiple rules MUST merge (compose)
+- **FR-066**: System MUST track which properties came from which rule for each node (property provenance)
+
+#### Code Generation (Enhanced for multi-format export)
+
+- **FR-067**: System MUST generate code in three formats: React JSX (inline styles), React+Tailwind (utility classes), HTML/CSS (separate stylesheet)
+- **FR-068**: Generated code MUST incorporate FigmaToCode Tailwind mappings:
+  - Arbitrary value fallbacks (`gap-[13px]` when no standard class)
+  - Hex-to-Tailwind color matching (use color tokens when close match)
+  - Shadow pattern matching (standard Figma shadows → `shadow-sm`, `shadow-md`)
+  - Context-aware sizing (`flex-1` vs `w-full` based on parent layout)
+- **FR-069**: Generated code MUST be syntactically valid and renderable in preview iframes
+- **FR-070**: Generated code MUST follow export preferences from Settings (TypeScript vs JavaScript, formatting options)
 
 ---
 
 ### Key Entities
 
-- **Figma Node**: Design element from Figma file with properties like layout mode, spacing, fills, geometry. Fetched via API and cached locally.
+- **Node Library**: Collection of all imported Figma nodes stored in `figma-data/` with metadata. Indexed in `library-index.json`. Each node has: unique ID, name, type, import date, thumbnail, cached Figma data.
 
-- **AltNode**: Normalized intermediate representation of Figma node with CSS-familiar properties. Computed on-the-fly from cached Figma data.
+- **Figma Node**: Design element from Figma file with properties like layout mode, spacing, fills, geometry. Fetched via API and cached in `figma-data/{nodeId}/data.json`.
 
-- **Mapping Rule**: JSON definition containing selector (pattern for matching AltNode properties), transformer (output structure for HTML/CSS/JSX), and priority (integer for conflict resolution). Rules are reusable across multiple nodes and projects.
+- **AltNode**: Normalized intermediate representation of Figma node with CSS-familiar properties. Computed on-the-fly from cached Figma data. Includes `originalNode` reference for complete Figma data access.
 
-- **Rule Match**: Relationship between an AltNode and the rules that apply to it. Tracks which properties each rule contributes and identifies conflicts.
+- **Mapping Rule**: JSON definition in global rule library (`mapping-rules.json`) containing selector (pattern for matching AltNode properties), transformer (output structure for HTML/CSS/JSX), and priority (integer for conflict resolution). Rules are reusable across all nodes and projects.
 
-- **Preview Output**: Generated code in three formats (React JSX, React+Tailwind, HTML/CSS) produced by applying matching rules to the current AltNode tree. Includes both rendered iframe and syntax-highlighted code.
+- **Rule Match**: Relationship between an AltNode and the rules that apply to it. Calculated for all nodes in library. Tracks: which rules matched, which properties each rule contributes, priority resolution, conflicts. Used for Applied Rules Inspector and match count badges.
 
-- **Rule Library**: Complete collection of mapping rules persisted as JSON. Represents the reusable knowledge base exported for production use.
+- **Rule Library**: Single global `mapping-rules.json` file containing all mapping rules. Represents the reusable knowledge base exported for use in other projects. NOT per-node rules.
+
+- **Library Index**: `figma-data/library-index.json` file tracking all imported nodes with metadata. Enables fast library browsing without reading all node data files.
+
+- **Preview Output**: Generated code in three formats (React JSX, React+Tailwind, HTML/CSS) produced by applying matching rules to current AltNode tree. Displayed in Viewer Render tab and available for export.
+
+- **Dashboard Stats**: Calculated metrics displayed on homepage: total nodes (count from library index), total rules (count from rule library), average coverage (% of nodes across entire library that have at least one rule match), last import date (most recent timestamp from library index).
 
 ---
 
@@ -222,41 +298,52 @@ User can save the complete rule library to a local JSON file (`mapping-rules.jso
 
 ### Measurable Outcomes
 
-- **SC-001**: User can load a Figma node and see the normalized AltNode tree within 5 seconds of submitting the URL
-- **SC-002**: User can create a new mapping rule and see it applied in live previews within 100ms of saving
-- **SC-003**: User can modify an existing rule and observe all three preview tabs update within 100ms
-- **SC-004**: User can identify which rules match a selected node within 2 clicks
-- **SC-005**: User can resolve rule conflicts by understanding priority and property contribution without external documentation
-- **SC-006**: User can test a rule library on 5 different Figma nodes within 10 minutes
-- **SC-007**: User can export a complete rule library and re-import it without data loss
-- **SC-008**: 90% of rule syntax errors are caught with clear, actionable error messages before save attempt
-- **SC-009**: System operates entirely offline after initial Figma fetch, with zero additional API calls during rule editing
-- **SC-010**: Generated code previews are syntactically valid and renderable in all three framework tabs (React JSX, React+Tailwind, HTML/CSS)
+- **SC-001**: User can import a Figma node and see it appear in library grid within 10 seconds of pasting URL
+- **SC-002**: User can browse library of 50 nodes and find specific node via search within 3 seconds
+- **SC-003**: User can toggle between grid and list view, and apply filters/sort within 1 second (instant UI response)
+- **SC-004**: User can navigate between pages (Homepage → Library → Viewer → Rules → Settings) and return to previous state without data loss
+- **SC-005**: User can create a new rule and see match counts update across all nodes within 2 seconds
+- **SC-006**: User can inspect a node in Viewer, click nodes in tree, and see Applied Rules Inspector update within 200ms
+- **SC-007**: User can switch between preview formats (React JSX, React+Tailwind, HTML/CSS) and see render update within 500ms
+- **SC-008**: User can identify which rules matched a node and understand conflict resolution without external documentation (via Applied Rules Inspector clarity)
+- **SC-009**: User can export complete rule library and re-import in another project without data loss
+- **SC-010**: User can test a rule library against 10 different nodes within 5 minutes (import 10 nodes, verify coverage in dashboard)
+- **SC-011**: User can perform bulk operations (delete 10 nodes, export 5 nodes) within 10 seconds
+- **SC-012**: Dashboard stats (total nodes, rules, coverage) accurately reflect library state and update within 1 second of changes
+- **SC-013**: System operates entirely offline after initial imports, with zero additional Figma API calls during rule editing and viewing
+- **SC-014**: Rule match counts displayed in Rule Manager are accurate across all nodes in library (100% correctness)
+- **SC-015**: Generated code exports are syntactically valid and can be copied/pasted into projects without modification
 
 ---
 
 ## Assumptions
 
-- Figma personal access token is managed outside the application (no built-in auth UI)
-- Users are familiar with JSON syntax and comfortable editing structured data
-- Git is the primary version control mechanism for rule libraries (no integrated VCS needed)
-- Single-user, local-first architecture sufficient (no collaboration features required)
-- Typical Figma nodes have <1000 child elements (performance not optimized for massive trees)
-- Users validate rule quality through visual inspection (no automated rule quality analysis initially)
-- Standard web browser environment (Chrome, Firefox, Safari) with modern JavaScript support
-- Node ID format follows Figma's standard URL structure (`figma.com/file/{fileKey}?node-id={nodeId}`)
+- Figma personal access token is managed via Settings page (no OAuth flow needed)
+- Users are familiar with JSON syntax and comfortable editing rules in Monaco editor
+- Git is the primary version control mechanism for rule libraries (export JSON, commit to repo)
+- Single-user, local-first architecture sufficient (no collaboration, real-time sync, or cloud storage)
+- Typical Figma nodes have <1000 child elements (performance optimized for this scale)
+- Users have 10-100 nodes in library (dashboard and library page optimized for this scale)
+- Users validate rule quality through visual inspection and Applied Rules Inspector (no automated rule quality scoring initially)
+- Standard desktop browser environment (Chrome, Firefox, Safari) with modern JavaScript support (no mobile/tablet)
+- Node IDs follow Figma standard URL format: `figma.com/file/{fileKey}?node-id={nodeId}` or `figma.com/design/{fileKey}?node-id={nodeId}`
+- Figma API rate limits are respected (no burst imports of 100+ nodes)
 
 ---
 
 ## Out of Scope
 
-- User authentication and authorization (token stored in config file)
-- Batch testing across multiple nodes simultaneously (manual per-node verification)
-- Automated rule quality feedback (e.g., "rule too specific", "rule never matched")
-- Version control integration beyond exporting JSON (no Git UI, history, diffing)
-- Collaboration features (real-time editing, sharing, comments)
-- Rule marketplace or sharing platform
-- Production code export tool (this generates rules, not final code)
-- Custom AltNode transformation logic (normalization is fixed)
-- Plugin or Figma integration (standalone web app)
+- User authentication and authorization beyond local Figma token storage
+- Real-time collaboration or multi-user editing of rule libraries
+- Cloud storage or synchronization of library data (local filesystem only)
+- Automated rule quality feedback (e.g., "rule too specific", "rule conflicts likely")
+- Version control UI for rules (Git integration limited to export JSON)
+- Rule marketplace or community sharing platform
+- Production deployment of generated code (tool generates rules, not production-ready components)
+- Custom AltNode transformation logic (normalization follows FigmaToCode patterns, not user-configurable)
+- Figma plugin or desktop app integration (standalone web app only)
 - Mobile or tablet support (desktop-focused developer workbench)
+- Batch testing across multiple nodes simultaneously in single view (sequential inspection via Viewer)
+- Advanced analytics (rule effectiveness scoring, automated conflict detection, rule usage trends over time)
+- Undo/redo functionality for rule edits (manual version control via export/import)
+- Rule dependencies or composition (rules are independent, no "extends" or "inherits")
