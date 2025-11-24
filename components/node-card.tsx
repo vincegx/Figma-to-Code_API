@@ -107,7 +107,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
 
         <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
           <span className="flex items-center gap-1">
-            <span className="font-medium">{node.altNode.type}</span>
+            <span className="font-medium">{node.altNode?.type || 'Node'}</span>
           </span>
           <span className="text-xs">{new Date(node.addedAt).toLocaleDateString()}</span>
         </div>

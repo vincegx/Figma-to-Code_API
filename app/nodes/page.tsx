@@ -34,7 +34,7 @@ export default function NodesLibraryPage() {
 
     // Type filter
     if (filters.type && filters.type.length > 0) {
-      if (!filters.type.includes(node.altNode.type)) {
+      if (!node.altNode?.type || !filters.type.includes(node.altNode.type)) {
         return false;
       }
     }
@@ -59,7 +59,7 @@ export default function NodesLibraryPage() {
         comparison = new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime();
         break;
       case 'type':
-        comparison = a.altNode.type.localeCompare(b.altNode.type);
+        comparison = (a.altNode?.type || '').localeCompare(b.altNode?.type || '');
         break;
       case 'coverage':
         // Coverage not available in LibraryNode, use viewCount as fallback
@@ -307,7 +307,7 @@ export default function NodesLibraryPage() {
                     </a>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                    {node.altNode.type}
+                    {node.altNode?.type || 'Node'}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                     {new Date(node.addedAt).toLocaleDateString()}
