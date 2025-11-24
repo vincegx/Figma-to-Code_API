@@ -1,4 +1,4 @@
-import { AltNode } from '../types/altnode';
+import type { SimpleAltNode } from '../altnode-transform';
 import { toPascalCase, cssPropToTailwind } from './helpers';
 import { GeneratedCodeOutput } from './react';
 
@@ -24,7 +24,7 @@ import { GeneratedCodeOutput } from './react';
  * @returns GeneratedCodeOutput object with Tailwind JSX string
  */
 export function generateReactTailwind(
-  altNode: AltNode,
+  altNode: SimpleAltNode,
   resolvedProperties: Record<string, string>
 ): GeneratedCodeOutput {
   const componentName = toPascalCase(altNode.name);
@@ -56,7 +56,7 @@ ${jsx}  );
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
-  node: AltNode,
+  node: SimpleAltNode,
   properties: Record<string, string>,
   depth: number
 ): string {

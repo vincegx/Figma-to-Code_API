@@ -21,6 +21,7 @@ import Image from 'next/image';
 import FigmaTreeView from '@/components/figma-tree-view';
 import AppliedRulesInspector from '@/components/applied-rules-inspector';
 import PreviewTabs from '@/components/preview-tabs';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 export default function ViewerPage() {
   const params = useParams();
@@ -42,18 +43,41 @@ export default function ViewerPage() {
   const [activeTab, setActiveTab] = useState<'code' | 'render'>('code');
   const [generatedCode, setGeneratedCode] = useState<string>('');
 
+  // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
+  const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
+  const [isLoadingAltNode, setIsLoadingAltNode] = useState(false);
+
   // Find current node
   const currentNode = nodes.find((n) => n.id === nodeId);
 
-  // Load data on mount
+  // Load library data on mount
   useEffect(() => {
     loadLibrary();
     loadRules();
     selectNode(nodeId);
   }, [loadLibrary, loadRules, selectNode, nodeId]);
 
-  // Get AltNode from current node
-  const altNode = currentNode?.altNode || null;
+  // Fetch node data with AltNode transformation on-the-fly
+  useEffect(() => {
+    async function fetchNodeWithAltNode() {
+      if (!nodeId) return;
+
+      setIsLoadingAltNode(true);
+      try {
+        const response = await fetch(`/api/figma/node/${nodeId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setAltNode(data.altNode || null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch node data:', error);
+      } finally {
+        setIsLoadingAltNode(false);
+      }
+    }
+
+    fetchNodeWithAltNode();
+  }, [nodeId]);
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
@@ -167,10 +191,17 @@ export default function ViewerPage() {
             <button
               onClick={async () => {
                 try {
+                  // POST to refresh from Figma API
                   await fetch(`/api/figma/node/${nodeId}`, {
                     method: 'POST',
                   });
                   await loadLibrary();
+                  // Refresh altNode with new data
+                  const response = await fetch(`/api/figma/node/${nodeId}`);
+                  if (response.ok) {
+                    const data = await response.json();
+                    setAltNode(data.altNode || null);
+                  }
                 } catch (error) {
                   console.error('Failed to re-fetch node:', error);
                 }

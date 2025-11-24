@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { AltNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { SimpleMappingRule } from '@/lib/types/rules';
 import { generateReactJSX } from '@/lib/code-generators/react';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
@@ -9,7 +9,7 @@ import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 import CodePreview from './code-preview';
 
 interface PreviewTabsProps {
-  altNode: AltNode | null;
+  altNode: SimpleAltNode | null;
   rules: SimpleMappingRule[];
   onCodeChange?: (code: string) => void;
 }

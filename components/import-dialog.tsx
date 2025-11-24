@@ -17,9 +17,8 @@ export default function ImportDialog() {
     setError('');
 
     // Validate URL
-    let parsed;
     try {
-      parsed = parseFigmaUrl(url);
+      parseFigmaUrl(url); // Throws if invalid
     } catch (err: any) {
       setError(err.message || 'Invalid Figma URL');
       return;
@@ -42,9 +41,12 @@ export default function ImportDialog() {
         throw new Error(errorData.error || 'Import failed');
       }
 
-      const nodeMetadata = await response.json();
+      const apiResponse = await response.json();
 
-      // Update nodes-store
+      // API returns {success, nodeId, metadata} - extract just the metadata
+      const nodeMetadata = apiResponse.metadata;
+
+      // Update nodes-store with the LibraryNode
       importNode(nodeMetadata);
 
       // Reload library to get updated data

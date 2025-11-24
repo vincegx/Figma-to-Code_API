@@ -1,4 +1,4 @@
-import { AltNode } from '../types/altnode';
+import type { SimpleAltNode } from '../altnode-transform';
 import { toKebabCase } from './helpers';
 import { GeneratedCodeOutput } from './react';
 
@@ -24,7 +24,7 @@ import { GeneratedCodeOutput } from './react';
  * @returns GeneratedCodeOutput object with HTML and CSS strings
  */
 export function generateHTMLCSS(
-  altNode: AltNode,
+  altNode: SimpleAltNode,
   resolvedProperties: Record<string, string>
 ): GeneratedCodeOutput {
   const className = toKebabCase(altNode.name);
@@ -68,7 +68,7 @@ export function generateHTMLCSS(
  * @returns HTML string
  */
 function generateHTMLElement(
-  node: AltNode,
+  node: SimpleAltNode,
   properties: Record<string, string>,
   cssRules: Array<{ selector: string; properties: Record<string, string> }>,
   depth: number

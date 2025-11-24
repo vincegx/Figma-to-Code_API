@@ -1,4 +1,4 @@
-import { AltNode } from '../types/altnode';
+import type { SimpleAltNode } from '../altnode-transform';
 import { toPascalCase } from './helpers';
 
 /**
@@ -39,7 +39,7 @@ export interface GeneratedCodeOutput {
  * @returns GeneratedCodeOutput object with JSX string
  */
 export function generateReactJSX(
-  altNode: AltNode,
+  altNode: SimpleAltNode,
   resolvedProperties: Record<string, string>
 ): GeneratedCodeOutput {
   const componentName = toPascalCase(altNode.name);
@@ -71,7 +71,7 @@ ${jsx}  );
  * @returns JSX string
  */
 function generateJSXElement(
-  node: AltNode,
+  node: SimpleAltNode,
   properties: Record<string, string>,
   depth: number
 ): string {

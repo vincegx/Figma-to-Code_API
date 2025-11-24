@@ -1,13 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import { AltNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { SimpleMappingRule, SimpleRuleMatch } from '@/lib/types/rules';
 import { evaluateRules } from '@/lib/rule-engine';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 
 interface AppliedRulesInspectorProps {
-  altNode: AltNode | null;
+  altNode: SimpleAltNode | null;
   selectedNodeId: string | null;
   rules: SimpleMappingRule[];
 }
@@ -264,7 +264,7 @@ function RuleMatchCard({ match, rank }: { match: SimpleRuleMatch; rank: number }
 }
 
 // Helper function to find node by ID in tree
-function findNodeById(node: AltNode, id: string): AltNode | null {
+function findNodeById(node: SimpleAltNode, id: string): SimpleAltNode | null {
   if (node.id === id) return node;
 
   if ('children' in node && node.children) {

@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getNode, addNode } from '@/lib/utils/library-index';
 import { loadNodeData, loadNodeMetadata, saveNodeData } from '@/lib/utils/file-storage';
 import { fetchNode, fetchScreenshot, fetchWithRetry } from '@/lib/figma-client';
+import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 
 interface RouteParams {
   params: {
@@ -55,10 +56,15 @@ export async function GET(
       );
     }
 
+    // Transform to AltNode on-the-fly (Constitutional Principle III: don't persist)
+    resetNameCounters(); // Reset for clean unique name generation
+    const altNode = transformToAltNode(nodeData);
+
     return NextResponse.json({
       success: true,
       metadata,
       nodeData,
+      altNode,
     });
   } catch (error) {
     console.error('Node fetch error:', error);

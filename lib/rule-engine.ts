@@ -12,7 +12,7 @@
  * - getPropertyProvenance(): Property attribution for Applied Rules Inspector
  */
 
-import type { AltNode } from './types/altnode';
+import type { SimpleAltNode } from './altnode-transform';
 import type { Selector, SimpleMappingRule, SimpleRuleMatch } from './types/rules';
 
 // ============================================================================
@@ -28,7 +28,7 @@ import type { Selector, SimpleMappingRule, SimpleRuleMatch } from './types/rules
  * @returns Array of SimpleRuleMatch objects with resolved properties
  */
 export function evaluateRules(
-  altNode: AltNode,
+  altNode: SimpleAltNode,
   rules: SimpleMappingRule[]
 ): SimpleRuleMatch[] {
   // Filter to matching rules
@@ -68,7 +68,7 @@ export function evaluateRules(
  * @returns true if ALL selector properties match
  */
 export function selectorMatches(
-  altNode: AltNode,
+  altNode: SimpleAltNode,
   selector: Selector
 ): boolean {
   // Type matching
@@ -89,9 +89,9 @@ export function selectorMatches(
     }
   }
 
-  // Width range matching
+  // Width range matching (access via originalNode)
   if (selector.width !== undefined) {
-    const nodeWidth = altNode.absoluteBoundingBox.width;
+    const nodeWidth = altNode.originalNode?.absoluteBoundingBox?.width;
     if (typeof nodeWidth !== 'number') {
       return false;
     }
@@ -103,9 +103,9 @@ export function selectorMatches(
     }
   }
 
-  // Height range matching
+  // Height range matching (access via originalNode)
   if (selector.height !== undefined) {
-    const nodeHeight = altNode.absoluteBoundingBox.height;
+    const nodeHeight = altNode.originalNode?.absoluteBoundingBox?.height;
     if (typeof nodeHeight !== 'number') {
       return false;
     }
@@ -119,17 +119,17 @@ export function selectorMatches(
 
   // Children count matching
   if (selector.hasChildren !== undefined) {
-    const hasChildren = 'children' in altNode && altNode.children.length > 0;
+    const hasChildren = altNode.children && altNode.children.length > 0;
     if (selector.hasChildren !== hasChildren) {
       return false;
     }
   }
 
-  // Parent type matching (if available in AltNode)
-  if (selector.parentType !== undefined && altNode.parent) {
-    if (altNode.parent.type !== selector.parentType) {
-      return false;
-    }
+  // Parent type matching - not available in SimpleAltNode, skip for now
+  // TODO: Add parent reference to SimpleAltNode if needed
+  if (selector.parentType !== undefined) {
+    // Cannot match parent type without parent reference
+    return false;
   }
 
   // All checks passed - selector matches
@@ -156,7 +156,7 @@ export function selectorMatches(
  */
 export function resolveConflicts(
   matchedRules: SimpleMappingRule[],
-  altNode: AltNode
+  altNode: SimpleAltNode
 ): SimpleRuleMatch[] {
   const ruleMatches: SimpleRuleMatch[] = [];
   const propertyOwnership: Map<string, string> = new Map(); // property name → rule ID

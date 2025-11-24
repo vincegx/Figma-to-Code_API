@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { AltNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { ChevronRight, ChevronDown, Eye, EyeOff } from 'lucide-react';
 
 interface FigmaTreeViewProps {
-  altNode: AltNode | null;
+  altNode: SimpleAltNode | null;
   selectedNodeId: string | null;
   onNodeClick: (nodeId: string) => void;
 }
@@ -45,7 +45,7 @@ export default function FigmaTreeView({
 }
 
 interface TreeNodeProps {
-  node: AltNode;
+  node: SimpleAltNode;
   level: number;
   selectedNodeId: string | null;
   onNodeClick: (nodeId: string) => void;
@@ -119,7 +119,7 @@ function TreeNode({ node, level, selectedNodeId, onNodeClick }: TreeNodeProps) {
       {/* Children (recursive) */}
       {hasChildren && isExpanded && 'children' in node && (
         <div>
-          {node.children.map((child: AltNode) => (
+          {node.children.map((child: SimpleAltNode) => (
             <TreeNode
               key={child.id}
               node={child}
