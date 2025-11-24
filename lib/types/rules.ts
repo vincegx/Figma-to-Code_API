@@ -223,3 +223,45 @@ export interface RuleSetStats {
   readonly ruleStats: readonly RuleStats[];
   readonly generatedAt: string;
 }
+
+// ============================================================================
+// WP05 Rule Engine Types - Property-level composition approach
+// ============================================================================
+
+/**
+ * Selector for WP05 Rule Engine (AND-logic matching)
+ * All selector properties must match for rule to apply
+ */
+export interface Selector {
+  readonly type?: FigmaNodeType;
+  readonly name?: string | RegExp;
+  readonly width?: { readonly min?: number; readonly max?: number };
+  readonly height?: { readonly min?: number; readonly max?: number };
+  readonly hasChildren?: boolean;
+  readonly parentType?: FigmaNodeType;
+}
+
+/**
+ * Simplified mapping rule for WP05 Rule Engine
+ * Focuses on CSS property composition with priority-based conflict resolution
+ */
+export interface SimpleMappingRule {
+  readonly id: string;
+  readonly name: string;
+  readonly priority: number;
+  readonly selector: Selector;
+  readonly transformer: Record<string, string | number>; // CSS properties
+}
+
+/**
+ * Rule match result for WP05 Rule Engine
+ * Tracks property provenance and conflict information
+ */
+export interface SimpleRuleMatch {
+  readonly ruleId: string;
+  readonly ruleName: string;
+  readonly priority: number;
+  readonly contributedProperties: readonly string[];
+  readonly conflicts: readonly string[];
+  readonly severity: 'major' | 'minor' | 'none';
+}

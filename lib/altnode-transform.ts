@@ -20,13 +20,6 @@
 
 import type { FigmaNode } from './types/figma';
 
-// Extended types for properties not yet in lib/types/figma.ts
-interface ExtendedFigmaNode extends FigmaNode {
-  rotation?: number;
-  exportSettings?: any[];
-  layoutWrap?: 'NO_WRAP' | 'WRAP';
-}
-
 // Simple AltNode structure for transformation engine
 export interface SimpleAltNode {
   id: string;
