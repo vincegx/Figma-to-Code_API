@@ -60,14 +60,39 @@ export async function loadLibraryIndex(): Promise<LibraryIndex> {
     const fileContent = await fs.readFile(LIBRARY_INDEX_PATH, 'utf-8');
     const data = JSON.parse(fileContent);
 
-    // Convert from serialized format to Map objects
+    // Convert from serialized format (nodes array) to Map objects
+    const nodeMap = new Map<string, LibraryNode>();
+    const categories = new Map<string, readonly LibraryNode[]>();
+    const tags = new Map<string, readonly LibraryNode[]>();
+
+    // Build nodeMap from nodes array
+    if (data.nodes && Array.isArray(data.nodes)) {
+      for (const node of data.nodes) {
+        nodeMap.set(node.id, node);
+
+        // Rebuild categories index
+        if (node.category) {
+          const categoryNodes = categories.get(node.category) || [];
+          categories.set(node.category, [...categoryNodes, node]);
+        }
+
+        // Rebuild tags index
+        if (node.tags && Array.isArray(node.tags)) {
+          for (const tag of node.tags) {
+            const tagNodes = tags.get(tag) || [];
+            tags.set(tag, [...tagNodes, node]);
+          }
+        }
+      }
+    }
+
     return {
       version: data.version,
       lastUpdated: data.lastUpdated,
-      categories: new Map(Object.entries(data.categories || {})),
-      tags: new Map(Object.entries(data.tags || {})),
-      nodeMap: new Map(Object.entries(data.nodeMap || {})),
-      totalNodes: data.totalNodes,
+      categories,
+      tags,
+      nodeMap,
+      totalNodes: data.totalNodes || nodeMap.size,
     };
   } catch (error) {
     // Initialize empty index if not exists

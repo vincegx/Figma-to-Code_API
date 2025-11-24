@@ -33,8 +33,7 @@ export default function ImportDialog() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileKey: parsed.fileKey,
-          nodeId: parsed.nodeId,
+          url: url,
         }),
       });
 

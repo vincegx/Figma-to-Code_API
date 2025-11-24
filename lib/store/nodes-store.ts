@@ -66,13 +66,13 @@ export const useNodesStore = create<NodesState>()(
         loadLibrary: async () => {
           try {
             // Fetch library index from API route (WP03)
-            const response = await fetch('/api/library/index');
+            const response = await fetch('/api/figma/library');
             if (!response.ok) {
               throw new Error('Failed to load library index');
             }
 
-            const libraryIndex = await response.json();
-            const nodes: LibraryNode[] = libraryIndex.nodes || [];
+            const data = await response.json();
+            const nodes: LibraryNode[] = data.nodes || [];
 
             set({ nodes });
           } catch (error) {
