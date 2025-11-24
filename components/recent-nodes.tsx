@@ -55,7 +55,7 @@ export default function RecentNodes() {
                 {node.name}
               </h4>
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>{node.altNode.type}</span>
+                <span>{node.altNode?.type || 'Node'}</span>
                 <span>•</span>
                 <span>{new Date(node.addedAt).toLocaleDateString()}</span>
               </div>
