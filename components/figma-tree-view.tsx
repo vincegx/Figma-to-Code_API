@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { ChevronRight, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { FigmaTypeIcon } from './figma-type-icon';
+import { InstanceBadge } from './instance-badge';
+import { getNodeColors } from '@/lib/utils/node-colors';
+import { cn } from '@/lib/utils';
 
 interface FigmaTreeViewProps {
   altNode: SimpleAltNode | null;
@@ -39,6 +43,7 @@ export default function FigmaTreeView({
         level={0}
         selectedNodeId={selectedNodeId}
         onNodeClick={onNodeClick}
+        defaultExpanded={false} // Collapsed by default like Figma
       />
     </div>
   );
@@ -49,23 +54,39 @@ interface TreeNodeProps {
   level: number;
   selectedNodeId: string | null;
   onNodeClick: (nodeId: string) => void;
+  defaultExpanded?: boolean;
 }
 
-function TreeNode({ node, level, selectedNodeId, onNodeClick }: TreeNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+function TreeNode({
+  node,
+  level,
+  selectedNodeId,
+  onNodeClick,
+  defaultExpanded = false,
+}: TreeNodeProps) {
+  // Root level expanded by default, others collapsed
+  const [isExpanded, setIsExpanded] = useState(level === 0 ? true : defaultExpanded);
   const hasChildren =
     'children' in node && node.children && node.children.length > 0;
   const isSelected = selectedNodeId === node.id;
+  const colors = getNodeColors(node.type);
+
+  // Extract component name for INSTANCE nodes
+  const componentName =
+    node.type === 'INSTANCE' && 'componentName' in node
+      ? (node as { componentName?: string }).componentName
+      : undefined;
 
   return (
     <div>
       {/* Node row */}
       <div
-        className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+        className={cn(
+          'flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors',
           isSelected
-            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+            ? cn(colors.bg, colors.text, colors.border, 'border')
             : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-        }`}
+        )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => onNodeClick(node.id)}
       >
@@ -88,24 +109,33 @@ function TreeNode({ node, level, selectedNodeId, onNodeClick }: TreeNodeProps) {
           <span className="w-5 flex-shrink-0" /> // Spacer for alignment
         )}
 
-        {/* Node type badge */}
-        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono w-14 flex-shrink-0">
-          {node.type.slice(0, 4)}
-        </span>
+        {/* Node type icon with color */}
+        <FigmaTypeIcon
+          type={node.type}
+          size={14}
+          className={cn('flex-shrink-0', colors.text)}
+        />
 
         {/* Node name */}
-        <span className="text-sm truncate flex-1 text-gray-900 dark:text-white">
+        <span
+          className={cn(
+            'text-sm truncate flex-1',
+            isSelected ? colors.text : 'text-gray-900 dark:text-white'
+          )}
+        >
           {node.name}
         </span>
+
+        {/* Instance badge for INSTANCE nodes */}
+        {node.type === 'INSTANCE' && componentName && (
+          <InstanceBadge componentName={componentName} />
+        )}
 
         {/* Metadata badges */}
         <div className="flex items-center gap-1 flex-shrink-0">
           {/* Invisible badge */}
           {!node.visible && (
             <EyeOff size={12} className="text-gray-400 dark:text-gray-500" />
-          )}
-          {node.visible && (
-            <Eye size={12} className="text-gray-300 dark:text-gray-600" />
           )}
           {/* Children count */}
           {hasChildren && 'children' in node && (
@@ -126,6 +156,7 @@ function TreeNode({ node, level, selectedNodeId, onNodeClick }: TreeNodeProps) {
               level={level + 1}
               selectedNodeId={selectedNodeId}
               onNodeClick={onNodeClick}
+              defaultExpanded={false}
             />
           ))}
         </div>

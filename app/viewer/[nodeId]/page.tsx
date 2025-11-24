@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useNodesStore, useRulesStore } from '@/lib/store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,6 +21,10 @@ import Image from 'next/image';
 import FigmaTreeView from '@/components/figma-tree-view';
 import AppliedRulesInspector from '@/components/applied-rules-inspector';
 import PreviewTabs from '@/components/preview-tabs';
+import { FigmaPropertiesPanel } from '@/components/figma-properties-panel';
+import { TechnicalRenderPanel } from '@/components/technical-render-panel';
+import { FigmaTypeIcon } from '@/components/figma-type-icon';
+import { getNodeColors } from '@/lib/utils/node-colors';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 export default function ViewerPage() {
@@ -41,6 +45,9 @@ export default function ViewerPage() {
     null
   );
   const [activeTab, setActiveTab] = useState<'code' | 'render'>('code');
+  const [rightPanelTab, setRightPanelTab] = useState<
+    'figma' | 'technical' | 'code'
+  >('figma');
   const [generatedCode, setGeneratedCode] = useState<string>('');
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
@@ -49,6 +56,24 @@ export default function ViewerPage() {
 
   // Find current node
   const currentNode = nodes.find((n) => n.id === nodeId);
+
+  // Find selected node in tree
+  const selectedNode = useMemo(() => {
+    if (!altNode || !selectedTreeNodeId) return null;
+
+    function findNode(node: SimpleAltNode): SimpleAltNode | null {
+      if (node.id === selectedTreeNodeId) return node;
+      if (node.children) {
+        for (const child of node.children) {
+          const found = findNode(child);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    return findNode(altNode);
+  }, [altNode, selectedTreeNodeId]);
 
   // Load library data on mount
   useEffect(() => {
@@ -105,6 +130,10 @@ export default function ViewerPage() {
     );
   }
 
+  // Get node type colors for breadcrumb
+  const nodeType = currentNode.altNode?.type || 'FRAME';
+  const nodeColors = getNodeColors(nodeType);
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
@@ -112,8 +141,8 @@ export default function ViewerPage() {
         <div className="container mx-auto flex items-center justify-between">
           {/* Left: Breadcrumbs + Thumbnail + Name */}
           <div className="flex items-center gap-4">
-            {/* Breadcrumbs */}
-            <nav className="text-sm text-gray-600 dark:text-gray-400 mr-4">
+            {/* Breadcrumbs with type icons */}
+            <nav className="text-sm text-gray-600 dark:text-gray-400 mr-4 flex items-center gap-1">
               <a href="/" className="hover:text-gray-900 dark:hover:text-gray-200">
                 Home
               </a>
@@ -125,7 +154,12 @@ export default function ViewerPage() {
                 Library
               </a>
               {' > '}
-              <span className="font-semibold text-gray-900 dark:text-white">
+              <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
+                <FigmaTypeIcon
+                  type={nodeType}
+                  size={14}
+                  className={nodeColors.text}
+                />
                 {currentNode.name}
               </span>
             </nav>
@@ -149,11 +183,16 @@ export default function ViewerPage() {
 
             {/* Name and metadata */}
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <FigmaTypeIcon
+                  type={nodeType}
+                  size={18}
+                  className={nodeColors.text}
+                />
                 {currentNode.name}
               </h1>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {currentNode.altNode?.type || 'Node'} •{' '}
+                {nodeType} •{' '}
                 {new Date(currentNode.addedAt).toLocaleDateString()}
               </div>
             </div>
@@ -269,7 +308,7 @@ export default function ViewerPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Main Tabs */}
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as 'code' | 'render')}
@@ -292,13 +331,49 @@ export default function ViewerPage() {
               />
             </div>
 
-            {/* Applied Rules Inspector (right 60%) */}
-            <div className="w-3/5 overflow-auto bg-white dark:bg-gray-800">
-              <AppliedRulesInspector
-                altNode={altNode}
-                selectedNodeId={selectedTreeNodeId}
-                rules={rules}
-              />
+            {/* Right Panel with Tabs (60%) */}
+            <div className="w-3/5 flex flex-col overflow-hidden bg-white dark:bg-gray-800">
+              <Tabs
+                value={rightPanelTab}
+                onValueChange={(v) =>
+                  setRightPanelTab(v as 'figma' | 'technical' | 'code')
+                }
+                className="flex-1 flex flex-col overflow-hidden"
+              >
+                <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-gray-50 dark:bg-gray-900 px-2">
+                  <TabsTrigger value="figma" className="text-sm">
+                    Figma
+                  </TabsTrigger>
+                  <TabsTrigger value="technical" className="text-sm">
+                    Technical
+                  </TabsTrigger>
+                  <TabsTrigger value="code" className="text-sm">
+                    Code
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent
+                  value="figma"
+                  className="flex-1 overflow-auto m-0"
+                >
+                  <FigmaPropertiesPanel node={selectedNode} />
+                </TabsContent>
+
+                <TabsContent
+                  value="technical"
+                  className="flex-1 overflow-auto m-0"
+                >
+                  <TechnicalRenderPanel node={selectedNode} />
+                </TabsContent>
+
+                <TabsContent value="code" className="flex-1 overflow-auto m-0">
+                  <AppliedRulesInspector
+                    altNode={altNode}
+                    selectedNodeId={selectedTreeNodeId}
+                    rules={rules}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </TabsContent>
