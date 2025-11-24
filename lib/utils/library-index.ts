@@ -293,9 +293,7 @@ export async function sortNodes(
         comparison = new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime();
         break;
       case 'type':
-        if (a.altNode && b.altNode) {
-          comparison = String(a.altNode.type).localeCompare(String(b.altNode.type));
-        }
+        comparison = String(a.altNode?.type || '').localeCompare(String(b.altNode?.type || ''));
         break;
       case 'coverage':
         // Coverage would be calculated by rule matches (WP05)
