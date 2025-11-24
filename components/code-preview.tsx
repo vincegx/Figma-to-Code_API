@@ -18,16 +18,31 @@ export default function CodePreview({ code, language }: CodePreviewProps) {
     const loadPrism = async () => {
       // Dynamic imports to prevent SSR execution
       const Prism = (await import('prismjs')).default;
+
+      // IMPORTANT: Import order matters! Dependencies must be loaded first.
+      // Dependency chain: tsx → (jsx + typescript) → (markup + javascript)
+
+      // 1. Base languages first (no dependencies)
       // @ts-ignore - Dynamic import for Prism components
-      await import('prismjs/components/prism-typescript');
-      // @ts-ignore
-      await import('prismjs/components/prism-tsx');
-      // @ts-ignore
-      await import('prismjs/components/prism-jsx');
-      // @ts-ignore
       await import('prismjs/components/prism-markup');
       // @ts-ignore
       await import('prismjs/components/prism-css');
+
+      // 2. JavaScript (depends on nothing in our chain)
+      // @ts-ignore
+      await import('prismjs/components/prism-javascript');
+
+      // 3. JSX (depends on markup + javascript)
+      // @ts-ignore
+      await import('prismjs/components/prism-jsx');
+
+      // 4. TypeScript (depends on javascript)
+      // @ts-ignore
+      await import('prismjs/components/prism-typescript');
+
+      // 5. TSX (depends on jsx + typescript) - MUST BE LAST
+      // @ts-ignore
+      await import('prismjs/components/prism-tsx');
 
       if (codeRef.current) {
         Prism.highlightElement(codeRef.current);

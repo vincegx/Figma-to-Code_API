@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { SimpleMappingRule } from '@/lib/types/rules';
 import { generateReactJSX } from '@/lib/code-generators/react';
@@ -65,13 +65,16 @@ export default function PreviewTabs({
     const duration = endTime - startTime;
     console.log(`Code generation (${selectedFormat}): ${duration.toFixed(2)}ms`);
 
-    // Notify parent of code change
-    if (onCodeChange) {
-      onCodeChange(codeOutput);
-    }
-
     return codeOutput;
-  }, [altNode, selectedFormat, onCodeChange]);
+  }, [altNode, selectedFormat]);
+
+  // Notify parent of code change via useEffect (not during render)
+  // This fixes: "Cannot update a component while rendering a different component"
+  useEffect(() => {
+    if (onCodeChange && generatedCode) {
+      onCodeChange(generatedCode);
+    }
+  }, [generatedCode, onCodeChange]);
 
   // Get language for syntax highlighting
   const language = useMemo(() => {
