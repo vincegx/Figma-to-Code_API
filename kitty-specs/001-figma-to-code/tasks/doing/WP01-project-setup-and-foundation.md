@@ -14,10 +14,10 @@ subtasks:
   - "T011"
 title: "Project Setup & Foundation"
 phase: "Phase 0 - Foundation"
-lane: "planned"
+lane: "doing"
 assignee: ""
-agent: ""
-shell_pid: ""
+agent: "claude"
+shell_pid: "96455"
 review_status: ""
 reviewed_by: ""
 history:
@@ -563,3 +563,4 @@ Initialize a production-ready Next.js 14+ project with TypeScript strict mode, e
 ## Activity Log
 
 - 2025-11-24T00:00:00Z – system – lane=planned – Prompt created via /spec-kitty.tasks
+- 2025-11-24T00:26:18Z – claude – shell_pid=96455 – lane=doing – Started WP01: Project Setup & Foundation
