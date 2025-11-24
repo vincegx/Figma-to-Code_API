@@ -129,7 +129,7 @@ export default function ViewerPage() {
                 {currentNode.name}
               </h1>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {currentNode.altNode.type} •{' '}
+                {currentNode.altNode?.type || 'Node'} •{' '}
                 {new Date(currentNode.addedAt).toLocaleDateString()}
               </div>
             </div>
@@ -167,10 +167,8 @@ export default function ViewerPage() {
             <button
               onClick={async () => {
                 try {
-                  await fetch('/api/figma/refresh', {
+                  await fetch(`/api/figma/node/${nodeId}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nodeId }),
                   });
                   await loadLibrary();
                 } catch (error) {

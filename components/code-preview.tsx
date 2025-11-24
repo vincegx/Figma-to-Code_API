@@ -1,13 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Prism from 'prismjs';
+// Import CSS statically (no SSR issues with CSS)
 import 'prismjs/themes/prism-tomorrow.css';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-css';
 
 interface CodePreviewProps {
   code: string;
@@ -18,10 +13,27 @@ export default function CodePreview({ code, language }: CodePreviewProps) {
   const codeRef = useRef<HTMLElement>(null);
 
   // Apply syntax highlighting when code or language changes
+  // Dynamically load Prism.js only on client-side to avoid SSR issues
   useEffect(() => {
-    if (codeRef.current) {
-      Prism.highlightElement(codeRef.current);
-    }
+    const loadPrism = async () => {
+      // Dynamic imports to prevent SSR execution
+      const Prism = (await import('prismjs')).default;
+      // @ts-ignore - Dynamic import for Prism components
+      await import('prismjs/components/prism-typescript');
+      // @ts-ignore
+      await import('prismjs/components/prism-tsx');
+      // @ts-ignore
+      await import('prismjs/components/prism-jsx');
+      // @ts-ignore
+      await import('prismjs/components/prism-markup');
+      // @ts-ignore
+      await import('prismjs/components/prism-css');
+
+      if (codeRef.current) {
+        Prism.highlightElement(codeRef.current);
+      }
+    };
+    loadPrism();
   }, [code, language]);
 
   // Map language to Prism language class
