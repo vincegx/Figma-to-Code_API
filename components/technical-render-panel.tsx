@@ -38,7 +38,13 @@ export function TechnicalRenderPanel({ node }: TechnicalRenderPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2 px-3 pb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Type:</span>
+            <span className="text-sm text-muted-foreground">Figma Type:</span>
+            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">
+              {node.originalNode?.type || 'UNKNOWN'}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm text-muted-foreground">HTML Type:</span>
             <Badge variant="outline">{node.type}</Badge>
           </div>
 
@@ -107,7 +113,11 @@ export function TechnicalRenderPanel({ node }: TechnicalRenderPanelProps) {
               <span className="font-medium">{node.children.length}</span>
             </div>
             <div className="text-xs text-muted-foreground mt-2">
-              Types:{' '}
+              Figma Types:{' '}
+              {[...new Set(node.children.map((c) => c.originalNode?.type || 'UNKNOWN'))].join(', ')}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              HTML Types:{' '}
               {[...new Set(node.children.map((c) => c.type))].join(', ')}
             </div>
           </CardContent>

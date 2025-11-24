@@ -69,12 +69,13 @@ function TreeNode({
   const hasChildren =
     'children' in node && node.children && node.children.length > 0;
   const isSelected = selectedNodeId === node.id;
-  const colors = getNodeColors(node.type);
+  const figmaType = node.originalNode?.type || 'FRAME';
+  const colors = getNodeColors(figmaType);
 
   // Extract component name for INSTANCE nodes
   const componentName =
-    node.type === 'INSTANCE' && 'componentName' in node
-      ? (node as { componentName?: string }).componentName
+    figmaType === 'INSTANCE'
+      ? (node.originalNode as any)?.componentId ? node.name : undefined
       : undefined;
 
   return (
@@ -109,9 +110,9 @@ function TreeNode({
           <span className="w-5 flex-shrink-0" /> // Spacer for alignment
         )}
 
-        {/* Node type icon with color */}
+        {/* Node type icon with color - use figmaType (from originalNode.type), NOT node.type (HTML type) */}
         <FigmaTypeIcon
-          type={node.type}
+          type={figmaType}
           size={14}
           className={cn('flex-shrink-0', colors.text)}
         />
@@ -126,13 +127,17 @@ function TreeNode({
           {node.name}
         </span>
 
-        {/* Instance badge for INSTANCE nodes */}
-        {node.type === 'INSTANCE' && componentName && (
+        {/* Instance badge for INSTANCE nodes - use figmaType, NOT node.type */}
+        {figmaType === 'INSTANCE' && componentName && (
           <InstanceBadge componentName={componentName} />
         )}
 
         {/* Metadata badges */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* HTML type badge - shows the rendered HTML element type */}
+          <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-1 rounded font-mono">
+            {node.type}
+          </span>
           {/* Invisible badge */}
           {!node.visible && (
             <EyeOff size={12} className="text-gray-400 dark:text-gray-500" />
