@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "id": "custom-test-final",
+    "name": "Final Test",
+    "type": "custom",
+    "category": "layout",
+    "tags": [
+      "test"
+    ],
+    "enabled": true,
+    "priority": 100,
+    "selector": {
+      "type": "FRAME"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "test"
+      }
+    }
+  }
+]
