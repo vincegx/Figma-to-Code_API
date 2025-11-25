@@ -1,6 +1,6 @@
 [
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -25,7 +25,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -47,7 +47,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -78,7 +78,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -109,7 +109,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -140,7 +140,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -171,7 +171,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -202,7 +202,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -233,7 +233,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -264,7 +264,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -295,7 +295,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -326,7 +326,7 @@
     }
   },
   {
-    "id": "official-layoutmode-none",
+    "id": "official-layoutmode-none-html_css",
     "name": "layoutMode = NONE",
     "type": "official",
     "category": "layout",
@@ -353,7 +353,7 @@
     }
   },
   {
-    "id": "official-layoutmode-horizontal",
+    "id": "official-layoutmode-horizontal-html_css",
     "name": "layoutMode = HORIZONTAL",
     "type": "official",
     "category": "layout",
@@ -386,7 +386,7 @@
     }
   },
   {
-    "id": "official-layoutmode-vertical",
+    "id": "official-layoutmode-vertical-html_css",
     "name": "layoutMode = VERTICAL",
     "type": "official",
     "category": "layout",
@@ -419,7 +419,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-min",
+    "id": "official-primaryaxisalignitems-min-html_css",
     "name": "primaryAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -450,7 +450,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-center",
+    "id": "official-primaryaxisalignitems-center-html_css",
     "name": "primaryAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -481,7 +481,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-max",
+    "id": "official-primaryaxisalignitems-max-html_css",
     "name": "primaryAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -512,7 +512,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-space_between",
+    "id": "official-primaryaxisalignitems-space_between-html_css",
     "name": "primaryAxisAlignItems = SPACE_BETWEEN",
     "type": "official",
     "category": "layout",
@@ -543,7 +543,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-min",
+    "id": "official-counteraxisalignitems-min-html_css",
     "name": "counterAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -574,7 +574,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-center",
+    "id": "official-counteraxisalignitems-center-html_css",
     "name": "counterAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -605,7 +605,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-max",
+    "id": "official-counteraxisalignitems-max-html_css",
     "name": "counterAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -636,7 +636,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-baseline",
+    "id": "official-counteraxisalignitems-baseline-html_css",
     "name": "counterAxisAlignItems = BASELINE",
     "type": "official",
     "category": "layout",
@@ -667,7 +667,7 @@
     }
   },
   {
-    "id": "official-paddingleft",
+    "id": "official-paddingleft-html_css",
     "name": "paddingLeft property",
     "type": "official",
     "category": "spacing",
@@ -689,7 +689,7 @@
     }
   },
   {
-    "id": "official-paddingright",
+    "id": "official-paddingright-html_css",
     "name": "paddingRight property",
     "type": "official",
     "category": "spacing",
@@ -711,7 +711,7 @@
     }
   },
   {
-    "id": "official-paddingtop",
+    "id": "official-paddingtop-html_css",
     "name": "paddingTop property",
     "type": "official",
     "category": "spacing",
@@ -733,7 +733,7 @@
     }
   },
   {
-    "id": "official-paddingbottom",
+    "id": "official-paddingbottom-html_css",
     "name": "paddingBottom property",
     "type": "official",
     "category": "spacing",
@@ -755,7 +755,7 @@
     }
   },
   {
-    "id": "official-itemspacing",
+    "id": "official-itemspacing-html_css",
     "name": "itemSpacing property",
     "type": "official",
     "category": "spacing",
@@ -777,7 +777,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-no_wrap",
+    "id": "official-layoutwrap-no_wrap-html_css",
     "name": "layoutWrap = NO_WRAP",
     "type": "official",
     "category": "layout",
@@ -808,7 +808,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-wrap",
+    "id": "official-layoutwrap-wrap-html_css",
     "name": "layoutWrap = WRAP",
     "type": "official",
     "category": "layout",
@@ -839,7 +839,7 @@
     }
   },
   {
-    "id": "official-counteraxisspacing",
+    "id": "official-counteraxisspacing-html_css",
     "name": "counterAxisSpacing property",
     "type": "official",
     "category": "spacing",
@@ -861,7 +861,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -883,7 +883,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -905,7 +905,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -929,7 +929,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -953,7 +953,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -977,7 +977,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-2",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -1002,7 +1002,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-2",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -1024,7 +1024,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-2",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -1055,7 +1055,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-2",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -1086,7 +1086,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-2",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -1117,7 +1117,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-2",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -1148,7 +1148,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-2",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -1179,7 +1179,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-2",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -1210,7 +1210,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-2",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -1241,7 +1241,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-2",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -1272,7 +1272,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-2",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -1303,7 +1303,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-2",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -1325,7 +1325,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-2",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -1349,7 +1349,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-2",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -1373,7 +1373,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-2",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -1800,7 +1800,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-3",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -1825,7 +1825,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-3",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -1847,7 +1847,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-3",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -1878,7 +1878,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-3",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -1909,7 +1909,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-3",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -1940,7 +1940,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-3",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -1971,7 +1971,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-3",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -2002,7 +2002,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-3",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -2033,7 +2033,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-3",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -2064,7 +2064,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-3",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -2095,7 +2095,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-3",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -2126,7 +2126,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-3",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -2148,7 +2148,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-3",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -2172,7 +2172,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-3",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -2196,7 +2196,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-3",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -2220,7 +2220,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-2",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -2242,7 +2242,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-4",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -2267,7 +2267,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-4",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -2289,7 +2289,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-4",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -2320,7 +2320,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-4",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -2351,7 +2351,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-4",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -2382,7 +2382,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-4",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -2413,7 +2413,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-4",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -2444,7 +2444,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-4",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -2475,7 +2475,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-4",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -2506,7 +2506,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-4",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -2537,7 +2537,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-4",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -2568,7 +2568,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-4",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -2590,7 +2590,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-4",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -2614,7 +2614,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-4",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -2638,7 +2638,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-4",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -2662,7 +2662,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-5",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -2687,7 +2687,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-5",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -2709,7 +2709,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-5",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -2740,7 +2740,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-5",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -2771,7 +2771,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-5",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -2802,7 +2802,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-5",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -2833,7 +2833,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-5",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -2864,7 +2864,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-5",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -2895,7 +2895,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-5",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -2926,7 +2926,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-5",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -2957,7 +2957,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-5",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -2988,7 +2988,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-5",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -3010,7 +3010,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-5",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -3034,7 +3034,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-5",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -3058,7 +3058,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-5",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -3082,7 +3082,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-3",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -3104,7 +3104,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-6",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -3129,7 +3129,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-6",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -3151,7 +3151,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-6",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -3182,7 +3182,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-6",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -3213,7 +3213,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-6",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -3244,7 +3244,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-6",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -3275,7 +3275,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-6",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -3306,7 +3306,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-6",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -3337,7 +3337,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-6",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -3368,7 +3368,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-6",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -3399,7 +3399,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-6",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -3430,7 +3430,7 @@
     }
   },
   {
-    "id": "official-layoutmode-none",
+    "id": "official-layoutmode-none-html_css-2",
     "name": "layoutMode = NONE",
     "type": "official",
     "category": "layout",
@@ -3457,7 +3457,7 @@
     }
   },
   {
-    "id": "official-layoutmode-horizontal",
+    "id": "official-layoutmode-horizontal-html_css-2",
     "name": "layoutMode = HORIZONTAL",
     "type": "official",
     "category": "layout",
@@ -3490,7 +3490,7 @@
     }
   },
   {
-    "id": "official-layoutmode-vertical",
+    "id": "official-layoutmode-vertical-html_css-2",
     "name": "layoutMode = VERTICAL",
     "type": "official",
     "category": "layout",
@@ -3523,7 +3523,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-min",
+    "id": "official-primaryaxisalignitems-min-html_css-2",
     "name": "primaryAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -3554,7 +3554,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-center",
+    "id": "official-primaryaxisalignitems-center-html_css-2",
     "name": "primaryAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -3585,7 +3585,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-max",
+    "id": "official-primaryaxisalignitems-max-html_css-2",
     "name": "primaryAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -3616,7 +3616,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-space_between",
+    "id": "official-primaryaxisalignitems-space_between-html_css-2",
     "name": "primaryAxisAlignItems = SPACE_BETWEEN",
     "type": "official",
     "category": "layout",
@@ -3647,7 +3647,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-min",
+    "id": "official-counteraxisalignitems-min-html_css-2",
     "name": "counterAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -3678,7 +3678,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-center",
+    "id": "official-counteraxisalignitems-center-html_css-2",
     "name": "counterAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -3709,7 +3709,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-max",
+    "id": "official-counteraxisalignitems-max-html_css-2",
     "name": "counterAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -3740,7 +3740,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-baseline",
+    "id": "official-counteraxisalignitems-baseline-html_css-2",
     "name": "counterAxisAlignItems = BASELINE",
     "type": "official",
     "category": "layout",
@@ -3771,7 +3771,7 @@
     }
   },
   {
-    "id": "official-paddingleft",
+    "id": "official-paddingleft-html_css-2",
     "name": "paddingLeft property",
     "type": "official",
     "category": "spacing",
@@ -3793,7 +3793,7 @@
     }
   },
   {
-    "id": "official-paddingright",
+    "id": "official-paddingright-html_css-2",
     "name": "paddingRight property",
     "type": "official",
     "category": "spacing",
@@ -3815,7 +3815,7 @@
     }
   },
   {
-    "id": "official-paddingtop",
+    "id": "official-paddingtop-html_css-2",
     "name": "paddingTop property",
     "type": "official",
     "category": "spacing",
@@ -3837,7 +3837,7 @@
     }
   },
   {
-    "id": "official-paddingbottom",
+    "id": "official-paddingbottom-html_css-2",
     "name": "paddingBottom property",
     "type": "official",
     "category": "spacing",
@@ -3859,7 +3859,7 @@
     }
   },
   {
-    "id": "official-itemspacing",
+    "id": "official-itemspacing-html_css-2",
     "name": "itemSpacing property",
     "type": "official",
     "category": "spacing",
@@ -3881,7 +3881,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-no_wrap",
+    "id": "official-layoutwrap-no_wrap-html_css-2",
     "name": "layoutWrap = NO_WRAP",
     "type": "official",
     "category": "layout",
@@ -3912,7 +3912,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-wrap",
+    "id": "official-layoutwrap-wrap-html_css-2",
     "name": "layoutWrap = WRAP",
     "type": "official",
     "category": "layout",
@@ -3943,7 +3943,7 @@
     }
   },
   {
-    "id": "official-counteraxisspacing",
+    "id": "official-counteraxisspacing-html_css-2",
     "name": "counterAxisSpacing property",
     "type": "official",
     "category": "spacing",
@@ -3965,7 +3965,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-4",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -3987,7 +3987,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-6",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -4009,7 +4009,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-6",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -4033,7 +4033,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-6",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -4057,7 +4057,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-6",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -4081,7 +4081,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-7",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -4106,7 +4106,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-7",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -4128,7 +4128,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-7",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -4159,7 +4159,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-7",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -4190,7 +4190,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-7",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -4221,7 +4221,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-7",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -4252,7 +4252,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-7",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -4283,7 +4283,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-7",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -4314,7 +4314,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-7",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -4345,7 +4345,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-7",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -4376,7 +4376,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-7",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -4407,7 +4407,7 @@
     }
   },
   {
-    "id": "official-layoutmode-none",
+    "id": "official-layoutmode-none-html_css-3",
     "name": "layoutMode = NONE",
     "type": "official",
     "category": "layout",
@@ -4434,7 +4434,7 @@
     }
   },
   {
-    "id": "official-layoutmode-horizontal",
+    "id": "official-layoutmode-horizontal-html_css-3",
     "name": "layoutMode = HORIZONTAL",
     "type": "official",
     "category": "layout",
@@ -4467,7 +4467,7 @@
     }
   },
   {
-    "id": "official-layoutmode-vertical",
+    "id": "official-layoutmode-vertical-html_css-3",
     "name": "layoutMode = VERTICAL",
     "type": "official",
     "category": "layout",
@@ -4500,7 +4500,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-min",
+    "id": "official-primaryaxisalignitems-min-html_css-3",
     "name": "primaryAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -4531,7 +4531,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-center",
+    "id": "official-primaryaxisalignitems-center-html_css-3",
     "name": "primaryAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -4562,7 +4562,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-max",
+    "id": "official-primaryaxisalignitems-max-html_css-3",
     "name": "primaryAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -4593,7 +4593,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-space_between",
+    "id": "official-primaryaxisalignitems-space_between-html_css-3",
     "name": "primaryAxisAlignItems = SPACE_BETWEEN",
     "type": "official",
     "category": "layout",
@@ -4624,7 +4624,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-min",
+    "id": "official-counteraxisalignitems-min-html_css-3",
     "name": "counterAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -4655,7 +4655,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-center",
+    "id": "official-counteraxisalignitems-center-html_css-3",
     "name": "counterAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -4686,7 +4686,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-max",
+    "id": "official-counteraxisalignitems-max-html_css-3",
     "name": "counterAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -4717,7 +4717,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-baseline",
+    "id": "official-counteraxisalignitems-baseline-html_css-3",
     "name": "counterAxisAlignItems = BASELINE",
     "type": "official",
     "category": "layout",
@@ -4748,7 +4748,7 @@
     }
   },
   {
-    "id": "official-paddingleft",
+    "id": "official-paddingleft-html_css-3",
     "name": "paddingLeft property",
     "type": "official",
     "category": "spacing",
@@ -4770,7 +4770,7 @@
     }
   },
   {
-    "id": "official-paddingright",
+    "id": "official-paddingright-html_css-3",
     "name": "paddingRight property",
     "type": "official",
     "category": "spacing",
@@ -4792,7 +4792,7 @@
     }
   },
   {
-    "id": "official-paddingtop",
+    "id": "official-paddingtop-html_css-3",
     "name": "paddingTop property",
     "type": "official",
     "category": "spacing",
@@ -4814,7 +4814,7 @@
     }
   },
   {
-    "id": "official-paddingbottom",
+    "id": "official-paddingbottom-html_css-3",
     "name": "paddingBottom property",
     "type": "official",
     "category": "spacing",
@@ -4836,7 +4836,7 @@
     }
   },
   {
-    "id": "official-itemspacing",
+    "id": "official-itemspacing-html_css-3",
     "name": "itemSpacing property",
     "type": "official",
     "category": "spacing",
@@ -4858,7 +4858,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-no_wrap",
+    "id": "official-layoutwrap-no_wrap-html_css-3",
     "name": "layoutWrap = NO_WRAP",
     "type": "official",
     "category": "layout",
@@ -4889,7 +4889,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-wrap",
+    "id": "official-layoutwrap-wrap-html_css-3",
     "name": "layoutWrap = WRAP",
     "type": "official",
     "category": "layout",
@@ -4920,7 +4920,7 @@
     }
   },
   {
-    "id": "official-counteraxisspacing",
+    "id": "official-counteraxisspacing-html_css-3",
     "name": "counterAxisSpacing property",
     "type": "official",
     "category": "spacing",
@@ -4942,7 +4942,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-5",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -4964,7 +4964,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-7",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -4986,7 +4986,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-7",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -5010,7 +5010,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-7",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -5034,7 +5034,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-7",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -5058,7 +5058,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-8",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -5083,7 +5083,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-8",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -5105,7 +5105,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-8",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -5136,7 +5136,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-8",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -5167,7 +5167,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-8",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -5198,7 +5198,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-8",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -5229,7 +5229,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-8",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -5260,7 +5260,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-8",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -5291,7 +5291,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-8",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -5322,7 +5322,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-8",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -5353,7 +5353,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-8",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -5384,7 +5384,7 @@
     }
   },
   {
-    "id": "official-layoutmode-none",
+    "id": "official-layoutmode-none-html_css-4",
     "name": "layoutMode = NONE",
     "type": "official",
     "category": "layout",
@@ -5411,7 +5411,7 @@
     }
   },
   {
-    "id": "official-layoutmode-horizontal",
+    "id": "official-layoutmode-horizontal-html_css-4",
     "name": "layoutMode = HORIZONTAL",
     "type": "official",
     "category": "layout",
@@ -5444,7 +5444,7 @@
     }
   },
   {
-    "id": "official-layoutmode-vertical",
+    "id": "official-layoutmode-vertical-html_css-4",
     "name": "layoutMode = VERTICAL",
     "type": "official",
     "category": "layout",
@@ -5477,7 +5477,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-min",
+    "id": "official-primaryaxisalignitems-min-html_css-4",
     "name": "primaryAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -5508,7 +5508,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-center",
+    "id": "official-primaryaxisalignitems-center-html_css-4",
     "name": "primaryAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -5539,7 +5539,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-max",
+    "id": "official-primaryaxisalignitems-max-html_css-4",
     "name": "primaryAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -5570,7 +5570,7 @@
     }
   },
   {
-    "id": "official-primaryaxisalignitems-space_between",
+    "id": "official-primaryaxisalignitems-space_between-html_css-4",
     "name": "primaryAxisAlignItems = SPACE_BETWEEN",
     "type": "official",
     "category": "layout",
@@ -5601,7 +5601,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-min",
+    "id": "official-counteraxisalignitems-min-html_css-4",
     "name": "counterAxisAlignItems = MIN",
     "type": "official",
     "category": "layout",
@@ -5632,7 +5632,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-center",
+    "id": "official-counteraxisalignitems-center-html_css-4",
     "name": "counterAxisAlignItems = CENTER",
     "type": "official",
     "category": "layout",
@@ -5663,7 +5663,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-max",
+    "id": "official-counteraxisalignitems-max-html_css-4",
     "name": "counterAxisAlignItems = MAX",
     "type": "official",
     "category": "layout",
@@ -5694,7 +5694,7 @@
     }
   },
   {
-    "id": "official-counteraxisalignitems-baseline",
+    "id": "official-counteraxisalignitems-baseline-html_css-4",
     "name": "counterAxisAlignItems = BASELINE",
     "type": "official",
     "category": "layout",
@@ -5725,7 +5725,7 @@
     }
   },
   {
-    "id": "official-paddingleft",
+    "id": "official-paddingleft-html_css-4",
     "name": "paddingLeft property",
     "type": "official",
     "category": "spacing",
@@ -5747,7 +5747,7 @@
     }
   },
   {
-    "id": "official-paddingright",
+    "id": "official-paddingright-html_css-4",
     "name": "paddingRight property",
     "type": "official",
     "category": "spacing",
@@ -5769,7 +5769,7 @@
     }
   },
   {
-    "id": "official-paddingtop",
+    "id": "official-paddingtop-html_css-4",
     "name": "paddingTop property",
     "type": "official",
     "category": "spacing",
@@ -5791,7 +5791,7 @@
     }
   },
   {
-    "id": "official-paddingbottom",
+    "id": "official-paddingbottom-html_css-4",
     "name": "paddingBottom property",
     "type": "official",
     "category": "spacing",
@@ -5813,7 +5813,7 @@
     }
   },
   {
-    "id": "official-itemspacing",
+    "id": "official-itemspacing-html_css-4",
     "name": "itemSpacing property",
     "type": "official",
     "category": "spacing",
@@ -5835,7 +5835,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-no_wrap",
+    "id": "official-layoutwrap-no_wrap-html_css-4",
     "name": "layoutWrap = NO_WRAP",
     "type": "official",
     "category": "layout",
@@ -5866,7 +5866,7 @@
     }
   },
   {
-    "id": "official-layoutwrap-wrap",
+    "id": "official-layoutwrap-wrap-html_css-4",
     "name": "layoutWrap = WRAP",
     "type": "official",
     "category": "layout",
@@ -5897,7 +5897,7 @@
     }
   },
   {
-    "id": "official-counteraxisspacing",
+    "id": "official-counteraxisspacing-html_css-4",
     "name": "counterAxisSpacing property",
     "type": "official",
     "category": "spacing",
@@ -5919,7 +5919,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-6",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -5941,7 +5941,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-8",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -5963,7 +5963,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-8",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -5987,7 +5987,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-8",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -6011,7 +6011,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-8",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -6035,7 +6035,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-9",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -6060,7 +6060,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-9",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -6082,7 +6082,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-9",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -6113,7 +6113,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-9",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -6144,7 +6144,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-9",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -6175,7 +6175,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-9",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -6206,7 +6206,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-9",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -6237,7 +6237,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-9",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -6268,7 +6268,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-9",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -6299,7 +6299,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-9",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -6330,7 +6330,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-9",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -6361,7 +6361,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-9",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -6383,7 +6383,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-9",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -6407,7 +6407,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-9",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -6431,7 +6431,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-9",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -6455,7 +6455,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-10",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -6480,7 +6480,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-10",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -6502,7 +6502,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-10",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -6533,7 +6533,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-10",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -6564,7 +6564,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-10",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -6595,7 +6595,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-10",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -6626,7 +6626,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-10",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -6657,7 +6657,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-10",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -6688,7 +6688,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-10",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -6719,7 +6719,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-10",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -6750,7 +6750,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-10",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -6781,7 +6781,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-10",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -6803,7 +6803,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-10",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -6827,7 +6827,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-10",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -6851,7 +6851,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-10",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -6875,7 +6875,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-7",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
@@ -6897,7 +6897,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-11",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -6922,7 +6922,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-11",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -6944,7 +6944,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-11",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -6975,7 +6975,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-11",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -7006,7 +7006,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-11",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -7037,7 +7037,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-11",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -7068,7 +7068,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-11",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -7099,7 +7099,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-11",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -7130,7 +7130,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-11",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -7161,7 +7161,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-11",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -7192,7 +7192,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-11",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -7223,7 +7223,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-11",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -7245,7 +7245,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-11",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -7269,7 +7269,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-11",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -7293,7 +7293,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-11",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -7317,7 +7317,7 @@
     }
   },
   {
-    "id": "official-blendmode",
+    "id": "official-blendmode-html_css-12",
     "name": "blendMode property",
     "type": "official",
     "category": "effects",
@@ -7342,7 +7342,7 @@
     }
   },
   {
-    "id": "official-opacity",
+    "id": "official-opacity-html_css-12",
     "name": "opacity property",
     "type": "official",
     "category": "colors",
@@ -7364,7 +7364,7 @@
     }
   },
   {
-    "id": "official-layoutalign-inherit",
+    "id": "official-layoutalign-inherit-html_css-12",
     "name": "layoutAlign = INHERIT",
     "type": "official",
     "category": "constraints",
@@ -7395,7 +7395,7 @@
     }
   },
   {
-    "id": "official-layoutalign-stretch",
+    "id": "official-layoutalign-stretch-html_css-12",
     "name": "layoutAlign = STRETCH",
     "type": "official",
     "category": "constraints",
@@ -7426,7 +7426,7 @@
     }
   },
   {
-    "id": "official-layoutalign-min",
+    "id": "official-layoutalign-min-html_css-12",
     "name": "layoutAlign = MIN",
     "type": "official",
     "category": "constraints",
@@ -7457,7 +7457,7 @@
     }
   },
   {
-    "id": "official-layoutalign-center",
+    "id": "official-layoutalign-center-html_css-12",
     "name": "layoutAlign = CENTER",
     "type": "official",
     "category": "constraints",
@@ -7488,7 +7488,7 @@
     }
   },
   {
-    "id": "official-layoutalign-max",
+    "id": "official-layoutalign-max-html_css-12",
     "name": "layoutAlign = MAX",
     "type": "official",
     "category": "constraints",
@@ -7519,7 +7519,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-0",
+    "id": "official-layoutgrow-0-html_css-12",
     "name": "layoutGrow = 0",
     "type": "official",
     "category": "layout",
@@ -7550,7 +7550,7 @@
     }
   },
   {
-    "id": "official-layoutgrow-1",
+    "id": "official-layoutgrow-1-html_css-12",
     "name": "layoutGrow = 1",
     "type": "official",
     "category": "layout",
@@ -7581,7 +7581,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-auto",
+    "id": "official-layoutpositioning-auto-html_css-12",
     "name": "layoutPositioning = AUTO",
     "type": "official",
     "category": "constraints",
@@ -7612,7 +7612,7 @@
     }
   },
   {
-    "id": "official-layoutpositioning-absolute",
+    "id": "official-layoutpositioning-absolute-html_css-12",
     "name": "layoutPositioning = ABSOLUTE",
     "type": "official",
     "category": "constraints",
@@ -7643,7 +7643,7 @@
     }
   },
   {
-    "id": "official-strokeweight",
+    "id": "official-strokeweight-html_css-12",
     "name": "strokeWeight property",
     "type": "official",
     "category": "borders",
@@ -7665,7 +7665,7 @@
     }
   },
   {
-    "id": "official-strokealign-inside",
+    "id": "official-strokealign-inside-html_css-12",
     "name": "strokeAlign = INSIDE",
     "type": "official",
     "category": "borders",
@@ -7689,7 +7689,7 @@
     }
   },
   {
-    "id": "official-strokealign-outside",
+    "id": "official-strokealign-outside-html_css-12",
     "name": "strokeAlign = OUTSIDE",
     "type": "official",
     "category": "borders",
@@ -7713,7 +7713,7 @@
     }
   },
   {
-    "id": "official-strokealign-center",
+    "id": "official-strokealign-center-html_css-12",
     "name": "strokeAlign = CENTER",
     "type": "official",
     "category": "borders",
@@ -7737,7 +7737,7 @@
     }
   },
   {
-    "id": "official-cornerradius",
+    "id": "official-cornerradius-html_css-8",
     "name": "cornerRadius property",
     "type": "official",
     "category": "borders",
