@@ -1,6 +1,25 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-25T18:16:02.078Z",
-  "nodes": [],
-  "totalNodes": 0
+  "lastUpdated": "2025-11-25T19:23:51.484Z",
+  "nodes": [
+    {
+      "id": "lib-124-21142",
+      "figmaNodeId": "124:21142",
+      "name": "Home",
+      "altNode": null,
+      "tags": [],
+      "addedAt": "2025-11-25T19:23:51.480Z",
+      "lastModified": "2025-11-25T19:23:51.480Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
+        "fileName": "Sans titre",
+        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=124:21142"
+      }
+    }
+  ],
+  "totalNodes": 1
 }
