@@ -1,0 +1,1374 @@
+[
+  {
+    "id": "community-layout-flex-row-(horizontal)",
+    "name": "Flex Row (HORIZONTAL) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "flex"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex flex-row"
+      },
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flexDirection": "row"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-flex-column-(vertical)",
+    "name": "Flex Column (VERTICAL) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "flex"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex flex-col"
+      },
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flexDirection": "column"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-flex-wrap",
+    "name": "Flex Wrap (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "flex-wrap"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex-wrap"
+      },
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flexWrap": "wrap"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-justify-start-(min)",
+    "name": "Justify Start (MIN) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-start"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "flex-start"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-justify-center",
+    "name": "Justify Center (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "center"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-justify-end-(max)",
+    "name": "Justify End (MAX) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-end"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "flex-end"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-justify-space-between",
+    "name": "Justify Space Between (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-between"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "space-between"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-align-items-start-(min)",
+    "name": "Align Items Start (MIN) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-start"
+      },
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "flex-start"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-align-items-center",
+    "name": "Align Items Center (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "align-items": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "center"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-align-items-end-(max)",
+    "name": "Align Items End (MAX) (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-end"
+      },
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "flex-end"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-layout-align-items-baseline",
+    "name": "Align Items Baseline (FigmaToCode)",
+    "type": "community",
+    "category": "layout",
+    "tags": [
+      "figmatocode",
+      "layout",
+      "alignment"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "counterAxisAlignItems": "BASELINE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-baseline"
+      },
+      "html-css": {
+        "cssProperties": {
+          "align-items": "baseline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "baseline"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-spacing-gap-spacing",
+    "name": "Gap Spacing (FigmaToCode)",
+    "type": "community",
+    "category": "spacing",
+    "tags": [
+      "figmatocode",
+      "spacing",
+      "gap"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "itemSpacing": "$value"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-${tailwindSize($value)}"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "${value}px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "${value}px"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindAutoLayout.ts"
+    }
+  },
+  {
+    "id": "community-borders-border-width",
+    "name": "Border Width (FigmaToCode)",
+    "type": "community",
+    "category": "borders",
+    "tags": [
+      "figmatocode",
+      "borders",
+      "stroke"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "border-${tailwindBorderWidth($value)}"
+      },
+      "html-css": {
+        "cssProperties": {
+          "border-width": "${value}px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderWidth": "${value}px"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBorder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBorder.ts"
+    }
+  },
+  {
+    "id": "community-borders-border-radius",
+    "name": "Border Radius (FigmaToCode)",
+    "type": "community",
+    "category": "borders",
+    "tags": [
+      "figmatocode",
+      "borders",
+      "radius"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded-${tailwindRadius($value)}"
+      },
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "${value}px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "${value}px"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBorder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBorder.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-multiply",
+    "name": "Blend Mode Multiply (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "MULTIPLY"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-multiply"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "multiply"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "multiply"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-screen",
+    "name": "Blend Mode Screen (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "SCREEN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-screen"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "screen"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "screen"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-overlay",
+    "name": "Blend Mode Overlay (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "OVERLAY"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-overlay"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "overlay"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "overlay"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-darken",
+    "name": "Blend Mode Darken (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "DARKEN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-darken"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "darken"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "darken"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-lighten",
+    "name": "Blend Mode Lighten (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "LIGHTEN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-lighten"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "lighten"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "lighten"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-color-dodge",
+    "name": "Blend Mode Color Dodge (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "COLOR_DODGE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-color-dodge"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "color-dodge"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "color-dodge"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-color-burn",
+    "name": "Blend Mode Color Burn (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "COLOR_BURN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-color-burn"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "color-burn"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "color-burn"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-hard-light",
+    "name": "Blend Mode Hard Light (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "HARD_LIGHT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-hard-light"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "hard-light"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "hard-light"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-soft-light",
+    "name": "Blend Mode Soft Light (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "SOFT_LIGHT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-soft-light"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "soft-light"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "soft-light"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-difference",
+    "name": "Blend Mode Difference (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "DIFFERENCE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-difference"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "difference"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "difference"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-exclusion",
+    "name": "Blend Mode Exclusion (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "EXCLUSION"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-exclusion"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "exclusion"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "exclusion"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-hue",
+    "name": "Blend Mode Hue (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "HUE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-hue"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "hue"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "hue"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-saturation",
+    "name": "Blend Mode Saturation (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "SATURATION"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-saturation"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "saturation"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "saturation"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-color",
+    "name": "Blend Mode Color (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "COLOR"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-color"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "color"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "color"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-effects-blend-mode-luminosity",
+    "name": "Blend Mode Luminosity (FigmaToCode)",
+    "type": "community",
+    "category": "effects",
+    "tags": [
+      "figmatocode",
+      "effects",
+      "blend"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "blendMode": "LUMINOSITY"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "mix-blend-luminosity"
+      },
+      "html-css": {
+        "cssProperties": {
+          "mix-blend-mode": "luminosity"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "mixBlendMode": "luminosity"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/builderImpl/tailwindBlend.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/builderImpl/tailwindBlend.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-align-left",
+    "name": "Text Align Left (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "align"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textAlignHorizontal": "LEFT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-left"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-align": "left"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "left"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-align-center",
+    "name": "Text Align Center (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "align"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textAlignHorizontal": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-align": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "center"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-align-right",
+    "name": "Text Align Right (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "align"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textAlignHorizontal": "RIGHT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-right"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-align": "right"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "right"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-align-justified",
+    "name": "Text Align Justified (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "align"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textAlignHorizontal": "JUSTIFIED"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-justify"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-align": "justify"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "justify"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-transform-upper",
+    "name": "Text Transform Upper (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "transform"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textCase": "UPPER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "uppercase"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "uppercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "uppercase"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-transform-lower",
+    "name": "Text Transform Lower (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "transform"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textCase": "LOWER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "lowercase"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "lowercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "lowercase"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-transform-title",
+    "name": "Text Transform Title (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "transform"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textCase": "TITLE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "capitalize"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "capitalize"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "capitalize"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-decoration-underline",
+    "name": "Text Decoration Underline (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "decoration"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textDecoration": "UNDERLINE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "underline"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-decoration": "underline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textDecoration": "underline"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  },
+  {
+    "id": "community-typography-text-decoration-strikethrough",
+    "name": "Text Decoration Strikethrough (FigmaToCode)",
+    "type": "community",
+    "category": "typography",
+    "tags": [
+      "figmatocode",
+      "typography",
+      "decoration"
+    ],
+    "enabled": true,
+    "priority": 75,
+    "selector": {
+      "textDecoration": "STRIKETHROUGH"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "line-through"
+      },
+      "html-css": {
+        "cssProperties": {
+          "text-decoration": "line-through"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textDecoration": "line-through"
+        }
+      }
+    },
+    "source": {
+      "repo": "bernaferrari/FigmaToCode",
+      "file": "packages/backend/src/tailwind/tailwindTextBuilder.ts",
+      "url": "https://github.com/bernaferrari/FigmaToCode/blob/main/packages/backend/src/tailwind/tailwindTextBuilder.ts"
+    }
+  }
+]

@@ -1,0 +1,7761 @@
+[
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-none",
+    "name": "layoutMode = NONE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "none",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "NONE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      },
+      "react-tailwind": {
+        "className": ""
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-horizontal",
+    "name": "layoutMode = HORIZONTAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "horizontal",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-row"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-vertical",
+    "name": "layoutMode = VERTICAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "vertical",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-col"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-min",
+    "name": "primaryAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-start"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-center",
+    "name": "primaryAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-center"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-max",
+    "name": "primaryAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-end"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-space_between",
+    "name": "primaryAxisAlignItems = SPACE_BETWEEN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "space_between",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-between"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-min",
+    "name": "counterAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-start"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-center",
+    "name": "counterAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-center"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-max",
+    "name": "counterAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-end"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-baseline",
+    "name": "counterAxisAlignItems = BASELINE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "baseline",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "BASELINE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "baseline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "baseline"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-baseline"
+      }
+    }
+  },
+  {
+    "id": "official-paddingleft",
+    "name": "paddingLeft property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingleft",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingLeft": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-left": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingright",
+    "name": "paddingRight property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingright",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingRight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-right": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingtop",
+    "name": "paddingTop property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingtop",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-top": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingbottom",
+    "name": "paddingBottom property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingbottom",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingBottom": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-bottom": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-itemspacing",
+    "name": "itemSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "itemspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-no_wrap",
+    "name": "layoutWrap = NO_WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "no_wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "NO_WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-nowrap"
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-wrap",
+    "name": "layoutWrap = WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-wrap"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisspacing",
+    "name": "counterAxisSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "counteraxisspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-textdecoration-none",
+    "name": "textDecoration = NONE",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textdecoration",
+      "none",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textDecoration": "NONE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-decoration": "none"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-decoration": "none"
+        }
+      },
+      "react-tailwind": {
+        "className": "no-underline"
+      }
+    }
+  },
+  {
+    "id": "official-textdecoration-strikethrough",
+    "name": "textDecoration = STRIKETHROUGH",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textdecoration",
+      "strikethrough",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textDecoration": "STRIKETHROUGH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-decoration": "line-through"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-decoration": "line-through"
+        }
+      },
+      "react-tailwind": {
+        "className": "line-through"
+      }
+    }
+  },
+  {
+    "id": "official-textdecoration-underline",
+    "name": "textDecoration = UNDERLINE",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textdecoration",
+      "underline",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textDecoration": "UNDERLINE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-decoration": "underline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-decoration": "underline"
+        }
+      },
+      "react-tailwind": {
+        "className": "underline"
+      }
+    }
+  },
+  {
+    "id": "official-fontweight",
+    "name": "fontWeight property",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "fontweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "fontWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "font-weight": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-fontsize",
+    "name": "fontSize property",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "fontsize",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "fontSize": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "font-size": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-textcase-original",
+    "name": "textCase = ORIGINAL",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textcase",
+      "original",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textCase": "ORIGINAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      },
+      "react-tailwind": {
+        "className": ""
+      }
+    }
+  },
+  {
+    "id": "official-textcase-upper",
+    "name": "textCase = UPPER",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textcase",
+      "upper",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textCase": "UPPER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "uppercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-transform": "uppercase"
+        }
+      },
+      "react-tailwind": {
+        "className": "uppercase"
+      }
+    }
+  },
+  {
+    "id": "official-textcase-lower",
+    "name": "textCase = LOWER",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textcase",
+      "lower",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textCase": "LOWER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "lowercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-transform": "lowercase"
+        }
+      },
+      "react-tailwind": {
+        "className": "lowercase"
+      }
+    }
+  },
+  {
+    "id": "official-textcase-title",
+    "name": "textCase = TITLE",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "textcase",
+      "title",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textCase": "TITLE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-transform": "capitalize"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-transform": "capitalize"
+        }
+      },
+      "react-tailwind": {
+        "className": "capitalize"
+      }
+    }
+  },
+  {
+    "id": "official-textalignhorizontal-left",
+    "name": "textAlignHorizontal = LEFT",
+    "type": "official",
+    "category": "other",
+    "tags": [
+      "textalignhorizontal",
+      "left",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textAlignHorizontal": "LEFT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-align": "left"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-align": "left"
+        }
+      },
+      "react-tailwind": {
+        "className": "text-left"
+      }
+    }
+  },
+  {
+    "id": "official-textalignhorizontal-right",
+    "name": "textAlignHorizontal = RIGHT",
+    "type": "official",
+    "category": "other",
+    "tags": [
+      "textalignhorizontal",
+      "right",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textAlignHorizontal": "RIGHT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-align": "right"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-align": "right"
+        }
+      },
+      "react-tailwind": {
+        "className": "text-right"
+      }
+    }
+  },
+  {
+    "id": "official-textalignhorizontal-center",
+    "name": "textAlignHorizontal = CENTER",
+    "type": "official",
+    "category": "other",
+    "tags": [
+      "textalignhorizontal",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textAlignHorizontal": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-align": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-align": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "text-center"
+      }
+    }
+  },
+  {
+    "id": "official-textalignhorizontal-justified",
+    "name": "textAlignHorizontal = JUSTIFIED",
+    "type": "official",
+    "category": "other",
+    "tags": [
+      "textalignhorizontal",
+      "justified",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "textAlignHorizontal": "JUSTIFIED"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "text-align": "justify"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "text-align": "justify"
+        }
+      },
+      "react-tailwind": {
+        "className": "text-justify"
+      }
+    }
+  },
+  {
+    "id": "official-letterspacing",
+    "name": "letterSpacing property",
+    "type": "official",
+    "category": "typography",
+    "tags": [
+      "letterspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "letterSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "letter-spacing": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-none",
+    "name": "layoutMode = NONE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "none",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "NONE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      },
+      "react-tailwind": {
+        "className": ""
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-horizontal",
+    "name": "layoutMode = HORIZONTAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "horizontal",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-row"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-vertical",
+    "name": "layoutMode = VERTICAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "vertical",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-col"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-min",
+    "name": "primaryAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-start"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-center",
+    "name": "primaryAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-center"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-max",
+    "name": "primaryAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-end"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-space_between",
+    "name": "primaryAxisAlignItems = SPACE_BETWEEN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "space_between",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-between"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-min",
+    "name": "counterAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-start"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-center",
+    "name": "counterAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-center"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-max",
+    "name": "counterAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-end"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-baseline",
+    "name": "counterAxisAlignItems = BASELINE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "baseline",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "BASELINE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "baseline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "baseline"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-baseline"
+      }
+    }
+  },
+  {
+    "id": "official-paddingleft",
+    "name": "paddingLeft property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingleft",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingLeft": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-left": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingright",
+    "name": "paddingRight property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingright",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingRight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-right": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingtop",
+    "name": "paddingTop property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingtop",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-top": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingbottom",
+    "name": "paddingBottom property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingbottom",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingBottom": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-bottom": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-itemspacing",
+    "name": "itemSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "itemspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-no_wrap",
+    "name": "layoutWrap = NO_WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "no_wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "NO_WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-nowrap"
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-wrap",
+    "name": "layoutWrap = WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-wrap"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisspacing",
+    "name": "counterAxisSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "counteraxisspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-none",
+    "name": "layoutMode = NONE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "none",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "NONE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      },
+      "react-tailwind": {
+        "className": ""
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-horizontal",
+    "name": "layoutMode = HORIZONTAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "horizontal",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-row"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-vertical",
+    "name": "layoutMode = VERTICAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "vertical",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-col"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-min",
+    "name": "primaryAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-start"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-center",
+    "name": "primaryAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-center"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-max",
+    "name": "primaryAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-end"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-space_between",
+    "name": "primaryAxisAlignItems = SPACE_BETWEEN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "space_between",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-between"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-min",
+    "name": "counterAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-start"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-center",
+    "name": "counterAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-center"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-max",
+    "name": "counterAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-end"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-baseline",
+    "name": "counterAxisAlignItems = BASELINE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "baseline",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "BASELINE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "baseline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "baseline"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-baseline"
+      }
+    }
+  },
+  {
+    "id": "official-paddingleft",
+    "name": "paddingLeft property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingleft",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingLeft": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-left": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingright",
+    "name": "paddingRight property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingright",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingRight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-right": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingtop",
+    "name": "paddingTop property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingtop",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-top": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingbottom",
+    "name": "paddingBottom property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingbottom",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingBottom": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-bottom": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-itemspacing",
+    "name": "itemSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "itemspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-no_wrap",
+    "name": "layoutWrap = NO_WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "no_wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "NO_WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-nowrap"
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-wrap",
+    "name": "layoutWrap = WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-wrap"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisspacing",
+    "name": "counterAxisSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "counteraxisspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-none",
+    "name": "layoutMode = NONE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "none",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "NONE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      },
+      "react-tailwind": {
+        "className": ""
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-horizontal",
+    "name": "layoutMode = HORIZONTAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "horizontal",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "row"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-row"
+      }
+    }
+  },
+  {
+    "id": "official-layoutmode-vertical",
+    "name": "layoutMode = VERTICAL",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutmode",
+      "vertical",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flex-direction": "column"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex flex-col"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-min",
+    "name": "primaryAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-start"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-center",
+    "name": "primaryAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-center"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-max",
+    "name": "primaryAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-end"
+      }
+    }
+  },
+  {
+    "id": "official-primaryaxisalignitems-space_between",
+    "name": "primaryAxisAlignItems = SPACE_BETWEEN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "primaryaxisalignitems",
+      "space_between",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justify-content": "space-between"
+        }
+      },
+      "react-tailwind": {
+        "className": "justify-between"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-min",
+    "name": "counterAxisAlignItems = MIN",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-start"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-center",
+    "name": "counterAxisAlignItems = CENTER",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-center"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-max",
+    "name": "counterAxisAlignItems = MAX",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-end"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisalignitems-baseline",
+    "name": "counterAxisAlignItems = BASELINE",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "counteraxisalignitems",
+      "baseline",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "BASELINE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-items": "baseline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-items": "baseline"
+        }
+      },
+      "react-tailwind": {
+        "className": "items-baseline"
+      }
+    }
+  },
+  {
+    "id": "official-paddingleft",
+    "name": "paddingLeft property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingleft",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingLeft": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-left": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingright",
+    "name": "paddingRight property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingright",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingRight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-right": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingtop",
+    "name": "paddingTop property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingtop",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-top": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-paddingbottom",
+    "name": "paddingBottom property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "paddingbottom",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingBottom": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "padding-bottom": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-itemspacing",
+    "name": "itemSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "itemspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-no_wrap",
+    "name": "layoutWrap = NO_WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "no_wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "NO_WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "nowrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-nowrap"
+      }
+    }
+  },
+  {
+    "id": "official-layoutwrap-wrap",
+    "name": "layoutWrap = WRAP",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutwrap",
+      "wrap",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-wrap": "wrap"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-wrap"
+      }
+    }
+  },
+  {
+    "id": "official-counteraxisspacing",
+    "name": "counterAxisSpacing property",
+    "type": "official",
+    "category": "spacing",
+    "tags": [
+      "counteraxisspacing",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisSpacing": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "gap": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-blendmode",
+    "name": "blendMode property",
+    "type": "official",
+    "category": "effects",
+    "tags": [
+      "blendmode",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "blendMode": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "NORMAL": "$value"
+        }
+      },
+      "react-tailwind": {
+        "className": "{'NORMAL': 'mix-blend-normal', 'MULTIPLY': 'mix-blend-multiply', 'SCREEN': 'mix-blend-screen', 'OVERLAY': 'mix-blend-overlay', 'DARKEN': 'mix-blend-darken', 'LIGHTEN': 'mix-blend-lighten', 'COLOR_DODGE': 'mix-blend-color-dodge', 'COLOR_BURN': 'mix-blend-color-burn', 'HARD_LIGHT': 'mix-blend-hard-light', 'SOFT_LIGHT': 'mix-blend-soft-light', 'DIFFERENCE': 'mix-blend-difference', 'EXCLUSION': 'mix-blend-exclusion', 'HUE': 'mix-blend-hue', 'SATURATION': 'mix-blend-saturation', 'COLOR': 'mix-blend-color', 'LUMINOSITY': 'mix-blend-luminosity'}"
+      }
+    }
+  },
+  {
+    "id": "official-opacity",
+    "name": "opacity property",
+    "type": "official",
+    "category": "colors",
+    "tags": [
+      "opacity",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "opacity": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "opacity": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-inherit",
+    "name": "layoutAlign = INHERIT",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "inherit",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "INHERIT"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "auto"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "auto"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-auto"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-stretch",
+    "name": "layoutAlign = STRETCH",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "stretch",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "STRETCH"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "stretch"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "stretch"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-stretch"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-min",
+    "name": "layoutAlign = MIN",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "min",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MIN"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-start"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-start"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-center",
+    "name": "layoutAlign = CENTER",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "center"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-center"
+      }
+    }
+  },
+  {
+    "id": "official-layoutalign-max",
+    "name": "layoutAlign = MAX",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutalign",
+      "max",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutAlign": "MAX"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "align-self": "flex-end"
+        }
+      },
+      "react-tailwind": {
+        "className": "self-end"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-0",
+    "name": "layoutGrow = 0",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "0",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 0
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "0"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "0"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow-0"
+      }
+    }
+  },
+  {
+    "id": "official-layoutgrow-1",
+    "name": "layoutGrow = 1",
+    "type": "official",
+    "category": "layout",
+    "tags": [
+      "layoutgrow",
+      "1",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutGrow": 1
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "flex-grow": "1"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flex-grow": "1"
+        }
+      },
+      "react-tailwind": {
+        "className": "flex-grow"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-auto",
+    "name": "layoutPositioning = AUTO",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "auto",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "AUTO"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "relative"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "relative"
+        }
+      },
+      "react-tailwind": {
+        "className": "relative"
+      }
+    }
+  },
+  {
+    "id": "official-layoutpositioning-absolute",
+    "name": "layoutPositioning = ABSOLUTE",
+    "type": "official",
+    "category": "constraints",
+    "tags": [
+      "layoutpositioning",
+      "absolute",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutPositioning": "ABSOLUTE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "position": "absolute"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "position": "absolute"
+        }
+      },
+      "react-tailwind": {
+        "className": "absolute"
+      }
+    }
+  },
+  {
+    "id": "official-strokeweight",
+    "name": "strokeWeight property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokeweight",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeWeight": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-width": "$value"
+        }
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-inside",
+    "name": "strokeAlign = INSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "inside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "INSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-outside",
+    "name": "strokeAlign = OUTSIDE",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "outside",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "OUTSIDE"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-strokealign-center",
+    "name": "strokeAlign = CENTER",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "strokealign",
+      "center",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "strokeAlign": "CENTER"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {}
+      },
+      "react-inline": {
+        "style": {}
+      }
+    }
+  },
+  {
+    "id": "official-cornerradius",
+    "name": "cornerRadius property",
+    "type": "official",
+    "category": "borders",
+    "tags": [
+      "cornerradius",
+      "figma-api"
+    ],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": "$value"
+    },
+    "transformers": {
+      "html-css": {
+        "cssProperties": {
+          "border-radius": "$value"
+        }
+      }
+    }
+  }
+]
