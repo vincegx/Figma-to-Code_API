@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { RulesSidebar } from '@/components/rules-sidebar';
 import { RulesList } from '@/components/rules-list';
 import { RuleEditor } from '@/components/rule-editor';
 
-export default function RulesPage() {
+function RulesPageContent() {
   const searchParams = useSearchParams();
 
   // Framework selection (from URL or default)
@@ -185,5 +185,20 @@ export default function RulesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RulesPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading Rules Manager...</p>
+        </div>
+      </div>
+    }>
+      <RulesPageContent />
+    </Suspense>
   );
 }
