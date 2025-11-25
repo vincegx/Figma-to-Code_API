@@ -1,6 +1,6 @@
 'use client';
 
-import type { FrameworkType } from '@/lib/types/rules';
+import type { FrameworkType, MultiFrameworkRule } from '@/lib/types/rules';
 
 interface RulesSidebarProps {
   selectedFramework: FrameworkType;
@@ -15,6 +15,7 @@ interface RulesSidebarProps {
   onShowCustomRulesChange: (show: boolean) => void;
   showEnabledOnly: boolean;
   onShowEnabledOnlyChange: (show: boolean) => void;
+  allRules: MultiFrameworkRule[]; // WP20: For category and type counters
 }
 
 const CATEGORIES = [
@@ -49,7 +50,20 @@ export function RulesSidebar({
   onShowCustomRulesChange,
   showEnabledOnly,
   onShowEnabledOnlyChange,
+  allRules,
 }: RulesSidebarProps) {
+  // WP20: Calculate counts by category
+  const categoryCounts = CATEGORIES.reduce((acc, cat) => {
+    acc[cat.id] = allRules.filter(rule => rule.category === cat.id && rule.transformers[selectedFramework]).length;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const totalRulesCount = allRules.filter(rule => rule.transformers[selectedFramework]).length;
+
+  // WP20: Calculate counts by type
+  const officialCount = allRules.filter(rule => rule.type === 'official' && rule.transformers[selectedFramework]).length;
+  const communityCount = allRules.filter(rule => rule.type === 'community' && rule.transformers[selectedFramework]).length;
+  const customCount = allRules.filter(rule => rule.type === 'custom' && rule.transformers[selectedFramework]).length;
   return (
     <div className="p-4 space-y-6">
       {/* Framework Selector */}
@@ -70,7 +84,7 @@ export function RulesSidebar({
         </select>
       </div>
 
-      {/* Categories */}
+      {/* Categories (WP20: with counters) */}
       <div>
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Categories
@@ -78,72 +92,85 @@ export function RulesSidebar({
         <div className="space-y-1">
           <button
             onClick={() => onCategoryChange(null)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
               selectedCategory === null
                 ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-medium'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
-            All Categories
+            <span>All Categories</span>
+            <span className="text-xs opacity-70">{totalRulesCount}</span>
           </button>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => onCategoryChange(cat.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
                 selectedCategory === cat.id
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-medium'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
+              <span className="flex items-center gap-2">
+                <span>{cat.icon}</span>
+                <span>{cat.label}</span>
+              </span>
+              <span className="text-xs opacity-70">{categoryCounts[cat.id] || 0}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Filters (WP20: 3-tier system) */}
+      {/* Filters (WP20: 3-tier system with counters) */}
       <div>
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Rule Types
         </h3>
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={showOfficialRules}
-              onChange={(e) => onShowOfficialRulesChange(e.target.checked)}
-              className="rounded border-gray-300 dark:border-gray-600"
-            />
-            <span className="flex items-center gap-1">
-              <span className="text-blue-500">🔵</span>
-              Official Rules
+          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showOfficialRules}
+                onChange={(e) => onShowOfficialRulesChange(e.target.checked)}
+                className="rounded border-gray-300 dark:border-gray-600"
+              />
+              <span className="flex items-center gap-1">
+                <span className="text-blue-500">🔵</span>
+                Official Rules
+              </span>
             </span>
+            <span className="text-xs opacity-70">{officialCount}</span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={showCommunityRules}
-              onChange={(e) => onShowCommunityRulesChange(e.target.checked)}
-              className="rounded border-gray-300 dark:border-gray-600"
-            />
-            <span className="flex items-center gap-1">
-              <span className="text-purple-500">🟣</span>
-              Community Rules
+          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showCommunityRules}
+                onChange={(e) => onShowCommunityRulesChange(e.target.checked)}
+                className="rounded border-gray-300 dark:border-gray-600"
+              />
+              <span className="flex items-center gap-1">
+                <span className="text-purple-500">🟣</span>
+                Community Rules
+              </span>
             </span>
+            <span className="text-xs opacity-70">{communityCount}</span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={showCustomRules}
-              onChange={(e) => onShowCustomRulesChange(e.target.checked)}
-              className="rounded border-gray-300 dark:border-gray-600"
-            />
-            <span className="flex items-center gap-1">
-              <span className="text-green-500">🟢</span>
-              Custom Rules
+          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showCustomRules}
+                onChange={(e) => onShowCustomRulesChange(e.target.checked)}
+                className="rounded border-gray-300 dark:border-gray-600"
+              />
+              <span className="flex items-center gap-1">
+                <span className="text-green-500">🟢</span>
+                Custom Rules
+              </span>
             </span>
+            <span className="text-xs opacity-70">{customCount}</span>
           </label>
         </div>
       </div>

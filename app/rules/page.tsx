@@ -157,6 +157,7 @@ function RulesPageContent() {
             onShowCustomRulesChange={setShowCustomRules}
             showEnabledOnly={showEnabledOnly}
             onShowEnabledOnlyChange={setShowEnabledOnly}
+            allRules={allRules}
           />
         </div>
 
