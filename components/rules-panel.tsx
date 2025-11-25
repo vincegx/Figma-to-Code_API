@@ -30,16 +30,7 @@ export function RulesPanel({
   // Get only rules that match the selected node
   const ruleMatches = useMemo(() => {
     if (!node) return [];
-    console.log('[RulesPanel] Filtering rules for node:', {
-      nodeId: node.id,
-      nodeName: node.name,
-      nodeType: node.type,
-      totalRules: allRules.length,
-      framework: selectedFramework
-    });
-    const matches = getMultiFrameworkRuleMatches(node, allRules, selectedFramework);
-    console.log('[RulesPanel] Matched rules:', matches.length, matches.map(m => m.ruleName));
-    return matches;
+    return getMultiFrameworkRuleMatches(node, allRules, selectedFramework);
   }, [node, allRules, selectedFramework]);
 
   // Create a map for quick lookup

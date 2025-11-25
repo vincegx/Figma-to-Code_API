@@ -231,9 +231,13 @@ export interface RuleSetStats {
 /**
  * Selector for WP05 Rule Engine (AND-logic matching)
  * All selector properties must match for rule to apply
+ *
+ * WP19: type can now be a single type or array of types
+ * - Single: { type: 'TEXT' } - matches only TEXT nodes
+ * - Array: { type: ['FRAME', 'COMPONENT'] } - matches FRAME OR COMPONENT nodes
  */
 export interface Selector {
-  readonly type?: FigmaNodeType;
+  readonly type?: FigmaNodeType | FigmaNodeType[];
   readonly name?: string | RegExp;
   readonly width?: { readonly min?: number; readonly max?: number };
   readonly height?: { readonly min?: number; readonly max?: number };

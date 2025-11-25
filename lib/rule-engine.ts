@@ -79,9 +79,19 @@ export function selectorMatches(
   altNode: SimpleAltNode,
   selector: Selector
 ): boolean {
-  // Type matching
-  if (selector.type !== undefined && altNode.type !== selector.type) {
-    return false;
+  // Type matching (WP19: support single type or array of types)
+  if (selector.type !== undefined) {
+    if (Array.isArray(selector.type)) {
+      // Array of types: match if node type is in the array
+      if (!selector.type.includes(altNode.type as any)) {
+        return false;
+      }
+    } else {
+      // Single type: exact match
+      if (altNode.type !== selector.type) {
+        return false;
+      }
+    }
   }
 
   // Name matching (exact match or regex)
