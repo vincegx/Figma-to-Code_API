@@ -41,35 +41,9 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
     );
   }
 
-  // Row layout (HORIZONTAL)
+  // Row layout (HORIZONTAL) - elements arranged horizontally (side by side)
   if (layoutMode === 'HORIZONTAL') {
     // Row center
-    if (primaryAxisAlignItems === 'CENTER') {
-      return (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
-          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm2 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
-        </svg>
-      );
-    }
-    // Row right
-    if (primaryAxisAlignItems === 'MAX') {
-      return (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
-          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm4 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
-        </svg>
-      );
-    }
-    // Row left (MIN or default)
-    return (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
-        <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm0 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
-      </svg>
-    );
-  }
-
-  // Column layout (VERTICAL) - use primaryAxisAlignItems for vertical alignment
-  if (layoutMode === 'VERTICAL') {
-    // Column center
     if (primaryAxisAlignItems === 'CENTER') {
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
@@ -77,7 +51,7 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
         </svg>
       );
     }
-    // Column bottom
+    // Row right
     if (primaryAxisAlignItems === 'MAX') {
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
@@ -85,10 +59,36 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
         </svg>
       );
     }
-    // Column top (MIN or default)
+    // Row left (MIN or default)
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
         <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 0h2v4h-2zM9 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
+      </svg>
+    );
+  }
+
+  // Column layout (VERTICAL) - elements arranged vertically (stacked)
+  if (layoutMode === 'VERTICAL') {
+    // Column center
+    if (primaryAxisAlignItems === 'CENTER') {
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm2 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Column bottom
+    if (primaryAxisAlignItems === 'MAX') {
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm4 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Column top (MIN or default)
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+        <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm0 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
       </svg>
     );
   }
