@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { RulesSidebar } from '@/components/rules-sidebar';
 import { RulesList } from '@/components/rules-list';
 import { RuleEditor } from '@/components/rule-editor';
+import { CustomRuleModal } from '@/components/custom-rule-modal';
 
 function RulesPageContent() {
   const searchParams = useSearchParams();
@@ -34,29 +36,106 @@ function RulesPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const RULES_PER_PAGE = 50;
 
+  // Custom Rule Modal (WP23)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [editingRule, setEditingRule] = useState<MultiFrameworkRule | null>(null);
+
   // Load rules from API (WP20: 3-tier system)
-  useEffect(() => {
-    async function loadRules() {
-      try {
-        const response = await fetch('/api/rules');
+  const loadRules = async () => {
+    try {
+      const response = await fetch('/api/rules');
 
-        if (!response.ok) {
-          throw new Error(`Failed to load rules: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setOfficialRules(data.officialRules || []);
-        setCommunityRules(data.communityRules || []);
-        setCustomRules(data.customRules || []);
-      } catch (error) {
-        console.error('Failed to load rules:', error);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`Failed to load rules: ${response.statusText}`);
       }
-    }
 
+      const data = await response.json();
+      setOfficialRules(data.officialRules || []);
+      setCommunityRules(data.communityRules || []);
+      setCustomRules(data.customRules || []);
+    } catch (error) {
+      console.error('Failed to load rules:', error);
+      toast.error('Failed to load rules');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadRules();
   }, []);
+
+  // WP23: Handlers for custom rule CRUD
+  const handleCreateRule = () => {
+    setModalMode('create');
+    setEditingRule(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditRule = (rule: MultiFrameworkRule) => {
+    if (rule.type !== 'custom') {
+      toast.error('Only custom rules can be edited');
+      return;
+    }
+    setModalMode('edit');
+    setEditingRule(rule);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteRule = async (rule: MultiFrameworkRule) => {
+    if (rule.type !== 'custom') {
+      toast.error('Only custom rules can be deleted');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete the rule "${rule.name}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/rules/custom/${rule.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to delete rule');
+      }
+
+      toast.success(`Rule "${rule.name}" deleted successfully`);
+      await loadRules();
+    } catch (error) {
+      console.error('Failed to delete rule:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete rule');
+    }
+  };
+
+  const handleSaveRule = async (rule: MultiFrameworkRule) => {
+    try {
+      const method = modalMode === 'create' ? 'POST' : 'PUT';
+      const url = modalMode === 'create' ? '/api/rules/custom' : `/api/rules/custom/${rule.id}`;
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rule),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to save rule');
+      }
+
+      toast.success(`Rule "${rule.name}" ${modalMode === 'create' ? 'created' : 'updated'} successfully`);
+      await loadRules();
+    } catch (error) {
+      console.error('Failed to save rule:', error);
+      throw error; // Re-throw to let modal handle it
+    }
+  };
 
   // Combine and filter rules (WP20: 3-tier system)
   const allRules = useMemo(() => {
@@ -128,6 +207,15 @@ function RulesPageContent() {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Custom Rule Modal (WP23) */}
+      <CustomRuleModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSave={handleSaveRule}
+        existingRule={editingRule}
+        mode={modalMode}
+      />
+
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
         <div className="container mx-auto">
@@ -158,6 +246,7 @@ function RulesPageContent() {
             showEnabledOnly={showEnabledOnly}
             onShowEnabledOnlyChange={setShowEnabledOnly}
             allRules={allRules}
+            onCreateRule={handleCreateRule}
           />
         </div>
 
@@ -173,6 +262,8 @@ function RulesPageContent() {
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             isLoading={isLoading}
+            onEditRule={handleEditRule}
+            onDeleteRule={handleDeleteRule}
           />
         </div>
 

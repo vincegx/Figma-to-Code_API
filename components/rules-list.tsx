@@ -1,6 +1,6 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search, Edit, Trash2 } from 'lucide-react';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
 
 interface RulesListProps {
@@ -13,6 +13,8 @@ interface RulesListProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   isLoading: boolean;
+  onEditRule?: (rule: MultiFrameworkRule) => void; // WP23
+  onDeleteRule?: (rule: MultiFrameworkRule) => void; // WP23
 }
 
 export function RulesList({
@@ -25,6 +27,8 @@ export function RulesList({
   totalPages,
   onPageChange,
   isLoading,
+  onEditRule,
+  onDeleteRule,
 }: RulesListProps) {
   return (
     <div className="flex flex-col h-full">
@@ -58,9 +62,8 @@ export function RulesList({
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {rules.map((rule) => (
-              <button
+              <div
                 key={rule.id}
-                onClick={() => onRuleSelect(rule.id)}
                 className={`w-full text-left p-4 transition-colors ${
                   selectedRuleId === rule.id
                     ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
@@ -68,15 +71,47 @@ export function RulesList({
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
+                  <button
+                    onClick={() => onRuleSelect(rule.id)}
+                    className="flex-1 min-w-0 text-left"
+                  >
                     <h3 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                       {rule.name}
                     </h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {rule.id} • Priority: {rule.priority}
                     </p>
-                  </div>
+                  </button>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* WP23: Edit/Delete buttons for custom rules */}
+                    {rule.type === 'custom' && (onEditRule || onDeleteRule) && (
+                      <div className="flex gap-1">
+                        {onEditRule && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditRule(rule);
+                            }}
+                            className="p-1.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                            title="Edit rule"
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
+                        {onDeleteRule && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteRule(rule);
+                            }}
+                            className="p-1.5 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Delete rule"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    )}
                     {/* Type badge (WP20: 3-tier system) */}
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 ${
@@ -118,7 +153,7 @@ export function RulesList({
                     )}
                   </div>
                 )}
-              </button>
+              </div>
             ))}
           </div>
         )}

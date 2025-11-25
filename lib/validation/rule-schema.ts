@@ -29,30 +29,30 @@ const SelectorSchema = z.object({
 const ReactTailwindTransformerSchema = z.object({
   htmlTag: z.string().optional(),
   className: z.string().optional(),
-  props: z.record(z.string()).optional(),
+  props: z.record(z.string(), z.string()).optional(),
 });
 
 const HTMLCSSTransformerSchema = z.object({
   htmlTag: z.string().optional(),
   cssClass: z.string().optional(),
-  cssProperties: z.record(z.string()).optional(),
+  cssProperties: z.record(z.string(), z.string()).optional(),
 });
 
 const ReactInlineTransformerSchema = z.object({
   htmlTag: z.string().optional(),
-  style: z.record(z.union([z.string(), z.number()])).optional(),
-  props: z.record(z.string()).optional(),
+  style: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  props: z.record(z.string(), z.string()).optional(),
 });
 
 const SwiftUITransformerSchema = z.object({
   component: z.string().optional(),
   modifiers: z.array(z.string()).optional(),
-  props: z.record(z.union([z.string(), z.number()])).optional(),
+  props: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
 
 const AndroidXMLTransformerSchema = z.object({
   viewType: z.string().optional(),
-  attributes: z.record(z.string()).optional(),
+  attributes: z.record(z.string(), z.string()).optional(),
 });
 
 // Transformers object (at least one framework required)
@@ -104,16 +104,12 @@ export type CustomRuleInput = z.infer<typeof CustomRuleSchema>;
 
 // Validation functions
 export function validateCustomRule(data: unknown): { success: true; data: CustomRuleInput } | { success: false; error: string } {
-  try {
-    const validated = CustomRuleSchema.parse(data);
-    return { success: true, data: validated };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessages = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
-      return { success: false, error: errorMessages };
-    }
-    console.error('Validation error:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown validation error' };
+  const result = CustomRuleSchema.safeParse(data);
+  if (result.success) {
+    return { success: true, data: result.data };
+  } else {
+    const errorMessages = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+    return { success: false, error: errorMessages };
   }
 }
 

@@ -16,6 +16,7 @@ interface RulesSidebarProps {
   showEnabledOnly: boolean;
   onShowEnabledOnlyChange: (show: boolean) => void;
   allRules: MultiFrameworkRule[]; // WP20: For category and type counters
+  onCreateRule?: () => void; // WP23: Handler to open custom rule modal
 }
 
 const CATEGORIES = [
@@ -51,6 +52,7 @@ export function RulesSidebar({
   showEnabledOnly,
   onShowEnabledOnlyChange,
   allRules,
+  onCreateRule,
 }: RulesSidebarProps) {
   // WP20: Calculate counts by category
   const categoryCounts = CATEGORIES.reduce((acc, cat) => {
@@ -123,9 +125,20 @@ export function RulesSidebar({
 
       {/* Filters (WP20: 3-tier system with counters) */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Rule Types
-        </h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Rule Types
+          </h3>
+          {onCreateRule && (
+            <button
+              onClick={onCreateRule}
+              className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors"
+              title="Create new custom rule"
+            >
+              + New
+            </button>
+          )}
+        </div>
         <div className="space-y-2">
           <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
             <span className="flex items-center gap-2">
