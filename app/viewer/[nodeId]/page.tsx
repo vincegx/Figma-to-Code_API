@@ -21,10 +21,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
 import FigmaTreeView from '@/components/figma-tree-view';
-import AppliedRulesInspector from '@/components/applied-rules-inspector';
 import PreviewTabs from '@/components/preview-tabs';
-import { FigmaPropertiesPanel } from '@/components/figma-properties-panel';
-import { TechnicalRenderPanel } from '@/components/technical-render-panel';
+import { InformationPanel } from '@/components/information-panel';
+import { RulesPanel } from '@/components/rules-panel';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
@@ -42,16 +41,20 @@ export default function ViewerPage() {
 
   // Multi-framework rules state
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
-  const [selectedFramework, setSelectedFramework] = useState<FrameworkType>('react-tailwind');
   const [isLoadingRules, setIsLoadingRules] = useState(true);
+
+  // Framework states for each tab zone (T172)
+  const [infoFramework, setInfoFramework] = useState<FrameworkType>('react-tailwind');
+  const [rulesFramework, setRulesFramework] = useState<FrameworkType>('react-tailwind');
+  const [renderFramework, setRenderFramework] = useState<FrameworkType>('react-tailwind');
 
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(
     null
   );
   const [activeTab, setActiveTab] = useState<'code' | 'render'>('code');
   const [rightPanelTab, setRightPanelTab] = useState<
-    'figma' | 'technical' | 'code'
-  >('figma');
+    'information' | 'rules'
+  >('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
@@ -79,7 +82,7 @@ export default function ViewerPage() {
     return findNode(altNode);
   }, [altNode, selectedTreeNodeId]);
 
-  // Evaluate rules for selected node
+  // Evaluate rules for selected node (using renderFramework for preview)
   const resolvedProperties = useMemo(() => {
     const targetNode = selectedNode || altNode;
     if (!targetNode || multiFrameworkRules.length === 0) {
@@ -89,11 +92,11 @@ export default function ViewerPage() {
     const resolved = evaluateMultiFrameworkRules(
       targetNode,
       multiFrameworkRules,
-      selectedFramework
+      renderFramework
     );
 
     return resolved.properties;
-  }, [selectedNode, altNode, multiFrameworkRules, selectedFramework]);
+  }, [selectedNode, altNode, multiFrameworkRules, renderFramework]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
@@ -329,19 +332,6 @@ export default function ViewerPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Framework Selector */}
-            <select
-              value={selectedFramework}
-              onChange={(e) => setSelectedFramework(e.target.value as FrameworkType)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="react-tailwind">React + Tailwind</option>
-              <option value="html-css">HTML + CSS</option>
-              <option value="react-inline">React Inline</option>
-              <option value="swift-ui">SwiftUI</option>
-              <option value="android-xml">Android XML</option>
-            </select>
-
             {/* "Edit Rules" button */}
             <button
               onClick={() => (window.location.href = `/rules?nodeId=${nodeId}`)}
@@ -382,42 +372,36 @@ export default function ViewerPage() {
               <Tabs
                 value={rightPanelTab}
                 onValueChange={(v) =>
-                  setRightPanelTab(v as 'figma' | 'technical' | 'code')
+                  setRightPanelTab(v as 'information' | 'rules')
                 }
                 className="flex-1 flex flex-col overflow-hidden"
               >
                 <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-gray-50 dark:bg-gray-900 px-2">
-                  <TabsTrigger value="figma" className="text-sm">
-                    Figma
+                  <TabsTrigger value="information" className="text-sm">
+                    Information
                   </TabsTrigger>
-                  <TabsTrigger value="technical" className="text-sm">
-                    Technical
-                  </TabsTrigger>
-                  <TabsTrigger value="code" className="text-sm">
-                    Code
+                  <TabsTrigger value="rules" className="text-sm">
+                    Rules
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent
-                  value="figma"
+                  value="information"
                   className="flex-1 overflow-auto m-0"
                 >
-                  <FigmaPropertiesPanel node={selectedNode} />
+                  <InformationPanel
+                    node={selectedNode}
+                    framework={infoFramework}
+                    onFrameworkChange={setInfoFramework}
+                  />
                 </TabsContent>
 
-                <TabsContent
-                  value="technical"
-                  className="flex-1 overflow-auto m-0"
-                >
-                  <TechnicalRenderPanel node={selectedNode} />
-                </TabsContent>
-
-                <TabsContent value="code" className="flex-1 overflow-auto m-0">
-                  <AppliedRulesInspector
-                    altNode={altNode}
-                    selectedNodeId={selectedTreeNodeId}
-                    multiFrameworkRules={multiFrameworkRules}
-                    selectedFramework={selectedFramework}
+                <TabsContent value="rules" className="flex-1 overflow-auto m-0">
+                  <RulesPanel
+                    node={selectedNode}
+                    selectedFramework={rulesFramework}
+                    onFrameworkChange={setRulesFramework}
+                    allRules={multiFrameworkRules}
                   />
                 </TabsContent>
               </Tabs>
@@ -427,14 +411,36 @@ export default function ViewerPage() {
 
         {/* Render Tab */}
         <TabsContent value="render" className="flex-1 overflow-hidden m-0">
-          <PreviewTabs
-            altNode={altNode}
-            multiFrameworkRules={multiFrameworkRules}
-            selectedFramework={selectedFramework}
-            resolvedProperties={resolvedProperties}
-            onCodeChange={setGeneratedCode}
-            scopedNode={selectedNode}
-          />
+          <div className="h-full flex flex-col">
+            {/* Framework selector in Render tab header */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Preview
+              </h3>
+              <select
+                value={renderFramework}
+                onChange={(e) => setRenderFramework(e.target.value as FrameworkType)}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                <option value="react-tailwind">React + Tailwind</option>
+                <option value="html-css">HTML + CSS</option>
+                <option value="react-inline">React Inline</option>
+                <option value="swift-ui">SwiftUI</option>
+                <option value="android-xml">Android XML</option>
+              </select>
+            </div>
+
+            <div className="flex-1 overflow-auto">
+              <PreviewTabs
+                altNode={altNode}
+                multiFrameworkRules={multiFrameworkRules}
+                selectedFramework={renderFramework}
+                resolvedProperties={resolvedProperties}
+                onCodeChange={setGeneratedCode}
+                scopedNode={selectedNode}
+              />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
