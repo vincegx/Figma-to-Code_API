@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import { RuleCategorySection } from './rule-category-section';
@@ -9,6 +9,7 @@ import {
   groupRulesByCategory,
   getContributedProperties,
 } from '@/lib/utils/rule-conflict-detector';
+import { getMultiFrameworkRuleMatches } from '@/lib/rule-engine';
 
 interface RulesPanelProps {
   node: SimpleAltNode | null;
@@ -26,6 +27,24 @@ export function RulesPanel({
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
 
+  // Get only rules that match the selected node
+  const ruleMatches = useMemo(() => {
+    if (!node) return [];
+    return getMultiFrameworkRuleMatches(node, allRules, selectedFramework);
+  }, [node, allRules, selectedFramework]);
+
+  // Create a map for quick lookup
+  const matchesMap = useMemo(() => {
+    const map = new Map();
+    ruleMatches.forEach(match => map.set(match.ruleId, match));
+    return map;
+  }, [ruleMatches]);
+
+  // Extract just the rules from matches
+  const applicableRules = useMemo(() => {
+    return allRules.filter(rule => matchesMap.has(rule.id));
+  }, [allRules, matchesMap]);
+
   if (!node) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
@@ -34,35 +53,40 @@ export function RulesPanel({
     );
   }
 
-  // TODO: Get applicable rules for this node from rule engine
-  // For now, using all rules as placeholder
-  const applicableRules = allRules;
-
-  // Detect conflicts
-  const conflicts = detectRuleConflicts(applicableRules, selectedFramework);
+  if (applicableRules.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+        <div className="text-center">
+          <p className="font-medium">No rules match this element</p>
+          <p className="text-sm mt-1">Try selecting a different element or adding custom rules</p>
+        </div>
+      </div>
+    );
+  }
 
   // Group by category
   const rulesByCategory = groupRulesByCategory(applicableRules);
 
-  // Sort within each category by priority (ascending for display order)
+  // Sort within each category by priority (DESCENDING - highest priority first = wins)
   const sortedRulesByCategory = Object.entries(rulesByCategory)
     .map(([category, rules]) => ({
       category,
       rules: rules
-        .sort((a, b) => a.priority - b.priority)
+        .sort((a, b) => b.priority - a.priority) // DESCENDING: highest priority first
         .map((rule, index) => {
-          const conflict = conflicts.get(rule.id);
+          const match = matchesMap.get(rule.id);
           return {
             rule,
-            order: index + 1,
-            isOverridden: conflict?.isOverridden || false,
-            contributedProperties: getContributedProperties(rule, selectedFramework),
+            order: index + 1, // #1 = highest priority = wins
+            isOverridden: (match?.conflicts.length || 0) > 0, // Has conflicts means it's overridden
+            contributedProperties: Array.from(match?.contributedProperties || []) as string[],
           };
         }),
     }))
     .filter(({ category }) =>
       categoryFilter.length === 0 || categoryFilter.includes(category)
-    );
+    )
+    .sort((a, b) => b.rules.length - a.rules.length); // Categories with most rules first
 
   const totalRules = applicableRules.length;
   const priorityRange = applicableRules.length > 0
@@ -95,26 +119,43 @@ export function RulesPanel({
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
-        <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Filters
+      {/* Smart Filters - Only show if there are many rules or categories */}
+      {(totalRules > 10 || Object.keys(rulesByCategory).length > 3) && (
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
+          <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Filters
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(rulesByCategory).length > 3 && (
+              <>
+                <button
+                  onClick={() => setCategoryFilter([])}
+                  className={`px-2 py-1 text-xs border rounded transition-colors ${
+                    categoryFilter.length === 0
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  All Categories
+                </button>
+                {Object.entries(rulesByCategory).map(([category, rules]) => (
+                  <button
+                    key={category}
+                    onClick={() => setCategoryFilter([category])}
+                    className={`px-2 py-1 text-xs border rounded transition-colors ${
+                      categoryFilter.includes(category)
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {category} ({rules.length})
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setCategoryFilter([])}
-            className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            All Categories
-          </button>
-          <button
-            onClick={() => setPriorityFilter([])}
-            className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            All Priorities
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Category Sections */}
       <div className="flex-1 overflow-y-auto">

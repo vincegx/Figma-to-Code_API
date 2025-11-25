@@ -13,12 +13,14 @@ interface InformationPanelProps {
   node: SimpleAltNode | null;
   framework: FrameworkType;
   onFrameworkChange: (framework: FrameworkType) => void;
+  resolvedProperties?: Record<string, string>;
 }
 
 export function InformationPanel({
   node,
   framework,
   onFrameworkChange,
+  resolvedProperties = {},
 }: InformationPanelProps) {
   if (!node) {
     return (
@@ -179,6 +181,7 @@ export function InformationPanel({
         node={node}
         framework={framework}
         onFrameworkChange={onFrameworkChange}
+        resolvedProperties={resolvedProperties}
       />
 
       {/* Raw Data Section */}

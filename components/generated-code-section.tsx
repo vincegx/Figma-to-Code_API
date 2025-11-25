@@ -1,37 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Copy, Check, Download } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
+import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
+import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 
 type FrameworkType = 'react-tailwind' | 'html-css' | 'react-inline' | 'swift-ui' | 'android-xml';
 
 interface GeneratedCodeSectionProps {
-  node: any; // Will be typed properly with AltNode
+  node: SimpleAltNode | null;
   framework: FrameworkType;
   onFrameworkChange: (framework: FrameworkType) => void;
+  resolvedProperties?: Record<string, string>;
 }
 
 export function GeneratedCodeSection({
   node,
   framework,
   onFrameworkChange,
+  resolvedProperties = {},
 }: GeneratedCodeSectionProps) {
   const [activeTab, setActiveTab] = useState<'component' | 'styles'>('component');
   const [copiedComponent, setCopiedComponent] = useState(false);
   const [copiedStyles, setCopiedStyles] = useState(false);
 
-  // TODO: Wire up actual code generators
-  const componentCode = `<div className="flex flex-col gap-3 p-4">
-  {/* ${node?.name || 'Component'} */}
-</div>`;
+  // Generate code using the appropriate generator
+  const { componentCode, stylesCode } = useMemo(() => {
+    if (!node) {
+      return {
+        componentCode: '// No node selected',
+        stylesCode: '/* No node selected */',
+      };
+    }
 
-  const stylesCode = `/* Styles for ${node?.name || 'Component'} */
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}`;
+    try {
+      if (framework === 'react-tailwind') {
+        const output = generateReactTailwind(node, resolvedProperties);
+        return {
+          componentCode: output.code,
+          stylesCode: '/* Tailwind classes are inline - no separate styles needed */',
+        };
+      } else if (framework === 'html-css') {
+        const output = generateHTMLCSS(node, resolvedProperties);
+        return {
+          componentCode: output.code,
+          stylesCode: output.css || '/* No styles generated */',
+        };
+      } else {
+        // Placeholder for other frameworks
+        return {
+          componentCode: `// ${framework} generator not yet implemented for ${node.name}`,
+          stylesCode: `/* ${framework} styles not yet implemented */`,
+        };
+      }
+    } catch (error) {
+      console.error('Code generation error:', error);
+      return {
+        componentCode: `// Error generating code: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        stylesCode: '/* Error generating styles */',
+      };
+    }
+  }, [node, framework, resolvedProperties]);
 
   const handleCopy = async (text: string, type: 'component' | 'styles') => {
     try {

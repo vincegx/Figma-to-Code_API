@@ -82,20 +82,23 @@ export default function ViewerPage() {
     return findNode(altNode);
   }, [altNode, selectedTreeNodeId]);
 
-  // Evaluate rules for selected node (using renderFramework for preview)
-  const resolvedProperties = useMemo(() => {
+  // Evaluate rules for each framework separately
+  const infoResolvedProperties = useMemo(() => {
     const targetNode = selectedNode || altNode;
-    if (!targetNode || multiFrameworkRules.length === 0) {
-      return {};
-    }
+    if (!targetNode || multiFrameworkRules.length === 0) return {};
+    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, infoFramework).properties;
+  }, [selectedNode, altNode, multiFrameworkRules, infoFramework]);
 
-    const resolved = evaluateMultiFrameworkRules(
-      targetNode,
-      multiFrameworkRules,
-      renderFramework
-    );
+  const rulesResolvedProperties = useMemo(() => {
+    const targetNode = selectedNode || altNode;
+    if (!targetNode || multiFrameworkRules.length === 0) return {};
+    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, rulesFramework).properties;
+  }, [selectedNode, altNode, multiFrameworkRules, rulesFramework]);
 
-    return resolved.properties;
+  const renderResolvedProperties = useMemo(() => {
+    const targetNode = selectedNode || altNode;
+    if (!targetNode || multiFrameworkRules.length === 0) return {};
+    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, renderFramework).properties;
   }, [selectedNode, altNode, multiFrameworkRules, renderFramework]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
@@ -393,6 +396,7 @@ export default function ViewerPage() {
                     node={selectedNode}
                     framework={infoFramework}
                     onFrameworkChange={setInfoFramework}
+                    resolvedProperties={infoResolvedProperties}
                   />
                 </TabsContent>
 
@@ -435,7 +439,7 @@ export default function ViewerPage() {
                 altNode={altNode}
                 multiFrameworkRules={multiFrameworkRules}
                 selectedFramework={renderFramework}
-                resolvedProperties={resolvedProperties}
+                resolvedProperties={renderResolvedProperties}
                 onCodeChange={setGeneratedCode}
                 scopedNode={selectedNode}
               />
