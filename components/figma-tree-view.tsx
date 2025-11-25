@@ -68,10 +68,10 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
     );
   }
 
-  // Column layout (VERTICAL)
+  // Column layout (VERTICAL) - use primaryAxisAlignItems for vertical alignment
   if (layoutMode === 'VERTICAL') {
     // Column center
-    if (counterAxisAlignItems === 'CENTER') {
+    if (primaryAxisAlignItems === 'CENTER') {
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
           <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 2h2v4h-2zM9 6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
@@ -79,7 +79,7 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
       );
     }
     // Column bottom
-    if (counterAxisAlignItems === 'MAX') {
+    if (primaryAxisAlignItems === 'MAX') {
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
           <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 4h2v4h-2zM9 8a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
