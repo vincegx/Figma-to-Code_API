@@ -265,3 +265,140 @@ export interface SimpleRuleMatch {
   readonly conflicts: readonly string[];
   readonly severity: 'major' | 'minor' | 'none';
 }
+
+// ============================================================================
+// WP17 Multi-Framework Rules System Types
+// ============================================================================
+
+/**
+ * Supported output frameworks
+ */
+export type FrameworkType =
+  | 'react-tailwind'
+  | 'html-css'
+  | 'react-inline'
+  | 'swift-ui'
+  | 'android-xml';
+
+/**
+ * Framework-specific transformer for React + Tailwind
+ */
+export interface ReactTailwindTransformer {
+  readonly htmlTag?: string;
+  readonly className?: string;
+  readonly props?: Record<string, string>;
+}
+
+/**
+ * Framework-specific transformer for HTML + CSS
+ */
+export interface HTMLCSSTransformer {
+  readonly htmlTag?: string;
+  readonly cssClass?: string;
+  readonly cssProperties?: Record<string, string>;
+}
+
+/**
+ * Framework-specific transformer for React + Inline Styles
+ */
+export interface ReactInlineTransformer {
+  readonly htmlTag?: string;
+  readonly style?: Record<string, string | number>;
+  readonly props?: Record<string, string>;
+}
+
+/**
+ * Framework-specific transformer for SwiftUI
+ */
+export interface SwiftUITransformer {
+  readonly component?: string;
+  readonly modifiers?: readonly string[];
+  readonly props?: Record<string, string | number>;
+}
+
+/**
+ * Framework-specific transformer for Android XML
+ */
+export interface AndroidXMLTransformer {
+  readonly viewType?: string;
+  readonly attributes?: Record<string, string>;
+}
+
+/**
+ * Union type for all framework transformers
+ */
+export type RuleTransformer =
+  | ReactTailwindTransformer
+  | HTMLCSSTransformer
+  | ReactInlineTransformer
+  | SwiftUITransformer
+  | AndroidXMLTransformer;
+
+/**
+ * Multi-framework rule with transformers for different output targets
+ *
+ * A rule can have transformers for multiple frameworks.
+ * If a transformer is missing for a framework, the rule is ignored for that framework.
+ */
+export interface MultiFrameworkRule {
+  readonly id: string;
+  readonly name: string;
+  readonly type: 'system' | 'user';
+  readonly category: 'layout' | 'colors' | 'typography' | 'spacing' | 'borders' | 'effects' | 'components' | 'custom';
+  readonly tags: readonly string[];
+  readonly enabled: boolean;
+  readonly priority: number;
+  readonly selector: Selector;
+  readonly transformers: {
+    readonly 'react-tailwind'?: ReactTailwindTransformer;
+    readonly 'html-css'?: HTMLCSSTransformer;
+    readonly 'react-inline'?: ReactInlineTransformer;
+    readonly 'swift-ui'?: SwiftUITransformer;
+    readonly 'android-xml'?: AndroidXMLTransformer;
+  };
+}
+
+/**
+ * System rule (extracted from altnode-transform.ts)
+ * Read-only in UI, lower priority (default 50)
+ */
+export type SystemRule = MultiFrameworkRule & {
+  readonly type: 'system';
+  readonly priority: 50;
+};
+
+/**
+ * User rule (created by user)
+ * Fully editable, higher priority (default 100+)
+ */
+export type UserRule = MultiFrameworkRule & {
+  readonly type: 'user';
+};
+
+/**
+ * Rule match result with framework context
+ */
+export interface MultiFrameworkRuleMatch {
+  readonly ruleId: string;
+  readonly ruleName: string;
+  readonly ruleType: 'system' | 'user';
+  readonly priority: number;
+  readonly framework: FrameworkType;
+  readonly contributedProperties: readonly string[];
+  readonly conflicts: readonly string[];
+  readonly severity: 'major' | 'minor' | 'none';
+  readonly provenance: Record<string, string>; // property → ruleId
+}
+
+/**
+ * Resolved properties after applying all rules for a framework
+ */
+export interface ResolvedProperties {
+  readonly framework: FrameworkType;
+  readonly properties: Record<string, string>;
+  readonly provenance: Record<string, string>; // property → ruleId
+  readonly conflicts: readonly {
+    readonly property: string;
+    readonly rules: readonly string[]; // conflicting rule IDs
+  }[];
+}
