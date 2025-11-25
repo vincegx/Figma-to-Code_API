@@ -200,18 +200,17 @@ function TreeNode({
           <span className="w-5 flex-shrink-0" /> // Spacer for alignment
         )}
 
-        {/* Node type icon with color - use figmaType (from originalNode.type), NOT node.type (HTML type) */}
-        <FigmaTypeIcon
-          type={figmaType}
-          size={14}
-          className={cn('flex-shrink-0', colors.text)}
-        />
-
-        {/* Layout icon (WP18 - T157) - shows auto-layout configuration */}
-        {getLayoutIcon(node) && (
-          <div className="flex-shrink-0 text-gray-400 dark:text-gray-500 ml-0.5">
+        {/* Icon: Layout icon for auto-layout nodes, type icon otherwise (WP18 - T157) */}
+        {getLayoutIcon(node) ? (
+          <div className="flex-shrink-0 text-gray-400 dark:text-gray-500">
             {getLayoutIcon(node)}
           </div>
+        ) : (
+          <FigmaTypeIcon
+            type={figmaType}
+            size={14}
+            className={cn('flex-shrink-0', colors.text)}
+          />
         )}
 
         {/* Node name */}
