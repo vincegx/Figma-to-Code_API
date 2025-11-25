@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUIStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ import {
   Palette,
   Code,
   Key,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -116,6 +117,22 @@ export default function SettingsPage() {
   const theme = useUIStore((state) => state.theme);
   const setTheme = useUIStore((state) => state.setTheme);
 
+  // Auto-save toast notification (Review Feedback)
+  const [showSavedToast, setShowSavedToast] = useState(false);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMount = useRef(true);
+
+  // Show "Settings saved" toast with auto-dismiss
+  const showSaveNotification = useCallback(() => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    setShowSavedToast(true);
+    toastTimeoutRef.current = setTimeout(() => {
+      setShowSavedToast(false);
+    }, 2000);
+  }, []);
+
   // Load cache stats from API
   const loadCacheStats = useCallback(async () => {
     setLoadingCache(true);
@@ -157,10 +174,16 @@ export default function SettingsPage() {
     loadCacheStats();
   }, [loadCacheStats]);
 
-  // Save settings to localStorage whenever they change
+  // Save settings to localStorage whenever they change + show toast
   useEffect(() => {
+    // Skip toast on initial mount (loading from localStorage)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     localStorage.setItem('app-settings', JSON.stringify(settings));
-  }, [settings]);
+    showSaveNotification();
+  }, [settings, showSaveNotification]);
 
   // Format bytes to human-readable
   function formatBytes(bytes: number): string {
@@ -171,7 +194,7 @@ export default function SettingsPage() {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   }
 
-  // Test Figma connection (T116)
+  // Test Figma connection (T116) - Uses proxy to avoid CORS
   async function testConnection() {
     if (!figmaToken.trim()) {
       setConnectionStatus('error');
@@ -182,13 +205,18 @@ export default function SettingsPage() {
     setConnectionStatus(null);
 
     try {
-      const response = await fetch('https://api.figma.com/v1/me', {
+      // Use proxy API route to avoid CORS issues
+      const response = await fetch('/api/figma/test-connection', {
+        method: 'POST',
         headers: {
-          'X-Figma-Token': figmaToken,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ token: figmaToken }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (data.success) {
         setConnectionStatus('success');
         // Save valid token
         localStorage.setItem('figma-token', figmaToken);
@@ -205,6 +233,7 @@ export default function SettingsPage() {
   // Save token (without testing)
   function saveToken() {
     localStorage.setItem('figma-token', figmaToken);
+    showSaveNotification();
   }
 
   // Clear all cache (T120)
@@ -234,7 +263,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
+    <>
+      {/* Auto-save toast notification */}
+      {showSavedToast && (
+        <div className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <CheckCircle2 size={18} />
+          <span className="font-medium">Settings saved</span>
+        </div>
+      )}
+      <div className="container max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Settings className="h-8 w-8" />
@@ -476,5 +513,6 @@ export default function SettingsPage() {
         </SettingsSection>
       </div>
     </div>
+    </>
   );
 }
