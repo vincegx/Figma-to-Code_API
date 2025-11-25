@@ -1,6 +1,31 @@
 import type { SimpleAltNode } from '../altnode-transform';
 import { toPascalCase, cssPropToTailwind } from './helpers';
 import { GeneratedCodeOutput } from './react';
+import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
+import { evaluateMultiFrameworkRules } from '../rule-engine';
+
+/**
+ * Filter out properties with unresolved variables or empty values
+ * @param props - Raw resolved properties from rule evaluation
+ * @returns Cleaned properties without $value placeholders
+ */
+function cleanResolvedProperties(props: Record<string, string>): Record<string, string> {
+  const cleaned: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(props)) {
+    // Skip properties with unresolved variables
+    if (value.includes('$value') || value.includes('${')) {
+      continue;
+    }
+    // Skip empty values
+    if (!value || value.trim() === '') {
+      continue;
+    }
+    cleaned[key] = value;
+  }
+
+  return cleaned;
+}
 
 /**
  * Generate React JSX component with Tailwind CSS classes
@@ -21,14 +46,22 @@ import { GeneratedCodeOutput } from './react';
  *
  * @param altNode - The AltNode tree to generate code from
  * @param resolvedProperties - CSS properties from rule evaluation
+ * @param allRules - All available rules for child evaluation
+ * @param framework - Target framework for code generation
  * @returns GeneratedCodeOutput object with Tailwind JSX string
  */
 export function generateReactTailwind(
   altNode: SimpleAltNode,
-  resolvedProperties: Record<string, string>
+  resolvedProperties: Record<string, string>,
+  allRules: MultiFrameworkRule[] = [],
+  framework: FrameworkType = 'react-tailwind'
 ): GeneratedCodeOutput {
   const componentName = toPascalCase(altNode.name);
-  const jsx = generateTailwindJSXElement(altNode, resolvedProperties, 0);
+
+  // FIX: Clean properties to remove $value placeholders
+  const cleanedProps = cleanResolvedProperties(resolvedProperties);
+
+  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework);
 
   const code = `export function ${componentName}() {
   return (
@@ -53,12 +86,16 @@ ${jsx}  );
  * @param node - Current AltNode
  * @param properties - Resolved CSS properties for this node
  * @param depth - Indentation depth
+ * @param allRules - All available rules for child evaluation
+ * @param framework - Target framework for code generation
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
   node: SimpleAltNode,
   properties: Record<string, string>,
-  depth: number
+  depth: number,
+  allRules: MultiFrameworkRule[] = [],
+  framework: FrameworkType = 'react-tailwind'
 ): string {
   const indent = '  '.repeat(depth + 1);
   const htmlTag = mapNodeTypeToHTMLTag(node.type);
@@ -91,16 +128,21 @@ function generateTailwindJSXElement(
   if (hasChildren) {
     jsxString += `${indent}<${htmlTag}${hasClasses ? ` className="${tailwindClasses}"` : ''}>\n`;
 
-    // Recursively generate children with their own styles
+    // FIX: Recursively generate children with their own rule evaluation
     for (const child of (node as any).children) {
-      // Children inherit no properties from parent - each node uses its own styles
-      jsxString += generateTailwindJSXElement(child, {}, depth + 1);
+      // Evaluate rules for this child
+      const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
+      const childProps = cleanResolvedProperties(childResult.properties);
+
+      jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework);
     }
 
     jsxString += `${indent}</${htmlTag}>`;
   } else {
-    // Leaf node
-    const content = node.type === 'TEXT' ? (node as any).characters || '' : '';
+    // Leaf node - FIX: Access text via originalNode.characters
+    const content = node.type === 'TEXT'
+      ? (node.originalNode as any)?.characters || ''
+      : '';
     if (content) {
       jsxString += `${indent}<${htmlTag}${hasClasses ? ` className="${tailwindClasses}"` : ''}>${content}</${htmlTag}>`;
     } else {

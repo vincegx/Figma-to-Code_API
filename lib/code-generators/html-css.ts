@@ -1,6 +1,31 @@
 import type { SimpleAltNode } from '../altnode-transform';
 import { toKebabCase } from './helpers';
 import { GeneratedCodeOutput } from './react';
+import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
+import { evaluateMultiFrameworkRules } from '../rule-engine';
+
+/**
+ * Filter out properties with unresolved variables or empty values
+ * @param props - Raw resolved properties from rule evaluation
+ * @returns Cleaned properties without $value placeholders
+ */
+function cleanResolvedProperties(props: Record<string, string>): Record<string, string> {
+  const cleaned: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(props)) {
+    // Skip properties with unresolved variables
+    if (value.includes('$value') || value.includes('${')) {
+      continue;
+    }
+    // Skip empty values
+    if (!value || value.trim() === '') {
+      continue;
+    }
+    cleaned[key] = value;
+  }
+
+  return cleaned;
+}
 
 /**
  * Generate HTML with separate CSS file
@@ -21,17 +46,24 @@ import { GeneratedCodeOutput } from './react';
  *
  * @param altNode - The AltNode tree to generate code from
  * @param resolvedProperties - CSS properties from rule evaluation
+ * @param allRules - All available rules for child evaluation
+ * @param framework - Target framework for code generation
  * @returns GeneratedCodeOutput object with HTML and CSS strings
  */
 export function generateHTMLCSS(
   altNode: SimpleAltNode,
-  resolvedProperties: Record<string, string>
+  resolvedProperties: Record<string, string>,
+  allRules: MultiFrameworkRule[] = [],
+  framework: FrameworkType = 'html-css'
 ): GeneratedCodeOutput {
   const className = toKebabCase(altNode.name);
   const cssRules: Array<{ selector: string; properties: Record<string, string> }> = [];
 
+  // FIX: Clean properties to remove $value placeholders
+  const cleanedProps = cleanResolvedProperties(resolvedProperties);
+
   // Generate HTML and collect CSS rules
-  const html = generateHTMLElement(altNode, resolvedProperties, cssRules, 0);
+  const html = generateHTMLElement(altNode, cleanedProps, cssRules, 0, allRules, framework);
 
   // Generate CSS from collected rules
   const css = cssRules
@@ -65,13 +97,17 @@ export function generateHTMLCSS(
  * @param properties - Resolved CSS properties for this node
  * @param cssRules - Array to collect CSS rules (mutated)
  * @param depth - Indentation depth
+ * @param allRules - All available rules for child evaluation
+ * @param framework - Target framework for code generation
  * @returns HTML string
  */
 function generateHTMLElement(
   node: SimpleAltNode,
   properties: Record<string, string>,
   cssRules: Array<{ selector: string; properties: Record<string, string> }>,
-  depth: number
+  depth: number,
+  allRules: MultiFrameworkRule[] = [],
+  framework: FrameworkType = 'html-css'
 ): string {
   const indent = '  '.repeat(depth);
   const htmlTag = mapNodeTypeToHTMLTag(node.type);
@@ -93,15 +129,21 @@ function generateHTMLElement(
   if (hasChildren) {
     htmlString += `${indent}<${htmlTag} class="${className}">\n`;
 
-    // Recursively generate children
+    // FIX: Recursively generate children with their own rule evaluation
     for (const child of (node as any).children) {
-      htmlString += generateHTMLElement(child, {}, cssRules, depth + 1);
+      // Evaluate rules for this child
+      const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
+      const childProps = cleanResolvedProperties(childResult.properties);
+
+      htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework);
     }
 
     htmlString += `${indent}</${htmlTag}>`;
   } else {
-    // Leaf node
-    const content = node.type === 'TEXT' ? (node as any).characters || '' : '';
+    // Leaf node - FIX: Access text via originalNode.characters
+    const content = node.type === 'TEXT'
+      ? (node.originalNode as any)?.characters || ''
+      : '';
     if (content) {
       htmlString += `${indent}<${htmlTag} class="${className}">${content}</${htmlTag}>`;
     } else {

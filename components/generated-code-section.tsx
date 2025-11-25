@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Copy, Check, Download } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
+import type { MultiFrameworkRule } from '@/lib/types/rules';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 
@@ -14,6 +15,7 @@ interface GeneratedCodeSectionProps {
   framework: FrameworkType;
   onFrameworkChange: (framework: FrameworkType) => void;
   resolvedProperties?: Record<string, string>;
+  allRules?: MultiFrameworkRule[];
 }
 
 export function GeneratedCodeSection({
@@ -21,6 +23,7 @@ export function GeneratedCodeSection({
   framework,
   onFrameworkChange,
   resolvedProperties = {},
+  allRules = [],
 }: GeneratedCodeSectionProps) {
   const [activeTab, setActiveTab] = useState<'component' | 'styles'>('component');
   const [copiedComponent, setCopiedComponent] = useState(false);
@@ -37,13 +40,15 @@ export function GeneratedCodeSection({
 
     try {
       if (framework === 'react-tailwind') {
-        const output = generateReactTailwind(node, resolvedProperties);
+        // FIX: Pass allRules and framework for child evaluation
+        const output = generateReactTailwind(node, resolvedProperties, allRules, framework);
         return {
           componentCode: output.code,
           stylesCode: '/* Tailwind classes are inline - no separate styles needed */',
         };
       } else if (framework === 'html-css') {
-        const output = generateHTMLCSS(node, resolvedProperties);
+        // FIX: Pass allRules and framework for child evaluation
+        const output = generateHTMLCSS(node, resolvedProperties, allRules, framework);
         return {
           componentCode: output.code,
           stylesCode: output.css || '/* No styles generated */',
@@ -62,7 +67,7 @@ export function GeneratedCodeSection({
         stylesCode: '/* Error generating styles */',
       };
     }
-  }, [node, framework, resolvedProperties]);
+  }, [node, framework, resolvedProperties, allRules]);
 
   const handleCopy = async (text: string, type: 'component' | 'styles') => {
     try {

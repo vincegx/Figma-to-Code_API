@@ -397,6 +397,7 @@ export default function ViewerPage() {
                     framework={infoFramework}
                     onFrameworkChange={setInfoFramework}
                     resolvedProperties={infoResolvedProperties}
+                    allRules={multiFrameworkRules}
                   />
                 </TabsContent>
 

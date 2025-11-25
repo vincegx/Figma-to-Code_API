@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
+import type { MultiFrameworkRule } from '@/lib/types/rules';
 import { PropertyBlock, PropertyItem } from './property-block';
 import { GeneratedCodeSection } from './generated-code-section';
 import { RawDataSection } from './raw-data-section';
@@ -14,6 +15,7 @@ interface InformationPanelProps {
   framework: FrameworkType;
   onFrameworkChange: (framework: FrameworkType) => void;
   resolvedProperties?: Record<string, string>;
+  allRules?: MultiFrameworkRule[];
 }
 
 export function InformationPanel({
@@ -21,6 +23,7 @@ export function InformationPanel({
   framework,
   onFrameworkChange,
   resolvedProperties = {},
+  allRules = [],
 }: InformationPanelProps) {
   if (!node) {
     return (
@@ -182,6 +185,7 @@ export function InformationPanel({
         framework={framework}
         onFrameworkChange={onFrameworkChange}
         resolvedProperties={resolvedProperties}
+        allRules={allRules}
       />
 
       {/* Raw Data Section */}
