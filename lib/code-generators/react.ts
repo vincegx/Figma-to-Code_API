@@ -1,5 +1,5 @@
 import type { SimpleAltNode } from '../altnode-transform';
-import { toPascalCase } from './helpers';
+import { toPascalCase, extractTextContent, extractComponentDataAttributes } from './helpers';
 
 /**
  * Simple generated code structure for WP06 MVP
@@ -76,7 +76,19 @@ function generateJSXElement(
   depth: number
 ): string {
   const indent = '  '.repeat(depth + 1);
-  const htmlTag = mapNodeTypeToHTMLTag(node.type);
+  const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
+
+  // T178: Add data-layer attribute
+  // T180: Extract component properties as data-* attributes
+  const componentAttrs = extractComponentDataAttributes(node);
+  const allDataAttrs = {
+    'data-layer': node.name, // T178: Original Figma name
+    ...componentAttrs // T180: Component properties
+  };
+
+  const dataAttrString = Object.entries(allDataAttrs)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(' ');
 
   // Build style object
   const styleLines = Object.entries(properties)
@@ -84,7 +96,6 @@ function generateJSXElement(
     .join('\n');
 
   const hasStyles = styleLines.length > 0;
-  const hasChildren = 'children' in node && node.children.length > 0;
 
   // Generate style declaration
   let jsxString = '';
@@ -94,23 +105,32 @@ function generateJSXElement(
     jsxString += `${indent}};\n\n`;
   }
 
-  // Generate JSX
-  if (hasChildren) {
-    jsxString += `${indent}<${htmlTag}${hasStyles ? ' style={styles}' : ''}>\n`;
-
-    // Recursively generate children
-    for (const child of (node as any).children) {
-      jsxString += generateJSXElement(child, {}, depth + 1);
-    }
-
-    jsxString += `${indent}</${htmlTag}>`;
-  } else {
-    // Self-closing tag for leaf nodes
-    const content = node.type === 'TEXT' ? (node as any).characters || '' : '';
+  // T177 CRITICAL FIX: TEXT nodes MUST use text content, not children
+  // TEXT nodes in Figma can have children (for styling spans) but we want the raw text
+  if (node.originalType === 'TEXT') {
+    // T185: Use extractTextContent to preserve line breaks
+    const content = extractTextContent(node);
     if (content) {
-      jsxString += `${indent}<${htmlTag}${hasStyles ? ' style={styles}' : ''}>${content}</${htmlTag}>`;
+      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasStyles ? ' style={styles}' : ''}>${content}</${htmlTag}>`;
     } else {
-      jsxString += `${indent}<${htmlTag}${hasStyles ? ' style={styles}' : ''} />`;
+      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasStyles ? ' style={styles}' : ''}></${htmlTag}>`;
+    }
+  } else {
+    // Non-TEXT nodes: check for children
+    const hasChildren = 'children' in node && node.children.length > 0;
+
+    if (hasChildren) {
+      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasStyles ? ' style={styles}' : ''}>\n`;
+
+      // Recursively generate children
+      for (const child of (node as any).children) {
+        jsxString += generateJSXElement(child, {}, depth + 1);
+      }
+
+      jsxString += `${indent}</${htmlTag}>`;
+    } else {
+      // Empty leaf node
+      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasStyles ? ' style={styles}' : ''} />`;
     }
   }
 

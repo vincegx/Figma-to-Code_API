@@ -150,8 +150,63 @@ export function selectorMatches(
     return false;
   }
 
+  // T176 FIX: Dynamic validation for ALL other selector properties
+  // This fixes the catastrophic bug where rules with properties like blendMode,
+  // layoutMode, layoutWrap, etc. would match ALL nodes
+  const checkedProperties = new Set(['type', 'name', 'width', 'height', 'hasChildren', 'parentType']);
+
+  for (const [key, expectedValue] of Object.entries(selector)) {
+    // Skip properties already validated above
+    if (checkedProperties.has(key)) {
+      continue;
+    }
+
+    // Access property from originalNode (where Figma properties live)
+    const actualValue = (altNode.originalNode as any)?.[key];
+
+    // If selector specifies this property but node doesn't have it → no match
+    if (actualValue === undefined) {
+      return false;
+    }
+
+    // Compare values (handle arrays, objects, primitives)
+    if (!valuesMatch(actualValue, expectedValue)) {
+      return false;
+    }
+  }
+
   // All checks passed - selector matches
   return true;
+}
+
+/**
+ * Helper function for value comparison in selector matching
+ * Handles primitives, arrays, and objects
+ *
+ * @param actual - Actual value from node
+ * @param expected - Expected value from selector
+ * @returns true if values match
+ */
+function valuesMatch(actual: any, expected: any): boolean {
+  // Handle primitive comparison
+  if (typeof expected !== 'object' || expected === null) {
+    return actual === expected;
+  }
+
+  // Handle array comparison (e.g., type: ['FRAME', 'GROUP'])
+  // This allows multiple options for a property
+  if (Array.isArray(expected)) {
+    return expected.includes(actual);
+  }
+
+  // Handle object comparison (e.g., width: {min: 100, max: 500})
+  // This is already handled by width/height logic above
+  // For any other object types, do deep equality
+  if (typeof actual === 'object' && actual !== null) {
+    return JSON.stringify(actual) === JSON.stringify(expected);
+  }
+
+  return false;
 }
 
 // ============================================================================

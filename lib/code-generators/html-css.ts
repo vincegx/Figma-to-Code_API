@@ -1,5 +1,5 @@
 import type { SimpleAltNode } from '../altnode-transform';
-import { toKebabCase } from './helpers';
+import { toKebabCase, toPascalCase, extractTextContent, extractComponentDataAttributes } from './helpers';
 import { GeneratedCodeOutput } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
@@ -110,8 +110,20 @@ function generateHTMLElement(
   framework: FrameworkType = 'html-css'
 ): string {
   const indent = '  '.repeat(depth);
-  const htmlTag = mapNodeTypeToHTMLTag(node.type);
-  const className = toKebabCase(node.name);
+  const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
+  const className = toPascalCase(node.name); // T179: Use PascalCase instead of kebab-case
+
+  // T178: Add data-layer attribute
+  // T180: Extract component properties as data-* attributes
+  const componentAttrs = extractComponentDataAttributes(node);
+  const allDataAttrs = {
+    'data-layer': node.name, // T178: Original Figma name
+    ...componentAttrs // T180: Component properties
+  };
+
+  const dataAttrString = Object.entries(allDataAttrs)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(' ');
 
   // Collect CSS rule for this node
   if (Object.keys(properties).length > 0) {
@@ -121,33 +133,39 @@ function generateHTMLElement(
     });
   }
 
-  const hasChildren = 'children' in node && node.children.length > 0;
-
   // Generate HTML
   let htmlString = '';
 
-  if (hasChildren) {
-    htmlString += `${indent}<${htmlTag} class="${className}">\n`;
-
-    // FIX: Recursively generate children with their own rule evaluation
-    for (const child of (node as any).children) {
-      // Evaluate rules for this child
-      const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
-      const childProps = cleanResolvedProperties(childResult.properties);
-
-      htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework);
-    }
-
-    htmlString += `${indent}</${htmlTag}>`;
-  } else {
-    // Leaf node - FIX: Access text via originalNode.characters
-    const content = node.type === 'TEXT'
-      ? (node.originalNode as any)?.characters || ''
-      : '';
+  // T177 CRITICAL FIX: TEXT nodes MUST use text content, not children
+  // TEXT nodes in Figma can have children (for styling spans) but we want the raw text
+  if (node.originalType === 'TEXT') {
+    // T185: Use extractTextContent to preserve line breaks
+    const content = extractTextContent(node);
     if (content) {
-      htmlString += `${indent}<${htmlTag} class="${className}">${content}</${htmlTag}>`;
+      htmlString += `${indent}<${htmlTag} ${dataAttrString} class="${className}">${content}</${htmlTag}>`;
     } else {
-      htmlString += `${indent}<${htmlTag} class="${className}"></${htmlTag}>`;
+      htmlString += `${indent}<${htmlTag} ${dataAttrString} class="${className}"></${htmlTag}>`;
+    }
+  } else {
+    // Non-TEXT nodes: check for children
+    const hasChildren = 'children' in node && node.children.length > 0;
+
+    if (hasChildren) {
+      htmlString += `${indent}<${htmlTag} ${dataAttrString} class="${className}">\n`;
+
+      // FIX: Recursively generate children with their own rule evaluation
+      for (const child of (node as any).children) {
+        // Evaluate rules for this child
+        const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
+        const childProps = cleanResolvedProperties(childResult.properties);
+
+        htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework);
+      }
+
+      htmlString += `${indent}</${htmlTag}>`;
+    } else {
+      // Empty leaf node
+      htmlString += `${indent}<${htmlTag} ${dataAttrString} class="${className}"></${htmlTag}>`;
     }
   }
 

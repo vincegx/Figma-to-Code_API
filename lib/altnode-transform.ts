@@ -26,6 +26,7 @@ export interface SimpleAltNode {
   name: string;
   uniqueName: string;
   type: string;
+  originalType: string; // T177: Preserve original Figma type for TEXT detection
   styles: Record<string, string | number>;
   children: SimpleAltNode[];
   originalNode: FigmaNode;
@@ -127,6 +128,7 @@ function handleGroupInlining(
     name: groupNode.name,
     uniqueName: generateUniqueName(groupNode.name),
     type: 'group',
+    originalType: groupNode.type, // T177: Preserve original type
     styles: {},
     children: groupNode.children
       .map(child => transformToAltNode(child, newCumulativeRotation))
@@ -523,7 +525,8 @@ export function transformToAltNode(
     id: figmaNode.id,
     name: figmaNode.name,
     uniqueName,
-    type: mapNodeType(figmaNode.type),
+    type: mapNodeType(figmaNode.type), // HTML tag for rendering
+    originalType: figmaNode.type, // T177: Preserve Figma type for TEXT detection
     styles: {},
     children: [],
     originalNode: figmaNode, // CRITICAL: preserve complete Figma data
