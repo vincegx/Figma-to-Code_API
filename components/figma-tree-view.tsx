@@ -8,6 +8,95 @@ import { InstanceBadge } from './instance-badge';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import { cn } from '@/lib/utils';
 
+// ============================================================================
+// Layout Icon Helper (WP18 - T157)
+// ============================================================================
+
+/**
+ * Get layout icon for nodes with auto-layout
+ * Returns null if no auto-layout (layoutMode === 'NONE' or undefined)
+ *
+ * Icon selection logic:
+ * 1. Wrap mode (layoutWrap='WRAP') → grid icon
+ * 2. Row layout → flex row icon (alignment: left/center/right)
+ * 3. Column layout → flex column icon (alignment: top/center/bottom)
+ * 4. No layout → null
+ */
+function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
+  const layoutMode = (node.originalNode as any)?.layoutMode;
+  const layoutWrap = (node.originalNode as any)?.layoutWrap;
+  const primaryAxisAlignItems = (node.originalNode as any)?.primaryAxisAlignItems;
+  const counterAxisAlignItems = (node.originalNode as any)?.counterAxisAlignItems;
+
+  // No auto-layout = no icon
+  if (!layoutMode || layoutMode === 'NONE') {
+    return null;
+  }
+
+  // Wrap mode takes precedence - show grid icon
+  if (layoutWrap === 'WRAP') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+        <path fillRule="evenodd" d="M5.5 3a.5.5 0 0 1 .5.5V5h4V3.5a.5.5 0 0 1 1 0V5h1.5a.5.5 0 0 1 0 1H11v4h1.5a.5.5 0 0 1 0 1H11v1.5a.5.5 0 0 1-1 0V11H6v1.5a.5.5 0 0 1-1 0V11H3.5a.5.5 0 0 1 0-1H5V6H3.5a.5.5 0 0 1 0-1H5V3.5a.5.5 0 0 1 .5-.5m4.5 7V6H6v4z" clipRule="evenodd"></path>
+      </svg>
+    );
+  }
+
+  // Row layout (HORIZONTAL)
+  if (layoutMode === 'HORIZONTAL') {
+    // Row center
+    if (primaryAxisAlignItems === 'CENTER') {
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm2 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Row right
+    if (primaryAxisAlignItems === 'MAX') {
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm4 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Row left (MIN or default)
+    return (
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+        <path fillRule="evenodd" d="M4 4v2h8V4zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm0 7v2h4v-2zm0-1a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z" clipRule="evenodd"></path>
+      </svg>
+    );
+  }
+
+  // Column layout (VERTICAL)
+  if (layoutMode === 'VERTICAL') {
+    // Column center
+    if (counterAxisAlignItems === 'CENTER') {
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 2h2v4h-2zM9 6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Column bottom
+    if (counterAxisAlignItems === 'MAX') {
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+          <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 4h2v4h-2zM9 8a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
+        </svg>
+      );
+    }
+    // Column top (MIN or default)
+    return (
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" className="flex-shrink-0">
+        <path fillRule="evenodd" d="M4 4h2v8H4zM3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm7 0h2v4h-2zM9 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z" clipRule="evenodd"></path>
+      </svg>
+    );
+  }
+
+  return null;
+}
+
 interface FigmaTreeViewProps {
   altNode: SimpleAltNode | null;
   selectedNodeId: string | null;
@@ -117,6 +206,13 @@ function TreeNode({
           size={14}
           className={cn('flex-shrink-0', colors.text)}
         />
+
+        {/* Layout icon (WP18 - T157) - shows auto-layout configuration */}
+        {getLayoutIcon(node) && (
+          <div className="flex-shrink-0 text-gray-400 dark:text-gray-500 ml-0.5">
+            {getLayoutIcon(node)}
+          </div>
+        )}
 
         {/* Node name */}
         <span
