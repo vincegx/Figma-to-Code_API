@@ -28,6 +28,8 @@ import { TechnicalRenderPanel } from '@/components/technical-render-panel';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
+import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
+import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 
 export default function ViewerPage() {
   const params = useParams();
@@ -37,12 +39,11 @@ export default function ViewerPage() {
   const nodes = useNodesStore((state) => state.nodes);
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
   const selectNode = useNodesStore((state) => state.selectNode);
-  const rulesFromStore = useRulesStore((state) => state.rules);
-  const loadRules = useRulesStore((state) => state.loadRules);
 
-  // Convert MappingRule[] to SimpleMappingRule[] for components
-  // For MVP, use empty array since full rule evaluation is complex
-  const rules: import('@/lib/types/rules').SimpleMappingRule[] = [];
+  // Multi-framework rules state
+  const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
+  const [selectedFramework, setSelectedFramework] = useState<FrameworkType>('react-tailwind');
+  const [isLoadingRules, setIsLoadingRules] = useState(true);
 
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(
     null
@@ -78,12 +79,59 @@ export default function ViewerPage() {
     return findNode(altNode);
   }, [altNode, selectedTreeNodeId]);
 
+  // Evaluate rules for selected node
+  const resolvedProperties = useMemo(() => {
+    const targetNode = selectedNode || altNode;
+    if (!targetNode || multiFrameworkRules.length === 0) {
+      return {};
+    }
+
+    const resolved = evaluateMultiFrameworkRules(
+      targetNode,
+      multiFrameworkRules,
+      selectedFramework
+    );
+
+    return resolved.properties;
+  }, [selectedNode, altNode, multiFrameworkRules, selectedFramework]);
+
+  // Load multi-framework rules from JSON
+  useEffect(() => {
+    async function loadMultiFrameworkRules() {
+      try {
+        const [systemRes, userRes] = await Promise.all([
+          fetch('/figma-data/rules/system-rules.json'),
+          fetch('/figma-data/rules/user-rules.json')
+        ]);
+
+        const rules: MultiFrameworkRule[] = [];
+
+        if (systemRes.ok) {
+          const systemData = await systemRes.json();
+          rules.push(...systemData);
+        }
+
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          rules.push(...userData);
+        }
+
+        setMultiFrameworkRules(rules);
+      } catch (error) {
+        console.error('Failed to load multi-framework rules:', error);
+      } finally {
+        setIsLoadingRules(false);
+      }
+    }
+
+    loadMultiFrameworkRules();
+  }, []);
+
   // Load library data on mount
   useEffect(() => {
     loadLibrary();
-    loadRules();
     selectNode(nodeId);
-  }, [loadLibrary, loadRules, selectNode, nodeId]);
+  }, [loadLibrary, selectNode, nodeId]);
 
   // Fetch node data with AltNode transformation on-the-fly
   useEffect(() => {
@@ -285,6 +333,19 @@ export default function ViewerPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Framework Selector */}
+            <select
+              value={selectedFramework}
+              onChange={(e) => setSelectedFramework(e.target.value as FrameworkType)}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="react-tailwind">React + Tailwind</option>
+              <option value="html-css">HTML + CSS</option>
+              <option value="react-inline">React Inline</option>
+              <option value="swift-ui">SwiftUI</option>
+              <option value="android-xml">Android XML</option>
+            </select>
+
             {/* "Edit Rules" button */}
             <button
               onClick={() => (window.location.href = `/rules?nodeId=${nodeId}`)}
@@ -359,7 +420,8 @@ export default function ViewerPage() {
                   <AppliedRulesInspector
                     altNode={altNode}
                     selectedNodeId={selectedTreeNodeId}
-                    rules={rules}
+                    multiFrameworkRules={multiFrameworkRules}
+                    selectedFramework={selectedFramework}
                   />
                 </TabsContent>
               </Tabs>
@@ -371,7 +433,9 @@ export default function ViewerPage() {
         <TabsContent value="render" className="flex-1 overflow-hidden m-0">
           <PreviewTabs
             altNode={altNode}
-            rules={rules}
+            multiFrameworkRules={multiFrameworkRules}
+            selectedFramework={selectedFramework}
+            resolvedProperties={resolvedProperties}
             onCodeChange={setGeneratedCode}
             scopedNode={selectedNode}
           />

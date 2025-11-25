@@ -2,20 +2,22 @@
 
 import { useMemo } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
-import { SimpleMappingRule, SimpleRuleMatch } from '@/lib/types/rules';
-import { evaluateRules } from '@/lib/rule-engine';
+import type { MultiFrameworkRule, MultiFrameworkRuleMatch, FrameworkType } from '@/lib/types/rules';
+import { getMultiFrameworkRuleMatches } from '@/lib/rule-engine';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 
 interface AppliedRulesInspectorProps {
   altNode: SimpleAltNode | null;
   selectedNodeId: string | null;
-  rules: SimpleMappingRule[];
+  multiFrameworkRules: MultiFrameworkRule[];
+  selectedFramework: FrameworkType;
 }
 
 export default function AppliedRulesInspector({
   altNode,
   selectedNodeId,
-  rules,
+  multiFrameworkRules,
+  selectedFramework,
 }: AppliedRulesInspectorProps) {
   // Find the selected node in the tree
   const selectedNode = useMemo(() => {
@@ -23,11 +25,11 @@ export default function AppliedRulesInspector({
     return findNodeById(altNode, selectedNodeId);
   }, [altNode, selectedNodeId]);
 
-  // Evaluate rules for selected node
+  // Evaluate multi-framework rules for selected node
   const ruleMatches = useMemo(() => {
-    if (!selectedNode || !rules || rules.length === 0) return [];
-    return evaluateRules(selectedNode, rules);
-  }, [selectedNode, rules]);
+    if (!selectedNode || !multiFrameworkRules || multiFrameworkRules.length === 0) return [];
+    return getMultiFrameworkRuleMatches(selectedNode, multiFrameworkRules, selectedFramework);
+  }, [selectedNode, multiFrameworkRules, selectedFramework]);
 
   // Calculate coverage stats
   const coverageStats = useMemo(() => {
@@ -179,7 +181,7 @@ export default function AppliedRulesInspector({
 }
 
 // Helper component for individual rule match
-function RuleMatchCard({ match, rank }: { match: SimpleRuleMatch; rank: number }) {
+function RuleMatchCard({ match, rank }: { match: MultiFrameworkRuleMatch; rank: number }) {
   const priorityColor =
     match.priority >= 1000
       ? 'bg-red-500'
