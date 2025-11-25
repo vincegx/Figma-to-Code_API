@@ -551,13 +551,14 @@ export function extractComponentDataAttributes(node: any): Record<string, string
   // Extract from componentPropertyReferences
   if (original.componentPropertyReferences) {
     for (const [key, ref] of Object.entries(original.componentPropertyReferences)) {
-      // Sanitize key: remove special characters, convert to kebab-case
+      // Sanitize key: remove ALL special chars and numbers, convert to kebab-case
       const sanitized = key
-        .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special chars
+        .replace(/[^a-zA-Z\s]/g, '')     // Remove special chars AND numbers
         .replace(/\s+/g, '-')            // Spaces to hyphens
         .replace(/([A-Z])/g, '-$1')      // camelCase to kebab-case
         .toLowerCase()
-        .replace(/^-/, '');              // Remove leading hyphen
+        .replace(/^-+|-+$/g, '')         // Remove leading/trailing hyphens
+        .replace(/-+/g, '-');            // Collapse multiple hyphens
 
       if (sanitized) {
         attributes[`data-${sanitized}`] = 'true'; // Boolean properties
@@ -568,13 +569,14 @@ export function extractComponentDataAttributes(node: any): Record<string, string
   // Extract from componentProperties (variant values)
   if (original.componentProperties) {
     for (const [key, prop] of Object.entries(original.componentProperties)) {
-      // Sanitize key: remove special characters, convert to kebab-case
+      // Sanitize key: remove ALL special chars and numbers, convert to kebab-case
       const sanitized = key
-        .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special chars
+        .replace(/[^a-zA-Z\s]/g, '')     // Remove special chars AND numbers
         .replace(/\s+/g, '-')            // Spaces to hyphens
         .replace(/([A-Z])/g, '-$1')      // camelCase to kebab-case
         .toLowerCase()
-        .replace(/^-/, '');              // Remove leading hyphen
+        .replace(/^-+|-+$/g, '')         // Remove leading/trailing hyphens
+        .replace(/-+/g, '-');            // Collapse multiple hyphens
 
       if (sanitized) {
         const value = (prop as any).value || 'true';
