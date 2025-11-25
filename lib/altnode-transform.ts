@@ -5,7 +5,7 @@
  * Implements 23 improvements from FigmaToCode analysis (5 CRITICAL + 12 HIGH + 6 MEDIUM priority).
  *
  * CRITICAL Improvements (T034):
- * 1. Invisible node filtering (visible === false)
+ * 1. Hidden node marking (visible: false preserved, shown dimmed in tree - T156)
  * 2. GROUP node inlining (skip wrapper, process children)
  * 3. Unique name generation (Button, Button_01, Button_02)
  * 4. originalNode reference preservation
@@ -503,10 +503,9 @@ export function transformToAltNode(
   figmaNode: FigmaNode,
   cumulativeRotation: number = 0
 ): SimpleAltNode | null {
-  // CRITICAL: Invisible node filtering
-  if (figmaNode.visible === false) {
-    return null;
-  }
+  // NOTE: Hidden nodes (visible === false) are KEPT in tree with visible: false
+  // This allows the UI to show hidden nodes with EyeOff indicator (T156)
+  // The `visible` property is preserved at line 531
 
   // CRITICAL: GROUP node inlining
   if (figmaNode.type === 'GROUP' && figmaNode.children) {

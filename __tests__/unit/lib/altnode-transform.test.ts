@@ -9,8 +9,8 @@ describe('AltNode Transformation Engine', () => {
     resetNameCounters();
   });
 
-  describe('CRITICAL: Invisible node filtering', () => {
-    it('should filter out invisible nodes', () => {
+  describe('CRITICAL: Hidden node visibility marking (T156)', () => {
+    it('should keep hidden nodes with visible: false (not filter them)', () => {
       const invisibleNode: FigmaNode = {
         id: '1:1',
         name: 'InvisibleFrame',
@@ -21,10 +21,12 @@ describe('AltNode Transformation Engine', () => {
       };
 
       const result = transformToAltNode(invisibleNode);
-      expect(result).toBeNull();
+      expect(result).not.toBeNull(); // T156: Hidden nodes are KEPT
+      expect(result?.visible).toBe(false); // But marked as hidden
+      expect(result?.name).toBe('InvisibleFrame');
     });
 
-    it('should include visible nodes', () => {
+    it('should include visible nodes with visible: true', () => {
       const visibleNode: FigmaNode = {
         id: '1:2',
         name: 'VisibleFrame',
@@ -36,10 +38,11 @@ describe('AltNode Transformation Engine', () => {
 
       const result = transformToAltNode(visibleNode);
       expect(result).not.toBeNull();
+      expect(result?.visible).toBe(true);
       expect(result?.name).toBe('VisibleFrame');
     });
 
-    it('should filter invisible children from parent', () => {
+    it('should keep both visible and hidden children (T156)', () => {
       const parentWithMixedChildren: FigmaNode = {
         id: '1:3',
         name: 'Parent',
@@ -65,8 +68,11 @@ describe('AltNode Transformation Engine', () => {
       };
 
       const result = transformToAltNode(parentWithMixedChildren);
-      expect(result?.children).toHaveLength(1);
+      expect(result?.children).toHaveLength(2); // T156: Both children kept
       expect(result?.children[0].name).toBe('VisibleChild');
+      expect(result?.children[0].visible).toBe(true);
+      expect(result?.children[1].name).toBe('InvisibleChild');
+      expect(result?.children[1].visible).toBe(false);
     });
   });
 
@@ -741,7 +747,7 @@ describe('AltNode Transformation Engine', () => {
       expect(navItems[1].uniqueName).toBe('NavItem_01');
     });
 
-    it('should handle mixed visibility and GROUP inlining', () => {
+    it('should handle mixed visibility and GROUP inlining (T156)', () => {
       const mixedTree: FigmaNode = {
         id: '13:1',
         name: 'Container',
@@ -773,8 +779,10 @@ describe('AltNode Transformation Engine', () => {
       };
 
       const result = transformToAltNode(mixedTree);
-      expect(result?.children).toHaveLength(1); // Only visible child
+      expect(result?.children).toHaveLength(2); // T156: Both visible GROUP (inlined) and hidden Frame
       expect(result?.children[0].name).toBe('OnlyChild'); // GROUP inlined
+      expect(result?.children[1].name).toBe('InvisibleFrame'); // T156: Hidden kept
+      expect(result?.children[1].visible).toBe(false);
     });
   });
 });
