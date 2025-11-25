@@ -26,7 +26,6 @@ function getLayoutIcon(node: SimpleAltNode): React.ReactNode | null {
   const layoutMode = (node.originalNode as any)?.layoutMode;
   const layoutWrap = (node.originalNode as any)?.layoutWrap;
   const primaryAxisAlignItems = (node.originalNode as any)?.primaryAxisAlignItems;
-  const counterAxisAlignItems = (node.originalNode as any)?.counterAxisAlignItems;
 
   // No auto-layout = no icon
   if (!layoutMode || layoutMode === 'NONE') {
