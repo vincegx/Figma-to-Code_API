@@ -63,8 +63,21 @@ function generateTailwindJSXElement(
   const indent = '  '.repeat(depth + 1);
   const htmlTag = mapNodeTypeToHTMLTag(node.type);
 
+  // Merge base styles from AltNode with rule overrides
+  // Rules take precedence over computed styles
+  // Convert node.styles values to strings if needed
+  const baseStyles: Record<string, string> = {};
+  for (const [key, value] of Object.entries(node.styles || {})) {
+    baseStyles[key] = typeof value === 'number' ? String(value) : value;
+  }
+
+  const mergedStyles: Record<string, string> = {
+    ...baseStyles,
+    ...properties,
+  };
+
   // Convert CSS properties to Tailwind classes
-  const tailwindClasses = Object.entries(properties)
+  const tailwindClasses = Object.entries(mergedStyles)
     .map(([cssProperty, cssValue]) => cssPropToTailwind(cssProperty, cssValue))
     .filter(Boolean)
     .join(' ');
@@ -78,8 +91,9 @@ function generateTailwindJSXElement(
   if (hasChildren) {
     jsxString += `${indent}<${htmlTag}${hasClasses ? ` className="${tailwindClasses}"` : ''}>\n`;
 
-    // Recursively generate children
+    // Recursively generate children with their own styles
     for (const child of (node as any).children) {
+      // Children inherit no properties from parent - each node uses its own styles
       jsxString += generateTailwindJSXElement(child, {}, depth + 1);
     }
 
