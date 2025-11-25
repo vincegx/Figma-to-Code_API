@@ -37,13 +37,19 @@ export function RuleCategorySection({
 }: RuleCategorySectionProps) {
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
 
+  // Calculate priority statistics
+  const highestPriority = rules.length > 0 ? Math.max(...rules.map(r => r.rule.priority)) : 0;
+  const lowestPriority = rules.length > 0 ? Math.min(...rules.map(r => r.rule.priority)) : 0;
+  const activeRules = rules.filter(r => !r.isOverridden).length;
+  const overriddenRules = rules.filter(r => r.isOverridden).length;
+
   return (
     <div className="border-b border-gray-200 dark:border-gray-700 last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <ChevronDown
             className={cn(
               "w-4 h-4 transition-transform text-gray-500",
@@ -56,6 +62,14 @@ export function RuleCategorySection({
           <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
             {rules.length}
           </span>
+          {overriddenRules > 0 && (
+            <span className="text-xs text-orange-500" title={`${overriddenRules} overridden rules`}>
+              ⚠️ {overriddenRules}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span className="font-mono">Priority: {lowestPriority}-{highestPriority}</span>
         </div>
       </button>
 

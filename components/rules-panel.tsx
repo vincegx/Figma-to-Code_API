@@ -174,7 +174,7 @@ export function RulesPanel({
               key={category}
               category={category}
               rules={rules}
-              defaultCollapsed={true}
+              defaultCollapsed={false}
             />
           ))
         ) : (
