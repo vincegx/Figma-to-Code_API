@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useNodesStore, useRulesStore } from '@/lib/store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import {
   ChevronLeft,
   ChevronRight,
@@ -29,6 +31,7 @@ import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 export default function ViewerPage() {
   const params = useParams();
+  const router = useRouter();
   const nodeId = params.nodeId as string;
 
   const nodes = useNodesStore((state) => state.nodes);
@@ -119,12 +122,12 @@ export default function ViewerPage() {
             The node you&apos;re looking for doesn&apos;t exist or hasn&apos;t been imported
             yet.
           </p>
-          <a
+          <Link
             href="/nodes"
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-block"
           >
             Return to Library
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -142,27 +145,13 @@ export default function ViewerPage() {
           {/* Left: Breadcrumbs + Thumbnail + Name */}
           <div className="flex items-center gap-4">
             {/* Breadcrumbs with type icons */}
-            <nav className="text-sm text-gray-600 dark:text-gray-400 mr-4 flex items-center gap-1">
-              <a href="/" className="hover:text-gray-900 dark:hover:text-gray-200">
-                Home
-              </a>
-              {' > '}
-              <a
-                href="/nodes"
-                className="hover:text-gray-900 dark:hover:text-gray-200"
-              >
-                Library
-              </a>
-              {' > '}
-              <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
-                <FigmaTypeIcon
-                  type={nodeType}
-                  size={14}
-                  className={nodeColors.text}
-                />
-                {currentNode.name}
-              </span>
-            </nav>
+            <Breadcrumbs
+              items={[
+                { label: 'Library', href: '/nodes' },
+                { label: currentNode.name, figmaType: nodeType },
+              ]}
+              className="mr-4"
+            />
 
             {/* Thumbnail */}
             <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500">
@@ -204,7 +193,7 @@ export default function ViewerPage() {
             <button
               onClick={() => {
                 if (prevNode) {
-                  window.location.href = `/viewer/${prevNode.id}`;
+                  router.push(`/viewer/${prevNode.id}`);
                 }
               }}
               disabled={!prevNode}
@@ -216,7 +205,7 @@ export default function ViewerPage() {
             <button
               onClick={() => {
                 if (nextNode) {
-                  window.location.href = `/viewer/${nextNode.id}`;
+                  router.push(`/viewer/${nextNode.id}`);
                 }
               }}
               disabled={!nextNode}
