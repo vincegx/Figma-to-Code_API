@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { generateReactJSX } from '@/lib/code-generators/react';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
-import { AltNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 /**
  * Code Generator Performance Benchmarks
@@ -16,7 +16,7 @@ describe('Code Generators - Performance Benchmarks', () => {
   /**
    * Helper to create a deep nested node tree
    */
-  function createDeepTree(depth: number, childrenPerLevel: number): Partial<AltNode> {
+  function createDeepTree(depth: number, childrenPerLevel: number): Partial<SimpleAltNode> {
     if (depth === 0) {
       return {
         id: `leaf-${Math.random()}`,
@@ -42,7 +42,7 @@ describe('Code Generators - Performance Benchmarks', () => {
   /**
    * Helper to create a wide node tree
    */
-  function createWideTree(totalChildren: number): Partial<AltNode> {
+  function createWideTree(totalChildren: number): Partial<SimpleAltNode> {
     const children: any[] = [];
     for (let i = 0; i < totalChildren; i++) {
       if (i % 2 === 0) {
@@ -86,7 +86,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const complexNode = createWideTree(100);
 
       const startTime = performance.now();
-      const result = generateReactJSX(complexNode as AltNode, sampleProperties);
+      const result = generateReactJSX(complexNode as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React JSX (100 children) in ${duration.toFixed(2)}ms`);
@@ -100,7 +100,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const complexNode = createWideTree(100);
 
       const startTime = performance.now();
-      const result = generateReactTailwind(complexNode as AltNode, sampleProperties);
+      const result = generateReactTailwind(complexNode as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React Tailwind (100 children) in ${duration.toFixed(2)}ms`);
@@ -114,7 +114,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const complexNode = createWideTree(100);
 
       const startTime = performance.now();
-      const result = generateHTMLCSS(complexNode as AltNode, sampleProperties);
+      const result = generateHTMLCSS(complexNode as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated HTML/CSS (100 children) in ${duration.toFixed(2)}ms`);
@@ -131,9 +131,9 @@ describe('Code Generators - Performance Benchmarks', () => {
       const startTime = performance.now();
 
       // Generate all three formats
-      generateReactJSX(complexNode as AltNode, sampleProperties);
-      generateReactTailwind(complexNode as AltNode, sampleProperties);
-      generateHTMLCSS(complexNode as AltNode, sampleProperties);
+      generateReactJSX(complexNode as SimpleAltNode, sampleProperties);
+      generateReactTailwind(complexNode as SimpleAltNode, sampleProperties);
+      generateHTMLCSS(complexNode as SimpleAltNode, sampleProperties);
 
       const duration = performance.now() - startTime;
 
@@ -149,7 +149,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const deepNode = createDeepTree(10, 2);
 
       const startTime = performance.now();
-      const result = generateReactJSX(deepNode as AltNode, sampleProperties);
+      const result = generateReactJSX(deepNode as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React JSX (10 levels deep, ~1024 nodes) in ${duration.toFixed(2)}ms`);
@@ -163,7 +163,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const veryDeepNode = createDeepTree(20, 1);
 
       const startTime = performance.now();
-      const result = generateReactTailwind(veryDeepNode as AltNode, sampleProperties);
+      const result = generateReactTailwind(veryDeepNode as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React Tailwind (20 levels deep) in ${duration.toFixed(2)}ms`);
@@ -175,7 +175,7 @@ describe('Code Generators - Performance Benchmarks', () => {
 
   describe('Large Property Sets', () => {
     it('should handle nodes with many CSS properties efficiently', () => {
-      const node: Partial<AltNode> = {
+      const node: Partial<SimpleAltNode> = {
         id: '1',
         name: 'StyledBox',
         type: 'FRAME',
@@ -189,7 +189,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       }
 
       const startTime = performance.now();
-      const result = generateReactJSX(node as AltNode, largePropertySet);
+      const result = generateReactJSX(node as SimpleAltNode, largePropertySet);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React JSX (50 CSS properties) in ${duration.toFixed(2)}ms`);
@@ -199,7 +199,7 @@ describe('Code Generators - Performance Benchmarks', () => {
     });
 
     it('should convert many properties to Tailwind classes efficiently', () => {
-      const node: Partial<AltNode> = {
+      const node: Partial<SimpleAltNode> = {
         id: '1',
         name: 'StyledBox',
         type: 'FRAME',
@@ -217,7 +217,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       };
 
       const startTime = performance.now();
-      const result = generateReactTailwind(node as AltNode, tailwindProperties);
+      const result = generateReactTailwind(node as SimpleAltNode, tailwindProperties);
       const duration = performance.now() - startTime;
 
       console.log(`✓ Generated React Tailwind (Tailwind conversion) in ${duration.toFixed(2)}ms`);
@@ -229,7 +229,7 @@ describe('Code Generators - Performance Benchmarks', () => {
 
   describe('Batch Generation Performance', () => {
     it('should generate 100 simple components in <500ms', () => {
-      const simpleNode: Partial<AltNode> = {
+      const simpleNode: Partial<SimpleAltNode> = {
         id: '1',
         name: 'Button',
         type: 'FRAME',
@@ -239,7 +239,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const startTime = performance.now();
 
       for (let i = 0; i < 100; i++) {
-        generateReactJSX(simpleNode as AltNode, sampleProperties);
+        generateReactJSX(simpleNode as SimpleAltNode, sampleProperties);
       }
 
       const duration = performance.now() - startTime;
@@ -250,7 +250,7 @@ describe('Code Generators - Performance Benchmarks', () => {
     });
 
     it('should generate mixed formats (100 components) in <1000ms', () => {
-      const node: Partial<AltNode> = {
+      const node: Partial<SimpleAltNode> = {
         id: '1',
         name: 'Component',
         type: 'FRAME',
@@ -267,9 +267,9 @@ describe('Code Generators - Performance Benchmarks', () => {
       const startTime = performance.now();
 
       for (let i = 0; i < 33; i++) {
-        generateReactJSX(node as AltNode, sampleProperties);
-        generateReactTailwind(node as AltNode, sampleProperties);
-        generateHTMLCSS(node as AltNode, sampleProperties);
+        generateReactJSX(node as SimpleAltNode, sampleProperties);
+        generateReactTailwind(node as SimpleAltNode, sampleProperties);
+        generateHTMLCSS(node as SimpleAltNode, sampleProperties);
       }
 
       const duration = performance.now() - startTime;
@@ -286,7 +286,7 @@ describe('Code Generators - Performance Benchmarks', () => {
 
       // Generate multiple times to check for memory leaks
       for (let i = 0; i < 10; i++) {
-        const result = generateReactJSX(largeTree as AltNode, sampleProperties);
+        const result = generateReactJSX(largeTree as SimpleAltNode, sampleProperties);
         expect(result.code.length).toBeGreaterThan(0);
       }
 
@@ -300,7 +300,7 @@ describe('Code Generators - Performance Benchmarks', () => {
       const node = createWideTree(50);
 
       const startTime = performance.now();
-      const result = generateReactJSX(node as AltNode, sampleProperties);
+      const result = generateReactJSX(node as SimpleAltNode, sampleProperties);
       const duration = performance.now() - startTime;
 
       // Should be fast

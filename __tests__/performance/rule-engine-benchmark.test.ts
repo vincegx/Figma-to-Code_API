@@ -8,15 +8,15 @@
 
 import { describe, it, expect } from 'vitest';
 import { evaluateRules } from '@/lib/rule-engine';
-import type { AltNode, AltFrameNode, AltTextNode, AltRectangleNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { SimpleMappingRule, Selector } from '@/lib/types/rules';
 
 // ============================================================================
 // Test Data Generators
 // ============================================================================
 
-function generateTestNodes(count: number): AltNode[] {
-  const nodes: AltNode[] = [];
+function generateTestNodes(count: number): SimpleAltNode[] {
+  const nodes: SimpleAltNode[] = [];
 
   for (let i = 0; i < count; i++) {
     const nodeType = i % 3 === 0 ? 'FRAME' : i % 3 === 1 ? 'TEXT' : 'RECTANGLE';
@@ -54,7 +54,7 @@ function generateTestNodes(count: number): AltNode[] {
         clipsContent: false,
         isComponent: false,
         originalNode: {} as any,
-      } as AltFrameNode);
+      } as unknown as SimpleAltNode);
     } else if (nodeType === 'TEXT') {
       nodes.push({
         id: `node-${i}`,
@@ -87,7 +87,7 @@ function generateTestNodes(count: number): AltNode[] {
         textAutoResize: 'WIDTH_AND_HEIGHT',
         lineHeight: 'AUTO',
         originalNode: {} as any,
-      } as AltTextNode);
+      } as unknown as SimpleAltNode);
     } else {
       nodes.push({
         id: `node-${i}`,
@@ -110,7 +110,7 @@ function generateTestNodes(count: number): AltNode[] {
         strokes: { paints: [], weight: 0, align: 'INSIDE' },
         cornerRadius: { topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0, isUniform: true },
         originalNode: {} as any,
-      } as AltRectangleNode);
+      } as unknown as SimpleAltNode);
     }
   }
 

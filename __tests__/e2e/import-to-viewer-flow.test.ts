@@ -26,12 +26,14 @@ const mockFigmaNode: FigmaNode = {
   name: 'TestFrame',
   type: 'FRAME',
   visible: true,
+  locked: false,
   children: [
     {
       id: '1:3',
       name: 'ChildText',
       type: 'TEXT',
       visible: true,
+      locked: false,
       characters: 'Hello World',
     } as FigmaNode,
   ],

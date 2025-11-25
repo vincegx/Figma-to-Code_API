@@ -9,7 +9,7 @@ import {
   toKebabCase,
   formatCode,
 } from '@/lib/code-generators/helpers';
-import { AltNode } from '@/lib/types/altnode';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 // ============================================================================
 // Helper Function Tests
@@ -227,7 +227,7 @@ describe('Code Generators - React JSX', () => {
   };
 
   it('should generate valid React JSX', () => {
-    const result = generateReactJSX(sampleNode as AltNode, sampleProperties);
+    const result = generateReactJSX(sampleNode as SimpleAltNode, sampleProperties);
 
     expect(result.code).toContain('export function');
     expect(result.code).toContain('return');
@@ -239,13 +239,13 @@ describe('Code Generators - React JSX', () => {
   });
 
   it('should use PascalCase component names', () => {
-    const result = generateReactJSX(sampleNode as AltNode, sampleProperties);
+    const result = generateReactJSX(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.code).toContain('export function Button');
     expect(result.metadata.componentName).toBe('Button');
   });
 
   it('should include styles object', () => {
-    const result = generateReactJSX(sampleNode as AltNode, sampleProperties);
+    const result = generateReactJSX(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.code).toContain('const styles: React.CSSProperties');
     expect(result.code).toContain("display: 'flex'");
     expect(result.code).toContain("padding: '16px'");
@@ -273,7 +273,7 @@ describe('Code Generators - React JSX', () => {
       ],
     };
 
-    const result = generateReactJSX(deepNode as AltNode, {});
+    const result = generateReactJSX(deepNode as SimpleAltNode, {});
     expect(result.code.match(/<div/g)?.length).toBeGreaterThan(1);
     expect(result.code).toContain('Deep content');
   });
@@ -286,13 +286,13 @@ describe('Code Generators - React JSX', () => {
       children: [],
     };
 
-    const result = generateReactJSX(leafNode as AltNode, { padding: '8px' });
+    const result = generateReactJSX(leafNode as SimpleAltNode, { padding: '8px' });
     expect(result.code).toContain('<div');
     expect(result.code).toContain('/>'); // Self-closing tag
   });
 
   it('should include metadata', () => {
-    const result = generateReactJSX(sampleNode as AltNode, sampleProperties);
+    const result = generateReactJSX(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.metadata.componentName).toBe('Button');
     expect(result.metadata.nodeId).toBe('1');
     expect(result.metadata.generatedAt).toBeTruthy();
@@ -319,7 +319,7 @@ describe('Code Generators - React Tailwind', () => {
   };
 
   it('should generate valid React Tailwind JSX', () => {
-    const result = generateReactTailwind(sampleNode as AltNode, sampleProperties);
+    const result = generateReactTailwind(sampleNode as SimpleAltNode, sampleProperties);
 
     expect(result.code).toContain('export function');
     expect(result.code).toContain('className="');
@@ -329,7 +329,7 @@ describe('Code Generators - React Tailwind', () => {
   });
 
   it('should convert CSS properties to Tailwind classes', () => {
-    const result = generateReactTailwind(sampleNode as AltNode, sampleProperties);
+    const result = generateReactTailwind(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.code).toContain('flex');
     expect(result.code).toContain('p-4');
     expect(result.code).toContain('bg-[#EF4444]');
@@ -349,7 +349,7 @@ describe('Code Generators - React Tailwind', () => {
       padding: '7px',
     };
 
-    const result = generateReactTailwind(nodeWithArbitrary as AltNode, arbitraryProps);
+    const result = generateReactTailwind(nodeWithArbitrary as SimpleAltNode, arbitraryProps);
     expect(result.code).toContain('gap-[13px]');
     expect(result.code).toContain('p-[7px]');
   });
@@ -369,7 +369,7 @@ describe('Code Generators - React Tailwind', () => {
       ],
     };
 
-    const result = generateReactTailwind(nestedNode as AltNode, { display: 'flex' });
+    const result = generateReactTailwind(nestedNode as SimpleAltNode, { display: 'flex' });
     expect(result.code).toContain('className="flex"');
     expect(result.code).toContain('Content');
   });
@@ -394,7 +394,7 @@ describe('Code Generators - HTML/CSS', () => {
   };
 
   it('should generate valid HTML and CSS', () => {
-    const result = generateHTMLCSS(sampleNode as AltNode, sampleProperties);
+    const result = generateHTMLCSS(sampleNode as SimpleAltNode, sampleProperties);
 
     expect(result.code).toContain('<div');
     expect(result.code).toContain('</div>');
@@ -406,13 +406,13 @@ describe('Code Generators - HTML/CSS', () => {
   });
 
   it('should use kebab-case class names', () => {
-    const result = generateHTMLCSS(sampleNode as AltNode, sampleProperties);
+    const result = generateHTMLCSS(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.code).toContain('class="button"');
     expect(result.css).toContain('.button');
   });
 
   it('should convert camelCase CSS to kebab-case', () => {
-    const result = generateHTMLCSS(sampleNode as AltNode, sampleProperties);
+    const result = generateHTMLCSS(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.css).toContain('background-color: #ef4444');
   });
 
@@ -431,14 +431,14 @@ describe('Code Generators - HTML/CSS', () => {
       ],
     };
 
-    const result = generateHTMLCSS(nestedNode as AltNode, { display: 'flex' });
+    const result = generateHTMLCSS(nestedNode as SimpleAltNode, { display: 'flex' });
     expect(result.code).toContain('<div class="container">');
     expect(result.code).toContain('<span class="child">Text content</span>');
     expect(result.css).toContain('.container');
   });
 
   it('should separate HTML and CSS', () => {
-    const result = generateHTMLCSS(sampleNode as AltNode, sampleProperties);
+    const result = generateHTMLCSS(sampleNode as SimpleAltNode, sampleProperties);
     expect(result.code).toContain('<!-- HTML -->');
     expect(result.code).toContain('/* CSS */');
     expect(result.css).toBeTruthy();
@@ -458,7 +458,7 @@ describe('Code Generators - Readability', () => {
       children: [],
     };
 
-    const result = generateReactJSX(node as AltNode, { padding: '16px' });
+    const result = generateReactJSX(node as SimpleAltNode, { padding: '16px' });
     const lines = result.code.split('\n');
     const indentedLines = lines.filter(line => line.startsWith('  '));
     expect(indentedLines.length).toBeGreaterThan(0);
@@ -472,7 +472,7 @@ describe('Code Generators - Readability', () => {
       children: [],
     };
 
-    const result = generateReactJSX(node as AltNode, {});
+    const result = generateReactJSX(node as SimpleAltNode, {});
     expect(result.code).toContain('export function ButtonPrimary');
     expect(result.metadata.componentName).toBe('ButtonPrimary');
   });
@@ -491,7 +491,7 @@ describe('Code Generators - Readability', () => {
       backgroundColor: '#EF4444',
     };
 
-    const result = generateHTMLCSS(node as AltNode, properties);
+    const result = generateHTMLCSS(node as SimpleAltNode, properties);
     expect(result.css).toContain('display: flex;');
     expect(result.css).toContain('padding: 16px;');
     expect(result.css).toContain('background-color: #ef4444;');

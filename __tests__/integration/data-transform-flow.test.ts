@@ -25,6 +25,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'TestFrame',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [],
         absoluteBoundingBox: { x: 0, y: 0, width: 100, height: 100 },
         relativeTransform: [[1, 0, 0], [0, 1, 0]],
@@ -46,6 +47,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'HiddenFrame',
         type: 'FRAME',
         visible: false,
+        locked: false,
         children: [],
       } as FigmaNode;
 
@@ -60,6 +62,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'Button',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [],
       } as FigmaNode;
 
@@ -68,6 +71,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'Button',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [],
       } as FigmaNode;
 
@@ -84,12 +88,14 @@ describe('Data Transform Flow Integration', () => {
         name: 'ParentFrame',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [
           {
             id: '1:2',
             name: 'ChildText',
             type: 'TEXT',
             visible: true,
+            locked: false,
             characters: 'Hello',
           } as FigmaNode,
           {
@@ -97,6 +103,7 @@ describe('Data Transform Flow Integration', () => {
             name: 'ChildFrame',
             type: 'FRAME',
             visible: true,
+            locked: false,
             children: [],
           } as FigmaNode,
         ],
@@ -117,18 +124,21 @@ describe('Data Transform Flow Integration', () => {
         name: 'ContainerFrame',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [
           {
             id: '1:2',
             name: 'GroupWrapper',
             type: 'GROUP',
             visible: true,
+            locked: false,
             children: [
               {
                 id: '1:3',
                 name: 'InnerElement',
                 type: 'RECTANGLE',
                 visible: true,
+                locked: false,
               } as FigmaNode,
             ],
           } as FigmaNode,
@@ -148,6 +158,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'TestNode',
         type: 'FRAME',
         visible: true,
+        locked: false,
         absoluteBoundingBox: { x: 10, y: 20, width: 300, height: 400 },
         children: [],
       } as FigmaNode;
@@ -165,6 +176,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'Label',
         type: 'TEXT',
         visible: true,
+        locked: false,
         characters: 'Hello World',
       } as FigmaNode;
 
@@ -180,6 +192,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'Icon',
         type: 'VECTOR',
         visible: true,
+        locked: false,
       } as FigmaNode;
 
       const result = transformToAltNode(figmaNode);
@@ -193,6 +206,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'SmallIcon',
         type: 'VECTOR',
         visible: true,
+        locked: false,
         absoluteBoundingBox: { x: 0, y: 0, width: 24, height: 24 },
       } as FigmaNode;
 
@@ -209,6 +223,7 @@ describe('Data Transform Flow Integration', () => {
         name: 'Frame',
         type: 'FRAME',
         visible: true,
+        locked: false,
         children: [],
       } as FigmaNode;
 

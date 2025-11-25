@@ -15,12 +15,13 @@ import {
 } from '@/lib/rule-engine';
 import type { AltNode, AltFrameNode, AltTextNode, AltRectangleNode } from '@/lib/types/altnode';
 import type { SimpleMappingRule, Selector } from '@/lib/types/rules';
+import type { SimpleAltNode } from '@/lib/altnode-transform';
 
 // ============================================================================
 // Test Helpers - Mock AltNode Creation
 // ============================================================================
 
-function createMockFrameNode(overrides?: Partial<AltFrameNode>): AltFrameNode {
+function createMockFrameNode(overrides?: Partial<SimpleAltNode>): SimpleAltNode {
   return {
     id: '1:1',
     name: 'Frame',
@@ -66,10 +67,10 @@ function createMockFrameNode(overrides?: Partial<AltFrameNode>): AltFrameNode {
     isComponent: false,
     originalNode: {} as any,
     ...overrides,
-  } as AltFrameNode;
+  } as unknown as SimpleAltNode;
 }
 
-function createMockTextNode(overrides?: Partial<AltTextNode>): AltTextNode {
+function createMockTextNode(overrides?: Partial<SimpleAltNode>): SimpleAltNode {
   return {
     id: '1:2',
     name: 'Text',
@@ -102,10 +103,10 @@ function createMockTextNode(overrides?: Partial<AltTextNode>): AltTextNode {
     lineHeight: 'AUTO',
     originalNode: {} as any,
     ...overrides,
-  } as AltTextNode;
+  } as unknown as SimpleAltNode;
 }
 
-function createMockRectangleNode(overrides?: Partial<AltRectangleNode>): AltRectangleNode {
+function createMockRectangleNode(overrides?: Partial<SimpleAltNode>): SimpleAltNode {
   return {
     id: '1:3',
     name: 'Rectangle',
@@ -140,7 +141,7 @@ function createMockRectangleNode(overrides?: Partial<AltRectangleNode>): AltRect
     },
     originalNode: {} as any,
     ...overrides,
-  } as AltRectangleNode;
+  } as unknown as SimpleAltNode;
 }
 
 // ============================================================================
