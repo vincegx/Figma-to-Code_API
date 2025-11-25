@@ -80,13 +80,14 @@ function TreeNode({
 
   return (
     <div>
-      {/* Node row */}
+      {/* Node row - dim hidden nodes */}
       <div
         className={cn(
           'flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors',
           isSelected
             ? cn(colors.bg, colors.text, colors.border, 'border')
-            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-700',
+          !node.visible && 'opacity-50' // T156: Dim hidden nodes
         )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => onNodeClick(node.id)}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { FigmaNode, Paint, Effect, Color } from '@/lib/types/figma';
-import { ChevronDown, ChevronRight, Eye, EyeOff, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Eye, EyeOff, Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FigmaPropertiesPanelProps {
@@ -11,39 +11,58 @@ interface FigmaPropertiesPanelProps {
 }
 
 // =============================================================================
-// REUSABLE SUB-COMPONENTS (per T151 specs)
+// FIGMA COLOR SCHEME (exact Figma colors)
+// =============================================================================
+const figmaColors = {
+  bg: '#2c2c2c',
+  bgLight: '#383838',
+  input: '#3d3d3d',
+  inputHover: '#4a4a4a',
+  border: '#3d3d3d',
+  label: '#adadad',
+  value: '#ffffff',
+  activeBlue: 'rgba(59, 130, 246, 0.2)',
+  activeBlueBorder: 'rgba(59, 130, 246, 0.5)',
+};
+
+// =============================================================================
+// REUSABLE FIGMA-STYLE COMPONENTS
 // =============================================================================
 
-interface PropertySectionProps {
+interface FigmaSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
   showAddButton?: boolean;
+  rightContent?: React.ReactNode;
 }
 
-function PropertySection({ title, children, defaultOpen = true, showAddButton = false }: PropertySectionProps) {
+function FigmaSection({ title, children, defaultOpen = true, showAddButton = false, rightContent }: FigmaSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700">
+    <div className="border-b" style={{ borderColor: figmaColors.border }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-white/5 transition-colors"
       >
         <div className="flex items-center gap-2">
           {isOpen ? (
-            <ChevronDown size={12} className="text-gray-400" />
+            <ChevronDown size={10} style={{ color: figmaColors.label }} />
           ) : (
-            <ChevronRight size={12} className="text-gray-400" />
+            <ChevronRight size={10} style={{ color: figmaColors.label }} />
           )}
-          <span className="text-sm font-medium text-gray-900 dark:text-white">{title}</span>
+          <span className="text-xs font-medium" style={{ color: figmaColors.value }}>{title}</span>
         </div>
-        {showAddButton && (
-          <Plus size={14} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
-        )}
+        <div className="flex items-center gap-1">
+          {rightContent}
+          {showAddButton && (
+            <Plus size={12} style={{ color: figmaColors.label }} />
+          )}
+        </div>
       </button>
       {isOpen && (
-        <div className="px-3 pb-3 space-y-2">
+        <div className="px-3 pb-3 space-y-3">
           {children}
         </div>
       )}
@@ -51,90 +70,163 @@ function PropertySection({ title, children, defaultOpen = true, showAddButton = 
   );
 }
 
-interface PropertyRowProps {
-  label: string;
-  value: string | number;
-  monospace?: boolean;
-}
-
-function PropertyRow({ label, value, monospace = true }: PropertyRowProps) {
+// Figma-style input display (read-only)
+function FigmaInput({ value, prefix, suffix, className }: { value: string | number; prefix?: string; suffix?: string; className?: string }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">{label}</span>
-      <PropertyInput value={String(value)} monospace={monospace} />
+    <div
+      className={cn("flex items-center gap-1 rounded px-2 py-1 text-xs font-mono", className)}
+      style={{ backgroundColor: figmaColors.input, color: figmaColors.value }}
+    >
+      {prefix && <span style={{ color: figmaColors.label }}>{prefix}</span>}
+      <span className="flex-1 text-right">{value}</span>
+      {suffix && <span style={{ color: figmaColors.label }}>{suffix}</span>}
     </div>
   );
 }
 
-interface PropertyInputProps {
-  value: string;
-  monospace?: boolean;
-  className?: string;
+// Figma-style label
+function FigmaLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[10px]" style={{ color: figmaColors.label }}>
+      {children}
+    </span>
+  );
 }
 
-function PropertyInput({ value, monospace = true, className }: PropertyInputProps) {
+// Alignment button (read-only display)
+function AlignButton({ active, children }: { active?: boolean; children: React.ReactNode }) {
   return (
-    <div className={cn(
-      "bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-xs text-gray-900 dark:text-white min-w-[60px] text-right",
-      monospace && "font-mono",
-      className
-    )}>
-      {value}
+    <div
+      className={cn(
+        "w-7 h-7 flex items-center justify-center rounded text-xs",
+        active && "ring-1"
+      )}
+      style={{
+        backgroundColor: active ? figmaColors.activeBlue : figmaColors.input,
+        borderColor: active ? figmaColors.activeBlueBorder : 'transparent',
+        color: figmaColors.value,
+      }}
+    >
+      {children}
     </div>
   );
 }
 
-interface ColorSwatchProps {
-  color: Color;
-  opacity?: number;
-  size?: number;
+// 3x3 Alignment Grid (read-only display)
+function AlignmentGrid3x3({ activeX, activeY }: { activeX: 'MIN' | 'CENTER' | 'MAX'; activeY: 'MIN' | 'CENTER' | 'MAX' }) {
+  const positions = ['MIN', 'CENTER', 'MAX'] as const;
+  const xIndex = positions.indexOf(activeX);
+  const yIndex = positions.indexOf(activeY);
+
+  return (
+    <div
+      className="grid grid-cols-3 gap-1 p-2 rounded"
+      style={{ backgroundColor: figmaColors.input }}
+    >
+      {positions.map((y, yi) =>
+        positions.map((x, xi) => {
+          const isActive = xi === xIndex && yi === yIndex;
+          return (
+            <div
+              key={`${x}-${y}`}
+              className={cn(
+                "w-2 h-2 rounded-full",
+                isActive ? "bg-blue-500" : "bg-gray-500/30"
+              )}
+            />
+          );
+        })
+      )}
+    </div>
+  );
 }
 
-function ColorSwatch({ color, opacity = 1, size = 20 }: ColorSwatchProps) {
+// Constraints Visualizer (the cross with anchor points)
+function ConstraintsVisualizer({ horizontal, vertical }: { horizontal: string; vertical: string }) {
+  // Map constraint types to visual positions
+  const hPos = horizontal === 'LEFT' ? 'start' : horizontal === 'RIGHT' ? 'end' : 'center';
+  const vPos = vertical === 'TOP' ? 'start' : vertical === 'BOTTOM' ? 'end' : 'center';
+
+  return (
+    <div
+      className="relative w-20 h-16 rounded"
+      style={{ backgroundColor: figmaColors.input }}
+    >
+      {/* Outer frame */}
+      <div className="absolute inset-2 border border-gray-500/30 rounded-sm">
+        {/* Horizontal line */}
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-500/30" />
+        {/* Vertical line */}
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-500/30" />
+
+        {/* Inner element (representing the node) */}
+        <div
+          className="absolute w-4 h-3 border border-blue-500 rounded-sm"
+          style={{
+            left: hPos === 'start' ? '2px' : hPos === 'end' ? 'calc(100% - 18px)' : 'calc(50% - 8px)',
+            top: vPos === 'start' ? '2px' : vPos === 'end' ? 'calc(100% - 14px)' : 'calc(50% - 6px)',
+          }}
+        />
+
+        {/* Constraint indicators */}
+        {horizontal === 'LEFT' && (
+          <div className="absolute left-0 top-1/2 w-2 h-0.5 bg-blue-500 -translate-y-1/2" />
+        )}
+        {horizontal === 'RIGHT' && (
+          <div className="absolute right-0 top-1/2 w-2 h-0.5 bg-blue-500 -translate-y-1/2" />
+        )}
+        {vertical === 'TOP' && (
+          <div className="absolute top-0 left-1/2 w-0.5 h-2 bg-blue-500 -translate-x-1/2" />
+        )}
+        {vertical === 'BOTTOM' && (
+          <div className="absolute bottom-0 left-1/2 w-0.5 h-2 bg-blue-500 -translate-x-1/2" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Color Swatch (24x24)
+function ColorSwatch({ color, opacity = 1, size = 24 }: { color: Color; opacity?: number; size?: number }) {
   const hex = colorToHex(color);
   return (
     <div
-      className="rounded border border-gray-300 dark:border-gray-600 shrink-0"
+      className="rounded border shrink-0"
       style={{
         backgroundColor: hex,
         opacity,
         width: size,
         height: size,
+        borderColor: figmaColors.border,
       }}
     />
   );
 }
 
-interface FillRowProps {
-  fill: Paint;
-  index: number;
-}
-
-function FillRow({ fill }: FillRowProps) {
-  const [visible, setVisible] = useState(fill.visible !== false);
-
+// Fill/Stroke Row (exact Figma layout)
+function FillRow({ fill, visible = true }: { fill: Paint; visible?: boolean }) {
   if (fill.type === 'SOLID' && fill.color) {
     const hex = colorToHex(fill.color);
     const opacity = fill.opacity ?? 1;
 
     return (
-      <div className="flex items-center gap-2 py-1">
+      <div className="flex items-center gap-2">
         <ColorSwatch color={fill.color} opacity={opacity} />
-        <span className="text-xs text-gray-600 dark:text-gray-300 flex-1">Solid</span>
-        <span className="text-xs font-mono text-gray-900 dark:text-white uppercase">{hex}</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
+        <span className="text-xs flex-1" style={{ color: figmaColors.value }}>Solid</span>
+        <span className="text-xs font-mono uppercase" style={{ color: figmaColors.value }}>{hex}</span>
+        <span className="text-xs w-10 text-right" style={{ color: figmaColors.label }}>
           {Math.round(opacity * 100)}%
         </span>
-        <button
-          onClick={() => setVisible(!visible)}
-          className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-        >
+        <div className="p-1">
           {visible ? (
-            <Eye size={12} className="text-gray-400" />
+            <Eye size={12} style={{ color: figmaColors.label }} />
           ) : (
-            <EyeOff size={12} className="text-gray-400" />
+            <EyeOff size={12} style={{ color: figmaColors.label }} />
           )}
-        </button>
+        </div>
+        <div className="p-1">
+          <Minus size={12} style={{ color: figmaColors.label }} />
+        </div>
       </div>
     );
   }
@@ -142,36 +234,50 @@ function FillRow({ fill }: FillRowProps) {
   const fillType = fill.type as string;
   if (fillType?.startsWith('GRADIENT')) {
     return (
-      <div className="flex items-center gap-2 py-1">
-        <div className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-pink-500" />
-        <span className="text-xs text-gray-600 dark:text-gray-300 flex-1">
+      <div className="flex items-center gap-2">
+        <div
+          className="w-6 h-6 rounded border shrink-0"
+          style={{
+            background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+            borderColor: figmaColors.border,
+          }}
+        />
+        <span className="text-xs flex-1" style={{ color: figmaColors.value }}>
           {fillType === 'GRADIENT_LINEAR' ? 'Linear' :
-           fillType === 'GRADIENT_RADIAL' ? 'Radial' :
-           fillType === 'GRADIENT_ANGULAR' ? 'Angular' : 'Gradient'}
+           fillType === 'GRADIENT_RADIAL' ? 'Radial' : 'Gradient'}
         </span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-xs" style={{ color: figmaColors.label }}>Dégradé</span>
+        <span className="text-xs w-10 text-right" style={{ color: figmaColors.label }}>
           {Math.round((fill.opacity ?? 1) * 100)}%
         </span>
-        <button className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-          <Eye size={12} className="text-gray-400" />
-        </button>
+        <div className="p-1">
+          <Eye size={12} style={{ color: figmaColors.label }} />
+        </div>
+        <div className="p-1">
+          <Minus size={12} style={{ color: figmaColors.label }} />
+        </div>
       </div>
     );
   }
 
   if (fill.type === 'IMAGE') {
     return (
-      <div className="flex items-center gap-2 py-1">
-        <div className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-          <span className="text-[8px] text-gray-500">IMG</span>
+      <div className="flex items-center gap-2">
+        <div
+          className="w-6 h-6 rounded border shrink-0 flex items-center justify-center text-[8px]"
+          style={{ backgroundColor: figmaColors.input, borderColor: figmaColors.border, color: figmaColors.label }}
+        >
+          IMG
         </div>
-        <span className="text-xs text-gray-600 dark:text-gray-300 flex-1">Image</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {fill.scaleMode || 'fill'}
-        </span>
-        <button className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-          <Eye size={12} className="text-gray-400" />
-        </button>
+        <span className="text-xs flex-1" style={{ color: figmaColors.value }}>Image</span>
+        <span className="text-xs" style={{ color: figmaColors.label }}>{fill.scaleMode || 'fill'}</span>
+        <span className="text-xs w-10 text-right" style={{ color: figmaColors.label }}>100%</span>
+        <div className="p-1">
+          <Eye size={12} style={{ color: figmaColors.label }} />
+        </div>
+        <div className="p-1">
+          <Minus size={12} style={{ color: figmaColors.label }} />
+        </div>
       </div>
     );
   }
@@ -179,62 +285,60 @@ function FillRow({ fill }: FillRowProps) {
   return null;
 }
 
-interface EffectRowDisplayProps {
-  effect: Effect;
-}
-
-function EffectRowDisplay({ effect }: EffectRowDisplayProps) {
-  const [visible, setVisible] = useState(effect.visible !== false);
+// Effect Row
+function EffectRow({ effect }: { effect: Effect }) {
+  const visible = effect.visible !== false;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">
+        <span className="text-xs" style={{ color: figmaColors.value }}>
           {formatEffectType(effect.type)}
         </span>
-        <button
-          onClick={() => setVisible(!visible)}
-          className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-        >
+        <div className="p-1">
           {visible ? (
-            <Eye size={12} className="text-gray-400" />
+            <Eye size={12} style={{ color: figmaColors.label }} />
           ) : (
-            <EyeOff size={12} className="text-gray-400" />
+            <EyeOff size={12} style={{ color: figmaColors.label }} />
           )}
-        </button>
-      </div>
-      {effect.type.includes('SHADOW') && (
-        <div className="grid grid-cols-4 gap-1 text-xs">
-          <div className="flex flex-col">
-            <span className="text-gray-400 text-[10px]">X</span>
-            <PropertyInput value={`${effect.offset?.x ?? 0}`} className="text-center" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-400 text-[10px]">Y</span>
-            <PropertyInput value={`${effect.offset?.y ?? 0}`} className="text-center" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-400 text-[10px]">Blur</span>
-            <PropertyInput value={`${effect.radius ?? 0}`} className="text-center" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-gray-400 text-[10px]">Spread</span>
-            <PropertyInput value={`${effect.spread ?? 0}`} className="text-center" />
-          </div>
         </div>
+      </div>
+
+      {effect.type.includes('SHADOW') && (
+        <>
+          <div className="grid grid-cols-4 gap-1">
+            <div>
+              <FigmaLabel>X</FigmaLabel>
+              <FigmaInput value={effect.offset?.x ?? 0} />
+            </div>
+            <div>
+              <FigmaLabel>Y</FigmaLabel>
+              <FigmaInput value={effect.offset?.y ?? 0} />
+            </div>
+            <div>
+              <FigmaLabel>Blur</FigmaLabel>
+              <FigmaInput value={effect.radius ?? 0} />
+            </div>
+            <div>
+              <FigmaLabel>Spread</FigmaLabel>
+              <FigmaInput value={effect.spread ?? 0} />
+            </div>
+          </div>
+          {effect.color && (
+            <div className="flex items-center gap-2">
+              <ColorSwatch color={effect.color} opacity={effect.color.a} size={20} />
+              <span className="text-xs font-mono" style={{ color: figmaColors.label }}>
+                rgba({Math.round(effect.color.r * 255)}, {Math.round(effect.color.g * 255)}, {Math.round(effect.color.b * 255)}, {(effect.color.a ?? 1).toFixed(2)})
+              </span>
+            </div>
+          )}
+        </>
       )}
+
       {effect.type.includes('BLUR') && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Blur</span>
-          <PropertyInput value={`${effect.radius ?? 0}px`} />
-        </div>
-      )}
-      {effect.color && (
-        <div className="flex items-center gap-2 mt-1">
-          <ColorSwatch color={effect.color} opacity={effect.color.a} size={16} />
-          <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
-            rgba({Math.round(effect.color.r * 255)}, {Math.round(effect.color.g * 255)}, {Math.round(effect.color.b * 255)}, {effect.color.a?.toFixed(2) ?? 1})
-          </span>
+          <FigmaLabel>Blur</FigmaLabel>
+          <FigmaInput value={`${effect.radius ?? 0}px`} className="w-20" />
         </div>
       )}
     </div>
@@ -248,7 +352,7 @@ function EffectRowDisplay({ effect }: EffectRowDisplayProps) {
 export function FigmaPropertiesPanel({ node }: FigmaPropertiesPanelProps) {
   if (!node) {
     return (
-      <div className="p-4 text-gray-500 dark:text-gray-400 text-sm">
+      <div className="p-4 text-sm" style={{ color: figmaColors.label }}>
         Select a node to view properties
       </div>
     );
@@ -277,132 +381,254 @@ export function FigmaPropertiesPanel({ node }: FigmaPropertiesPanelProps) {
     primaryAxisAlignItems?: string;
     counterAxisAlignItems?: string;
     layoutWrap?: string;
+    primaryAxisSizingMode?: string;
+    counterAxisSizingMode?: string;
   };
 
   const hasAutoLayout = original?.layoutMode && original.layoutMode !== 'NONE';
-  const hasFills = original?.fills && original.fills.length > 0;
-  const hasStrokes = original?.strokes && original.strokes.length > 0;
-  const hasEffects = original?.effects && original.effects.length > 0;
+  const hasFills = original?.fills && original.fills.filter(f => f.visible !== false).length > 0;
+  const hasStrokes = original?.strokes && original.strokes.filter(s => s.visible !== false).length > 0;
+  const hasEffects = original?.effects && original.effects.filter(e => e.visible !== false).length > 0;
+
+  // Get alignment for 3x3 grid
+  const primaryAlign = (original?.primaryAxisAlignItems || 'MIN') as 'MIN' | 'CENTER' | 'MAX';
+  const counterAlign = (original?.counterAxisAlignItems || 'MIN') as 'MIN' | 'CENTER' | 'MAX';
 
   return (
-    <div className="h-full overflow-auto bg-white dark:bg-gray-900">
-      {/* Position Section - Always visible */}
-      <PropertySection title="Position" defaultOpen={true}>
-        <div className="grid grid-cols-2 gap-2">
-          <PropertyRow label="X" value={`${original?.x?.toFixed(0) ?? 0}px`} />
-          <PropertyRow label="Y" value={`${original?.y?.toFixed(0) ?? 0}px`} />
-          <PropertyRow label="W" value={`${original?.width?.toFixed(0) ?? 0}px`} />
-          <PropertyRow label="H" value={`${original?.height?.toFixed(0) ?? 0}px`} />
+    <div className="h-full overflow-auto" style={{ backgroundColor: figmaColors.bg }}>
+      {/* Position Section */}
+      <FigmaSection title="Position" defaultOpen={true}>
+        {/* Alignment buttons row */}
+        <div>
+          <FigmaLabel>Alignement</FigmaLabel>
+          <div className="flex items-center gap-2 mt-1">
+            {/* Horizontal alignment */}
+            <div className="flex gap-0.5">
+              <AlignButton active={false}>⊢</AlignButton>
+              <AlignButton active={false}>⊕</AlignButton>
+              <AlignButton active={false}>⊣</AlignButton>
+            </div>
+            {/* Vertical alignment */}
+            <div className="flex gap-0.5">
+              <AlignButton active={false}>⊤</AlignButton>
+              <AlignButton active={false}>⊕</AlignButton>
+              <AlignButton active={false}>⊥</AlignButton>
+            </div>
+            {/* Distribute */}
+            <AlignButton active={false}>≡</AlignButton>
+          </div>
         </div>
-        {original?.rotation !== undefined && original.rotation !== 0 && (
-          <PropertyRow label="Rotation" value={`${(original.rotation * -180 / Math.PI).toFixed(1)}°`} />
+
+        {/* Position X/Y */}
+        <div>
+          <FigmaLabel>Position</FigmaLabel>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <FigmaInput value={original?.x?.toFixed(1) ?? '0'} prefix="X" />
+            <FigmaInput value={original?.y?.toFixed(1) ?? '0'} prefix="Y" />
+          </div>
+        </div>
+
+        {/* Constraints */}
+        {original?.constraints && (
+          <div>
+            <FigmaLabel>Contraintes</FigmaLabel>
+            <div className="flex gap-2 mt-1">
+              <div className="space-y-1">
+                <FigmaInput
+                  value={formatConstraint(String(original.constraints.horizontal), 'horizontal')}
+                  className="w-24"
+                />
+                <FigmaInput
+                  value={formatConstraint(String(original.constraints.vertical), 'vertical')}
+                  className="w-24"
+                />
+              </div>
+              <ConstraintsVisualizer
+                horizontal={String(original.constraints.horizontal)}
+                vertical={String(original.constraints.vertical)}
+              />
+            </div>
+          </div>
         )}
-      </PropertySection>
+
+        {/* Rotation */}
+        <div>
+          <FigmaLabel>Rotation</FigmaLabel>
+          <div className="flex items-center gap-2 mt-1">
+            <FigmaInput
+              value={`${((original?.rotation || 0) * -180 / Math.PI).toFixed(0)}°`}
+              prefix="↻"
+              className="w-20"
+            />
+            <div className="flex gap-0.5">
+              <AlignButton>◇</AlignButton>
+              <AlignButton>⊗</AlignButton>
+              <AlignButton>≡</AlignButton>
+            </div>
+          </div>
+        </div>
+      </FigmaSection>
 
       {/* Auto Layout Section */}
       {hasAutoLayout && (
-        <PropertySection title="Auto Layout" defaultOpen={true}>
-          <PropertyRow
-            label="Direction"
-            value={original.layoutMode === 'HORIZONTAL' ? '→ Horizontal' : '↓ Vertical'}
-            monospace={false}
-          />
-          {original.itemSpacing !== undefined && (
-            <PropertyRow label="Gap" value={`${original.itemSpacing}px`} />
-          )}
-          <div className="grid grid-cols-4 gap-1">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400">Top</span>
-              <PropertyInput value={`${original.paddingTop ?? 0}`} className="text-center" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400">Right</span>
-              <PropertyInput value={`${original.paddingRight ?? 0}`} className="text-center" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400">Bottom</span>
-              <PropertyInput value={`${original.paddingBottom ?? 0}`} className="text-center" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400">Left</span>
-              <PropertyInput value={`${original.paddingLeft ?? 0}`} className="text-center" />
+        <FigmaSection title="Mise en page automatique" defaultOpen={true}>
+          {/* Flux */}
+          <div>
+            <FigmaLabel>Flux</FigmaLabel>
+            <div className="flex gap-0.5 mt-1">
+              <AlignButton active={original.layoutWrap === 'WRAP'}>⊞⊞</AlignButton>
+              <AlignButton active={original.layoutMode === 'VERTICAL' && original.layoutWrap !== 'WRAP'}>⊞↓</AlignButton>
+              <AlignButton active={original.layoutMode === 'HORIZONTAL' && original.layoutWrap !== 'WRAP'}>→→</AlignButton>
+              <AlignButton>⊞⊞</AlignButton>
             </div>
           </div>
-          {original.layoutWrap === 'WRAP' && (
-            <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-              ↩ Wrap enabled
+
+          {/* Dimensions */}
+          <div>
+            <FigmaLabel>Dimensions</FigmaLabel>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <FigmaInput
+                value={original?.width?.toFixed(0) ?? '0'}
+                prefix="W"
+                suffix={original.primaryAxisSizingMode === 'FIXED' ? '' : '▼'}
+              />
+              <FigmaInput
+                value={original?.height?.toFixed(0) ?? '0'}
+                prefix="H"
+                suffix={original.counterAxisSizingMode === 'FIXED' ? '' : '▼'}
+              />
+            </div>
+          </div>
+
+          {/* Alignment Grid + Espace */}
+          <div className="flex gap-4">
+            <div>
+              <FigmaLabel>Alignement</FigmaLabel>
+              <div className="mt-1">
+                <AlignmentGrid3x3
+                  activeX={original.layoutMode === 'HORIZONTAL' ? primaryAlign : counterAlign}
+                  activeY={original.layoutMode === 'HORIZONTAL' ? counterAlign : primaryAlign}
+                />
+              </div>
+            </div>
+            <div className="flex-1">
+              <FigmaLabel>Espace</FigmaLabel>
+              <FigmaInput value={original.itemSpacing ?? 0} className="mt-1" suffix="▼" />
+            </div>
+          </div>
+
+          {/* Margins */}
+          <div>
+            <FigmaLabel>Marges</FigmaLabel>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <FigmaInput
+                value={`${original.paddingLeft ?? 0}`}
+                prefix="|·|"
+              />
+              <FigmaInput
+                value={`${original.paddingTop ?? 0}`}
+                prefix="≡"
+              />
+            </div>
+          </div>
+
+          {/* Clip content checkbox (display only) */}
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-sm border"
+              style={{ borderColor: figmaColors.label }}
+            />
+            <span className="text-xs" style={{ color: figmaColors.label }}>
+              Masquer le contenu extérieur
+            </span>
+          </div>
+        </FigmaSection>
+      )}
+
+      {/* Apparence Section */}
+      <FigmaSection title="Apparence" defaultOpen={true}>
+        {/* T156: Visibility status */}
+        <div className="flex items-center gap-2 mb-2">
+          {node.visible ? (
+            <>
+              <Eye size={14} className="text-green-500" />
+              <span className="text-xs text-green-500">Visible</span>
+            </>
+          ) : (
+            <>
+              <EyeOff size={14} className="text-gray-400" />
+              <span className="text-xs text-gray-400">Masqué (hidden)</span>
+            </>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <FigmaLabel>Opacité</FigmaLabel>
+            <FigmaInput value={`${Math.round((original?.opacity ?? 1) * 100)}%`} className="mt-1" />
+          </div>
+          {original?.cornerRadius !== undefined && original.cornerRadius > 0 && (
+            <div>
+              <FigmaLabel>Rayon d&apos;angle</FigmaLabel>
+              <FigmaInput value={`${original.cornerRadius}px`} className="mt-1" />
             </div>
           )}
-        </PropertySection>
-      )}
-
-      {/* Appearance Section */}
-      <PropertySection title="Appearance" defaultOpen={true}>
-        <PropertyRow
-          label="Opacity"
-          value={`${Math.round((original?.opacity ?? 1) * 100)}%`}
-        />
-        {original?.cornerRadius !== undefined && original.cornerRadius > 0 && (
-          <PropertyRow label="Corner Radius" value={`${original.cornerRadius}px`} />
-        )}
-      </PropertySection>
-
-      {/* Constraints Section */}
-      {original?.constraints && (
-        <PropertySection title="Constraints" defaultOpen={false}>
-          <PropertyRow label="Horizontal" value={original.constraints.horizontal} monospace={false} />
-          <PropertyRow label="Vertical" value={original.constraints.vertical} monospace={false} />
-        </PropertySection>
-      )}
+        </div>
+      </FigmaSection>
 
       {/* Fill Section */}
-      <PropertySection title="Fill" defaultOpen={hasFills} showAddButton>
+      <FigmaSection title="Remplissage" defaultOpen={hasFills} showAddButton>
         {hasFills ? (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {original.fills!
               .filter((fill) => fill.visible !== false)
               .map((fill, i) => (
-                <FillRow key={i} fill={fill} index={i} />
+                <FillRow key={i} fill={fill} visible={fill.visible !== false} />
               ))}
           </div>
         ) : (
-          <div className="text-xs text-gray-400 py-1">No fills</div>
+          <div className="text-xs py-1" style={{ color: figmaColors.label }}>Aucun remplissage</div>
         )}
-      </PropertySection>
+      </FigmaSection>
 
       {/* Stroke Section */}
-      <PropertySection title="Stroke" defaultOpen={hasStrokes} showAddButton>
+      <FigmaSection title="Tracé" defaultOpen={hasStrokes} showAddButton>
         {hasStrokes ? (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
-              <PropertyRow label="Weight" value={`${original.strokeWeight ?? 1}px`} />
-              <PropertyRow label="Position" value={original.strokeAlign ?? 'CENTER'} monospace={false} />
+              <div>
+                <FigmaLabel>Weight</FigmaLabel>
+                <FigmaInput value={`${original.strokeWeight ?? 1}px`} className="mt-1" />
+              </div>
+              <div>
+                <FigmaLabel>Position</FigmaLabel>
+                <FigmaInput value={original.strokeAlign ?? 'CENTER'} className="mt-1" suffix="▼" />
+              </div>
             </div>
             {original.strokes!
               .filter((stroke) => stroke.visible !== false)
               .map((stroke, i) => (
-                <FillRow key={i} fill={stroke} index={i} />
+                <FillRow key={i} fill={stroke} visible={stroke.visible !== false} />
               ))}
           </div>
         ) : (
-          <div className="text-xs text-gray-400 py-1">No strokes</div>
+          <div className="text-xs py-1" style={{ color: figmaColors.label }}>Aucun tracé</div>
         )}
-      </PropertySection>
+      </FigmaSection>
 
       {/* Effects Section */}
-      <PropertySection title="Effects" defaultOpen={hasEffects} showAddButton>
+      <FigmaSection title="Effets" defaultOpen={hasEffects} showAddButton>
         {hasEffects ? (
           <div className="space-y-3">
             {original.effects!
               .filter((effect) => effect.visible !== false)
               .map((effect, i) => (
-                <EffectRowDisplay key={i} effect={effect} />
+                <EffectRow key={i} effect={effect} />
               ))}
           </div>
         ) : (
-          <div className="text-xs text-gray-400 py-1">No effects</div>
+          <div className="text-xs py-1" style={{ color: figmaColors.label }}>Aucun effet</div>
         )}
-      </PropertySection>
+      </FigmaSection>
     </div>
   );
 }
@@ -427,6 +653,32 @@ function formatEffectType(type: string): string {
     BACKGROUND_BLUR: 'Background Blur',
   };
   return map[type] || type;
+}
+
+function formatConstraint(value: string, axis: 'horizontal' | 'vertical'): string {
+  if (axis === 'horizontal') {
+    const map: Record<string, string> = {
+      LEFT: '⊢ Gauche',
+      RIGHT: '⊣ Droite',
+      CENTER: '⊕ Centre',
+      SCALE: '↔ Échelle',
+      MIN: '⊢ Gauche',
+      MAX: '⊣ Droite',
+      STRETCH: '↔ Étirer',
+    };
+    return map[value] || value;
+  } else {
+    const map: Record<string, string> = {
+      TOP: '⊤ Haut',
+      BOTTOM: '⊥ Bas',
+      CENTER: '⊕ Centre',
+      SCALE: '↕ Échelle',
+      MIN: '⊤ Haut',
+      MAX: '⊥ Bas',
+      STRETCH: '↕ Étirer',
+    };
+    return map[value] || value;
+  }
 }
 
 export default FigmaPropertiesPanel;
