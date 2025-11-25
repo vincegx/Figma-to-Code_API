@@ -77,14 +77,19 @@ export function RulesList({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* Type badge */}
+                    {/* Type badge (WP20: 3-tier system) */}
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        rule.type === 'system'
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 ${
+                        rule.type === 'official'
                           ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                          : rule.type === 'community'
+                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                           : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
                       }`}
                     >
+                      <span>
+                        {rule.type === 'official' ? '🔵' : rule.type === 'community' ? '🟣' : '🟢'}
+                      </span>
                       {rule.type}
                     </span>
                     {/* Enabled badge */}

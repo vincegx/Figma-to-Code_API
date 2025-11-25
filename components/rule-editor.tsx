@@ -18,7 +18,10 @@ const FRAMEWORK_LABELS: Record<FrameworkType, string> = {
 };
 
 export function RuleEditor({ rule, framework, onClose }: RuleEditorProps) {
-  const isSystemRule = rule.type === 'system';
+  // WP20: All rules are now editable, but show info banner for official/community rules
+  const isOfficialRule = rule.type === 'official';
+  const isCommunityRule = rule.type === 'community';
+  const isCustomRule = rule.type === 'custom';
   const currentTransformer = rule.transformers[framework];
   const availableFrameworks = Object.keys(rule.transformers) as FrameworkType[];
 
@@ -40,11 +43,28 @@ export function RuleEditor({ rule, framework, onClose }: RuleEditorProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-4 space-y-6">
-        {/* System rule warning */}
-        {isSystemRule && (
+        {/* Rule type info banner (WP20) */}
+        {isOfficialRule && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              This is a system rule and cannot be edited. You can create a custom rule with higher priority to override it.
+            <p className="text-sm text-blue-800 dark:text-blue-200 flex items-center gap-2">
+              <span>🔵</span>
+              <strong>Official Rule</strong> - From Figma API spec (priority: 50)
+            </p>
+          </div>
+        )}
+        {isCommunityRule && (
+          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+            <p className="text-sm text-purple-800 dark:text-purple-200 flex items-center gap-2">
+              <span>🟣</span>
+              <strong>Community Rule</strong> - From FigmaToCode (priority: 75)
+            </p>
+          </div>
+        )}
+        {isCustomRule && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+            <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+              <span>🟢</span>
+              <strong>Custom Rule</strong> - User-created (priority: {rule.priority})
             </p>
           </div>
         )}

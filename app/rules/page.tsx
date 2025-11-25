@@ -15,24 +15,26 @@ function RulesPageContent() {
     (searchParams.get('framework') as FrameworkType) || 'react-tailwind'
   );
 
-  // Rules state
-  const [systemRules, setSystemRules] = useState<MultiFrameworkRule[]>([]);
-  const [userRules, setUserRules] = useState<MultiFrameworkRule[]>([]);
+  // Rules state (WP20: 3-tier system)
+  const [officialRules, setOfficialRules] = useState<MultiFrameworkRule[]>([]);
+  const [communityRules, setCommunityRules] = useState<MultiFrameworkRule[]>([]);
+  const [customRules, setCustomRules] = useState<MultiFrameworkRule[]>([]);
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showSystemRules, setShowSystemRules] = useState(true);
-  const [showUserRules, setShowUserRules] = useState(true);
+  const [showOfficialRules, setShowOfficialRules] = useState(true);
+  const [showCommunityRules, setShowCommunityRules] = useState(true);
+  const [showCustomRules, setShowCustomRules] = useState(true);
   const [showEnabledOnly, setShowEnabledOnly] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const RULES_PER_PAGE = 50;
 
-  // Load rules from API (BUG-001 fix)
+  // Load rules from API (WP20: 3-tier system)
   useEffect(() => {
     async function loadRules() {
       try {
@@ -43,8 +45,9 @@ function RulesPageContent() {
         }
 
         const data = await response.json();
-        setSystemRules(data.systemRules || []);
-        setUserRules(data.userRules || []);
+        setOfficialRules(data.officialRules || []);
+        setCommunityRules(data.communityRules || []);
+        setCustomRules(data.customRules || []);
       } catch (error) {
         console.error('Failed to load rules:', error);
       } finally {
@@ -55,20 +58,24 @@ function RulesPageContent() {
     loadRules();
   }, []);
 
-  // Combine and filter rules
+  // Combine and filter rules (WP20: 3-tier system)
   const allRules = useMemo(() => {
     const combined: MultiFrameworkRule[] = [];
 
-    if (showSystemRules) {
-      combined.push(...systemRules);
+    if (showOfficialRules) {
+      combined.push(...officialRules);
     }
 
-    if (showUserRules) {
-      combined.push(...userRules);
+    if (showCommunityRules) {
+      combined.push(...communityRules);
+    }
+
+    if (showCustomRules) {
+      combined.push(...customRules);
     }
 
     return combined;
-  }, [systemRules, userRules, showSystemRules, showUserRules]);
+  }, [officialRules, communityRules, customRules, showOfficialRules, showCommunityRules, showCustomRules]);
 
   // Filter rules
   const filteredRules = useMemo(() => {
@@ -142,10 +149,12 @@ function RulesPageContent() {
             onFrameworkChange={setSelectedFramework}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
-            showSystemRules={showSystemRules}
-            onShowSystemRulesChange={setShowSystemRules}
-            showUserRules={showUserRules}
-            onShowUserRulesChange={setShowUserRules}
+            showOfficialRules={showOfficialRules}
+            onShowOfficialRulesChange={setShowOfficialRules}
+            showCommunityRules={showCommunityRules}
+            onShowCommunityRulesChange={setShowCommunityRules}
+            showCustomRules={showCustomRules}
+            onShowCustomRulesChange={setShowCustomRules}
             showEnabledOnly={showEnabledOnly}
             onShowEnabledOnlyChange={setShowEnabledOnly}
           />

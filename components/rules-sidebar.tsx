@@ -7,10 +7,12 @@ interface RulesSidebarProps {
   onFrameworkChange: (framework: FrameworkType) => void;
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
-  showSystemRules: boolean;
-  onShowSystemRulesChange: (show: boolean) => void;
-  showUserRules: boolean;
-  onShowUserRulesChange: (show: boolean) => void;
+  showOfficialRules: boolean;
+  onShowOfficialRulesChange: (show: boolean) => void;
+  showCommunityRules: boolean;
+  onShowCommunityRulesChange: (show: boolean) => void;
+  showCustomRules: boolean;
+  onShowCustomRulesChange: (show: boolean) => void;
   showEnabledOnly: boolean;
   onShowEnabledOnlyChange: (show: boolean) => void;
 }
@@ -39,10 +41,12 @@ export function RulesSidebar({
   onFrameworkChange,
   selectedCategory,
   onCategoryChange,
-  showSystemRules,
-  onShowSystemRulesChange,
-  showUserRules,
-  onShowUserRulesChange,
+  showOfficialRules,
+  onShowOfficialRulesChange,
+  showCommunityRules,
+  onShowCommunityRulesChange,
+  showCustomRules,
+  onShowCustomRulesChange,
   showEnabledOnly,
   onShowEnabledOnlyChange,
 }: RulesSidebarProps) {
@@ -99,30 +103,57 @@ export function RulesSidebar({
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters (WP20: 3-tier system) */}
       <div>
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Filters
+          Rule Types
         </h3>
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
             <input
               type="checkbox"
-              checked={showSystemRules}
-              onChange={(e) => onShowSystemRulesChange(e.target.checked)}
+              checked={showOfficialRules}
+              onChange={(e) => onShowOfficialRulesChange(e.target.checked)}
               className="rounded border-gray-300 dark:border-gray-600"
             />
-            <span>System Rules</span>
+            <span className="flex items-center gap-1">
+              <span className="text-blue-500">🔵</span>
+              Official Rules
+            </span>
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
             <input
               type="checkbox"
-              checked={showUserRules}
-              onChange={(e) => onShowUserRulesChange(e.target.checked)}
+              checked={showCommunityRules}
+              onChange={(e) => onShowCommunityRulesChange(e.target.checked)}
               className="rounded border-gray-300 dark:border-gray-600"
             />
-            <span>User Rules</span>
+            <span className="flex items-center gap-1">
+              <span className="text-purple-500">🟣</span>
+              Community Rules
+            </span>
           </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <input
+              type="checkbox"
+              checked={showCustomRules}
+              onChange={(e) => onShowCustomRulesChange(e.target.checked)}
+              className="rounded border-gray-300 dark:border-gray-600"
+            />
+            <span className="flex items-center gap-1">
+              <span className="text-green-500">🟢</span>
+              Custom Rules
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {/* Status Filters */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Status
+        </h3>
+        <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
             <input
               type="checkbox"

@@ -95,7 +95,7 @@ export default function ViewerPage() {
     return resolved.properties;
   }, [selectedNode, altNode, multiFrameworkRules, selectedFramework]);
 
-  // Load multi-framework rules from API (BUG-001 fix)
+  // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
     async function loadMultiFrameworkRules() {
       try {
@@ -107,8 +107,9 @@ export default function ViewerPage() {
 
         const data = await response.json();
         const rules: MultiFrameworkRule[] = [
-          ...(data.systemRules || []),
-          ...(data.userRules || [])
+          ...(data.officialRules || []),
+          ...(data.communityRules || []),
+          ...(data.customRules || [])
         ];
 
         setMultiFrameworkRules(rules);

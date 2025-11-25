@@ -335,6 +335,14 @@ export type RuleTransformer =
   | AndroidXMLTransformer;
 
 /**
+ * Rule type classification (WP20)
+ * - official: From Figma API spec (WP19), priority 50
+ * - community: From community projects like FigmaToCode (WP22), priority 75
+ * - custom: User-created rules, priority 100+
+ */
+export type RuleType = 'official' | 'community' | 'custom';
+
+/**
  * Multi-framework rule with transformers for different output targets
  *
  * A rule can have transformers for multiple frameworks.
@@ -343,11 +351,11 @@ export type RuleTransformer =
 export interface MultiFrameworkRule {
   readonly id: string;
   readonly name: string;
-  readonly type: 'system' | 'user';
-  readonly category: 'layout' | 'colors' | 'typography' | 'spacing' | 'borders' | 'effects' | 'components' | 'custom';
+  readonly type: RuleType; // WP20: Changed from 'system' | 'user' to support 3-tier system
+  readonly category: 'layout' | 'colors' | 'typography' | 'spacing' | 'borders' | 'effects' | 'components' | 'constraints' | 'other' | 'custom';
   readonly tags: readonly string[];
   readonly enabled: boolean;
-  readonly priority: number;
+  readonly priority: number; // WP20: Official=50, Community=75, Custom=100+
   readonly selector: Selector;
   readonly transformers: {
     readonly 'react-tailwind'?: ReactTailwindTransformer;
@@ -356,23 +364,43 @@ export interface MultiFrameworkRule {
     readonly 'swift-ui'?: SwiftUITransformer;
     readonly 'android-xml'?: AndroidXMLTransformer;
   };
+  readonly source?: {
+    readonly repo?: string;
+    readonly file?: string;
+    readonly url?: string;
+  }; // WP20/WP22: Source attribution for community rules
 }
 
 /**
- * System rule (extracted from altnode-transform.ts)
- * Read-only in UI, lower priority (default 50)
+ * Official rule (from Figma API spec - WP19)
+ * Generated from OpenAPI spec, priority 50
+ * @deprecated Use MultiFrameworkRule with type='official' instead
  */
-export type SystemRule = MultiFrameworkRule & {
-  readonly type: 'system';
+export type OfficialRule = MultiFrameworkRule & {
+  readonly type: 'official';
   readonly priority: 50;
 };
 
 /**
- * User rule (created by user)
+ * Community rule (from community projects - WP22)
+ * Generated from FigmaToCode and other sources, priority 75
+ */
+export type CommunityRule = MultiFrameworkRule & {
+  readonly type: 'community';
+  readonly priority: 75;
+  readonly source: {
+    readonly repo: string;
+    readonly file: string;
+    readonly url: string;
+  };
+};
+
+/**
+ * Custom rule (created by user)
  * Fully editable, higher priority (default 100+)
  */
-export type UserRule = MultiFrameworkRule & {
-  readonly type: 'user';
+export type CustomRule = MultiFrameworkRule & {
+  readonly type: 'custom';
 };
 
 /**
@@ -381,13 +409,44 @@ export type UserRule = MultiFrameworkRule & {
 export interface MultiFrameworkRuleMatch {
   readonly ruleId: string;
   readonly ruleName: string;
-  readonly ruleType: 'system' | 'user';
+  readonly ruleType: RuleType; // WP20: Changed from 'system' | 'user' to RuleType
   readonly priority: number;
   readonly framework: FrameworkType;
   readonly contributedProperties: readonly string[];
   readonly conflicts: readonly string[];
   readonly severity: 'major' | 'minor' | 'none';
   readonly provenance: Record<string, string>; // property → ruleId
+}
+
+// ============================================================================
+// WP20: Helper types for rule filtering and grouping
+// ============================================================================
+
+/**
+ * Helper function types for WP20 rule organization
+ */
+export interface RulesByType {
+  readonly official: readonly MultiFrameworkRule[];
+  readonly community: readonly MultiFrameworkRule[];
+  readonly custom: readonly MultiFrameworkRule[];
+}
+
+export interface RuleTypeStats {
+  readonly official: {
+    readonly total: number;
+    readonly enabled: number;
+    readonly disabled: number;
+  };
+  readonly community: {
+    readonly total: number;
+    readonly enabled: number;
+    readonly disabled: number;
+  };
+  readonly custom: {
+    readonly total: number;
+    readonly enabled: number;
+    readonly disabled: number;
+  };
 }
 
 /**
