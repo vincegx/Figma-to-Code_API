@@ -95,26 +95,21 @@ export default function ViewerPage() {
     return resolved.properties;
   }, [selectedNode, altNode, multiFrameworkRules, selectedFramework]);
 
-  // Load multi-framework rules from JSON
+  // Load multi-framework rules from API (BUG-001 fix)
   useEffect(() => {
     async function loadMultiFrameworkRules() {
       try {
-        const [systemRes, userRes] = await Promise.all([
-          fetch('/figma-data/rules/system-rules.json'),
-          fetch('/figma-data/rules/user-rules.json')
-        ]);
+        const response = await fetch('/api/rules');
 
-        const rules: MultiFrameworkRule[] = [];
-
-        if (systemRes.ok) {
-          const systemData = await systemRes.json();
-          rules.push(...systemData);
+        if (!response.ok) {
+          throw new Error(`Failed to load rules: ${response.statusText}`);
         }
 
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          rules.push(...userData);
-        }
+        const data = await response.json();
+        const rules: MultiFrameworkRule[] = [
+          ...(data.systemRules || []),
+          ...(data.userRules || [])
+        ];
 
         setMultiFrameworkRules(rules);
       } catch (error) {

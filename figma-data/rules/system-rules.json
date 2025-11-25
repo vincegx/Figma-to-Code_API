@@ -1,0 +1,1170 @@
+[
+  {
+    "id": "sys-layout-horizontal",
+    "name": "Horizontal Auto-Layout",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "auto-layout", "horizontal"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "HORIZONTAL"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex flex-row"
+      },
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flexDirection": "row"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flexDirection": "row"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-vertical",
+    "name": "Vertical Auto-Layout",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "auto-layout", "vertical"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutMode": "VERTICAL"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex flex-col"
+      },
+      "html-css": {
+        "cssProperties": {
+          "display": "flex",
+          "flexDirection": "column"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "display": "flex",
+          "flexDirection": "column"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-gap-4",
+    "name": "Item Spacing 4px",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["gap", "spacing"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": 4
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-1"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "4px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "4px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-gap-8",
+    "name": "Item Spacing 8px",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["gap", "spacing"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": 8
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-2"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "8px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "8px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-gap-16",
+    "name": "Item Spacing 16px",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["gap", "spacing"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": 16
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-4"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "16px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "16px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-gap-24",
+    "name": "Item Spacing 24px",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["gap", "spacing"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": 24
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-6"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "24px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "24px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-gap-32",
+    "name": "Item Spacing 32px",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["gap", "spacing"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "itemSpacing": 32
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "gap-8"
+      },
+      "html-css": {
+        "cssProperties": {
+          "gap": "32px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "gap": "32px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-justify-start",
+    "name": "Justify Start (Primary Axis MIN)",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "justify", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-start"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justifyContent": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "flex-start"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-justify-center",
+    "name": "Justify Center (Primary Axis CENTER)",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "justify", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justifyContent": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "center"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-justify-end",
+    "name": "Justify End (Primary Axis MAX)",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "justify", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-end"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justifyContent": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "flex-end"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-justify-between",
+    "name": "Justify Space Between",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "justify", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "primaryAxisAlignItems": "SPACE_BETWEEN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "justify-between"
+      },
+      "html-css": {
+        "cssProperties": {
+          "justifyContent": "space-between"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "justifyContent": "space-between"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-align-start",
+    "name": "Align Items Start (Counter Axis MIN)",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MIN"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-start"
+      },
+      "html-css": {
+        "cssProperties": {
+          "alignItems": "flex-start"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "flex-start"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-align-center",
+    "name": "Align Items Center",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "alignItems": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "center"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-align-end",
+    "name": "Align Items End (Counter Axis MAX)",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "counterAxisAlignItems": "MAX"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "items-end"
+      },
+      "html-css": {
+        "cssProperties": {
+          "alignItems": "flex-end"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "alignItems": "flex-end"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-layout-flex-wrap",
+    "name": "Flex Wrap",
+    "type": "system",
+    "category": "layout",
+    "tags": ["flexbox", "wrap"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "layoutWrap": "WRAP"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "flex-wrap"
+      },
+      "html-css": {
+        "cssProperties": {
+          "flexWrap": "wrap"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "flexWrap": "wrap"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-padding-uniform-4",
+    "name": "Padding 4px (Uniform)",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["padding"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": 4,
+      "paddingRight": 4,
+      "paddingBottom": 4,
+      "paddingLeft": 4
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "p-1"
+      },
+      "html-css": {
+        "cssProperties": {
+          "padding": "4px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "padding": "4px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-padding-uniform-8",
+    "name": "Padding 8px (Uniform)",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["padding"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": 8,
+      "paddingRight": 8,
+      "paddingBottom": 8,
+      "paddingLeft": 8
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "p-2"
+      },
+      "html-css": {
+        "cssProperties": {
+          "padding": "8px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "padding": "8px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-padding-uniform-16",
+    "name": "Padding 16px (Uniform)",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["padding"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": 16,
+      "paddingRight": 16,
+      "paddingBottom": 16,
+      "paddingLeft": 16
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "p-4"
+      },
+      "html-css": {
+        "cssProperties": {
+          "padding": "16px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "padding": "16px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-spacing-padding-uniform-24",
+    "name": "Padding 24px (Uniform)",
+    "type": "system",
+    "category": "spacing",
+    "tags": ["padding"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "paddingTop": 24,
+      "paddingRight": 24,
+      "paddingBottom": 24,
+      "paddingLeft": 24
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "p-6"
+      },
+      "html-css": {
+        "cssProperties": {
+          "padding": "24px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "padding": "24px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-borders-rounded-4",
+    "name": "Border Radius 4px",
+    "type": "system",
+    "category": "borders",
+    "tags": ["border-radius", "rounded"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": 4
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded"
+      },
+      "html-css": {
+        "cssProperties": {
+          "borderRadius": "4px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "4px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-borders-rounded-8",
+    "name": "Border Radius 8px",
+    "type": "system",
+    "category": "borders",
+    "tags": ["border-radius", "rounded"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": 8
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded-lg"
+      },
+      "html-css": {
+        "cssProperties": {
+          "borderRadius": "8px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "8px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-borders-rounded-12",
+    "name": "Border Radius 12px",
+    "type": "system",
+    "category": "borders",
+    "tags": ["border-radius", "rounded"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": 12
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded-xl"
+      },
+      "html-css": {
+        "cssProperties": {
+          "borderRadius": "12px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "12px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-borders-rounded-16",
+    "name": "Border Radius 16px",
+    "type": "system",
+    "category": "borders",
+    "tags": ["border-radius", "rounded"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": 16
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded-2xl"
+      },
+      "html-css": {
+        "cssProperties": {
+          "borderRadius": "16px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "16px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-borders-rounded-full",
+    "name": "Border Radius 9999px (Full)",
+    "type": "system",
+    "category": "borders",
+    "tags": ["border-radius", "rounded", "circle"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "cornerRadius": 9999
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "rounded-full"
+      },
+      "html-css": {
+        "cssProperties": {
+          "borderRadius": "9999px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "borderRadius": "9999px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-12",
+    "name": "Font Size 12px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 12
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-xs"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "12px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "12px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-14",
+    "name": "Font Size 14px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 14
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-sm"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "14px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "14px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-16",
+    "name": "Font Size 16px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 16
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-base"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "16px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "16px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-18",
+    "name": "Font Size 18px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 18
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-lg"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "18px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "18px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-20",
+    "name": "Font Size 20px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 20
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-xl"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "20px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "20px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-font-24",
+    "name": "Font Size 24px",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-size", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontSize": 24
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-2xl"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontSize": "24px"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontSize": "24px"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-weight-400",
+    "name": "Font Weight 400 (Normal)",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-weight", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontWeight": 400
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "font-normal"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontWeight": "400"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontWeight": "400"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-weight-500",
+    "name": "Font Weight 500 (Medium)",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-weight", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontWeight": 500
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "font-medium"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontWeight": "500"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontWeight": "500"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-weight-600",
+    "name": "Font Weight 600 (Semibold)",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-weight", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontWeight": 600
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "font-semibold"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontWeight": "600"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontWeight": "600"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-weight-700",
+    "name": "Font Weight 700 (Bold)",
+    "type": "system",
+    "category": "typography",
+    "tags": ["font-weight", "text"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "fontWeight": 700
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "font-bold"
+      },
+      "html-css": {
+        "cssProperties": {
+          "fontWeight": "700"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "fontWeight": "700"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-align-left",
+    "name": "Text Align Left",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textAlignHorizontal": "LEFT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-left"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textAlign": "left"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "left"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-align-center",
+    "name": "Text Align Center",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textAlignHorizontal": "CENTER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-center"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textAlign": "center"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "center"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-align-right",
+    "name": "Text Align Right",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-align", "alignment"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textAlignHorizontal": "RIGHT"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "text-right"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textAlign": "right"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textAlign": "right"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-transform-uppercase",
+    "name": "Text Transform Uppercase",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-transform"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textCase": "UPPER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "uppercase"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textTransform": "uppercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "uppercase"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-transform-lowercase",
+    "name": "Text Transform Lowercase",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-transform"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textCase": "LOWER"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "lowercase"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textTransform": "lowercase"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "lowercase"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-transform-capitalize",
+    "name": "Text Transform Capitalize",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-transform"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textCase": "TITLE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "capitalize"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textTransform": "capitalize"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textTransform": "capitalize"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-decoration-underline",
+    "name": "Text Decoration Underline",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-decoration"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textDecoration": "UNDERLINE"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "underline"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textDecoration": "underline"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textDecoration": "underline"
+        }
+      }
+    }
+  },
+  {
+    "id": "sys-typography-decoration-linethrough",
+    "name": "Text Decoration Line-through",
+    "type": "system",
+    "category": "typography",
+    "tags": ["text-decoration"],
+    "enabled": true,
+    "priority": 50,
+    "selector": {
+      "type": "TEXT",
+      "textDecoration": "STRIKETHROUGH"
+    },
+    "transformers": {
+      "react-tailwind": {
+        "className": "line-through"
+      },
+      "html-css": {
+        "cssProperties": {
+          "textDecoration": "line-through"
+        }
+      },
+      "react-inline": {
+        "style": {
+          "textDecoration": "line-through"
+        }
+      }
+    }
+  }
+]

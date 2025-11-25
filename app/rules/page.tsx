@@ -32,25 +32,19 @@ export default function RulesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const RULES_PER_PAGE = 50;
 
-  // Load rules from JSON files
+  // Load rules from API (BUG-001 fix)
   useEffect(() => {
     async function loadRules() {
       try {
-        // Load system and user rules from static files
-        const [systemRes, userRes] = await Promise.all([
-          fetch('/figma-data/rules/system-rules.json'),
-          fetch('/figma-data/rules/user-rules.json')
-        ]);
+        const response = await fetch('/api/rules');
 
-        if (systemRes.ok) {
-          const systemData = await systemRes.json();
-          setSystemRules(systemData);
+        if (!response.ok) {
+          throw new Error(`Failed to load rules: ${response.statusText}`);
         }
 
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUserRules(userData);
-        }
+        const data = await response.json();
+        setSystemRules(data.systemRules || []);
+        setUserRules(data.userRules || []);
       } catch (error) {
         console.error('Failed to load rules:', error);
       } finally {
