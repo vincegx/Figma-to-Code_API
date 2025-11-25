@@ -13,7 +13,15 @@
  */
 
 import type { SimpleAltNode } from './altnode-transform';
-import type { Selector, SimpleMappingRule, SimpleRuleMatch } from './types/rules';
+import type {
+  Selector,
+  SimpleMappingRule,
+  SimpleRuleMatch,
+  MultiFrameworkRule,
+  FrameworkType,
+  ResolvedProperties,
+  MultiFrameworkRuleMatch
+} from './types/rules';
 
 // ============================================================================
 // Main Entry Point (T043)
@@ -275,4 +283,232 @@ export function getPropertyProvenance(
   }
 
   return provenance;
+}
+
+// ============================================================================
+// WP17 Multi-Framework Rule Engine (T152)
+// ============================================================================
+
+/**
+ * Evaluate multi-framework rules against a single AltNode for a specific framework
+ *
+ * @param altNode - The node to evaluate rules against
+ * @param rules - All available multi-framework rules
+ * @param framework - Target framework (react-tailwind, html-css, etc.)
+ * @returns ResolvedProperties with merged properties, provenance, and conflicts
+ */
+export function evaluateMultiFrameworkRules(
+  altNode: SimpleAltNode,
+  rules: MultiFrameworkRule[],
+  framework: FrameworkType
+): ResolvedProperties {
+  // Filter to rules that:
+  // 1. Are enabled
+  // 2. Have a transformer for the selected framework
+  // 3. Match the selector
+  const matchingRules = rules.filter(rule =>
+    rule.enabled &&
+    rule.transformers[framework] !== undefined &&
+    selectorMatches(altNode, rule.selector)
+  );
+
+  // Sort by priority (descending - highest first)
+  const sortedRules = matchingRules.sort((a, b) => b.priority - a.priority);
+
+  // Resolve conflicts and build resolved properties
+  return resolveMultiFrameworkConflicts(sortedRules, framework, altNode);
+}
+
+/**
+ * Resolve conflicts between multiple matching multi-framework rules
+ *
+ * @param matchedRules - Array of rules that matched, sorted by priority
+ * @param framework - Target framework
+ * @param altNode - The node being evaluated (for context)
+ * @returns ResolvedProperties with properties, provenance, and conflicts
+ */
+function resolveMultiFrameworkConflicts(
+  matchedRules: MultiFrameworkRule[],
+  framework: FrameworkType,
+  altNode: SimpleAltNode
+): ResolvedProperties {
+  const properties: Record<string, string> = {};
+  const provenance: Record<string, string> = {};
+  const conflictMap: Map<string, Set<string>> = new Map(); // property → Set of rule IDs
+
+  // Process rules in priority order (highest first)
+  for (const rule of matchedRules) {
+    const transformer = rule.transformers[framework];
+    if (!transformer) continue;
+
+    // Extract properties from transformer based on framework
+    const ruleProperties = extractTransformerProperties(transformer, framework);
+
+    for (const [propName, propValue] of Object.entries(ruleProperties)) {
+      if (properties[propName] === undefined) {
+        // No conflict - this rule owns the property
+        properties[propName] = propValue;
+        provenance[propName] = rule.id;
+      } else {
+        // Conflict detected - track it
+        if (!conflictMap.has(propName)) {
+          conflictMap.set(propName, new Set([provenance[propName]]));
+        }
+        conflictMap.get(propName)!.add(rule.id);
+      }
+    }
+  }
+
+  // Build conflicts array
+  const conflicts = Array.from(conflictMap.entries()).map(([property, ruleIds]) => ({
+    property,
+    rules: Array.from(ruleIds)
+  }));
+
+  return {
+    framework,
+    properties,
+    provenance,
+    conflicts
+  };
+}
+
+/**
+ * Extract properties from a framework-specific transformer
+ *
+ * @param transformer - Framework-specific transformer object
+ * @param framework - Target framework
+ * @returns Record of property name → value
+ */
+function extractTransformerProperties(
+  transformer: any,
+  framework: FrameworkType
+): Record<string, string> {
+  const properties: Record<string, string> = {};
+
+  switch (framework) {
+    case 'react-tailwind':
+      if (transformer.className) {
+        properties.className = transformer.className;
+      }
+      if (transformer.htmlTag) {
+        properties.htmlTag = transformer.htmlTag;
+      }
+      break;
+
+    case 'html-css':
+      if (transformer.cssProperties) {
+        for (const [key, value] of Object.entries(transformer.cssProperties)) {
+          properties[key] = String(value);
+        }
+      }
+      if (transformer.cssClass) {
+        properties.cssClass = transformer.cssClass;
+      }
+      if (transformer.htmlTag) {
+        properties.htmlTag = transformer.htmlTag;
+      }
+      break;
+
+    case 'react-inline':
+      if (transformer.style) {
+        for (const [key, value] of Object.entries(transformer.style)) {
+          properties[key] = String(value);
+        }
+      }
+      if (transformer.htmlTag) {
+        properties.htmlTag = transformer.htmlTag;
+      }
+      break;
+
+    case 'swift-ui':
+      if (transformer.component) {
+        properties.component = transformer.component;
+      }
+      if (transformer.modifiers) {
+        properties.modifiers = (transformer.modifiers as string[]).join(' ');
+      }
+      break;
+
+    case 'android-xml':
+      if (transformer.viewType) {
+        properties.viewType = transformer.viewType;
+      }
+      if (transformer.attributes) {
+        for (const [key, value] of Object.entries(transformer.attributes)) {
+          properties[key] = String(value);
+        }
+      }
+      break;
+  }
+
+  return properties;
+}
+
+/**
+ * Get multi-framework rule matches for Applied Rules Inspector
+ *
+ * @param altNode - The node to evaluate rules against
+ * @param rules - All available multi-framework rules
+ * @param framework - Target framework
+ * @returns Array of MultiFrameworkRuleMatch objects
+ */
+export function getMultiFrameworkRuleMatches(
+  altNode: SimpleAltNode,
+  rules: MultiFrameworkRule[],
+  framework: FrameworkType
+): MultiFrameworkRuleMatch[] {
+  // Filter to matching rules
+  const matchingRules = rules.filter(rule =>
+    rule.enabled &&
+    rule.transformers[framework] !== undefined &&
+    selectorMatches(altNode, rule.selector)
+  );
+
+  // Sort by priority (descending - highest first)
+  const sortedRules = matchingRules.sort((a, b) => b.priority - a.priority);
+
+  const ruleMatches: MultiFrameworkRuleMatch[] = [];
+  const propertyOwnership: Map<string, string> = new Map(); // property name → rule ID
+
+  // Process rules in priority order
+  for (const rule of sortedRules) {
+    const transformer = rule.transformers[framework];
+    if (!transformer) continue;
+
+    const ruleProperties = extractTransformerProperties(transformer, framework);
+    const contributedProperties: string[] = [];
+    const ruleConflicts: string[] = [];
+    const ruleProvenance: Record<string, string> = {};
+
+    for (const propName of Object.keys(ruleProperties)) {
+      const existingOwner = propertyOwnership.get(propName);
+
+      if (existingOwner === undefined) {
+        // No conflict - this rule owns the property
+        propertyOwnership.set(propName, rule.id);
+        contributedProperties.push(propName);
+        ruleProvenance[propName] = rule.id;
+      } else {
+        // Conflict detected
+        ruleConflicts.push(propName);
+      }
+    }
+
+    const ruleMatch: MultiFrameworkRuleMatch = {
+      ruleId: rule.id,
+      ruleName: rule.name,
+      ruleType: rule.type,
+      priority: rule.priority,
+      framework,
+      contributedProperties,
+      conflicts: ruleConflicts,
+      severity: ruleConflicts.length > 0 ? detectConflictSeverity(ruleConflicts) : 'none',
+      provenance: ruleProvenance
+    };
+
+    ruleMatches.push(ruleMatch);
+  }
+
+  return ruleMatches;
 }
