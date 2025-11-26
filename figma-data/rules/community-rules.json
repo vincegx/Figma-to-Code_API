@@ -416,7 +416,7 @@
     },
     "transformers": {
       "react-tailwind": {
-        "className": "gap-${tailwindSize($value)}"
+        "className": "gap-[${value}px]"
       },
       "html-css": {
         "cssProperties": {
@@ -445,14 +445,14 @@
       "borders",
       "stroke"
     ],
-    "enabled": true,
+    "enabled": false,
     "priority": 75,
     "selector": {
       "strokeWeight": "$value"
     },
     "transformers": {
       "react-tailwind": {
-        "className": "border-${tailwindBorderWidth($value)}"
+        "className": "border-[${value}px]"
       },
       "html-css": {
         "cssProperties": {
@@ -488,7 +488,7 @@
     },
     "transformers": {
       "react-tailwind": {
-        "className": "rounded-${tailwindRadius($value)}"
+        "className": "rounded-[${value}px]"
       },
       "html-css": {
         "cssProperties": {

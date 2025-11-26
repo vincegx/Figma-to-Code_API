@@ -40,9 +40,18 @@ export function evaluateRules(
   rules: SimpleMappingRule[]
 ): SimpleRuleMatch[] {
   // Filter to matching rules
-  const matchingRules = rules.filter(rule =>
-    selectorMatches(altNode, rule.selector)
-  );
+  const matchingRules = rules.filter(rule => {
+    // DEBUG: Log official-itemspacing rule evaluation
+    if (rule.id === 'official-itemspacing' && (altNode.name === 'Tab' || altNode.name === 'Tab titleleft')) {
+      console.log(`\n--- Evaluating official-itemspacing for ${altNode.name} ---`);
+      console.log(`Selector: ${JSON.stringify(rule.selector)}`);
+    }
+    const matches = selectorMatches(altNode, rule.selector);
+    if (rule.id === 'official-itemspacing' && (altNode.name === 'Tab' || altNode.name === 'Tab titleleft')) {
+      console.log(`Result: ${matches ? '✅ MATCH' : '❌ NO MATCH'}\n`);
+    }
+    return matches;
+  });
 
   // Sort by priority (descending - highest first)
   const sortedMatches = matchingRules.sort((a, b) => b.priority - a.priority);
@@ -165,15 +174,30 @@ export function selectorMatches(
     // Access property from originalNode (where Figma properties live)
     const actualValue = (altNode.originalNode as any)?.[key];
 
+    // DEBUG: Disabled for now
+    // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
+    //   console.log(`  Checking ${key}: actual=${actualValue}, expected=${JSON.stringify(expectedValue)}`);
+    // }
+
     // If selector specifies this property but node doesn't have it → no match
     if (actualValue === undefined) {
+      // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
+      //   console.log(`  ❌ ${key} is undefined in originalNode`);
+      // }
       return false;
     }
 
     // Compare values (handle arrays, objects, primitives)
     if (!valuesMatch(actualValue, expectedValue)) {
+      // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
+      //   console.log(`  ❌ ${key} values don't match`);
+      // }
       return false;
     }
+
+    // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
+    //   console.log(`  ✅ ${key} matches`);
+    // }
   }
 
   // All checks passed - selector matches
@@ -189,6 +213,12 @@ export function selectorMatches(
  * @returns true if values match
  */
 function valuesMatch(actual: any, expected: any): boolean {
+  // CRITICAL FIX: Handle $value wildcard (matches any non-undefined value)
+  // Used in rules like { itemSpacing: "$value" } to match any itemSpacing value
+  if (expected === '$value') {
+    return actual !== undefined && actual !== null;
+  }
+
   // Handle primitive comparison
   if (typeof expected !== 'object' || expected === null) {
     return actual === expected;
@@ -368,6 +398,15 @@ export function evaluateMultiFrameworkRules(
   rules: MultiFrameworkRule[],
   framework: FrameworkType
 ): ResolvedProperties {
+  // DEBUG: Disabled for now
+  // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
+  //   console.log(`\n=== EVALUATING ${altNode.name} ===`);
+  //   console.log(`Type: ${altNode.originalType}`);
+  //   console.log(`Total rules: ${rules.length}`);
+  //   console.log(`originalNode.itemSpacing: ${(altNode.originalNode as any)?.itemSpacing}`);
+  //   console.log(`originalNode.opacity: ${(altNode.originalNode as any)?.opacity}`);
+  // }
+
   // Filter to rules that:
   // 1. Are enabled
   // 2. Have a transformer for the selected framework
@@ -377,6 +416,13 @@ export function evaluateMultiFrameworkRules(
     rule.transformers[framework] !== undefined &&
     selectorMatches(altNode, rule.selector)
   );
+
+  // DEBUG: Disabled
+  // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
+  //   console.log(`\n=== ${altNode.name} - ${framework} ===`);
+  //   console.log(`Matching rules: ${matchingRules.length}`);
+  //   matchingRules.forEach(r => console.log(`  - ${r.id}`));
+  // }
 
   // Sort by priority (descending - highest first)
   const sortedRules = matchingRules.sort((a, b) => b.priority - a.priority);
@@ -408,13 +454,24 @@ function resolveMultiFrameworkConflicts(
     if (!transformer) continue;
 
     // Extract properties from transformer based on framework
-    const ruleProperties = extractTransformerProperties(transformer, framework);
+    const ruleProperties = extractTransformerProperties(transformer, framework, altNode, rule.selector);
+
+    // DEBUG: Disabled
+    // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
+    //   console.log(`  ${rule.id} extracted:`, ruleProperties);
+    // }
 
     for (const [propName, propValue] of Object.entries(ruleProperties)) {
       if (properties[propName] === undefined) {
         // No conflict - this rule owns the property
         properties[propName] = propValue;
         provenance[propName] = rule.id;
+      } else if (propName === 'className' && framework === 'react-tailwind') {
+        // WP25 FIX: Concatenate className values instead of treating as conflict
+        // Multiple rules can contribute classes: "flex flex-row" + "gap-[32px]" → "flex flex-row gap-[32px]"
+        properties[propName] = `${properties[propName]} ${propValue}`;
+        // Track multiple contributors in provenance
+        provenance[propName] = `${provenance[propName]},${rule.id}`;
       } else {
         // Conflict detected - track it
         if (!conflictMap.has(propName)) {
@@ -424,6 +481,12 @@ function resolveMultiFrameworkConflicts(
       }
     }
   }
+
+  // DEBUG: Disabled
+  // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
+  //   console.log(`Final properties:`, properties);
+  //   console.log('');
+  // }
 
   // Build conflicts array
   const conflicts = Array.from(conflictMap.entries()).map(([property, ruleIds]) => ({
@@ -440,50 +503,81 @@ function resolveMultiFrameworkConflicts(
 }
 
 /**
+ * Replace ${value} placeholders with actual values from originalNode
+ * WP25 FIX: Round decimal numbers to avoid values like 15.53606128692627
+ */
+function replacePlaceholders(template: string, altNode: SimpleAltNode, selector: Selector): string {
+  // Find properties in selector that have values (e.g., itemSpacing: "$value")
+  for (const [selectorKey, selectorValue] of Object.entries(selector)) {
+    if (selectorValue === '$value' || selectorValue === '${value}') {
+      // Get actual value from originalNode
+      const actualValue = (altNode.originalNode as any)?.[selectorKey];
+      if (actualValue !== undefined && actualValue !== null) {
+        // WP25 FIX: Round decimal numbers (15.53606128692627 → 16)
+        let valueToInsert: string;
+        if (typeof actualValue === 'number') {
+          valueToInsert = String(Math.round(actualValue));
+        } else {
+          valueToInsert = String(actualValue);
+        }
+
+        // Replace ${value} with actual value
+        template = template.replace(/\$\{value\}/g, valueToInsert);
+      }
+    }
+  }
+  return template;
+}
+
+/**
  * Extract properties from a framework-specific transformer
  *
  * @param transformer - Framework-specific transformer object
  * @param framework - Target framework
+ * @param altNode - Node being evaluated (for ${value} replacement)
+ * @param selector - Rule selector (to find which property to use for ${value})
  * @returns Record of property name → value
  */
 function extractTransformerProperties(
   transformer: any,
-  framework: FrameworkType
+  framework: FrameworkType,
+  altNode: SimpleAltNode,
+  selector: Selector
 ): Record<string, string> {
   const properties: Record<string, string> = {};
 
   switch (framework) {
     case 'react-tailwind':
       if (transformer.className) {
-        properties.className = transformer.className;
+        properties.className = replacePlaceholders(transformer.className, altNode, selector);
       }
       if (transformer.htmlTag) {
-        properties.htmlTag = transformer.htmlTag;
+        properties.htmlTag = replacePlaceholders(transformer.htmlTag, altNode, selector);
       }
       break;
 
     case 'html-css':
       if (transformer.cssProperties) {
         for (const [key, value] of Object.entries(transformer.cssProperties)) {
-          properties[key] = String(value);
+          properties[key] = replacePlaceholders(String(value), altNode, selector);
         }
       }
       if (transformer.cssClass) {
-        properties.cssClass = transformer.cssClass;
+        properties.cssClass = replacePlaceholders(transformer.cssClass, altNode, selector);
       }
       if (transformer.htmlTag) {
-        properties.htmlTag = transformer.htmlTag;
+        properties.htmlTag = replacePlaceholders(transformer.htmlTag, altNode, selector);
       }
       break;
 
     case 'react-inline':
       if (transformer.style) {
         for (const [key, value] of Object.entries(transformer.style)) {
-          properties[key] = String(value);
+          properties[key] = replacePlaceholders(String(value), altNode, selector);
         }
       }
       if (transformer.htmlTag) {
-        properties.htmlTag = transformer.htmlTag;
+        properties.htmlTag = replacePlaceholders(transformer.htmlTag, altNode, selector);
       }
       break;
 
@@ -542,7 +636,7 @@ export function getMultiFrameworkRuleMatches(
     const transformer = rule.transformers[framework];
     if (!transformer) continue;
 
-    const ruleProperties = extractTransformerProperties(transformer, framework);
+    const ruleProperties = extractTransformerProperties(transformer, framework, altNode, rule.selector);
     const contributedProperties: string[] = [];
     const ruleConflicts: string[] = [];
     const ruleProvenance: Record<string, string> = {};

@@ -13,15 +13,18 @@ function cleanResolvedProperties(props: Record<string, string>): Record<string, 
   const cleaned: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(props)) {
+    // Ensure value is a string
+    const stringValue = String(value);
+
     // Skip properties with unresolved variables
-    if (value.includes('$value') || value.includes('${')) {
+    if (stringValue.includes('$value') || stringValue.includes('${')) {
       continue;
     }
     // Skip empty values
-    if (!value || value.trim() === '') {
+    if (!stringValue || stringValue.trim() === '') {
       continue;
     }
-    cleaned[key] = value;
+    cleaned[key] = stringValue;
   }
 
   return cleaned;
