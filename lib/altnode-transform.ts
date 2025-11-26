@@ -403,7 +403,19 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   if (fill.type === 'SOLID' && fill.color) {
     const { r, g, b } = fill.color;
     const a = fill.opacity ?? 1;
-    altNode.styles[colorProp] = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+    const rgbaValue = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+
+    // WP25 T181: Check for Figma variable bindings
+    const boundVars = (figmaNode as any).boundVariables;
+    if (boundVars && boundVars.fills && boundVars.fills[0]?.id) {
+      // Variable bound to this fill - generate CSS var() syntax
+      const varId = boundVars.fills[0].id;
+      // Extract variable name from ID (e.g., "VariableID:...112:35" → "var-112-35")
+      const varName = varId.replace(/^VariableID:.*\//, 'var-').replace(/:/g, '-');
+      altNode.styles[colorProp] = `var(--${varName}, ${rgbaValue})`;
+    } else {
+      altNode.styles[colorProp] = rgbaValue;
+    }
   } else if (fill.type === 'GRADIENT_LINEAR' && fill.gradientStops) {
     // Simplified linear gradient
     const stops = fill.gradientStops
@@ -436,7 +448,15 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       const weight = node.strokeWeight || 1;
       const { r, g, b } = stroke.color;
       const a = stroke.opacity ?? 1;
-      const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+      let color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+
+      // WP25 T181: Check for Figma variable bindings on strokes
+      const boundVars = (figmaNode as any).boundVariables;
+      if (boundVars && boundVars.strokes && boundVars.strokes[0]?.id) {
+        const varId = boundVars.strokes[0].id;
+        const varName = varId.replace(/^VariableID:.*\//, 'var-').replace(/:/g, '-');
+        color = `var(--${varName}, ${color})`;
+      }
 
       // WP25 FIX: Use outline for INSIDE strokes (Figma best practice)
       // INSIDE strokes render inside the bounds, similar to CSS outline with negative offset

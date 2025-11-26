@@ -161,6 +161,56 @@ export async function fetchWithRetry<T>(
 }
 
 /**
+ * Fetch SVG content for a specific node (WP25 T182)
+ *
+ * @param fileKey - Figma file key from URL
+ * @param nodeId - Node ID (format: "123:456")
+ * @returns SVG content as string, or null if fetch fails
+ */
+export async function fetchSVG(
+  fileKey: string,
+  nodeId: string
+): Promise<string | null> {
+  const token = process.env.FIGMA_ACCESS_TOKEN;
+  if (!token) {
+    return null; // SVG optional
+  }
+
+  try {
+    // Request SVG URL from Figma API
+    const url = `https://api.figma.com/v1/images/${fileKey}?ids=${nodeId}&format=svg`;
+
+    const response = await fetch(url, {
+      headers: { 'X-Figma-Token': token },
+    });
+
+    if (!response.ok) {
+      console.warn(`SVG request failed for ${nodeId}:`, response.status);
+      return null;
+    }
+
+    const data = await response.json() as { images?: Record<string, string> };
+    const svgUrl = data.images?.[nodeId];
+    if (!svgUrl) {
+      console.warn(`No SVG URL returned for ${nodeId}`);
+      return null;
+    }
+
+    // Fetch actual SVG from the returned URL
+    const svgResponse = await fetch(svgUrl);
+    if (!svgResponse.ok) {
+      console.warn(`SVG download failed for ${nodeId}:`, svgResponse.status);
+      return null;
+    }
+
+    return await svgResponse.text();
+  } catch (error) {
+    console.warn('Failed to fetch SVG:', error);
+    return null;
+  }
+}
+
+/**
  * Fetch file metadata from Figma API
  *
  * @param fileKey - Figma file key from URL

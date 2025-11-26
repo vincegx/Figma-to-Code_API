@@ -161,6 +161,30 @@ function generateHTMLElement(
     } else {
       htmlString += `${indent}<${htmlTag} ${dataAttrString} class="${className}"></${htmlTag}>`;
     }
+  } else if (node.originalType === 'VECTOR') {
+    // WP25 T182: VECTOR nodes should render as SVG with wrapper
+    // Extract component name for data-name attribute (e.g., "surfboard#4" → "surfboard")
+    const componentName = node.name.includes('#') ? node.name.split('#')[0] : node.name;
+    const svgDataAttr = `data-svg-wrapper data-name="${componentName}" ${dataAttrString}`;
+
+    // Generate SVG wrapper div with placeholder for actual SVG content
+    htmlString += `${indent}<div ${svgDataAttr} class="${className}" style="position: relative">\n`;
+    htmlString += `${indent}  <!-- TODO: Insert SVG content for ${node.name} here -->\n`;
+    htmlString += `${indent}  <!-- Fetch SVG via Figma API: GET /v1/images/{fileKey}?ids=${(node.originalNode as any)?.id || ''}&format=svg -->\n`;
+    htmlString += `${indent}</div>`;
+  } else if (shouldRenderAsImgTag(node)) {
+    // WP25 T183: Nodes with image fills that should be <img> tags
+    const imageUrl = extractImageUrl(node) || 'https://placehold.co/300x200';
+    const width = (node.originalNode as any)?.absoluteBoundingBox?.width || 300;
+    const height = (node.originalNode as any)?.absoluteBoundingBox?.height || 200;
+
+    // Extract inline styles from mergedProperties
+    const styleStr = Object.entries(mergedProperties)
+      .filter(([key]) => key !== 'background-image' && key !== 'background-size') // Exclude background props
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('; ');
+
+    htmlString += `${indent}<img ${dataAttrString} class="${className}" src="${imageUrl}" style="width: ${width}px; height: ${height}px${styleStr ? '; ' + styleStr : ''}" />`;
   } else {
     // Non-TEXT nodes: check for children
     const hasChildren = 'children' in node && node.children.length > 0;
@@ -203,4 +227,46 @@ function mapNodeTypeToHTMLTag(nodeType: string): string {
   };
 
   return mapping[nodeType] || 'div';
+}
+
+/**
+ * WP25 T183: Determine if a node should render as <img> tag vs background-image
+ *
+ * Use <img> if:
+ * - Node name contains "image", "img", "photo", "picture" (case-insensitive)
+ * - Node has no children (leaf node)
+ * - Node has an image fill
+ */
+function shouldRenderAsImgTag(node: SimpleAltNode): boolean {
+  // Check if node has image fill
+  const hasImageFill = (node.originalNode as any)?.fills?.some(
+    (fill: any) => fill.type === 'IMAGE'
+  );
+  if (!hasImageFill) {
+    return false;
+  }
+
+  // Check if node name suggests it's an image
+  const isImageNamed = /image|img|photo|picture/i.test(node.name);
+
+  // Check if node has no children (leaf node)
+  const hasNoChildren = !node.children || node.children.length === 0;
+
+  return isImageNamed && hasNoChildren;
+}
+
+/**
+ * WP25 T183: Extract image URL from node
+ *
+ * Returns imageRef from fills or null
+ */
+function extractImageUrl(node: SimpleAltNode): string | null {
+  const fills = (node.originalNode as any)?.fills || [];
+  const imageFill = fills.find((fill: any) => fill.type === 'IMAGE');
+
+  if (imageFill && imageFill.imageRef) {
+    return imageFill.imageRef;
+  }
+
+  return null;
 }
