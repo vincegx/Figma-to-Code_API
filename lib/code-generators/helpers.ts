@@ -63,6 +63,7 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   if (prop === 'display') {
     const displayMap: Record<string, string> = {
       flex: 'flex',
+      'inline-flex': 'inline-flex', // WP25 FIX: Add inline-flex mapping
       block: 'block',
       inline: 'inline',
       'inline-block': 'inline-block',
@@ -123,6 +124,16 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
       };
       return standardValues[px] || `gap-[${px}px]`; // Arbitrary value
     }
+  }
+
+  // WP25: Row gap
+  if (prop === 'rowgap') {
+    return convertSizeToTailwind(cssValue, 'gap-y');
+  }
+
+  // WP25: Column gap
+  if (prop === 'columngap') {
+    return convertSizeToTailwind(cssValue, 'gap-x');
   }
 
   // Background color (hex → Tailwind color)
@@ -395,6 +406,116 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
       '50': 'z-50',
     };
     return standards[cssValue] || `z-[${cssValue}]`;
+  }
+
+  // WP25: Flex grow
+  if (prop === 'flexgrow') {
+    if (cssValue === '0') return 'flex-grow-0';
+    if (cssValue === '1') return 'flex-grow';
+    return `flex-grow-[${cssValue}]`;
+  }
+
+  // WP25: Grid properties
+  if (prop === 'gridtemplatecolumns') {
+    return `grid-cols-[${cssValue}]`;
+  }
+
+  if (prop === 'gridtemplaterows') {
+    return `grid-rows-[${cssValue}]`;
+  }
+
+  if (prop === 'gridcolumnend') {
+    if (cssValue.startsWith('span ')) {
+      const span = cssValue.replace('span ', '');
+      return `col-span-${span}`;
+    }
+    return '';
+  }
+
+  if (prop === 'gridrowend') {
+    if (cssValue.startsWith('span ')) {
+      const span = cssValue.replace('span ', '');
+      return `row-span-${span}`;
+    }
+    return '';
+  }
+
+  // WP25: Filter (blur)
+  if (prop === 'filter' && cssValue.includes('blur')) {
+    const match = cssValue.match(/blur\((\d+)px\)/);
+    if (match) {
+      const px = parseInt(match[1], 10);
+      if (px === 0) return 'blur-none';
+      if (px <= 4) return 'blur-sm';
+      if (px <= 8) return 'blur';
+      if (px <= 12) return 'blur-md';
+      if (px <= 16) return 'blur-lg';
+      if (px <= 24) return 'blur-xl';
+      return 'blur-3xl';
+    }
+  }
+
+  // WP25: Backdrop filter
+  if (prop === 'backdropfilter' && cssValue.includes('blur')) {
+    const match = cssValue.match(/blur\((\d+)px\)/);
+    if (match) {
+      const px = parseInt(match[1], 10);
+      if (px === 0) return 'backdrop-blur-none';
+      if (px <= 4) return 'backdrop-blur-sm';
+      if (px <= 8) return 'backdrop-blur';
+      if (px <= 12) return 'backdrop-blur-md';
+      if (px <= 16) return 'backdrop-blur-lg';
+      if (px <= 24) return 'backdrop-blur-xl';
+      return 'backdrop-blur-3xl';
+    }
+  }
+
+  // WP25: Aspect ratio
+  if (prop === 'aspectratio') {
+    const ratio = parseFloat(cssValue);
+    if (ratio === 1) return 'aspect-square';
+    if (Math.abs(ratio - 16/9) < 0.01) return 'aspect-video';
+    return `aspect-[${cssValue}]`;
+  }
+
+  // WP25: Mix blend mode
+  if (prop === 'mixblendmode') {
+    const blendModes: Record<string, string> = {
+      'normal': 'mix-blend-normal',
+      'multiply': 'mix-blend-multiply',
+      'screen': 'mix-blend-screen',
+      'overlay': 'mix-blend-overlay',
+      'darken': 'mix-blend-darken',
+      'lighten': 'mix-blend-lighten',
+      'color-dodge': 'mix-blend-color-dodge',
+      'color-burn': 'mix-blend-color-burn',
+      'hard-light': 'mix-blend-hard-light',
+      'soft-light': 'mix-blend-soft-light',
+      'difference': 'mix-blend-difference',
+      'exclusion': 'mix-blend-exclusion',
+      'hue': 'mix-blend-hue',
+      'saturation': 'mix-blend-saturation',
+      'color': 'mix-blend-color',
+      'luminosity': 'mix-blend-luminosity',
+    };
+    return blendModes[cssValue] || '';
+  }
+
+  // WP25: Text properties
+  if (prop === 'verticalalign') {
+    const alignMap: Record<string, string> = {
+      'baseline': 'align-baseline',
+      'top': 'align-top',
+      'middle': 'align-middle',
+      'bottom': 'align-bottom',
+      'text-top': 'align-text-top',
+      'text-bottom': 'align-text-bottom',
+    };
+    return alignMap[cssValue] || '';
+  }
+
+  if (prop === 'textindent') {
+    return `indent-[${cssValue}]`;
   }
 
   // No mapping found

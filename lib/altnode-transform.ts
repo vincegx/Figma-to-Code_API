@@ -177,6 +177,98 @@ function isLikelyIcon(figmaNode: FigmaNode): boolean {
 }
 
 /**
+ * WP25: Extract ALL additional Figma properties to CSS
+ * Complements the normalize* functions above with comprehensive property extraction
+ *
+ * @param figmaNode - Original Figma node
+ * @param altNode - AltNode being constructed
+ */
+function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+  const node = figmaNode as any;
+
+  // Overflow clipping
+  if (node.clipsContent === true) {
+    altNode.styles.overflow = 'hidden';
+  }
+
+  // Opacity
+  if (node.opacity !== undefined && node.opacity !== 1) {
+    altNode.styles.opacity = String(node.opacity);
+  }
+
+  // Blend mode
+  if (node.blendMode && node.blendMode !== 'PASS_THROUGH' && node.blendMode !== 'NORMAL') {
+    const blendModeMap: Record<string, string> = {
+      'MULTIPLY': 'multiply',
+      'SCREEN': 'screen',
+      'OVERLAY': 'overlay',
+      'DARKEN': 'darken',
+      'LIGHTEN': 'lighten',
+      'COLOR_DODGE': 'color-dodge',
+      'COLOR_BURN': 'color-burn',
+      'HARD_LIGHT': 'hard-light',
+      'SOFT_LIGHT': 'soft-light',
+      'DIFFERENCE': 'difference',
+      'EXCLUSION': 'exclusion',
+      'HUE': 'hue',
+      'SATURATION': 'saturation',
+      'COLOR': 'color',
+      'LUMINOSITY': 'luminosity',
+    };
+    const cssBlendMode = blendModeMap[node.blendMode];
+    if (cssBlendMode) {
+      altNode.styles.mixBlendMode = cssBlendMode;
+    }
+  }
+
+  // Position (absolute positioning)
+  if (node.constraints) {
+    // Figma constraints can indicate absolute positioning
+    // For now, we'll skip this as it's complex
+  }
+
+  // Min/Max width/height
+  if (node.minWidth) {
+    altNode.styles.minWidth = `${node.minWidth}px`;
+  }
+  if (node.maxWidth) {
+    altNode.styles.maxWidth = `${node.maxWidth}px`;
+  }
+  if (node.minHeight) {
+    altNode.styles.minHeight = `${node.minHeight}px`;
+  }
+  if (node.maxHeight) {
+    altNode.styles.maxHeight = `${node.maxHeight}px`;
+  }
+
+  // WP25: Aspect ratio preservation
+  if (node.preserveRatio === true && node.absoluteBoundingBox) {
+    const width = node.absoluteBoundingBox.width;
+    const height = node.absoluteBoundingBox.height;
+    if (width && height) {
+      const ratio = width / height;
+      altNode.styles.aspectRatio = ratio.toFixed(4);
+    }
+  }
+
+  // WP25: Individual stroke weights
+  if (node.individualStrokeWeights) {
+    const { top, right, bottom, left } = node.individualStrokeWeights;
+    if (top || right || bottom || left) {
+      altNode.styles.borderTopWidth = `${top || 0}px`;
+      altNode.styles.borderRightWidth = `${right || 0}px`;
+      altNode.styles.borderBottomWidth = `${left || 0}px`;
+      altNode.styles.borderLeftWidth = `${left || 0}px`;
+    }
+  }
+
+  // WP25: Stroke dash pattern
+  if (node.strokeDashes && node.strokeDashes.length > 0) {
+    altNode.styles.borderStyle = 'dashed';
+  }
+}
+
+/**
  * Apply FigmaToCode HIGH priority improvements
  *
  * @param figmaNode - Original Figma node
@@ -226,18 +318,94 @@ function applyHighPriorityImprovements(
 function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
-  if (node.layoutMode === 'HORIZONTAL') {
-    altNode.styles.display = 'flex';
+  // WP25: Handle GRID layout mode
+  if (node.layoutMode === 'GRID') {
+    altNode.styles.display = 'grid';
+
+    // Grid template columns/rows
+    if (node.gridColumnsSizing) {
+      altNode.styles.gridTemplateColumns = node.gridColumnsSizing;
+    } else if (node.gridColumnCount) {
+      altNode.styles.gridTemplateColumns = `repeat(${node.gridColumnCount}, 1fr)`;
+    }
+
+    if (node.gridRowsSizing) {
+      altNode.styles.gridTemplateRows = node.gridRowsSizing;
+    } else if (node.gridRowCount) {
+      altNode.styles.gridTemplateRows = `repeat(${node.gridRowCount}, 1fr)`;
+    }
+
+    // Grid gaps
+    if (node.gridRowGap !== undefined && node.gridColumnGap !== undefined) {
+      if (node.gridRowGap === node.gridColumnGap) {
+        altNode.styles.gap = `${node.gridRowGap}px`;
+      } else {
+        altNode.styles.rowGap = `${node.gridRowGap}px`;
+        altNode.styles.columnGap = `${node.gridColumnGap}px`;
+      }
+    }
+  } else if (node.layoutMode === 'HORIZONTAL') {
+    // WP25 FIX: Use inline-flex for auto-layout frames (Figma best practice)
+    altNode.styles.display = 'inline-flex';
     altNode.styles.flexDirection = 'row';
     if (node.itemSpacing) {
       altNode.styles.gap = `${node.itemSpacing}px`;
     }
+    // WP25: Handle counterAxisSpacing (distinct from itemSpacing)
+    if (node.counterAxisSpacing) {
+      altNode.styles.rowGap = `${node.counterAxisSpacing}px`;
+    }
   } else if (node.layoutMode === 'VERTICAL') {
-    altNode.styles.display = 'flex';
+    // WP25 FIX: Use inline-flex for auto-layout frames (Figma best practice)
+    altNode.styles.display = 'inline-flex';
     altNode.styles.flexDirection = 'column';
     if (node.itemSpacing) {
       altNode.styles.gap = `${node.itemSpacing}px`;
     }
+    // WP25: Handle counterAxisSpacing (distinct from itemSpacing)
+    if (node.counterAxisSpacing) {
+      altNode.styles.columnGap = `${node.counterAxisSpacing}px`;
+    }
+  }
+
+  // WP25: layoutGrow → flex-grow
+  if (node.layoutGrow !== undefined && node.layoutGrow !== 0) {
+    altNode.styles.flexGrow = String(node.layoutGrow);
+  }
+
+  // WP25: layoutAlign → align-self
+  if (node.layoutAlign) {
+    const alignSelfMap: Record<string, string> = {
+      'MIN': 'flex-start',
+      'CENTER': 'center',
+      'MAX': 'flex-end',
+      'STRETCH': 'stretch',
+      'INHERIT': 'auto',
+    };
+    const alignSelf = alignSelfMap[node.layoutAlign];
+    if (alignSelf && alignSelf !== 'auto') {
+      altNode.styles.alignSelf = alignSelf;
+    }
+  }
+
+  // WP25: layoutPositioning → position: absolute
+  if (node.layoutPositioning === 'ABSOLUTE') {
+    altNode.styles.position = 'absolute';
+    // Add top/left if available
+    if (node.absoluteBoundingBox && node.parent?.absoluteBoundingBox) {
+      const parentBox = node.parent.absoluteBoundingBox;
+      const nodeBox = node.absoluteBoundingBox;
+      altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
+      altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
+    }
+  }
+
+  // WP25: Grid child properties
+  if (node.gridRowSpan && node.gridRowSpan > 1) {
+    altNode.styles.gridRowEnd = `span ${node.gridRowSpan}`;
+  }
+  if (node.gridColumnSpan && node.gridColumnSpan > 1) {
+    altNode.styles.gridColumnEnd = `span ${node.gridColumnSpan}`;
   }
 
   // Padding
@@ -308,10 +476,14 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     return;
   }
 
+  // WP25 FIX: TEXT nodes should use 'color' property, not 'background'
+  const isTextNode = figmaNode.type === 'TEXT';
+  const colorProp = isTextNode ? 'color' : 'background';
+
   if (fill.type === 'SOLID' && fill.color) {
     const { r, g, b } = fill.color;
     const a = fill.opacity ?? 1;
-    altNode.styles.background = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+    altNode.styles[colorProp] = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
   } else if (fill.type === 'GRADIENT_LINEAR' && fill.gradientStops) {
     // Simplified linear gradient
     const stops = fill.gradientStops
@@ -321,7 +493,7 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
         return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a}) ${Math.round(stop.position * 100)}%`;
       })
       .join(', ');
-    altNode.styles.background = `linear-gradient(180deg, ${stops})`;
+    altNode.styles[colorProp] = `linear-gradient(180deg, ${stops})`;
   } else if (fill.type === 'IMAGE' && fill.imageRef) {
     altNode.styles.backgroundImage = `url(${fill.imageRef})`;
     altNode.styles.backgroundSize = 'cover';
@@ -337,7 +509,7 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
 function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
-  // Apply border if strokes exist
+  // Apply border/outline if strokes exist
   if (node.strokes && node.strokes.length > 0) {
     const stroke = node.strokes.find((s: any) => s.visible !== false);
     if (stroke && stroke.color) {
@@ -345,7 +517,16 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       const { r, g, b } = stroke.color;
       const a = stroke.opacity ?? 1;
       const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
-      altNode.styles.border = `${weight}px solid ${color}`;
+
+      // WP25 FIX: Use outline for INSIDE strokes (Figma best practice)
+      // INSIDE strokes render inside the bounds, similar to CSS outline with negative offset
+      if (node.strokeAlign === 'INSIDE') {
+        altNode.styles.outline = `${weight}px solid ${color}`;
+        altNode.styles.outlineOffset = `-${weight}px`;
+      } else {
+        // CENTER or OUTSIDE strokes use border
+        altNode.styles.border = `${weight}px solid ${color}`;
+      }
     }
   }
 
@@ -393,6 +574,22 @@ function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
 
   if (shadows.length > 0) {
     altNode.styles.boxShadow = shadows.join(', ');
+  }
+
+  // WP25: Handle blur effects
+  const layerBlur = figmaNode.effects.find(
+    effect => effect.visible !== false && effect.type === 'LAYER_BLUR'
+  );
+  if (layerBlur && (layerBlur as any).radius) {
+    altNode.styles.filter = `blur(${(layerBlur as any).radius}px)`;
+  }
+
+  // WP25: Handle background blur
+  const backgroundBlur = figmaNode.effects.find(
+    effect => effect.visible !== false && effect.type === 'BACKGROUND_BLUR'
+  );
+  if (backgroundBlur && (backgroundBlur as any).radius) {
+    altNode.styles.backdropFilter = `blur(${(backgroundBlur as any).radius}px)`;
   }
 }
 
@@ -475,6 +672,29 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     }
   }
 
+  // WP25: Text vertical alignment
+  if (style.textAlignVertical) {
+    const verticalAlignMap: Record<string, string> = {
+      'TOP': 'top',
+      'CENTER': 'middle',
+      'BOTTOM': 'bottom',
+    };
+    const verticalAlign = verticalAlignMap[style.textAlignVertical];
+    if (verticalAlign) {
+      altNode.styles.verticalAlign = verticalAlign;
+    }
+  }
+
+  // WP25: Paragraph spacing
+  if (style.paragraphSpacing) {
+    altNode.styles.marginBottom = `${style.paragraphSpacing}px`;
+  }
+
+  // WP25: Paragraph indent
+  if (style.paragraphIndent) {
+    altNode.styles.textIndent = `${style.paragraphIndent}px`;
+  }
+
   // Color (from fills)
   const fills = textNode.fills;
   if (fills && fills.length > 0) {
@@ -541,6 +761,7 @@ export function transformToAltNode(
   normalizeStrokes(figmaNode, altNode);
   normalizeEffects(figmaNode, altNode);
   normalizeText(figmaNode, altNode);
+  normalizeAdditionalProperties(figmaNode, altNode); // WP25: Extract ALL Figma properties
 
   // Apply HIGH priority improvements
   applyHighPriorityImprovements(figmaNode, altNode, cumulativeRotation);

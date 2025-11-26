@@ -80,15 +80,16 @@ export function selectorMatches(
   selector: Selector
 ): boolean {
   // Type matching (WP19: support single type or array of types)
+  // T176 FIX: Use originalType for Figma type comparison, not HTML-mapped type
   if (selector.type !== undefined) {
     if (Array.isArray(selector.type)) {
       // Array of types: match if node type is in the array
-      if (!selector.type.includes(altNode.type as any)) {
+      if (!selector.type.includes(altNode.originalType as any)) {
         return false;
       }
     } else {
       // Single type: exact match
-      if (altNode.type !== selector.type) {
+      if (altNode.originalType !== selector.type) {
         return false;
       }
     }

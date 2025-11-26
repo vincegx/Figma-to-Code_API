@@ -125,11 +125,23 @@ function generateHTMLElement(
     .map(([key, value]) => `${key}="${value}"`)
     .join(' ');
 
+  // CRITICAL FIX: Merge base styles from AltNode with rule overrides
+  // Rules take precedence over computed styles
+  const baseStyles: Record<string, string> = {};
+  for (const [key, value] of Object.entries(node.styles || {})) {
+    baseStyles[key] = typeof value === 'number' ? String(value) : value;
+  }
+
+  const mergedProperties: Record<string, string> = {
+    ...baseStyles,      // Base styles from Figma normalization
+    ...properties,      // Rule overrides (higher priority)
+  };
+
   // Collect CSS rule for this node
-  if (Object.keys(properties).length > 0) {
+  if (Object.keys(mergedProperties).length > 0) {
     cssRules.push({
       selector: className,
-      properties,
+      properties: mergedProperties,
     });
   }
 
