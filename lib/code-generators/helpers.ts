@@ -119,22 +119,9 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // Gap (FigmaToCode enhancement: arbitrary values)
+  // WP25 FIX: Use convertSizeToTailwind for complete standard scale
   if (prop === 'gap') {
-    const match = cssValue.match(/^(\d+)px$/);
-    if (match) {
-      const px = parseInt(match[1], 10);
-      const standardValues: Record<number, string> = {
-        0: 'gap-0',
-        4: 'gap-1',
-        8: 'gap-2',
-        12: 'gap-3',
-        16: 'gap-4',
-        20: 'gap-5',
-        24: 'gap-6',
-        32: 'gap-8',
-      };
-      return standardValues[px] || `gap-[${px}px]`; // Arbitrary value
-    }
+    return convertSizeToTailwind(cssValue, 'gap');
   }
 
   // WP25: Row gap
@@ -148,7 +135,8 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // Background color (hex → Tailwind color)
-  if (prop === 'backgroundcolor') {
+  // WP25 FIX: AltNode uses 'background', not 'backgroundcolor'
+  if (prop === 'background' || prop === 'backgroundcolor') {
     return hexToTailwindColor(cssValue, 'bg');
   }
 
@@ -159,9 +147,10 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Border radius
   if (prop === 'borderradius') {
-    const match = cssValue.match(/^(\d+)px$/);
+    // WP25 FIX: Match decimal px values (35.55555725097656px)
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
     if (match) {
-      const px = parseInt(match[1], 10);
+      const px = Math.round(parseFloat(match[1]));
       const standardValues: Record<number, string> = {
         0: 'rounded-none',
         2: 'rounded-sm',
@@ -177,9 +166,10 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Rotation (FigmaToCode enhancement)
   if (prop === 'transform' && cssValue.includes('rotate')) {
-    const match = cssValue.match(/rotate\((-?\d+)deg\)/);
+    // WP25 FIX: Match decimal degrees (47.5deg)
+    const match = cssValue.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/);
     if (match) {
-      const degrees = parseInt(match[1], 10);
+      const degrees = Math.round(parseFloat(match[1]));
       const standardRotations: Record<number, string> = {
         0: '',
         45: 'rotate-45',
@@ -398,14 +388,21 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   if (prop === 'outlineoffset') {
+    // WP25 FIX: Round decimal px values (-1.5536061525344849px → -2px)
+    const match = cssValue.match(/^(-?\d+(?:\.\d+)?)px$/);
+    if (match) {
+      const px = Math.round(parseFloat(match[1]));
+      return `outline-offset-[${px}px]`;
+    }
     return `outline-offset-[${cssValue}]`;
   }
 
   // Border
   if (prop === 'borderwidth') {
-    const match = cssValue.match(/^(\d+)px$/);
+    // WP25 FIX: Match decimal px values
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
     if (match) {
-      const px = parseInt(match[1], 10);
+      const px = Math.round(parseFloat(match[1]));
       const standards: Record<number, string> = {
         0: 'border-0',
         1: 'border',
@@ -562,13 +559,22 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
  * @returns Tailwind class string
  */
 function convertSizeToTailwind(value: string, prefix: string): string {
-  const pxMatch = value.match(/^(\d+)px$/);
+  // WP25 FIX: Match both integer and decimal px values (876.9999389648438px)
+  const pxMatch = value.match(/^(\d+(?:\.\d+)?)px$/);
   if (!pxMatch) {
     // Non-px units: use arbitrary value
     return `${prefix}-[${value}]`;
   }
 
-  const px = parseInt(pxMatch[1], 10);
+  // WP25 FIX: Round decimal pixel values (876.9999389648438 → 877)
+  // Plugin Figma rounds dimensions to nearest integer
+  const px = Math.round(parseFloat(pxMatch[1]));
+
+  // WP25 FIX: Don't generate classes for zero values (padding:0, margin:0, gap:0)
+  // The plugin Figma doesn't generate py-0, px-0, etc.
+  if (px === 0 && (prefix.startsWith('p') || prefix.startsWith('m') || prefix === 'gap-x' || prefix === 'gap-y')) {
+    return '';
+  }
 
   // Standard Tailwind size scale
   const standards: Record<number, string> = {
@@ -621,26 +627,67 @@ function convertSizeToTailwind(value: string, prefix: string): string {
 }
 
 /**
- * Convert hex color to Tailwind color class
+ * Convert color (hex/rgba) to Tailwind color class
  *
- * TODO (MEDIUM priority from FigmaToCode): Implement precise hex-to-Tailwind mapping
- * For MVP: Return arbitrary value `bg-[#FF0000]`
+ * WP25: Enhanced to parse rgba() and map common colors to standard Tailwind classes
  *
- * @param hexColor - Hex color string (#FF0000)
+ * @param color - Color string (rgba(...) or #hex)
  * @param prefix - Tailwind prefix (bg, text, border)
  * @returns Tailwind color class
  */
-function hexToTailwindColor(hexColor: string, prefix: string): string {
-  // MVP: Use arbitrary values for all colors
-  return `${prefix}-[${hexColor}]`;
+function hexToTailwindColor(color: string, prefix: string): string {
+  // Parse rgba() to hex
+  let hex = color;
+  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  if (rgbaMatch) {
+    const r = parseInt(rgbaMatch[1]);
+    const g = parseInt(rgbaMatch[2]);
+    const b = parseInt(rgbaMatch[3]);
+    hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
+  }
 
-  // TODO: Map common hex values to Tailwind colors
-  // const colorMap: Record<string, string> = {
-  //   '#EF4444': `${prefix}-red-500`,
-  //   '#3B82F6': `${prefix}-blue-500`,
-  //   // ... add more mappings
-  // };
-  // return colorMap[hexColor.toUpperCase()] || `${prefix}-[${hexColor}]`;
+  // WP25 FIX: Map common colors to standard Tailwind classes
+  const colorMap: Record<string, string> = {
+    // White/Black/Gray
+    '#FFFFFF': 'white',
+    '#000000': 'black',
+    '#F9FAFB': 'gray-50',
+    '#F3F4F6': 'gray-100',
+    '#E5E7EB': 'gray-200',
+    '#D1D5DB': 'gray-300',
+    '#9CA3AF': 'gray-400',
+    '#6B7280': 'gray-500',
+    '#4B5563': 'gray-600',
+    '#374151': 'gray-700',
+    '#1F2937': 'gray-800',
+    '#111827': 'gray-900',
+
+    // Red
+    '#FEE2E2': 'red-100',
+    '#FECACA': 'red-200',
+    '#FCA5A5': 'red-300',
+    '#F87171': 'red-400',
+    '#EF4444': 'red-500',
+    '#DC2626': 'red-600',
+    '#B91C1C': 'red-700',
+
+    // Blue
+    '#DBEAFE': 'blue-100',
+    '#BFDBFE': 'blue-200',
+    '#93C5FD': 'blue-300',
+    '#60A5FA': 'blue-400',
+    '#3B82F6': 'blue-500',
+    '#2563EB': 'blue-600',
+    '#1D4ED8': 'blue-700',
+  };
+
+  const tailwindColor = colorMap[hex];
+  if (tailwindColor) {
+    return `${prefix}-${tailwindColor}`;
+  }
+
+  // Fallback to arbitrary value
+  return `${prefix}-[${hex}]`;
 }
 
 /**

@@ -107,7 +107,8 @@ function mapNodeType(figmaType: string): string {
  */
 function handleGroupInlining(
   groupNode: FigmaNode,
-  cumulativeRotation: number
+  cumulativeRotation: number,
+  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'
 ): SimpleAltNode | null {
   if (!groupNode.children || groupNode.children.length === 0) {
     return null; // Empty GROUP, skip entirely
@@ -117,12 +118,14 @@ function handleGroupInlining(
   const groupRotation = (groupNode as any).rotation || 0;
   const newCumulativeRotation = cumulativeRotation - (groupRotation * 180 / Math.PI);
 
+  // WP25 FIX: Pass parent layoutMode through GROUP inlining
   // If GROUP has only 1 child, return child directly (inline the GROUP)
   if (groupNode.children.length === 1) {
-    return transformToAltNode(groupNode.children[0], newCumulativeRotation);
+    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode);
   }
 
   // Multiple children: create container but mark as GROUP
+  // WP25 FIX: GROUP doesn't have layoutMode, so pass parent's layoutMode to children
   const container: SimpleAltNode = {
     id: groupNode.id,
     name: groupNode.name,
@@ -131,7 +134,7 @@ function handleGroupInlining(
     originalType: groupNode.type, // T177: Preserve original type
     styles: {},
     children: groupNode.children
-      .map(child => transformToAltNode(child, newCumulativeRotation))
+      .map(child => transformToAltNode(child, newCumulativeRotation, parentLayoutMode))
       .filter((node): node is SimpleAltNode => node !== null),
     originalNode: groupNode,
     visible: true,
@@ -186,17 +189,11 @@ function isLikelyIcon(figmaNode: FigmaNode): boolean {
 function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
-  // Overflow clipping
-  if (node.clipsContent === true) {
-    altNode.styles.overflow = 'hidden';
-  }
+  // NOTE: overflow (clipsContent) handled by official-clipscontent-true rule
+  // NOTE: opacity handled by official-opacity rule
+  // NOTE: mixBlendMode handled by official-blendmode rule (but keep mapping for COMPLEX values)
 
-  // Opacity
-  if (node.opacity !== undefined && node.opacity !== 1) {
-    altNode.styles.opacity = String(node.opacity);
-  }
-
-  // Blend mode
+  // Blend mode (COMPLEX mapping - keep for non-NORMAL values)
   if (node.blendMode && node.blendMode !== 'PASS_THROUGH' && node.blendMode !== 'NORMAL') {
     const blendModeMap: Record<string, string> = {
       'MULTIPLY': 'multiply',
@@ -221,25 +218,7 @@ function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltN
     }
   }
 
-  // Position (absolute positioning)
-  if (node.constraints) {
-    // Figma constraints can indicate absolute positioning
-    // For now, we'll skip this as it's complex
-  }
-
-  // Min/Max width/height
-  if (node.minWidth) {
-    altNode.styles.minWidth = `${node.minWidth}px`;
-  }
-  if (node.maxWidth) {
-    altNode.styles.maxWidth = `${node.maxWidth}px`;
-  }
-  if (node.minHeight) {
-    altNode.styles.minHeight = `${node.minHeight}px`;
-  }
-  if (node.maxHeight) {
-    altNode.styles.maxHeight = `${node.maxHeight}px`;
-  }
+  // NOTE: minWidth, maxWidth, minHeight, maxHeight handled by official-min*/max* rules
 
   // WP25: Aspect ratio preservation
   if (node.preserveRatio === true && node.absoluteBoundingBox) {
@@ -303,10 +282,7 @@ function applyHighPriorityImprovements(
   // }
 
   // 4. Layout wrap support
-  const layoutWrap = (figmaNode as any).layoutWrap;
-  if (layoutWrap === 'WRAP') {
-    altNode.styles.flexWrap = 'wrap';
-  }
+  // NOTE: flexWrap (layoutWrap) handled by official-layoutwrap rules
 }
 
 /**
@@ -314,15 +290,14 @@ function applyHighPriorityImprovements(
  *
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
+ * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
  */
-function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'): void {
   const node = figmaNode as any;
 
-  // WP25: Handle GRID layout mode
+  // Grid template columns/rows (COMPLEX - calculated values, not in rules)
   if (node.layoutMode === 'GRID') {
-    altNode.styles.display = 'grid';
-
-    // Grid template columns/rows
+    // NOTE: display:grid is handled by official-layoutmode-grid rule
     if (node.gridColumnsSizing) {
       altNode.styles.gridTemplateColumns = node.gridColumnsSizing;
     } else if (node.gridColumnCount) {
@@ -334,64 +309,26 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     } else if (node.gridRowCount) {
       altNode.styles.gridTemplateRows = `repeat(${node.gridRowCount}, 1fr)`;
     }
-
-    // Grid gaps
-    if (node.gridRowGap !== undefined && node.gridColumnGap !== undefined) {
-      if (node.gridRowGap === node.gridColumnGap) {
-        altNode.styles.gap = `${node.gridRowGap}px`;
-      } else {
-        altNode.styles.rowGap = `${node.gridRowGap}px`;
-        altNode.styles.columnGap = `${node.gridColumnGap}px`;
-      }
-    }
-  } else if (node.layoutMode === 'HORIZONTAL') {
-    // WP25 FIX: Use inline-flex for auto-layout frames (Figma best practice)
-    altNode.styles.display = 'inline-flex';
-    altNode.styles.flexDirection = 'row';
-    if (node.itemSpacing) {
-      altNode.styles.gap = `${node.itemSpacing}px`;
-    }
-    // WP25: Handle counterAxisSpacing (distinct from itemSpacing)
-    if (node.counterAxisSpacing) {
-      altNode.styles.rowGap = `${node.counterAxisSpacing}px`;
-    }
-  } else if (node.layoutMode === 'VERTICAL') {
-    // WP25 FIX: Use inline-flex for auto-layout frames (Figma best practice)
-    altNode.styles.display = 'inline-flex';
-    altNode.styles.flexDirection = 'column';
-    if (node.itemSpacing) {
-      altNode.styles.gap = `${node.itemSpacing}px`;
-    }
-    // WP25: Handle counterAxisSpacing (distinct from itemSpacing)
-    if (node.counterAxisSpacing) {
-      altNode.styles.columnGap = `${node.counterAxisSpacing}px`;
-    }
+    // NOTE: rowGap/columnGap are handled by official-gridrowgap/gridcolumngap rules
   }
 
-  // WP25: layoutGrow → flex-grow
-  if (node.layoutGrow !== undefined && node.layoutGrow !== 0) {
-    altNode.styles.flexGrow = String(node.layoutGrow);
+  // WP25 FIX: FigmaToCode logic for flex vs inline-flex
+  // Use 'flex' when parent has same layoutMode, otherwise 'inline-flex'
+  // This matches FigmaToCode's getFlex() function
+  if (node.layoutMode === 'HORIZONTAL' || node.layoutMode === 'VERTICAL') {
+    const hasSameLayoutMode = parentLayoutMode === node.layoutMode;
+    altNode.styles.display = hasSameLayoutMode ? 'flex' : 'inline-flex';
   }
+  // NOTE: layoutMode HORIZONTAL/VERTICAL flexDirection, gap handled by rules
+  // NOTE: counterAxisSpacing handled by official-counteraxisspacing rules
 
-  // WP25: layoutAlign → align-self
-  if (node.layoutAlign) {
-    const alignSelfMap: Record<string, string> = {
-      'MIN': 'flex-start',
-      'CENTER': 'center',
-      'MAX': 'flex-end',
-      'STRETCH': 'stretch',
-      'INHERIT': 'auto',
-    };
-    const alignSelf = alignSelfMap[node.layoutAlign];
-    if (alignSelf && alignSelf !== 'auto') {
-      altNode.styles.alignSelf = alignSelf;
-    }
-  }
+  // NOTE: layoutGrow handled by official-layoutgrow rules
+  // NOTE: layoutAlign handled by official-layoutalign rules
 
-  // WP25: layoutPositioning → position: absolute
+  // WP25: layoutPositioning ABSOLUTE → calculate top/left (COMPLEX calculation, not in rules)
   if (node.layoutPositioning === 'ABSOLUTE') {
-    altNode.styles.position = 'absolute';
-    // Add top/left if available
+    // NOTE: position: absolute is handled by official-layoutpositioning rule
+    // But top/left require parent calculation, so we keep them here
     if (node.absoluteBoundingBox && node.parent?.absoluteBoundingBox) {
       const parentBox = node.parent.absoluteBoundingBox;
       const nodeBox = node.absoluteBoundingBox;
@@ -431,25 +368,8 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     }
   }
 
-  // Alignment
-  if (node.primaryAxisAlignItems) {
-    const alignMap: Record<string, string> = {
-      'MIN': 'flex-start',
-      'CENTER': 'center',
-      'MAX': 'flex-end',
-      'SPACE_BETWEEN': 'space-between',
-    };
-    altNode.styles.justifyContent = alignMap[node.primaryAxisAlignItems] || 'flex-start';
-  }
-
-  if (node.counterAxisAlignItems) {
-    const alignMap: Record<string, string> = {
-      'MIN': 'flex-start',
-      'CENTER': 'center',
-      'MAX': 'flex-end',
-    };
-    altNode.styles.alignItems = alignMap[node.counterAxisAlignItems] || 'flex-start';
-  }
+  // NOTE: justifyContent (primaryAxisAlignItems) handled by official-primaryaxisalignitems rules
+  // NOTE: alignItems (counterAxisAlignItems) handled by official-counteraxisalignitems rules
 
   // Width and height
   if (figmaNode.absoluteBoundingBox) {
@@ -530,20 +450,7 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     }
   }
 
-  // Border radius (apply even without strokes)
-  if (node.cornerRadius) {
-    altNode.styles.borderRadius = `${node.cornerRadius}px`;
-  } else if (
-    node.rectangleCornerRadii &&
-    node.rectangleCornerRadii.length === 4
-  ) {
-    const [tl, tr, br, bl] = node.rectangleCornerRadii;
-    if (tl === tr && tr === br && br === bl) {
-      altNode.styles.borderRadius = `${tl}px`;
-    } else {
-      altNode.styles.borderRadius = `${tl}px ${tr}px ${br}px ${bl}px`;
-    }
-  }
+  // NOTE: borderRadius (cornerRadius) handled by official-cornerradius rules
 }
 
 /**
@@ -616,61 +523,20 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     altNode.styles.fontFamily = style.fontFamily;
   }
 
-  // Font size
-  if (style.fontSize) {
-    altNode.styles.fontSize = `${style.fontSize}px`;
-  }
+  // NOTE: fontSize handled by official-fontsize rules
+  // NOTE: fontWeight handled by official-fontweight rules
 
-  // Font weight
-  if (style.fontWeight) {
-    altNode.styles.fontWeight = String(style.fontWeight);
-  }
-
-  // Line height
+  // Line height (COMPLEX - px vs % handling, not in rules)
   if (style.lineHeightPx) {
     altNode.styles.lineHeight = `${style.lineHeightPx}px`;
   } else if (style.lineHeightPercent) {
     altNode.styles.lineHeight = `${style.lineHeightPercent}%`;
   }
 
-  // Text align
-  if (style.textAlignHorizontal) {
-    const alignMap: Record<string, string> = {
-      'LEFT': 'left',
-      'CENTER': 'center',
-      'RIGHT': 'right',
-      'JUSTIFIED': 'justify',
-    };
-    altNode.styles.textAlign = alignMap[style.textAlignHorizontal] || 'left';
-  }
-
-  // Letter spacing
-  if (style.letterSpacing) {
-    altNode.styles.letterSpacing = `${style.letterSpacing}px`;
-  }
-
-  // Text transform
-  if (style.textCase) {
-    const caseMap: Record<string, string> = {
-      'UPPER': 'uppercase',
-      'LOWER': 'lowercase',
-      'TITLE': 'capitalize',
-    };
-    if (style.textCase !== 'ORIGINAL') {
-      altNode.styles.textTransform = caseMap[style.textCase] || 'none';
-    }
-  }
-
-  // Text decoration
-  if (style.textDecoration) {
-    const decorationMap: Record<string, string> = {
-      'UNDERLINE': 'underline',
-      'STRIKETHROUGH': 'line-through',
-    };
-    if (style.textDecoration !== 'NONE') {
-      altNode.styles.textDecoration = decorationMap[style.textDecoration] || 'none';
-    }
-  }
+  // NOTE: textAlign handled by official-textalignhorizontal rules
+  // NOTE: letterSpacing handled by official-letterspacing rules
+  // NOTE: textTransform (textCase) handled by official-textcase rules
+  // NOTE: textDecoration handled by official-textdecoration rules
 
   // WP25: Text vertical alignment
   if (style.textAlignVertical) {
@@ -719,11 +585,13 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
  *
  * @param figmaNode - Figma node from API
  * @param cumulativeRotation - Cumulative rotation from parent nodes (degrees)
+ * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
  * @returns Transformed AltNode or null if filtered out
  */
 export function transformToAltNode(
   figmaNode: FigmaNode,
-  cumulativeRotation: number = 0
+  cumulativeRotation: number = 0,
+  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'
 ): SimpleAltNode | null {
   // NOTE: Hidden nodes (visible === false) are KEPT in tree with visible: false
   // This allows the UI to show hidden nodes with EyeOff indicator (T156)
@@ -731,7 +599,7 @@ export function transformToAltNode(
 
   // CRITICAL: GROUP node inlining
   if (figmaNode.type === 'GROUP' && figmaNode.children) {
-    return handleGroupInlining(figmaNode, cumulativeRotation);
+    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode);
   }
 
   // CRITICAL: Unique name generation
@@ -741,6 +609,13 @@ export function transformToAltNode(
   const nodeRotation = (figmaNode as any).rotation || 0;
   const nodeCumulativeRotation = cumulativeRotation - (nodeRotation * 180 / Math.PI);
 
+  // WP25 FIX: Flatten style properties into originalNode for rule matching
+  // Rules check originalNode.fontWeight, but Figma stores it in node.style.fontWeight
+  const flattenedNode = { ...figmaNode };
+  if ((figmaNode as any).style) {
+    Object.assign(flattenedNode, (figmaNode as any).style);
+  }
+
   const altNode: SimpleAltNode = {
     id: figmaNode.id,
     name: figmaNode.name,
@@ -749,14 +624,14 @@ export function transformToAltNode(
     originalType: figmaNode.type, // T177: Preserve Figma type for TEXT detection
     styles: {},
     children: [],
-    originalNode: figmaNode, // CRITICAL: preserve complete Figma data
+    originalNode: flattenedNode, // CRITICAL: preserve complete Figma data with flattened style
     visible: figmaNode.visible ?? true,
     canBeFlattened: false,
     cumulativeRotation: nodeCumulativeRotation,
   };
 
   // Normalize properties
-  normalizeLayout(figmaNode, altNode);
+  normalizeLayout(figmaNode, altNode, parentLayoutMode);
   normalizeFills(figmaNode, altNode);
   normalizeStrokes(figmaNode, altNode);
   normalizeEffects(figmaNode, altNode);
@@ -767,9 +642,11 @@ export function transformToAltNode(
   applyHighPriorityImprovements(figmaNode, altNode, cumulativeRotation);
 
   // Transform children recursively with updated cumulative rotation
+  // WP25 FIX: Pass this node's layoutMode to children for flex vs inline-flex logic
   if (figmaNode.children) {
+    const currentLayoutMode = (figmaNode as any).layoutMode as 'HORIZONTAL' | 'VERTICAL' | 'NONE' | undefined;
     altNode.children = figmaNode.children
-      .map(child => transformToAltNode(child, nodeCumulativeRotation))
+      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode))
       .filter((node): node is SimpleAltNode => node !== null);
   }
 
