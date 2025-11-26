@@ -7,6 +7,7 @@ import { generateReactJSX } from '@/lib/code-generators/react';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 import CodePreview from './code-preview';
+import LivePreview from './live-preview';
 
 interface PreviewTabsProps {
   altNode: SimpleAltNode | null;
@@ -114,6 +115,11 @@ export default function PreviewTabs({
     );
   }
 
+  const showLivePreview =
+    selectedFramework === 'html-css' ||
+    selectedFramework === 'react-tailwind' ||
+    selectedFramework === 'react-inline';
+
   return (
     <div className="h-full flex flex-col">
       {/* Code stats and scope indicator */}
@@ -136,8 +142,19 @@ export default function PreviewTabs({
         </div>
       </div>
 
-      {/* Code Preview */}
-      <div className="flex-1 overflow-auto">
+      {/* Live Preview - Top 50% (for supported frameworks) */}
+      {showLivePreview && (
+        <div className="flex-1 border-b border-gray-200 dark:border-gray-700">
+          <LivePreview
+            code={generatedCode}
+            framework={selectedFramework}
+            language={language}
+          />
+        </div>
+      )}
+
+      {/* Code Preview - Bottom 50% (or full height if no live preview) */}
+      <div className={showLivePreview ? 'flex-1 overflow-auto' : 'flex-1 overflow-auto'}>
         <CodePreview code={generatedCode} language={language} />
       </div>
     </div>

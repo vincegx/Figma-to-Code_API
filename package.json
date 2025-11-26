@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run copy-preview-assets && next dev",
+    "build": "npm run copy-preview-assets && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "copy-preview-assets": "node scripts/copy-preview-assets.js && node scripts/generate-tailwind-full.js"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
@@ -20,6 +21,7 @@
     "@radix-ui/react-slot": "1.2.4",
     "@radix-ui/react-tabs": "1.1.13",
     "@radix-ui/react-toast": "1.2.15",
+    "@swc/core": "^1.15.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.0",
     "lucide-react": "^0.554.0",

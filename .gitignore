@@ -60,3 +60,6 @@ next-env.d.ts
 .idea/
 *.swp
 *.swo
+
+# Preview assets (generated at build time, not committed)
+/public/preview-libs/
