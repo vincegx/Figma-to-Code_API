@@ -86,6 +86,17 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Padding (standard values: 4, 8, 12, 16, 20, 24, 32...)
   if (prop === 'padding') {
+    // WP25: Handle multi-value padding "12px 20px" → "py-3 px-5"
+    const multiMatch = cssValue.match(/^(\d+)px\s+(\d+)px$/);
+    if (multiMatch) {
+      const vertical = parseInt(multiMatch[1], 10);
+      const horizontal = parseInt(multiMatch[2], 10);
+      const py = convertSizeToTailwind(`${vertical}px`, 'py');
+      const px = convertSizeToTailwind(`${horizontal}px`, 'px');
+      return `${py} ${px}`.trim();
+    }
+
+    // Single value padding
     const match = cssValue.match(/^(\d+)px$/);
     if (match) {
       const px = parseInt(match[1], 10);
@@ -288,7 +299,28 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   if (prop === 'fontsize') {
-    return convertSizeToTailwind(cssValue, 'text');
+    // WP25: Font size has special Tailwind classes
+    const match = cssValue.match(/^(\d+)px$/);
+    if (match) {
+      const px = parseInt(match[1], 10);
+      const fontSizeMap: Record<number, string> = {
+        12: 'text-xs',
+        14: 'text-sm',
+        16: 'text-base',
+        18: 'text-lg',
+        20: 'text-xl',
+        24: 'text-2xl',
+        30: 'text-3xl',
+        36: 'text-4xl',
+        48: 'text-5xl',
+        60: 'text-6xl',
+        72: 'text-7xl',
+        96: 'text-8xl',
+        128: 'text-9xl',
+      };
+      return fontSizeMap[px] || `text-[${px}px]`;
+    }
+    return `text-[${cssValue}]`;
   }
 
   if (prop === 'lineheight') {
@@ -505,9 +537,9 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   if (prop === 'verticalalign') {
     const alignMap: Record<string, string> = {
       'baseline': 'align-baseline',
-      'top': 'align-top',
-      'middle': 'align-middle',
-      'bottom': 'align-bottom',
+      'top': 'self-start',  // WP25: In flexbox, use self-start instead of align-top
+      'middle': 'self-center',  // WP25: In flexbox, use self-center instead of align-middle
+      'bottom': 'self-end',  // WP25: In flexbox, use self-end instead of align-bottom
       'text-top': 'align-text-top',
       'text-bottom': 'align-text-bottom',
     };
