@@ -1,80 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Resizable } from 're-resizable';
 import { useUIStore } from '@/lib/store/ui-store';
-import { cn } from '@/lib/utils';
+import { Monitor, Tablet, Smartphone } from 'lucide-react';
 
-/**
- * DragHandle Component
- * Provides visual drag handles with diagonal stripe pattern (Tailwind Play style)
- */
-interface DragHandleProps {
-  side: 'left' | 'right';
-  maxWidth: number;
-  currentWidth: number;
-  onResize: (newWidth: number) => void;
-}
-
-function DragHandle({ side, maxWidth, currentWidth, onResize }: DragHandleProps) {
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = currentWidth;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const delta = (moveEvent.clientX - startX) * (side === 'left' ? -1 : 1);
-      const newWidth = Math.max(300, Math.min(startWidth + delta, maxWidth));
-      onResize(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  return (
-    <div
-      className={cn(
-        'w-1 h-full cursor-ew-resize transition-all bg-gray-300 dark:bg-gray-600',
-        'hover:w-1.5 hover:bg-blue-500 dark:hover:bg-blue-400'
-      )}
-      onMouseDown={handleMouseDown}
-      title={`Drag to resize viewport ${side}`}
-    />
-  );
-}
-
-/**
- * GridOverlay Component
- * Visual grid overlay with configurable spacing
- */
-interface GridOverlayProps {
-  spacing: number; // 8, 16, or 24
-}
-
-function GridOverlay({ spacing }: GridOverlayProps) {
+function GridOverlay({ spacing }: { spacing: number }) {
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       <div
         className="h-full w-full"
         style={{
           backgroundImage: `
-            repeating-linear-gradient(
-              0deg,
-              rgb(148 163 184 / 0.1) 0px,
-              transparent 1px,
-              transparent ${spacing}px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              rgb(148 163 184 / 0.1) 0px,
-              transparent 1px,
-              transparent ${spacing}px
-            )
+            repeating-linear-gradient(0deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${spacing}px),
+            repeating-linear-gradient(90deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${spacing}px)
           `,
         }}
       />
@@ -82,36 +21,36 @@ function GridOverlay({ spacing }: GridOverlayProps) {
   );
 }
 
-/**
- * DimensionLabel Component
- * Displays current viewport dimensions in top-right corner
- */
-interface DimensionLabelProps {
-  width: number;
-  height: number;
-  maxWidth?: number;
-  maxHeight?: number;
-}
+function DimensionLabel({ width, height, onPresetClick }: { width: number; height: number; onPresetClick: (w: number, h: number) => void }) {
+  const presets = [
+    { icon: Smartphone, width: 375, height: 667, label: 'Mobile' },
+    { icon: Tablet, width: 768, height: 1024, label: 'Tablet' },
+    { icon: Monitor, width: 1440, height: 900, label: 'Desktop' },
+  ];
 
-function DimensionLabel({ width, height, maxWidth, maxHeight }: DimensionLabelProps) {
   return (
-    <div className="absolute top-4 right-4 z-50 bg-slate-900/90 text-white text-sm px-3 py-1.5 rounded-lg font-mono shadow-lg">
-      <span className="font-semibold">{width} × {height}</span>
-      {maxWidth && maxHeight && (
-        <span className="text-slate-400 ml-2 text-xs">
-          max: {maxWidth} × {maxHeight}
-        </span>
-      )}
+    <div className="absolute top-4 right-4 z-50 bg-slate-900/90 text-white text-sm rounded-lg font-mono shadow-lg overflow-hidden">
+      <div className="flex items-center divide-x divide-slate-700">
+        <div className="px-3 py-1.5">
+          <span className="font-semibold">{width} × {height}</span>
+        </div>
+        <div className="flex items-center gap-1 px-2 py-1">
+          {presets.map((preset) => (
+            <button
+              key={preset.label}
+              onClick={() => onPresetClick(preset.width, preset.height)}
+              className="p-1 hover:bg-slate-700 rounded transition-colors"
+              title={`${preset.label} (${preset.width}×${preset.height})`}
+            >
+              <preset.icon size={14} />
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-/**
- * ResizablePreviewViewport Component
- * Wrapper for LivePreview with two modes:
- * - Normal mode: Full-width preview
- * - Responsive mode: Resizable viewport with drag handles, grid, and dimension label
- */
 interface ResizablePreviewViewportProps {
   children: React.ReactNode;
 }
@@ -121,30 +60,19 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
   const [availableWidth, setAvailableWidth] = useState(0);
   const [availableHeight, setAvailableHeight] = useState(0);
 
-  const {
-    viewerResponsiveMode,
-    viewerViewportWidth,
-    viewerViewportHeight,
-    viewerGridVisible,
-    viewerGridSpacing,
-    setViewerViewportSize,
-  } = useUIStore();
+  const { viewerResponsiveMode, viewerViewportWidth, viewerViewportHeight, viewerGridVisible, viewerGridSpacing, setViewerViewportSize } = useUIStore();
 
-  // ResizeObserver to track available container space
   useEffect(() => {
     if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
+    const observer = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       setAvailableWidth(width);
       setAvailableHeight(height);
     });
-
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  // Mode Normal: Preview 100% of panel
   if (!viewerResponsiveMode) {
     return (
       <div ref={containerRef} className="w-full h-full">
@@ -153,63 +81,40 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
     );
   }
 
-  // Mode Responsive: Resizable viewport with drag handles
-  const HANDLE_WIDTH = 4; // w-1 = 4px
-  const MARGIN = 40; // Additional margins
-  const maxViewportWidth = Math.max(300, availableWidth - (HANDLE_WIDTH * 2) - MARGIN);
-  const maxViewportHeight = Math.max(300, availableHeight - MARGIN);
-
-  // Constrain viewport to available space
-  const constrainedWidth = Math.min(viewerViewportWidth, maxViewportWidth);
-  const constrainedHeight = Math.min(viewerViewportHeight, maxViewportHeight);
-
-  const handleWidthResize = (newWidth: number) => {
-    setViewerViewportSize(newWidth, constrainedHeight);
-  };
+  const maxWidth = Math.max(300, availableWidth - 40);
+  const maxHeight = Math.max(300, availableHeight - 40);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full bg-slate-950 overflow-hidden relative"
-    >
-      {/* Dimension label */}
+    <div ref={containerRef} className="w-full h-full bg-slate-950 flex items-center justify-center">
       <DimensionLabel
-        width={constrainedWidth}
-        height={constrainedHeight}
-        maxWidth={maxViewportWidth}
-        maxHeight={maxViewportHeight}
+        width={viewerViewportWidth}
+        height={viewerViewportHeight}
+        onPresetClick={(w, h) => setViewerViewportSize(w, h)}
       />
 
-      {/* Centered viewport with drag handles */}
-      <div className="flex items-center justify-center h-full gap-0">
-        <DragHandle
-          side="left"
-          maxWidth={maxViewportWidth}
-          currentWidth={constrainedWidth}
-          onResize={handleWidthResize}
-        />
-
-        <div
-          className="relative bg-white dark:bg-slate-900"
-          style={{
-            width: constrainedWidth,
-            height: constrainedHeight,
-          }}
-        >
-          {/* Grid overlay */}
-          {viewerGridVisible && <GridOverlay spacing={viewerGridSpacing} />}
-
-          {/* Live preview iframe */}
-          {children}
-        </div>
-
-        <DragHandle
-          side="right"
-          maxWidth={maxViewportWidth}
-          currentWidth={constrainedWidth}
-          onResize={handleWidthResize}
-        />
-      </div>
+      <Resizable
+        size={{ width: viewerViewportWidth, height: viewerViewportHeight }}
+        onResizeStop={(_e, _direction, _ref, d) => {
+          setViewerViewportSize(viewerViewportWidth + d.width, viewerViewportHeight + d.height);
+        }}
+        minWidth={300}
+        minHeight={300}
+        maxWidth={maxWidth}
+        maxHeight={maxHeight}
+        enable={{ top: false, right: true, bottom: false, left: true, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false }}
+        handleStyles={{
+          left: { width: '8px', left: '-4px', cursor: 'ew-resize' },
+          right: { width: '8px', right: '-4px', cursor: 'ew-resize' },
+        }}
+        handleClasses={{
+          left: 'hover:bg-blue-500 transition-colors',
+          right: 'hover:bg-blue-500 transition-colors',
+        }}
+        className="relative bg-white dark:bg-slate-900"
+      >
+        {viewerGridVisible && <GridOverlay spacing={viewerGridSpacing} />}
+        {children}
+      </Resizable>
     </div>
   );
 }

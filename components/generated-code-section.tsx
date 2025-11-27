@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
@@ -25,6 +26,24 @@ import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 
 type FrameworkType = 'react-tailwind' | 'html-css' | 'react-inline' | 'swift-ui' | 'android-xml';
+
+// Custom theme based on oneDark/oneLight but with transparent background
+function getCustomTheme(isDark: boolean) {
+  const baseTheme = isDark ? oneDark : oneLight;
+  return {
+    ...baseTheme,
+    'pre[class*="language-"]': {
+      ...baseTheme['pre[class*="language-"]'],
+      background: 'transparent',
+      margin: 0,
+      padding: 0,
+    },
+    'code[class*="language-"]': {
+      ...baseTheme['code[class*="language-"]'],
+      background: 'transparent',
+    },
+  };
+}
 
 interface GeneratedCodeSectionProps {
   node: SimpleAltNode | null;
@@ -180,10 +199,10 @@ export function GeneratedCodeSection({
 
         <TabsContent value="component" className="mt-3">
           <div className="relative">
-            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-auto max-h-96">
               <SyntaxHighlighter
                 language={getLanguage(framework, false)}
-                style={isDark ? oneDark : oneLight}
+                style={getCustomTheme(isDark)}
                 customStyle={{
                   margin: 0,
                   padding: '1rem',
@@ -191,6 +210,8 @@ export function GeneratedCodeSection({
                   lineHeight: '1.5',
                   borderRadius: '0.5rem',
                   background: 'transparent',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
                 }}
                 wrapLines={true}
                 wrapLongLines={true}
@@ -213,11 +234,14 @@ export function GeneratedCodeSection({
                 <DialogContent className="max-w-4xl max-h-[80vh]">
                   <DialogHeader>
                     <DialogTitle>Component Code ({framework})</DialogTitle>
+                    <DialogDescription className="sr-only">
+                      Full-screen view of the generated component code
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="bg-gray-100 dark:bg-gray-900 rounded-lg overflow-auto text-sm border border-gray-200 dark:border-gray-700 max-h-[60vh]">
                     <SyntaxHighlighter
                       language={getLanguage(framework, false)}
-                      style={isDark ? oneDark : oneLight}
+                      style={getCustomTheme(isDark)}
                       customStyle={{
                         margin: 0,
                         padding: '1rem',
@@ -225,6 +249,8 @@ export function GeneratedCodeSection({
                         lineHeight: '1.5',
                         borderRadius: '0.5rem',
                         background: 'transparent',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
                       }}
                       wrapLines={true}
                       wrapLongLines={true}
@@ -274,10 +300,10 @@ export function GeneratedCodeSection({
 
         <TabsContent value="styles" className="mt-3">
           <div className="relative">
-            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-auto max-h-96">
               <SyntaxHighlighter
                 language={getLanguage(framework, true)}
-                style={isDark ? oneDark : oneLight}
+                style={getCustomTheme(isDark)}
                 customStyle={{
                   margin: 0,
                   padding: '1rem',
@@ -285,6 +311,8 @@ export function GeneratedCodeSection({
                   lineHeight: '1.5',
                   borderRadius: '0.5rem',
                   background: 'transparent',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
                 }}
                 wrapLines={true}
                 wrapLongLines={true}

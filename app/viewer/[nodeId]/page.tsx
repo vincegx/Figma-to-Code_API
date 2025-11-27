@@ -42,6 +42,7 @@ import LivePreview from '@/components/live-preview';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import { cn } from '@/lib/utils';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
@@ -90,10 +91,6 @@ export default function ViewerPage() {
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
-
-  // Resizable sidebar widths (in pixels)
-  const [leftPanelWidth, setLeftPanelWidth] = useState(300);
-  const [rightPanelWidth, setRightPanelWidth] = useState(300);
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
   const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
@@ -183,6 +180,13 @@ export default function ViewerPage() {
     fetchNodeWithAltNode();
   }, [nodeId]);
 
+  // Auto-select root node on first load if nothing is selected
+  useEffect(() => {
+    if (altNode && !selectedTreeNodeId) {
+      setSelectedTreeNodeId(altNode.id);
+    }
+  }, [altNode, selectedTreeNodeId]);
+
   // Generate code whenever altNode, selectedNode, framework, or rules change
   useEffect(() => {
     async function generateCode() {
@@ -220,51 +224,6 @@ export default function ViewerPage() {
 
     generateCode();
   }, [altNode, selectedNode, previewFramework, multiFrameworkRules]);
-
-  // Resize handlers for sidebars
-  const handleLeftPanelResize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = leftPanelWidth;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const delta = moveEvent.clientX - startX;
-      const newWidth = startWidth + delta;
-      const maxWidth = window.innerWidth * 0.30; // 30% max
-      const constrainedWidth = Math.max(300, Math.min(newWidth, maxWidth));
-      setLeftPanelWidth(constrainedWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleRightPanelResize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = rightPanelWidth;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const delta = startX - moveEvent.clientX; // Reversed for right panel
-      const newWidth = startWidth + delta;
-      const maxWidth = window.innerWidth * 0.30; // 30% max
-      const constrainedWidth = Math.max(300, Math.min(newWidth, maxWidth));
-      setRightPanelWidth(constrainedWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
@@ -525,18 +484,17 @@ export default function ViewerPage() {
         </div>
       </div>
 
-      {/* Three-Panel Elastic Layout */}
-      <div className="flex-1 flex overflow-hidden relative">
+      {/* Three-Panel Elastic Layout with Resizable */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
         {/* Left Panel - Tree View (Collapsable & Resizable) */}
-        <div
-          className={cn(
-            'border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative flex-shrink-0',
-            viewerLeftPanelCollapsed && 'w-0 border-none'
-          )}
-          style={{ width: viewerLeftPanelCollapsed ? 0 : `${leftPanelWidth}px` }}
-        >
-          {!viewerLeftPanelCollapsed && (
-            <>
+        {!viewerLeftPanelCollapsed && (
+          <>
+            <ResizablePanel
+              defaultSize={20}
+              minSize={15}
+              maxSize={30}
+              className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative"
+            >
               <div className="h-full overflow-auto pt-10">
                 <FigmaTreeView
                   altNode={altNode}
@@ -545,7 +503,7 @@ export default function ViewerPage() {
                 />
               </div>
 
-              {/* Collapse Button - Fixed position */}
+              {/* Collapse Button */}
               <button
                 onClick={() => setViewerLeftPanelCollapsed(true)}
                 className="absolute top-2 right-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
@@ -553,18 +511,13 @@ export default function ViewerPage() {
               >
                 <PanelLeftClose size={14} />
               </button>
+            </ResizablePanel>
 
-              {/* Resize Handle */}
-              <div
-                onMouseDown={handleLeftPanelResize}
-                className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors z-10"
-                title="Resize panel"
-              />
-            </>
-          )}
-        </div>
+            <ResizableHandle className="bg-gray-200 dark:bg-gray-700" />
+          </>
+        )}
 
-        {/* Expand Left Button (when collapsed) - Fixed on left edge of center panel */}
+        {/* Expand Left Button (when collapsed) */}
         {viewerLeftPanelCollapsed && (
           <button
             onClick={() => setViewerLeftPanelCollapsed(false)}
@@ -575,8 +528,8 @@ export default function ViewerPage() {
           </button>
         )}
 
-        {/* Center Panel - Live Preview (Elastic: flex-1) */}
-        <div className="flex-1 relative bg-slate-50 dark:bg-slate-900">
+        {/* Center Panel - Live Preview (Elastic) */}
+        <ResizablePanel className="relative bg-slate-50 dark:bg-slate-900">
           <ResizablePreviewViewport>
             <LivePreview
               code={generatedCode}
@@ -584,9 +537,9 @@ export default function ViewerPage() {
               language={previewFramework === 'html-css' ? 'html' : 'tsx'}
             />
           </ResizablePreviewViewport>
-        </div>
+        </ResizablePanel>
 
-        {/* Expand Right Button (when collapsed) - Fixed on right edge of center panel */}
+        {/* Expand Right Button (when collapsed) */}
         {viewerRightPanelCollapsed && (
           <button
             onClick={() => setViewerRightPanelCollapsed(false)}
@@ -598,16 +551,17 @@ export default function ViewerPage() {
         )}
 
         {/* Right Panel - Information/Rules Tabs (Collapsable & Resizable) */}
-        <div
-          className={cn(
-            'border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative flex-shrink-0',
-            viewerRightPanelCollapsed && 'w-0 border-none'
-          )}
-          style={{ width: viewerRightPanelCollapsed ? 0 : `${rightPanelWidth}px` }}
-        >
-          {!viewerRightPanelCollapsed && (
-            <>
-              {/* Collapse Button - Fixed position */}
+        {!viewerRightPanelCollapsed && (
+          <>
+            <ResizableHandle className="bg-gray-200 dark:bg-gray-700" />
+
+            <ResizablePanel
+              defaultSize={20}
+              minSize={15}
+              maxSize={30}
+              className="border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative"
+            >
+              {/* Collapse Button */}
               <button
                 onClick={() => setViewerRightPanelCollapsed(true)}
                 className="absolute top-2 left-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
@@ -615,13 +569,6 @@ export default function ViewerPage() {
               >
                 <PanelRightClose size={14} />
               </button>
-
-              {/* Resize Handle */}
-              <div
-                onMouseDown={handleRightPanelResize}
-                className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors z-10"
-                title="Resize panel"
-              />
 
               <Tabs
                 value={rightPanelTab}
@@ -656,10 +603,10 @@ export default function ViewerPage() {
                   />
                 </TabsContent>
               </Tabs>
-            </>
-          )}
-        </div>
-      </div>
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
     </div>
   );
 }

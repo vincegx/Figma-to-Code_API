@@ -48,9 +48,9 @@ export function InformationPanel({
           <PropertyItem label="Name" value={node.name} />
           <PropertyItem label="Type" value={node.type} />
           <PropertyItem label="Original Type" value={node.originalNode?.type || node.type} />
-          <div className="flex items-center justify-between text-sm mt-2">
-            <PropertyItem label="Visible" value={node.visible !== false} inline={false} />
-            <PropertyItem label="Locked" value={figmaNode?.locked || false} inline={false} />
+          <div className="flex items-center gap-4 text-sm mt-2">
+            <PropertyItem label="Visible" value={node.visible !== false} inline={true} />
+            <PropertyItem label="Locked" value={figmaNode?.locked || false} inline={true} />
           </div>
         </PropertyBlock>
 

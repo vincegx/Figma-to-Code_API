@@ -63,7 +63,7 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
 
   if (inline) {
     return (
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2 text-sm">
         <span className="text-gray-600 dark:text-gray-400">{label}:</span>
         <span className="font-medium text-gray-900 dark:text-white">
           {displayValue}

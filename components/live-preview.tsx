@@ -149,6 +149,31 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
       setError(null);
       setIsLoading(true);
 
+      const trimmedCode = sourceCode.trim();
+
+      // Skip if code is empty or just a placeholder comment
+      if (!trimmedCode || trimmedCode.startsWith('// No node selected')) {
+        setIsLoading(false);
+        return '';
+      }
+
+      // Detect if HTML code is being sent to React transpiler (framework mismatch)
+      // React code MUST contain 'export function' or 'function' keyword
+      // HTML code uses <!-- --> comments or class= attributes (not className)
+      const isReactCode = trimmedCode.includes('export function') ||
+                         trimmedCode.includes('function ') ||
+                         trimmedCode.includes('const ') && trimmedCode.includes('=>');
+      const isHtmlCode = trimmedCode.includes('<!--') ||
+                        trimmedCode.includes('class=') || // HTML uses class=, React uses className=
+                        (trimmedCode.startsWith('<') && !isReactCode);
+
+      if (isHtmlCode) {
+        // Code is HTML but framework is React - skip rendering to avoid crash
+        // The useEffect will re-run once the correct React code is generated
+        setIsLoading(false);
+        return '';
+      }
+
       // Fetch React libraries content (will be inlined in srcDoc to avoid CORS)
       const [reactResponse, reactDomResponse, transpileResponse] = await Promise.all([
         fetch('/preview-libs/react.js'),
