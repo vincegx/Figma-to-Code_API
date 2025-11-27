@@ -548,14 +548,14 @@ export default function ViewerPage() {
               {/* Resize Handle */}
               <div
                 onMouseDown={handleLeftPanelResize}
-                className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors"
+                className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors z-10"
                 title="Resize panel"
               />
 
               {/* Collapse Button */}
               <button
                 onClick={() => setViewerLeftPanelCollapsed(true)}
-                className="absolute bottom-2 right-2 z-50 p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
+                className="absolute bottom-2 right-2 z-[60] p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
                 title="Collapse tree"
               >
                 <PanelLeftClose size={16} />
@@ -651,7 +651,7 @@ export default function ViewerPage() {
               {/* Collapse Button */}
               <button
                 onClick={() => setViewerRightPanelCollapsed(true)}
-                className="absolute bottom-2 left-2 z-50 p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
+                className="absolute bottom-2 left-2 z-[60] p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
                 title="Collapse info"
               >
                 <PanelRightClose size={16} />
