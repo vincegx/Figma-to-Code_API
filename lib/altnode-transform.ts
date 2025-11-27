@@ -202,7 +202,7 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
   for (const [figmaProp, enumMapping] of Object.entries(figmaConfig.enumMappings)) {
     const figmaValue = node[figmaProp];
     if (figmaValue !== undefined && figmaValue !== null) {
-      const valueMapping = enumMapping.values[String(figmaValue)];
+      const valueMapping = (enumMapping as any).values[String(figmaValue)];
       if (valueMapping && valueMapping.css) {
         // Apply all CSS properties from the mapping
         for (const [cssProp, cssValue] of Object.entries(valueMapping.css)) {
