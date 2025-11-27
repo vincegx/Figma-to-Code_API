@@ -751,6 +751,74 @@
           "comment": "Fixed height from absoluteBoundingBox"
         }
       }
+    },
+    "strokeCap": {
+      "cssProperty": "stroke-linecap",
+      "type": "Enum",
+      "values": {
+        "NONE": {
+          "css": {
+            "stroke-linecap": "butt"
+          },
+          "tailwind": "",
+          "comment": "No stroke cap (butt)"
+        },
+        "ROUND": {
+          "css": {
+            "stroke-linecap": "round"
+          },
+          "tailwind": "",
+          "comment": "Round stroke cap"
+        },
+        "SQUARE": {
+          "css": {
+            "stroke-linecap": "square"
+          },
+          "tailwind": "",
+          "comment": "Square stroke cap"
+        },
+        "LINE_ARROW": {
+          "css": {
+            "stroke-linecap": "round"
+          },
+          "tailwind": "",
+          "comment": "Line arrow (uses round cap)"
+        },
+        "TRIANGLE_ARROW": {
+          "css": {
+            "stroke-linecap": "round"
+          },
+          "tailwind": "",
+          "comment": "Triangle arrow (uses round cap)"
+        }
+      }
+    },
+    "strokeJoin": {
+      "cssProperty": "stroke-linejoin",
+      "type": "Enum",
+      "values": {
+        "MITER": {
+          "css": {
+            "stroke-linejoin": "miter"
+          },
+          "tailwind": "",
+          "comment": "Miter stroke join (sharp corners)"
+        },
+        "BEVEL": {
+          "css": {
+            "stroke-linejoin": "bevel"
+          },
+          "tailwind": "",
+          "comment": "Bevel stroke join (beveled corners)"
+        },
+        "ROUND": {
+          "css": {
+            "stroke-linejoin": "round"
+          },
+          "tailwind": "",
+          "comment": "Round stroke join (rounded corners)"
+        }
+      }
     }
   },
   "comments": {
