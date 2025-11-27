@@ -592,18 +592,19 @@ function generateTailwindJSXElement(
     .filter(Boolean);
 
   if (properties.className) {
-    // WP25 FIX: baseClasses come LAST so they override rule classes
-    // This allows inline-flex from altNode.styles to override flex from rules
+    // WP28 T211: Rules come LAST so they override fallback base classes
+    // This ensures semantic classes from rules (text-sm) beat raw fallbacks (text-[14px])
+    // Architecture: fallbacks provide CSS guarantee → rules optimize to semantic classes
     const ruleClasses = properties.className.split(/\s+/).filter(Boolean);
-    const allClasses = [...ruleClasses, ...baseClasses];
+    const allClasses = [...baseClasses, ...ruleClasses]; // WP28: baseClasses first, rules last
 
-    // WP25 FIX: Deduplicate classes and resolve conflicts
-    // Rules: pt-[40px] overrides py-10, pl-[32px] overrides px-8
-    // baseStyles: inline-flex overrides flex
+    // WP28 T211: Deduplicate classes with correct priority
+    // Rules win: text-sm overrides text-[14px], flex-col overrides flex-column
+    // Last occurrence wins in deduplicateTailwindClasses(), so rules (last) beat fallbacks (first)
     const uniqueClasses = deduplicateTailwindClasses(allClasses);
     tailwindClasses = uniqueClasses.join(' ');
   } else {
-    // No rules - just use base classes
+    // No rules - just use base classes (fallbacks)
     tailwindClasses = baseClasses.join(' ');
   }
 

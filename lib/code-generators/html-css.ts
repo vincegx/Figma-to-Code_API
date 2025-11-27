@@ -130,14 +130,15 @@ function generateHTMLElement(
 
   // CRITICAL FIX: Merge base styles from AltNode with rule overrides
   // Rules take precedence over computed styles
+  // WP28 T211: Fallback architecture - baseStyles provide CSS guarantee, properties optimize
   const baseStyles: Record<string, string> = {};
   for (const [key, value] of Object.entries(node.styles || {})) {
     baseStyles[key] = typeof value === 'number' ? String(value) : value;
   }
 
   const mergedProperties: Record<string, string> = {
-    ...baseStyles,      // Base styles from Figma normalization
-    ...properties,      // Rule overrides (higher priority)
+    ...baseStyles,      // WP28: Fallback styles from altNode.styles (universal extraction)
+    ...properties,      // WP28: Rule overrides (higher priority) - semantic classes win
   };
 
   // Collect CSS rule for this node
