@@ -19,6 +19,7 @@
  */
 
 import type { FigmaNode } from './types/figma';
+import figmaConfig from './figma-transform-config.json';
 
 // Simple AltNode structure for transformation engine
 export interface SimpleAltNode {
@@ -75,24 +76,13 @@ function generateUniqueName(baseName: string): string {
 /**
  * Map Figma node type to simplified type
  *
+ * WP28 T209: Now uses externalized config instead of hardcoded typeMap
+ *
  * @param figmaType - Figma node type
  * @returns Simplified type string
  */
 function mapNodeType(figmaType: string): string {
-  const typeMap: Record<string, string> = {
-    'FRAME': 'div',
-    'GROUP': 'div',
-    'COMPONENT': 'div',
-    'INSTANCE': 'div',
-    'RECTANGLE': 'div',
-    'TEXT': 'span',
-    'ELLIPSE': 'div',
-    'VECTOR': 'svg',
-    'LINE': 'div',
-    'BOOLEAN_OPERATION': 'svg',
-  };
-
-  return typeMap[figmaType] || 'div';
+  return figmaConfig.typeMapping[figmaType as keyof typeof figmaConfig.typeMapping] || 'div';
 }
 
 /**
@@ -149,34 +139,78 @@ function handleGroupInlining(
  * Detect if node is likely an icon
  *
  * FigmaToCode HIGH priority: Icon detection for special handling
+ * WP28 T209: Now uses externalized config for thresholds and icon types
  *
  * @param figmaNode - Figma node to check
  * @returns true if likely an icon
  */
 function isLikelyIcon(figmaNode: FigmaNode): boolean {
   // Check type (icons are usually VECTOR, BOOLEAN_OPERATION, or small COMPONENT)
-  const iconTypes = ['VECTOR', 'BOOLEAN_OPERATION'];
-  if (iconTypes.includes(figmaNode.type)) {
+  if (figmaConfig.constants.iconNodeTypes.includes(figmaNode.type)) {
     return true;
   }
 
-  // Check size (icons typically ≤64px)
+  // Check size (icons typically ≤64px) - threshold from config
   const width = figmaNode.absoluteBoundingBox?.width || 0;
   const height = figmaNode.absoluteBoundingBox?.height || 0;
-  if (width <= 64 && height <= 64) {
+  if (width <= figmaConfig.thresholds.iconMaxSize && height <= figmaConfig.thresholds.iconMaxSize) {
     // Check if it has export settings (common for icons)
     const exportSettings = (figmaNode as any).exportSettings;
     if (exportSettings && exportSettings.length > 0) {
       return true;
     }
 
-    // Small COMPONENT might be an icon
-    if (figmaNode.type === 'COMPONENT' && width <= 32 && height <= 32) {
+    // Small COMPONENT might be an icon - threshold from config
+    if (figmaNode.type === 'COMPONENT' &&
+        width <= figmaConfig.thresholds.iconComponentMaxSize &&
+        height <= figmaConfig.thresholds.iconComponentMaxSize) {
       return true;
     }
   }
 
   return false;
+}
+
+/**
+ * WP28 T210: Extract universal fallbacks for all properties defined in config
+ *
+ * This function ensures that ALL Figma properties have CSS fallback values,
+ * even if no rule matches. Rules will optimize these fallbacks to semantic classes.
+ *
+ * Example: fontSize: 14 → styles.fontSize = "14px" (fallback)
+ *          If rule matches → "text-sm" (optimized)
+ *          If no rule → "text-[14px]" (fallback used)
+ *
+ * @param figmaNode - Original Figma node
+ * @param altNode - AltNode being constructed
+ */
+function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+  const node = figmaNode as any;
+
+  // Extract simple properties with direct unit conversion
+  for (const [figmaProp, mapping] of Object.entries(figmaConfig.propertyMappings)) {
+    if (!mapping.extract) continue;
+
+    const value = node[figmaProp];
+    if (value !== undefined && value !== null) {
+      const cssValue = mapping.unit ? `${value}${mapping.unit}` : String(value);
+      altNode.styles[mapping.cssProperty] = cssValue;
+    }
+  }
+
+  // Extract enum properties with value mappings
+  for (const [figmaProp, enumMapping] of Object.entries(figmaConfig.enumMappings)) {
+    const figmaValue = node[figmaProp];
+    if (figmaValue !== undefined && figmaValue !== null) {
+      const valueMapping = enumMapping.values[String(figmaValue)];
+      if (valueMapping && valueMapping.css) {
+        // Apply all CSS properties from the mapping
+        for (const [cssProp, cssValue] of Object.entries(valueMapping.css)) {
+          altNode.styles[cssProp] = cssValue as string;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -194,25 +228,9 @@ function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltN
   // NOTE: mixBlendMode handled by official-blendmode rule (but keep mapping for COMPLEX values)
 
   // Blend mode (COMPLEX mapping - keep for non-NORMAL values)
-  if (node.blendMode && node.blendMode !== 'PASS_THROUGH' && node.blendMode !== 'NORMAL') {
-    const blendModeMap: Record<string, string> = {
-      'MULTIPLY': 'multiply',
-      'SCREEN': 'screen',
-      'OVERLAY': 'overlay',
-      'DARKEN': 'darken',
-      'LIGHTEN': 'lighten',
-      'COLOR_DODGE': 'color-dodge',
-      'COLOR_BURN': 'color-burn',
-      'HARD_LIGHT': 'hard-light',
-      'SOFT_LIGHT': 'soft-light',
-      'DIFFERENCE': 'difference',
-      'EXCLUSION': 'exclusion',
-      'HUE': 'hue',
-      'SATURATION': 'saturation',
-      'COLOR': 'color',
-      'LUMINOSITY': 'luminosity',
-    };
-    const cssBlendMode = blendModeMap[node.blendMode];
+  // WP28 T209: Now uses externalized config for blend modes and exclusions
+  if (node.blendMode && !figmaConfig.constants.blendModeExclusions.includes(node.blendMode)) {
+    const cssBlendMode = figmaConfig.blendModes[node.blendMode as keyof typeof figmaConfig.blendModes];
     if (cssBlendMode) {
       altNode.styles.mixBlendMode = cssBlendMode;
     }
@@ -231,12 +249,13 @@ function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltN
   }
 
   // WP25: Individual stroke weights
+  // WP28 T209: Fixed bug - borderBottomWidth was using 'left' instead of 'bottom'
   if (node.individualStrokeWeights) {
     const { top, right, bottom, left } = node.individualStrokeWeights;
     if (top || right || bottom || left) {
       altNode.styles.borderTopWidth = `${top || 0}px`;
       altNode.styles.borderRightWidth = `${right || 0}px`;
-      altNode.styles.borderBottomWidth = `${left || 0}px`;
+      altNode.styles.borderBottomWidth = `${bottom || 0}px`; // ✅ Fixed: was using 'left'
       altNode.styles.borderLeftWidth = `${left || 0}px`;
     }
   }
@@ -260,8 +279,9 @@ function applyHighPriorityImprovements(
   cumulativeRotation: number
 ): void {
   // 1. Rotation conversion (radians → degrees)
+  // WP28 T209: Now uses config default for rotation check
   const rotation = (figmaNode as any).rotation;
-  if (rotation && rotation !== 0) {
+  if (rotation && rotation !== figmaConfig.defaults.rotation) {
     const rotationDegrees = -(rotation * 180 / Math.PI);
     altNode.styles.transform = `rotate(${rotationDegrees}deg)`;
   }
@@ -296,7 +316,8 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   const node = figmaNode as any;
 
   // Grid template columns/rows (COMPLEX - calculated values, not in rules)
-  if (node.layoutMode === 'GRID') {
+  // WP28 T209: Now uses config constant for layout mode comparison
+  if (node.layoutMode === figmaConfig.constants.layoutModes.GRID) {
     // NOTE: display:grid is handled by official-layoutmode-grid rule
     if (node.gridColumnsSizing) {
       altNode.styles.gridTemplateColumns = node.gridColumnsSizing;
@@ -315,7 +336,9 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   // WP25 FIX: FigmaToCode logic for flex vs inline-flex
   // Use 'flex' when parent has same layoutMode, otherwise 'inline-flex'
   // This matches FigmaToCode's getFlex() function
-  if (node.layoutMode === 'HORIZONTAL' || node.layoutMode === 'VERTICAL') {
+  // WP28 T209: Now uses config constants for layout mode comparisons
+  if (node.layoutMode === figmaConfig.constants.layoutModes.HORIZONTAL ||
+      node.layoutMode === figmaConfig.constants.layoutModes.VERTICAL) {
     const hasSameLayoutMode = parentLayoutMode === node.layoutMode;
     altNode.styles.display = hasSameLayoutMode ? 'flex' : 'inline-flex';
   }
@@ -326,7 +349,8 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   // NOTE: layoutAlign handled by official-layoutalign rules
 
   // WP25: layoutPositioning ABSOLUTE → calculate top/left (COMPLEX calculation, not in rules)
-  if (node.layoutPositioning === 'ABSOLUTE') {
+  // WP28 T209: Now uses config constant for layout positioning comparison
+  if (node.layoutPositioning === figmaConfig.constants.layoutPositioning.absolute) {
     // NOTE: position: absolute is handled by official-layoutpositioning rule
     // But top/left require parent calculation, so we keep them here
     if (node.absoluteBoundingBox && node.parent?.absoluteBoundingBox) {
@@ -400,7 +424,8 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const isTextNode = figmaNode.type === 'TEXT';
   const colorProp = isTextNode ? 'color' : 'background';
 
-  if (fill.type === 'SOLID' && fill.color) {
+  // WP28 T209: Now uses config constants for fill types
+  if (fill.type === figmaConfig.constants.fillTypes.solid && fill.color) {
     const { r, g, b } = fill.color;
     const a = fill.opacity ?? 1;
     const rgbaValue = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
@@ -416,7 +441,7 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     } else {
       altNode.styles[colorProp] = rgbaValue;
     }
-  } else if (fill.type === 'GRADIENT_LINEAR' && fill.gradientStops) {
+  } else if (fill.type === figmaConfig.constants.fillTypes.gradientLinear && fill.gradientStops) {
     // Simplified linear gradient
     const stops = fill.gradientStops
       .map((stop: any) => {
@@ -426,7 +451,7 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       })
       .join(', ');
     altNode.styles[colorProp] = `linear-gradient(180deg, ${stops})`;
-  } else if (fill.type === 'IMAGE' && fill.imageRef) {
+  } else if (fill.type === figmaConfig.constants.fillTypes.image && fill.imageRef) {
     altNode.styles.backgroundImage = `url(${fill.imageRef})`;
     altNode.styles.backgroundSize = 'cover';
   }
@@ -460,7 +485,8 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
 
       // WP25 FIX: Use outline for INSIDE strokes (Figma best practice)
       // INSIDE strokes render inside the bounds, similar to CSS outline with negative offset
-      if (node.strokeAlign === 'INSIDE') {
+      // WP28 T209: Now uses config constant for stroke align comparison
+      if (node.strokeAlign === figmaConfig.constants.strokeAlign.inside) {
         altNode.styles.outline = `${weight}px solid ${color}`;
         altNode.styles.outlineOffset = `-${weight}px`;
       } else {
@@ -484,17 +510,20 @@ function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     return;
   }
 
+  // WP28 T209: Now uses config constants for effect types and default color
   const shadows = figmaNode.effects
-    .filter(effect => effect.visible !== false && (effect.type === 'DROP_SHADOW' || effect.type === 'INNER_SHADOW'))
+    .filter(effect => effect.visible !== false &&
+            (effect.type === figmaConfig.constants.effectTypes.dropShadow ||
+             effect.type === figmaConfig.constants.effectTypes.innerShadow))
     .map(effect => {
-      const { r, g, b } = effect.color || { r: 0, g: 0, b: 0 };
+      const { r, g, b } = effect.color || figmaConfig.defaults.color;
       const a = effect.color?.a ?? 1;
       const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
       const x = effect.offset?.x || 0;
       const y = effect.offset?.y || 0;
       const blur = effect.radius || 0;
       const spread = effect.spread || 0;
-      const inset = effect.type === 'INNER_SHADOW' ? 'inset ' : '';
+      const inset = effect.type === figmaConfig.constants.effectTypes.innerShadow ? 'inset ' : '';
 
       return `${inset}${x}px ${y}px ${blur}px ${spread}px ${color}`;
     });
@@ -504,8 +533,9 @@ function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   }
 
   // WP25: Handle blur effects
+  // WP28 T209: Now uses config constants for effect types
   const layerBlur = figmaNode.effects.find(
-    effect => effect.visible !== false && effect.type === 'LAYER_BLUR'
+    effect => effect.visible !== false && effect.type === figmaConfig.constants.effectTypes.layerBlur
   );
   if (layerBlur && (layerBlur as any).radius) {
     altNode.styles.filter = `blur(${(layerBlur as any).radius}px)`;
@@ -513,7 +543,7 @@ function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
 
   // WP25: Handle background blur
   const backgroundBlur = figmaNode.effects.find(
-    effect => effect.visible !== false && effect.type === 'BACKGROUND_BLUR'
+    effect => effect.visible !== false && effect.type === figmaConfig.constants.effectTypes.backgroundBlur
   );
   if (backgroundBlur && (backgroundBlur as any).radius) {
     altNode.styles.backdropFilter = `blur(${(backgroundBlur as any).radius}px)`;
@@ -559,13 +589,9 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   // NOTE: textDecoration handled by official-textdecoration rules
 
   // WP25: Text vertical alignment
+  // WP28 T209: Now uses externalized config for text vertical align mapping
   if (style.textAlignVertical) {
-    const verticalAlignMap: Record<string, string> = {
-      'TOP': 'top',
-      'CENTER': 'middle',
-      'BOTTOM': 'bottom',
-    };
-    const verticalAlign = verticalAlignMap[style.textAlignVertical];
+    const verticalAlign = figmaConfig.textVerticalAlign[style.textAlignVertical as keyof typeof figmaConfig.textVerticalAlign];
     if (verticalAlign) {
       altNode.styles.verticalAlign = verticalAlign;
     }
@@ -582,9 +608,10 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   }
 
   // Color (from fills)
+  // WP28 T209: Now uses config constant for fill type
   const fills = textNode.fills;
   if (fills && fills.length > 0) {
-    const fill = fills.find((f: any) => f.visible !== false && f.type === 'SOLID');
+    const fill = fills.find((f: any) => f.visible !== false && f.type === figmaConfig.constants.fillTypes.solid);
     if (fill && fill.color) {
       const { r, g, b } = fill.color;
       const a = fill.opacity ?? 1;
@@ -657,6 +684,11 @@ export function transformToAltNode(
   normalizeEffects(figmaNode, altNode);
   normalizeText(figmaNode, altNode);
   normalizeAdditionalProperties(figmaNode, altNode); // WP25: Extract ALL Figma properties
+
+  // WP28 T210: Extract universal fallbacks for ALL properties in config
+  // This ensures every property has a CSS fallback, even if no rule matches
+  // Rules will override these fallbacks with semantic classes (e.g., text-sm instead of text-[14px])
+  extractUniversalFallbacks(figmaNode, altNode);
 
   // Apply HIGH priority improvements
   applyHighPriorityImprovements(figmaNode, altNode, cumulativeRotation);

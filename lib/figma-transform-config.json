@@ -1,0 +1,463 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-27",
+  "description": "Centralized configuration for Figma→CSS transformation mappings",
+  "source": "WP28 T208 - Externalized from altnode-transform.ts hardcoded values",
+
+  "typeMapping": {
+    "FRAME": "div",
+    "GROUP": "div",
+    "COMPONENT": "div",
+    "INSTANCE": "div",
+    "RECTANGLE": "div",
+    "TEXT": "span",
+    "ELLIPSE": "div",
+    "VECTOR": "svg",
+    "LINE": "div",
+    "BOOLEAN_OPERATION": "svg"
+  },
+
+  "blendModes": {
+    "MULTIPLY": "multiply",
+    "SCREEN": "screen",
+    "OVERLAY": "overlay",
+    "DARKEN": "darken",
+    "LIGHTEN": "lighten",
+    "COLOR_DODGE": "color-dodge",
+    "COLOR_BURN": "color-burn",
+    "HARD_LIGHT": "hard-light",
+    "SOFT_LIGHT": "soft-light",
+    "DIFFERENCE": "difference",
+    "EXCLUSION": "exclusion",
+    "HUE": "hue",
+    "SATURATION": "saturation",
+    "COLOR": "color",
+    "LUMINOSITY": "luminosity"
+  },
+
+  "textVerticalAlign": {
+    "TOP": "top",
+    "CENTER": "middle",
+    "BOTTOM": "bottom"
+  },
+
+  "thresholds": {
+    "iconMaxSize": 64,
+    "iconComponentMaxSize": 32
+  },
+
+  "defaults": {
+    "color": { "r": 0, "g": 0, "b": 0 },
+    "rotation": 0
+  },
+
+  "constants": {
+    "layoutModes": {
+      "NONE": "NONE",
+      "HORIZONTAL": "HORIZONTAL",
+      "VERTICAL": "VERTICAL",
+      "GRID": "GRID"
+    },
+    "blendModeExclusions": ["PASS_THROUGH", "NORMAL"],
+    "layoutPositioning": {
+      "auto": "AUTO",
+      "absolute": "ABSOLUTE"
+    },
+    "iconNodeTypes": ["VECTOR", "BOOLEAN_OPERATION"],
+    "strokeAlign": {
+      "inside": "INSIDE",
+      "center": "CENTER",
+      "outside": "OUTSIDE"
+    },
+    "effectTypes": {
+      "dropShadow": "DROP_SHADOW",
+      "innerShadow": "INNER_SHADOW",
+      "layerBlur": "LAYER_BLUR",
+      "backgroundBlur": "BACKGROUND_BLUR"
+    },
+    "fillTypes": {
+      "solid": "SOLID",
+      "gradientLinear": "GRADIENT_LINEAR",
+      "image": "IMAGE"
+    }
+  },
+
+  "propertyMappings": {
+    "fontSize": {
+      "cssProperty": "font-size",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Extract as fallback, rules optimize to semantic classes (text-sm, text-base, etc.)"
+    },
+    "fontWeight": {
+      "cssProperty": "font-weight",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Extract as fallback, rules optimize to semantic classes (font-medium, font-semibold, etc.)"
+    },
+    "cornerRadius": {
+      "cssProperty": "border-radius",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Extract as fallback, rules optimize to semantic classes (rounded, rounded-lg, etc.)"
+    },
+    "itemSpacing": {
+      "cssProperty": "gap",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Flex/grid gap spacing between children"
+    },
+    "opacity": {
+      "cssProperty": "opacity",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Extract as fallback, rules optimize to semantic classes (opacity-50, opacity-75, etc.)"
+    },
+    "letterSpacing": {
+      "cssProperty": "letter-spacing",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Character spacing in text nodes"
+    },
+    "strokeWeight": {
+      "cssProperty": "border-width",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "Border width for strokes"
+    }
+  },
+
+  "enumMappings": {
+    "layoutMode": {
+      "cssProperty": "flex-direction",
+      "type": "Enum",
+      "values": {
+        "NONE": {
+          "css": {},
+          "tailwind": "",
+          "comment": "No layout, uses absolute positioning"
+        },
+        "HORIZONTAL": {
+          "css": {
+            "display": "flex",
+            "flex-direction": "row"
+          },
+          "tailwind": "flex flex-row",
+          "comment": "Horizontal auto-layout (flexbox row)"
+        },
+        "VERTICAL": {
+          "css": {
+            "display": "flex",
+            "flex-direction": "column"
+          },
+          "tailwind": "flex flex-col",
+          "comment": "Vertical auto-layout (flexbox column)"
+        },
+        "GRID": {
+          "css": {
+            "display": "grid"
+          },
+          "tailwind": "grid",
+          "comment": "Grid layout"
+        }
+      }
+    },
+    "textCase": {
+      "cssProperty": "text-transform",
+      "type": "Enum",
+      "values": {
+        "ORIGINAL": {
+          "css": {},
+          "tailwind": "",
+          "comment": "No transformation"
+        },
+        "UPPER": {
+          "css": {
+            "text-transform": "uppercase"
+          },
+          "tailwind": "uppercase",
+          "comment": "All caps"
+        },
+        "LOWER": {
+          "css": {
+            "text-transform": "lowercase"
+          },
+          "tailwind": "lowercase",
+          "comment": "All lowercase"
+        },
+        "TITLE": {
+          "css": {
+            "text-transform": "capitalize"
+          },
+          "tailwind": "capitalize",
+          "comment": "Title Case"
+        }
+      }
+    },
+    "textDecoration": {
+      "cssProperty": "text-decoration",
+      "type": "Enum",
+      "values": {
+        "NONE": {
+          "css": {
+            "text-decoration": "none"
+          },
+          "tailwind": "[text-decoration:none]",
+          "comment": "No decoration"
+        },
+        "STRIKETHROUGH": {
+          "css": {
+            "text-decoration": "line-through"
+          },
+          "tailwind": "line-through",
+          "comment": "Strikethrough text"
+        },
+        "UNDERLINE": {
+          "css": {
+            "text-decoration": "underline"
+          },
+          "tailwind": "underline",
+          "comment": "Underlined text"
+        }
+      }
+    },
+    "textAlignHorizontal": {
+      "cssProperty": "text-align",
+      "type": "Enum",
+      "values": {
+        "LEFT": {
+          "css": {
+            "text-align": "left"
+          },
+          "tailwind": "text-left",
+          "comment": "Left-aligned text"
+        },
+        "CENTER": {
+          "css": {
+            "text-align": "center"
+          },
+          "tailwind": "text-center",
+          "comment": "Center-aligned text"
+        },
+        "RIGHT": {
+          "css": {
+            "text-align": "right"
+          },
+          "tailwind": "text-right",
+          "comment": "Right-aligned text"
+        },
+        "JUSTIFIED": {
+          "css": {
+            "text-align": "justify"
+          },
+          "tailwind": "text-justify",
+          "comment": "Justified text"
+        }
+      }
+    },
+    "clipsContent": {
+      "cssProperty": "overflow",
+      "type": "Enum",
+      "values": {
+        "true": {
+          "css": {
+            "overflow": "hidden"
+          },
+          "tailwind": "overflow-hidden",
+          "comment": "Content is clipped"
+        },
+        "false": {
+          "css": {
+            "overflow": "visible"
+          },
+          "tailwind": "overflow-visible",
+          "comment": "Content overflows container"
+        }
+      }
+    },
+    "layoutWrap": {
+      "cssProperty": "flex-wrap",
+      "type": "Enum",
+      "values": {
+        "NO_WRAP": {
+          "css": {
+            "flex-wrap": "nowrap"
+          },
+          "tailwind": "flex-nowrap",
+          "comment": "No wrapping"
+        },
+        "WRAP": {
+          "css": {
+            "flex-wrap": "wrap"
+          },
+          "tailwind": "flex-wrap",
+          "comment": "Wrap to next line"
+        }
+      }
+    },
+    "layoutGrow": {
+      "cssProperty": "flex-grow",
+      "type": "Enum",
+      "values": {
+        "0": {
+          "css": {
+            "flex-grow": "0"
+          },
+          "tailwind": "grow-0",
+          "comment": "Don't grow"
+        },
+        "1": {
+          "css": {
+            "flex-grow": "1"
+          },
+          "tailwind": "grow",
+          "comment": "Grow to fill space"
+        }
+      }
+    },
+    "layoutPositioning": {
+      "cssProperty": "position",
+      "type": "Enum",
+      "values": {
+        "AUTO": {
+          "css": {
+            "position": "relative"
+          },
+          "tailwind": "[position:relative]",
+          "comment": "Auto-layout positioning"
+        },
+        "ABSOLUTE": {
+          "css": {
+            "position": "absolute"
+          },
+          "tailwind": "absolute",
+          "comment": "Absolute positioning with manual constraints"
+        }
+      }
+    },
+    "primaryAxisAlignItems": {
+      "cssProperty": "justify-content",
+      "type": "Enum",
+      "values": {
+        "MIN": {
+          "css": {
+            "justify-content": "flex-start"
+          },
+          "tailwind": "justify-start",
+          "comment": "Align to start of main axis"
+        },
+        "CENTER": {
+          "css": {
+            "justify-content": "center"
+          },
+          "tailwind": "justify-center",
+          "comment": "Center on main axis"
+        },
+        "MAX": {
+          "css": {
+            "justify-content": "flex-end"
+          },
+          "tailwind": "justify-end",
+          "comment": "Align to end of main axis"
+        },
+        "SPACE_BETWEEN": {
+          "css": {
+            "justify-content": "space-between"
+          },
+          "tailwind": "justify-between",
+          "comment": "Space between children"
+        }
+      }
+    },
+    "counterAxisAlignItems": {
+      "cssProperty": "align-items",
+      "type": "Enum",
+      "values": {
+        "MIN": {
+          "css": {
+            "align-items": "flex-start"
+          },
+          "tailwind": "items-start",
+          "comment": "Align to start of cross axis"
+        },
+        "CENTER": {
+          "css": {
+            "align-items": "center"
+          },
+          "tailwind": "items-center",
+          "comment": "Center on cross axis"
+        },
+        "MAX": {
+          "css": {
+            "align-items": "flex-end"
+          },
+          "tailwind": "items-end",
+          "comment": "Align to end of cross axis"
+        },
+        "BASELINE": {
+          "css": {
+            "align-items": "baseline"
+          },
+          "tailwind": "items-baseline",
+          "comment": "Align to text baseline"
+        }
+      }
+    },
+    "layoutAlign": {
+      "cssProperty": "align-self",
+      "type": "Enum",
+      "values": {
+        "INHERIT": {
+          "css": {
+            "align-self": "auto"
+          },
+          "tailwind": "self-auto",
+          "comment": "Inherit from parent"
+        },
+        "MIN": {
+          "css": {
+            "align-self": "flex-start"
+          },
+          "tailwind": "self-start",
+          "comment": "Align self to start"
+        },
+        "CENTER": {
+          "css": {
+            "align-self": "center"
+          },
+          "tailwind": "self-center",
+          "comment": "Align self to center"
+        },
+        "MAX": {
+          "css": {
+            "align-self": "flex-end"
+          },
+          "tailwind": "self-end",
+          "comment": "Align self to end"
+        },
+        "STRETCH": {
+          "css": {
+            "align-self": "stretch"
+          },
+          "tailwind": "self-stretch",
+          "comment": "Stretch to fill cross axis"
+        }
+      }
+    }
+  },
+
+  "comments": {
+    "purpose": "This config externalizes all hardcoded mappings from altnode-transform.ts",
+    "usage": "Import this config and use mappings instead of inline object literals",
+    "architecture": "Figma JSON → altnode-transform.ts (extraction) → altNode.styles (fallback CSS) → rules (framework-specific optimization)",
+    "priority": "Rules always override fallbacks (rules = semantic, fallbacks = raw CSS)",
+    "maintenance": "Update this file when Figma API adds new properties or CSS standards change"
+  }
+}
