@@ -3,8 +3,16 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useNodesStore, useRulesStore } from '@/lib/store';
+import { useNodesStore, useUIStore } from '@/lib/store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import {
   ChevronLeft,
@@ -12,6 +20,12 @@ import {
   RefreshCw,
   Download,
   Settings,
+  Monitor,
+  Grid3x3,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -21,14 +35,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
 import FigmaTreeView from '@/components/figma-tree-view';
-import PreviewTabs from '@/components/preview-tabs';
 import { InformationPanel } from '@/components/information-panel';
 import { RulesPanel } from '@/components/rules-panel';
+import { ResizablePreviewViewport } from '@/components/resizable-preview-viewport';
+import LivePreview from '@/components/live-preview';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
+import { cn } from '@/lib/utils';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
+
+// Viewport presets for responsive mode
+const VIEWPORT_PRESETS = {
+  mobile: { width: 375, height: 667, name: 'Mobile (iPhone SE)' },
+  tablet: { width: 768, height: 1024, name: 'Tablet (iPad)' },
+  desktop: { width: 1920, height: 1080, name: 'Desktop (Full HD)' },
+  custom: { width: 1200, height: 800, name: 'Custom' },
+} as const;
 
 export default function ViewerPage() {
   const params = useParams();
@@ -39,22 +63,32 @@ export default function ViewerPage() {
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
   const selectNode = useNodesStore((state) => state.selectNode);
 
+  // UI Store for panel collapse and responsive mode
+  const {
+    viewerResponsiveMode,
+    viewerViewportWidth,
+    viewerViewportHeight,
+    viewerGridVisible,
+    viewerGridSpacing,
+    viewerLeftPanelCollapsed,
+    viewerRightPanelCollapsed,
+    setViewerResponsiveMode,
+    setViewerViewportSize,
+    setViewerGridVisible,
+    setViewerGridSpacing,
+    setViewerLeftPanelCollapsed,
+    setViewerRightPanelCollapsed,
+  } = useUIStore();
+
   // Multi-framework rules state
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(true);
 
-  // Framework states for each tab zone (T172)
-  const [infoFramework, setInfoFramework] = useState<FrameworkType>('react-tailwind');
-  const [rulesFramework, setRulesFramework] = useState<FrameworkType>('react-tailwind');
-  const [renderFramework, setRenderFramework] = useState<FrameworkType>('react-tailwind');
+  // Framework for preview (unified for now, can be split later if needed)
+  const [previewFramework, setPreviewFramework] = useState<FrameworkType>('react-tailwind');
 
-  const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(
-    null
-  );
-  const [activeTab, setActiveTab] = useState<'code' | 'render'>('code');
-  const [rightPanelTab, setRightPanelTab] = useState<
-    'information' | 'rules'
-  >('information');
+  const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
+  const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
@@ -82,24 +116,12 @@ export default function ViewerPage() {
     return findNode(altNode);
   }, [altNode, selectedTreeNodeId]);
 
-  // Evaluate rules for each framework separately
-  const infoResolvedProperties = useMemo(() => {
+  // Evaluate rules for preview
+  const resolvedProperties = useMemo(() => {
     const targetNode = selectedNode || altNode;
     if (!targetNode || multiFrameworkRules.length === 0) return {};
-    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, infoFramework).properties;
-  }, [selectedNode, altNode, multiFrameworkRules, infoFramework]);
-
-  const rulesResolvedProperties = useMemo(() => {
-    const targetNode = selectedNode || altNode;
-    if (!targetNode || multiFrameworkRules.length === 0) return {};
-    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, rulesFramework).properties;
-  }, [selectedNode, altNode, multiFrameworkRules, rulesFramework]);
-
-  const renderResolvedProperties = useMemo(() => {
-    const targetNode = selectedNode || altNode;
-    if (!targetNode || multiFrameworkRules.length === 0) return {};
-    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, renderFramework).properties;
-  }, [selectedNode, altNode, multiFrameworkRules, renderFramework]);
+    return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, previewFramework).properties;
+  }, [selectedNode, altNode, multiFrameworkRules, previewFramework]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
@@ -146,6 +168,30 @@ export default function ViewerPage() {
         if (response.ok) {
           const data = await response.json();
           setAltNode(data.altNode || null);
+
+          // Generate code for LivePreview
+          if (data.altNode) {
+            // Import code generators dynamically
+            const { generateReactTailwind } = await import('@/lib/code-generators/react-tailwind');
+            const { generateHTMLCSS } = await import('@/lib/code-generators/html-css');
+            const { generateReactJSX } = await import('@/lib/code-generators/react');
+
+            let codeOutput;
+            switch (previewFramework) {
+              case 'react-tailwind':
+                codeOutput = generateReactTailwind(data.altNode, resolvedProperties);
+                break;
+              case 'html-css':
+                codeOutput = generateHTMLCSS(data.altNode, resolvedProperties);
+                break;
+              case 'react-inline':
+                codeOutput = generateReactJSX(data.altNode, resolvedProperties);
+                break;
+              default:
+                codeOutput = generateReactTailwind(data.altNode, resolvedProperties);
+            }
+            setGeneratedCode(codeOutput.code);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch node data:', error);
@@ -155,13 +201,12 @@ export default function ViewerPage() {
     }
 
     fetchNodeWithAltNode();
-  }, [nodeId]);
+  }, [nodeId, previewFramework, resolvedProperties]);
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
   const prevNode = currentIndex > 0 ? nodes[currentIndex - 1] : null;
-  const nextNode =
-    currentIndex < nodes.length - 1 ? nodes[currentIndex + 1] : null;
+  const nextNode = currentIndex < nodes.length - 1 ? nodes[currentIndex + 1] : null;
 
   if (!currentNode) {
     return (
@@ -169,8 +214,7 @@ export default function ViewerPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Node not found</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The node you&apos;re looking for doesn&apos;t exist or hasn&apos;t been imported
-            yet.
+            The node you&apos;re looking for doesn&apos;t exist or hasn&apos;t been imported yet.
           </p>
           <Link
             href="/nodes"
@@ -223,16 +267,11 @@ export default function ViewerPage() {
             {/* Name and metadata */}
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FigmaTypeIcon
-                  type={nodeType}
-                  size={18}
-                  className={nodeColors.text}
-                />
+                <FigmaTypeIcon type={nodeType} size={18} className={nodeColors.text} />
                 {currentNode.name}
               </h1>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {nodeType} •{' '}
-                {new Date(currentNode.addedAt).toLocaleDateString()}
+                {nodeType} • {new Date(currentNode.addedAt).toLocaleDateString()}
               </div>
             </div>
           </div>
@@ -269,12 +308,8 @@ export default function ViewerPage() {
             <button
               onClick={async () => {
                 try {
-                  // POST to refresh from Figma API
-                  await fetch(`/api/figma/node/${nodeId}`, {
-                    method: 'POST',
-                  });
+                  await fetch(`/api/figma/node/${nodeId}`, { method: 'POST' });
                   await loadLibrary();
-                  // Refresh altNode with new data
                   const response = await fetch(`/api/figma/node/${nodeId}`);
                   if (response.ok) {
                     const data = await response.json();
@@ -305,7 +340,6 @@ export default function ViewerPage() {
                   onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(generatedCode);
-                      // TODO: Show success toast
                       console.log('Code copied to clipboard');
                     } catch (error) {
                       console.error('Failed to copy:', error);
@@ -317,9 +351,7 @@ export default function ViewerPage() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    const blob = new Blob([generatedCode], {
-                      type: 'text/plain',
-                    });
+                    const blob = new Blob([generatedCode], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -347,37 +379,155 @@ export default function ViewerPage() {
         </div>
       </div>
 
-      {/* Main Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as 'code' | 'render')}
-        className="flex-1 flex flex-col overflow-hidden"
-      >
-        <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-white dark:bg-gray-800">
-          <TabsTrigger value="code">Code</TabsTrigger>
-          <TabsTrigger value="render">Render</TabsTrigger>
-        </TabsList>
+      {/* Responsive Mode Toolbar */}
+      <div className="flex gap-2 items-center border-b border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800">
+        {/* Toggle Responsive Mode */}
+        <Button
+          variant={viewerResponsiveMode ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
+        >
+          <Monitor className="w-4 h-4 mr-1" />
+          Responsive Mode
+        </Button>
 
-        {/* Code Tab */}
-        <TabsContent value="code" className="flex-1 flex overflow-hidden m-0">
-          <div className="flex-1 flex overflow-hidden">
-            {/* Tree View (left 40%) */}
-            <div className="w-2/5 border-r border-gray-200 dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800">
-              <FigmaTreeView
-                altNode={altNode}
-                selectedNodeId={selectedTreeNodeId}
-                onNodeClick={(id) => setSelectedTreeNodeId(id)}
-              />
-            </div>
+        {/* Options visible only if responsive mode active */}
+        {viewerResponsiveMode && (
+          <>
+            {/* Toggle Grid */}
+            <Button
+              variant={viewerGridVisible ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewerGridVisible(!viewerGridVisible)}
+            >
+              <Grid3x3 className="w-4 h-4 mr-1" />
+              Grid
+            </Button>
 
-            {/* Right Panel with Tabs (60%) */}
-            <div className="w-3/5 flex flex-col overflow-hidden bg-white dark:bg-gray-800">
+            {/* Grid Spacing */}
+            {viewerGridVisible && (
+              <Select
+                value={viewerGridSpacing.toString()}
+                onValueChange={(v: string) => setViewerGridSpacing(Number(v) as 8 | 16 | 24)}
+              >
+                <SelectTrigger className="w-20 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="8">8px</SelectItem>
+                  <SelectItem value="16">16px</SelectItem>
+                  <SelectItem value="24">24px</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Viewport Presets */}
+            <Select
+              value="custom"
+              onValueChange={(preset: string) => {
+                if (preset in VIEWPORT_PRESETS) {
+                  const { width, height } = VIEWPORT_PRESETS[preset as keyof typeof VIEWPORT_PRESETS];
+                  setViewerViewportSize(width, height);
+                }
+              }}
+            >
+              <SelectTrigger className="w-32 h-8 text-xs">
+                <SelectValue placeholder="Presets" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mobile">📱 Mobile</SelectItem>
+                <SelectItem value="tablet">📱 Tablet</SelectItem>
+                <SelectItem value="desktop">🖥️ Desktop</SelectItem>
+                <SelectItem value="custom">⚙️ Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
+        )}
+
+        {/* Framework Selector */}
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Framework:</span>
+          <Select value={previewFramework} onValueChange={(v: string) => setPreviewFramework(v as FrameworkType)}>
+            <SelectTrigger className="w-40 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="react-tailwind">React + Tailwind</SelectItem>
+              <SelectItem value="html-css">HTML + CSS</SelectItem>
+              <SelectItem value="react-inline">React Inline</SelectItem>
+              <SelectItem value="swift-ui">SwiftUI</SelectItem>
+              <SelectItem value="android-xml">Android XML</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Three-Panel Elastic Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Tree View (Collapsable) */}
+        <div
+          className={cn(
+            'transition-all duration-200 ease-in-out border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative',
+            viewerLeftPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[300px] min-w-[300px] max-w-[15%]'
+          )}
+        >
+          {!viewerLeftPanelCollapsed && (
+            <>
+              <div className="h-full overflow-auto">
+                <FigmaTreeView
+                  altNode={altNode}
+                  selectedNodeId={selectedTreeNodeId}
+                  onNodeClick={(id) => setSelectedTreeNodeId(id)}
+                />
+              </div>
+
+              {/* Collapse Button */}
+              <button
+                onClick={() => setViewerLeftPanelCollapsed(true)}
+                className="absolute top-2 right-2 z-10 p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700"
+                title="Collapse tree"
+              >
+                <PanelLeftClose size={16} />
+              </button>
+            </>
+          )}
+
+          {/* Expand Button (when collapsed) */}
+          {viewerLeftPanelCollapsed && (
+            <button
+              onClick={() => setViewerLeftPanelCollapsed(false)}
+              className="absolute top-2 left-2 z-10 p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+              title="Expand tree"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+          )}
+        </div>
+
+        {/* Center Panel - Live Preview (Elastic: flex-1) */}
+        <div className="flex-1 relative bg-slate-50 dark:bg-slate-900">
+          <ResizablePreviewViewport>
+            <LivePreview
+              code={generatedCode}
+              framework={previewFramework}
+              language={previewFramework === 'html-css' ? 'html' : 'tsx'}
+            />
+          </ResizablePreviewViewport>
+        </div>
+
+        {/* Right Panel - Information/Rules Tabs (Collapsable) */}
+        <div
+          className={cn(
+            'transition-all duration-200 ease-in-out border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative',
+            viewerRightPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[300px] min-w-[300px] max-w-[15%]'
+          )}
+        >
+          {!viewerRightPanelCollapsed && (
+            <>
               <Tabs
                 value={rightPanelTab}
-                onValueChange={(v) =>
-                  setRightPanelTab(v as 'information' | 'rules')
-                }
-                className="flex-1 flex flex-col overflow-hidden"
+                onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
+                className="flex-1 flex flex-col overflow-hidden h-full"
               >
                 <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-gray-50 dark:bg-gray-900 px-2">
                   <TabsTrigger value="information" className="text-sm">
@@ -388,15 +538,12 @@ export default function ViewerPage() {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent
-                  value="information"
-                  className="flex-1 overflow-auto m-0"
-                >
+                <TabsContent value="information" className="flex-1 overflow-auto m-0">
                   <InformationPanel
                     node={selectedNode}
-                    framework={infoFramework}
-                    onFrameworkChange={setInfoFramework}
-                    resolvedProperties={infoResolvedProperties}
+                    framework={previewFramework}
+                    onFrameworkChange={setPreviewFramework}
+                    resolvedProperties={resolvedProperties}
                     allRules={multiFrameworkRules}
                   />
                 </TabsContent>
@@ -404,50 +551,36 @@ export default function ViewerPage() {
                 <TabsContent value="rules" className="flex-1 overflow-auto m-0">
                   <RulesPanel
                     node={selectedNode}
-                    selectedFramework={rulesFramework}
-                    onFrameworkChange={setRulesFramework}
+                    selectedFramework={previewFramework}
+                    onFrameworkChange={setPreviewFramework}
                     allRules={multiFrameworkRules}
                   />
                 </TabsContent>
               </Tabs>
-            </div>
-          </div>
-        </TabsContent>
 
-        {/* Render Tab */}
-        <TabsContent value="render" className="flex-1 overflow-hidden m-0">
-          <div className="h-full flex flex-col">
-            {/* Framework selector in Render tab header */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Preview
-              </h3>
-              <select
-                value={renderFramework}
-                onChange={(e) => setRenderFramework(e.target.value as FrameworkType)}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+              {/* Collapse Button */}
+              <button
+                onClick={() => setViewerRightPanelCollapsed(true)}
+                className="absolute top-2 left-2 z-10 p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700"
+                title="Collapse info"
               >
-                <option value="react-tailwind">React + Tailwind</option>
-                <option value="html-css">HTML + CSS</option>
-                <option value="react-inline">React Inline</option>
-                <option value="swift-ui">SwiftUI</option>
-                <option value="android-xml">Android XML</option>
-              </select>
-            </div>
+                <PanelRightClose size={16} />
+              </button>
+            </>
+          )}
 
-            <div className="flex-1 overflow-auto">
-              <PreviewTabs
-                altNode={altNode}
-                multiFrameworkRules={multiFrameworkRules}
-                selectedFramework={renderFramework}
-                resolvedProperties={renderResolvedProperties}
-                onCodeChange={setGeneratedCode}
-                scopedNode={selectedNode}
-              />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          {/* Expand Button (when collapsed) */}
+          {viewerRightPanelCollapsed && (
+            <button
+              onClick={() => setViewerRightPanelCollapsed(false)}
+              className="absolute top-2 right-2 z-10 p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+              title="Expand info"
+            >
+              <PanelRightOpen size={16} />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

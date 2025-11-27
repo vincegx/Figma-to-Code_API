@@ -22,12 +22,33 @@ export interface UIState {
   stats: DashboardStats | null;
   statsLastUpdated: number | null; // Unix timestamp
 
+  // Viewer responsive mode (persisted in localStorage)
+  viewerResponsiveMode: boolean;
+  viewerViewportWidth: number;
+  viewerViewportHeight: number;
+
+  // Grid overlay (persisted in localStorage)
+  viewerGridVisible: boolean;
+  viewerGridSpacing: 8 | 16 | 24;
+
+  // Panel collapse (persisted in localStorage)
+  viewerLeftPanelCollapsed: boolean;
+  viewerRightPanelCollapsed: boolean;
+
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setImporting: (isImporting: boolean) => void;
   setLoadingRules: (isLoadingRules: boolean) => void;
   loadStats: () => Promise<void>;
   invalidateStats: () => void;
+
+  // Viewer responsive mode actions
+  setViewerResponsiveMode: (active: boolean) => void;
+  setViewerViewportSize: (width: number, height: number) => void;
+  setViewerGridVisible: (visible: boolean) => void;
+  setViewerGridSpacing: (spacing: 8 | 16 | 24) => void;
+  setViewerLeftPanelCollapsed: (collapsed: boolean) => void;
+  setViewerRightPanelCollapsed: (collapsed: boolean) => void;
 }
 
 /**
@@ -43,6 +64,15 @@ export const useUIStore = create<UIState>()(
         isLoadingRules: false,
         stats: null,
         statsLastUpdated: null,
+
+        // Viewer responsive mode initial state
+        viewerResponsiveMode: false,
+        viewerViewportWidth: 1200,
+        viewerViewportHeight: 800,
+        viewerGridVisible: false,
+        viewerGridSpacing: 16,
+        viewerLeftPanelCollapsed: false,
+        viewerRightPanelCollapsed: false,
 
         // Actions
         setTheme: (theme: 'light' | 'dark' | 'system') => {
@@ -90,12 +120,47 @@ export const useUIStore = create<UIState>()(
         invalidateStats: () => {
           set({ stats: null, statsLastUpdated: null });
         },
+
+        // Viewer responsive mode actions
+        setViewerResponsiveMode: (active: boolean) => {
+          set({ viewerResponsiveMode: active });
+        },
+
+        setViewerViewportSize: (width: number, height: number) => {
+          set({
+            viewerViewportWidth: width,
+            viewerViewportHeight: height,
+          });
+        },
+
+        setViewerGridVisible: (visible: boolean) => {
+          set({ viewerGridVisible: visible });
+        },
+
+        setViewerGridSpacing: (spacing: 8 | 16 | 24) => {
+          set({ viewerGridSpacing: spacing });
+        },
+
+        setViewerLeftPanelCollapsed: (collapsed: boolean) => {
+          set({ viewerLeftPanelCollapsed: collapsed });
+        },
+
+        setViewerRightPanelCollapsed: (collapsed: boolean) => {
+          set({ viewerRightPanelCollapsed: collapsed });
+        },
       }),
       {
         name: 'ui-store', // localStorage key
         partialize: (state) => ({
-          // Persist theme only, NOT transient state
+          // Persist theme and viewer preferences, NOT transient state
           theme: state.theme,
+          viewerResponsiveMode: state.viewerResponsiveMode,
+          viewerViewportWidth: state.viewerViewportWidth,
+          viewerViewportHeight: state.viewerViewportHeight,
+          viewerGridVisible: state.viewerGridVisible,
+          viewerGridSpacing: state.viewerGridSpacing,
+          viewerLeftPanelCollapsed: state.viewerLeftPanelCollapsed,
+          viewerRightPanelCollapsed: state.viewerRightPanelCollapsed,
         }),
       }
     ),
