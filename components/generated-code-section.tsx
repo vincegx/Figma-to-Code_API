@@ -180,7 +180,7 @@ export function GeneratedCodeSection({
 
         <TabsContent value="component" className="mt-3">
           <div className="relative">
-            <div className="rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
               <SyntaxHighlighter
                 language={getLanguage(framework, false)}
                 style={isDark ? oneDark : oneLight}
@@ -190,6 +190,7 @@ export function GeneratedCodeSection({
                   fontSize: '0.75rem',
                   lineHeight: '1.5',
                   borderRadius: '0.5rem',
+                  background: 'transparent',
                 }}
                 wrapLines={true}
                 wrapLongLines={true}
@@ -213,7 +214,7 @@ export function GeneratedCodeSection({
                   <DialogHeader>
                     <DialogTitle>Component Code ({framework})</DialogTitle>
                   </DialogHeader>
-                  <div className="rounded-lg overflow-auto text-sm border border-gray-200 dark:border-gray-700 max-h-[60vh]">
+                  <div className="bg-gray-100 dark:bg-gray-900 rounded-lg overflow-auto text-sm border border-gray-200 dark:border-gray-700 max-h-[60vh]">
                     <SyntaxHighlighter
                       language={getLanguage(framework, false)}
                       style={isDark ? oneDark : oneLight}
@@ -223,6 +224,7 @@ export function GeneratedCodeSection({
                         fontSize: '0.875rem',
                         lineHeight: '1.5',
                         borderRadius: '0.5rem',
+                        background: 'transparent',
                       }}
                       wrapLines={true}
                       wrapLongLines={true}
@@ -272,7 +274,7 @@ export function GeneratedCodeSection({
 
         <TabsContent value="styles" className="mt-3">
           <div className="relative">
-            <div className="rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
               <SyntaxHighlighter
                 language={getLanguage(framework, true)}
                 style={isDark ? oneDark : oneLight}
@@ -282,6 +284,7 @@ export function GeneratedCodeSection({
                   fontSize: '0.75rem',
                   lineHeight: '1.5',
                   borderRadius: '0.5rem',
+                  background: 'transparent',
                 }}
                 wrapLines={true}
                 wrapLongLines={true}
