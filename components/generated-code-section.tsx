@@ -1,8 +1,24 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Copy, Check, Download } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Copy, Check, Download, Maximize2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
@@ -18,6 +34,27 @@ interface GeneratedCodeSectionProps {
   allRules?: MultiFrameworkRule[];
 }
 
+// Helper to determine syntax highlighting language
+function getLanguage(framework: FrameworkType, isStyles: boolean): string {
+  if (isStyles) {
+    return framework === 'html-css' ? 'css' : 'css';
+  }
+
+  switch (framework) {
+    case 'react-tailwind':
+    case 'react-inline':
+      return 'tsx';
+    case 'html-css':
+      return 'html';
+    case 'swift-ui':
+      return 'swift';
+    case 'android-xml':
+      return 'xml';
+    default:
+      return 'typescript';
+  }
+}
+
 export function GeneratedCodeSection({
   node,
   framework,
@@ -28,6 +65,25 @@ export function GeneratedCodeSection({
   const [activeTab, setActiveTab] = useState<'component' | 'styles'>('component');
   const [copiedComponent, setCopiedComponent] = useState(false);
   const [copiedStyles, setCopiedStyles] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  // Detect dark mode
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsDark(document.documentElement.classList.contains('dark'));
+
+      const observer = new MutationObserver(() => {
+        setIsDark(document.documentElement.classList.contains('dark'));
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+
+      return () => observer.disconnect();
+    }
+  }, []);
 
   // Generate code using the appropriate generator
   const { componentCode, stylesCode } = useMemo(() => {
@@ -102,17 +158,18 @@ export function GeneratedCodeSection({
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
           Generated Code
         </h3>
-        <select
-          value={framework}
-          onChange={(e) => onFrameworkChange(e.target.value as FrameworkType)}
-          className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-        >
-          <option value="react-tailwind">React + Tailwind</option>
-          <option value="html-css">HTML + CSS</option>
-          <option value="react-inline">React Inline</option>
-          <option value="swift-ui">SwiftUI</option>
-          <option value="android-xml">Android XML</option>
-        </select>
+        <Select value={framework} onValueChange={(v: string) => onFrameworkChange(v as FrameworkType)}>
+          <SelectTrigger className="w-40 h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="react-tailwind">React + Tailwind</SelectItem>
+            <SelectItem value="html-css">HTML + CSS</SelectItem>
+            <SelectItem value="react-inline">React Inline</SelectItem>
+            <SelectItem value="swift-ui">SwiftUI</SelectItem>
+            <SelectItem value="android-xml">Android XML</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'component' | 'styles')}>
@@ -123,10 +180,58 @@ export function GeneratedCodeSection({
 
         <TabsContent value="component" className="mt-3">
           <div className="relative">
-            <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto text-xs border border-gray-200 dark:border-gray-700">
-              <code className="text-gray-900 dark:text-gray-100">{componentCode}</code>
-            </pre>
+            <div className="rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <SyntaxHighlighter
+                language={getLanguage(framework, false)}
+                style={isDark ? oneDark : oneLight}
+                customStyle={{
+                  margin: 0,
+                  padding: '1rem',
+                  fontSize: '0.75rem',
+                  lineHeight: '1.5',
+                  borderRadius: '0.5rem',
+                }}
+                wrapLines={true}
+                wrapLongLines={true}
+              >
+                {componentCode}
+              </SyntaxHighlighter>
+            </div>
             <div className="absolute top-2 right-2 flex gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer"
+                    aria-label="View full code"
+                  >
+                    <Maximize2 size={14} className="text-gray-400" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh]">
+                  <DialogHeader>
+                    <DialogTitle>Component Code ({framework})</DialogTitle>
+                  </DialogHeader>
+                  <div className="rounded-lg overflow-auto text-sm border border-gray-200 dark:border-gray-700 max-h-[60vh]">
+                    <SyntaxHighlighter
+                      language={getLanguage(framework, false)}
+                      style={isDark ? oneDark : oneLight}
+                      customStyle={{
+                        margin: 0,
+                        padding: '1rem',
+                        fontSize: '0.875rem',
+                        lineHeight: '1.5',
+                        borderRadius: '0.5rem',
+                      }}
+                      wrapLines={true}
+                      wrapLongLines={true}
+                    >
+                      {componentCode}
+                    </SyntaxHighlighter>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <div
                 role="button"
                 tabIndex={0}
@@ -167,9 +272,23 @@ export function GeneratedCodeSection({
 
         <TabsContent value="styles" className="mt-3">
           <div className="relative">
-            <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto text-xs border border-gray-200 dark:border-gray-700">
-              <code className="text-gray-900 dark:text-gray-100">{stylesCode}</code>
-            </pre>
+            <div className="rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <SyntaxHighlighter
+                language={getLanguage(framework, true)}
+                style={isDark ? oneDark : oneLight}
+                customStyle={{
+                  margin: 0,
+                  padding: '1rem',
+                  fontSize: '0.75rem',
+                  lineHeight: '1.5',
+                  borderRadius: '0.5rem',
+                }}
+                wrapLines={true}
+                wrapLongLines={true}
+              >
+                {stylesCode}
+              </SyntaxHighlighter>
+            </div>
             <div className="absolute top-2 right-2 flex gap-2">
               <div
                 role="button"

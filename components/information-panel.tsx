@@ -38,7 +38,7 @@ export function InformationPanel({
   const hasLayout = figmaNode?.layoutMode && figmaNode.layoutMode !== 'NONE';
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto p-4">
       {/* Properties Blocks */}
       <div className="border-b border-gray-200 dark:border-gray-700">
 
