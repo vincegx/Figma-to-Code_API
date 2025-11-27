@@ -537,7 +537,7 @@ export default function ViewerPage() {
         >
           {!viewerLeftPanelCollapsed && (
             <>
-              <div className="h-full overflow-auto pb-10">
+              <div className="h-full overflow-auto pt-10">
                 <FigmaTreeView
                   altNode={altNode}
                   selectedNodeId={selectedTreeNodeId}
@@ -545,21 +545,21 @@ export default function ViewerPage() {
                 />
               </div>
 
+              {/* Collapse Button - Fixed position */}
+              <button
+                onClick={() => setViewerLeftPanelCollapsed(true)}
+                className="absolute top-2 right-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+                title="Collapse tree"
+              >
+                <PanelLeftClose size={14} />
+              </button>
+
               {/* Resize Handle */}
               <div
                 onMouseDown={handleLeftPanelResize}
                 className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors z-10"
                 title="Resize panel"
               />
-
-              {/* Collapse Button */}
-              <button
-                onClick={() => setViewerLeftPanelCollapsed(true)}
-                className="absolute bottom-2 right-2 z-[60] p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
-                title="Collapse tree"
-              >
-                <PanelLeftClose size={16} />
-              </button>
             </>
           )}
         </div>
@@ -607,6 +607,15 @@ export default function ViewerPage() {
         >
           {!viewerRightPanelCollapsed && (
             <>
+              {/* Collapse Button - Fixed position */}
+              <button
+                onClick={() => setViewerRightPanelCollapsed(true)}
+                className="absolute top-2 left-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+                title="Collapse info"
+              >
+                <PanelRightClose size={14} />
+              </button>
+
               {/* Resize Handle */}
               <div
                 onMouseDown={handleRightPanelResize}
@@ -617,7 +626,7 @@ export default function ViewerPage() {
               <Tabs
                 value={rightPanelTab}
                 onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
-                className="flex-1 flex flex-col overflow-hidden h-full"
+                className="flex-1 flex flex-col overflow-hidden h-full pt-10"
               >
                 <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-gray-50 dark:bg-gray-900 px-2">
                   <TabsTrigger value="information" className="text-sm">
@@ -647,15 +656,6 @@ export default function ViewerPage() {
                   />
                 </TabsContent>
               </Tabs>
-
-              {/* Collapse Button */}
-              <button
-                onClick={() => setViewerRightPanelCollapsed(true)}
-                className="absolute bottom-2 left-2 z-[60] p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-md"
-                title="Collapse info"
-              >
-                <PanelRightClose size={16} />
-              </button>
             </>
           )}
         </div>
