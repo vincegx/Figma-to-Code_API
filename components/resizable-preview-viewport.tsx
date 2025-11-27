@@ -39,10 +39,8 @@ function DragHandle({ side, maxWidth, currentWidth, onResize }: DragHandleProps)
   return (
     <div
       className={cn(
-        'w-[2.5rem] h-full cursor-ew-resize transition-colors',
-        'bg-[image:repeating-linear-gradient(315deg,transparent,transparent_10px,rgb(148_163_184_/_0.1)_10px,rgb(148_163_184_/_0.1)_20px)]',
-        'bg-[size:10px_10px]',
-        'hover:bg-slate-800/30'
+        'w-1 h-full cursor-ew-resize transition-all bg-gray-300 dark:bg-gray-600',
+        'hover:w-1.5 hover:bg-blue-500 dark:hover:bg-blue-400'
       )}
       onMouseDown={handleMouseDown}
       title={`Drag to resize viewport ${side}`}
@@ -156,8 +154,8 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
   }
 
   // Mode Responsive: Resizable viewport with drag handles
-  const HANDLE_WIDTH = 40; // 2.5rem = 40px
-  const MARGIN = 80; // Additional margins
+  const HANDLE_WIDTH = 4; // w-1 = 4px
+  const MARGIN = 40; // Additional margins
   const maxViewportWidth = Math.max(300, availableWidth - (HANDLE_WIDTH * 2) - MARGIN);
   const maxViewportHeight = Math.max(300, availableHeight - MARGIN);
 
