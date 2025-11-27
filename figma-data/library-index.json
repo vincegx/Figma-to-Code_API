@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-26T02:38:07.537Z",
+  "lastUpdated": "2025-11-27T11:36:41.180Z",
   "nodes": [
     {
       "id": "lib-124-21142",
@@ -8,8 +8,8 @@
       "name": "Home",
       "altNode": null,
       "tags": [],
-      "addedAt": "2025-11-25T19:23:51.480Z",
-      "lastModified": "2025-11-25T19:23:51.480Z",
+      "addedAt": "2025-11-27T11:36:41.176Z",
+      "lastModified": "2025-11-27T11:36:41.176Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -19,61 +19,7 @@
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=124:21142"
       }
-    },
-    {
-      "id": "lib-268-3339",
-      "figmaNodeId": "268:3339",
-      "name": "Homepage - Landing",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-26T02:09:13.135Z",
-      "lastModified": "2025-11-26T02:09:13.135Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=268:3339"
-      }
-    },
-    {
-      "id": "lib-122-21049",
-      "figmaNodeId": "122:21049",
-      "name": "Hero Header",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-26T02:15:44.790Z",
-      "lastModified": "2025-11-26T02:15:44.790Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=122:21049"
-      }
-    },
-    {
-      "id": "lib-354-16054",
-      "figmaNodeId": "354:16054",
-      "name": "welcome",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-26T02:38:07.535Z",
-      "lastModified": "2025-11-26T02:38:07.535Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=354:16054"
-      }
     }
   ],
-  "totalNodes": 4
+  "totalNodes": 1
 }

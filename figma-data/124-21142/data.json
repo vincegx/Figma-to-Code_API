@@ -56,6 +56,12 @@
           ]
         },
         {
+          "id": "I124:21154;114:861;112:1124;112:878",
+          "overriddenFields": [
+            "exportSettings"
+          ]
+        },
+        {
           "id": "I124:21154;131:261804",
           "overriddenFields": [
             "counterAxisSizingMode",
@@ -1828,6 +1834,12 @@
               "overriddenFields": [
                 "layoutGrow"
               ]
+            },
+            {
+              "id": "I124:21154;114:861;112:1124;112:878",
+              "overriddenFields": [
+                "exportSettings"
+              ]
             }
           ],
           "children": [
@@ -2263,7 +2275,14 @@
                       "boundVariables": {}
                     }
                   },
-                  "overrides": [],
+                  "overrides": [
+                    {
+                      "id": "I124:21154;114:861;112:1124;112:878",
+                      "overriddenFields": [
+                        "exportSettings"
+                      ]
+                    }
+                  ],
                   "children": [
                     {
                       "id": "I124:21154;114:861;112:1124;112:878",
@@ -2289,7 +2308,14 @@
                           "boundVariables": {}
                         }
                       },
-                      "overrides": [],
+                      "overrides": [
+                        {
+                          "id": "I124:21154;114:861;112:1124;112:878",
+                          "overriddenFields": [
+                            "exportSettings"
+                          ]
+                        }
+                      ],
                       "children": [
                         {
                           "id": "I124:21154;114:861;112:1124;112:878;112:496",
@@ -2461,6 +2487,16 @@
                       "layoutGrow": 0,
                       "layoutSizingHorizontal": "FIXED",
                       "layoutSizingVertical": "FIXED",
+                      "exportSettings": [
+                        {
+                          "suffix": "",
+                          "format": "PNG",
+                          "constraint": {
+                            "type": "SCALE",
+                            "value": 1
+                          }
+                        }
+                      ],
                       "effects": [],
                       "interactions": []
                     },
