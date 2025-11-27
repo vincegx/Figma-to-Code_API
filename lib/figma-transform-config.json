@@ -1,9 +1,8 @@
 {
   "version": "1.0.0",
   "lastUpdated": "2025-11-27",
-  "description": "Centralized configuration for Figma→CSS transformation mappings",
+  "description": "Centralized configuration for Figma\u2192CSS transformation mappings",
   "source": "WP28 T208 - Externalized from altnode-transform.ts hardcoded values",
-
   "typeMapping": {
     "FRAME": "div",
     "GROUP": "div",
@@ -16,7 +15,6 @@
     "LINE": "div",
     "BOOLEAN_OPERATION": "svg"
   },
-
   "blendModes": {
     "MULTIPLY": "multiply",
     "SCREEN": "screen",
@@ -34,23 +32,23 @@
     "COLOR": "color",
     "LUMINOSITY": "luminosity"
   },
-
   "textVerticalAlign": {
     "TOP": "top",
     "CENTER": "middle",
     "BOTTOM": "bottom"
   },
-
   "thresholds": {
     "iconMaxSize": 64,
     "iconComponentMaxSize": 32
   },
-
   "defaults": {
-    "color": { "r": 0, "g": 0, "b": 0 },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    },
     "rotation": 0
   },
-
   "constants": {
     "layoutModes": {
       "NONE": "NONE",
@@ -58,12 +56,18 @@
       "VERTICAL": "VERTICAL",
       "GRID": "GRID"
     },
-    "blendModeExclusions": ["PASS_THROUGH", "NORMAL"],
+    "blendModeExclusions": [
+      "PASS_THROUGH",
+      "NORMAL"
+    ],
     "layoutPositioning": {
       "auto": "AUTO",
       "absolute": "ABSOLUTE"
     },
-    "iconNodeTypes": ["VECTOR", "BOOLEAN_OPERATION"],
+    "iconNodeTypes": [
+      "VECTOR",
+      "BOOLEAN_OPERATION"
+    ],
     "strokeAlign": {
       "inside": "INSIDE",
       "center": "CENTER",
@@ -81,59 +85,302 @@
       "image": "IMAGE"
     }
   },
-
   "propertyMappings": {
-    "fontSize": {
-      "cssProperty": "font-size",
-      "unit": "px",
-      "extract": true,
-      "type": "Simple",
-      "comment": "Extract as fallback, rules optimize to semantic classes (text-sm, text-base, etc.)"
-    },
-    "fontWeight": {
-      "cssProperty": "font-weight",
+    "blendMode": {
+      "cssProperty": "mix-blend-mode",
       "unit": "",
       "extract": true,
       "type": "Simple",
-      "comment": "Extract as fallback, rules optimize to semantic classes (font-medium, font-semibold, etc.)"
+      "comment": "WP27 mapping - blendModeMap line 198-214 (14 values)"
+    },
+    "clipsContent": {
+      "cssProperty": "overflow",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
     },
     "cornerRadius": {
       "cssProperty": "border-radius",
       "unit": "px",
       "extract": true,
       "type": "Simple",
-      "comment": "Extract as fallback, rules optimize to semantic classes (rounded, rounded-lg, etc.)"
+      "comment": "WP27 mapping"
+    },
+    "counterAxisAlignItems": {
+      "cssProperty": "align-items",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "counterAxisSpacing": {
+      "cssProperty": "gap",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "fontFamily": {
+      "cssProperty": "font-family",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeText() line 532"
+    },
+    "fontSize": {
+      "cssProperty": "font-size",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - R\u00e8gle existante priority 50"
+    },
+    "fontWeight": {
+      "cssProperty": "font-weight",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "gridColumnGap": {
+      "cssProperty": "column-gap",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "gridColumnSpan": {
+      "cssProperty": "grid-column",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "gridRowGap": {
+      "cssProperty": "row-gap",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "gridRowSpan": {
+      "cssProperty": "grid-row",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeLayout() line 358-366"
     },
     "itemSpacing": {
       "cssProperty": "gap",
       "unit": "px",
       "extract": true,
       "type": "Simple",
-      "comment": "Flex/grid gap spacing between children"
+      "comment": "WP27 mapping"
     },
-    "opacity": {
-      "cssProperty": "opacity",
+    "layoutAlign": {
+      "cssProperty": "align-self",
       "unit": "",
       "extract": true,
       "type": "Simple",
-      "comment": "Extract as fallback, rules optimize to semantic classes (opacity-50, opacity-75, etc.)"
+      "comment": "WP27 mapping"
+    },
+    "layoutGrow": {
+      "cssProperty": "flex-grow",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "layoutPositioning": {
+      "cssProperty": "position",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "layoutWrap": {
+      "cssProperty": "flex-wrap",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
     },
     "letterSpacing": {
       "cssProperty": "letter-spacing",
       "unit": "px",
       "extract": true,
       "type": "Simple",
-      "comment": "Character spacing in text nodes"
+      "comment": "WP27 mapping"
+    },
+    "lineHeightPercent": {
+      "cssProperty": "line-height",
+      "unit": "%",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - Fallback for lineHeightPx"
+    },
+    "lineHeightPx": {
+      "cssProperty": "line-height",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeText() line 540"
+    },
+    "maxHeight": {
+      "cssProperty": "max-height",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "maxWidth": {
+      "cssProperty": "max-width",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "minHeight": {
+      "cssProperty": "min-height",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "minWidth": {
+      "cssProperty": "min-width",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "opacity": {
+      "cssProperty": "opacity",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "paddingBottom": {
+      "cssProperty": "padding-bottom",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "paddingLeft": {
+      "cssProperty": "padding-left",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeLayout() line 342 + official-paddingleft"
+    },
+    "paddingRight": {
+      "cssProperty": "padding-right",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "paddingTop": {
+      "cssProperty": "padding-top",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "paragraphIndent": {
+      "cssProperty": "text-indent",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeText() line 584"
+    },
+    "paragraphSpacing": {
+      "cssProperty": "margin-bottom",
+      "unit": "px",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - normalizeText() line 577"
+    },
+    "primaryAxisAlignItems": {
+      "cssProperty": "justify-content",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping"
+    },
+    "strokeCap": {
+      "cssProperty": "stroke-linecap (SVG)",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - Not yet analyzed"
+    },
+    "strokeDashes": {
+      "cssProperty": "border-style",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - line 247"
+    },
+    "strokeJoin": {
+      "cssProperty": "stroke-linejoin (SVG)",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - Not yet analyzed"
     },
     "strokeWeight": {
       "cssProperty": "border-width",
       "unit": "px",
       "extract": true,
       "type": "Simple",
-      "comment": "Border width for strokes"
+      "comment": "WP27 mapping - official-strokeweight (disabled)"
+    },
+    "textAlignHorizontal": {
+      "cssProperty": "text-align",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - 4 rules for LEFT/RIGHT/CENTER/JUSTIFIED"
+    },
+    "textAlignVertical": {
+      "cssProperty": "vertical-align",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - verticalAlignMap line 563"
+    },
+    "textCase": {
+      "cssProperty": "text-transform",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - 4 rules"
+    },
+    "textDecoration": {
+      "cssProperty": "text-decoration",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - 3 rules"
+    },
+    "visible": {
+      "cssProperty": "display: none",
+      "unit": "",
+      "extract": true,
+      "type": "Simple",
+      "comment": "WP27 mapping - Filter invisible nodes line 640-643"
+    },
+    "rectangleCornerRadii": {
+      "cssProperty": "border-radius",
+      "unit": "px",
+      "extract": true,
+      "type": "Complex",
+      "comment": "4-value array [topLeft, topRight, bottomRight, bottomLeft] - requires special handling in altnode-transform.ts"
     }
   },
-
   "enumMappings": {
     "layoutMode": {
       "cssProperty": "flex-direction",
@@ -450,13 +697,66 @@
           "comment": "Stretch to fill cross axis"
         }
       }
+    },
+    "layoutSizingHorizontal": {
+      "cssProperty": "width",
+      "type": "Enum",
+      "values": {
+        "HUG": {
+          "css": {
+            "width": "auto"
+          },
+          "tailwind": "w-auto",
+          "comment": "Content-sized width (Figma Auto Layout HUG)"
+        },
+        "FILL": {
+          "css": {
+            "width": "100%"
+          },
+          "tailwind": "w-full",
+          "comment": "Fill parent width (Figma Auto Layout FILL)"
+        },
+        "FIXED": {
+          "css": {
+            "width": "${absoluteBoundingBox.width}px"
+          },
+          "tailwind": "w-[${absoluteBoundingBox.width}px]",
+          "comment": "Fixed width from absoluteBoundingBox"
+        }
+      }
+    },
+    "layoutSizingVertical": {
+      "cssProperty": "height",
+      "type": "Enum",
+      "values": {
+        "HUG": {
+          "css": {
+            "height": "auto"
+          },
+          "tailwind": "h-auto",
+          "comment": "Content-sized height (Figma Auto Layout HUG)"
+        },
+        "FILL": {
+          "css": {
+            "height": "100%"
+          },
+          "tailwind": "h-full",
+          "comment": "Fill parent height (Figma Auto Layout FILL)"
+        },
+        "FIXED": {
+          "css": {
+            "height": "${absoluteBoundingBox.height}px"
+          },
+          "tailwind": "h-[${absoluteBoundingBox.height}px]",
+          "comment": "Fixed height from absoluteBoundingBox"
+        }
+      }
     }
   },
-
   "comments": {
     "purpose": "This config externalizes all hardcoded mappings from altnode-transform.ts",
     "usage": "Import this config and use mappings instead of inline object literals",
-    "architecture": "Figma JSON → altnode-transform.ts (extraction) → altNode.styles (fallback CSS) → rules (framework-specific optimization)",
+    "architecture": "Figma JSON \u2192 altnode-transform.ts (extraction) \u2192 altNode.styles (fallback CSS) \u2192 rules (framework-specific optimization)",
     "priority": "Rules always override fallbacks (rules = semantic, fallbacks = raw CSS)",
     "maintenance": "Update this file when Figma API adds new properties or CSS standards change"
   }

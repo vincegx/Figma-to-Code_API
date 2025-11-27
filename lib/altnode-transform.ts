@@ -206,9 +206,54 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
       if (valueMapping && valueMapping.css) {
         // Apply all CSS properties from the mapping
         for (const [cssProp, cssValue] of Object.entries(valueMapping.css)) {
-          altNode.styles[cssProp] = cssValue as string;
+          // Handle template variables like ${absoluteBoundingBox.width}px
+          let finalValue = cssValue as string;
+          if (finalValue.includes('${')) {
+            // Replace ${absoluteBoundingBox.width} with actual value
+            if (figmaNode.absoluteBoundingBox) {
+              finalValue = finalValue.replace('${absoluteBoundingBox.width}', String(figmaNode.absoluteBoundingBox.width));
+              finalValue = finalValue.replace('${absoluteBoundingBox.height}', String(figmaNode.absoluteBoundingBox.height));
+            }
+          }
+          altNode.styles[cssProp] = finalValue;
         }
       }
+    }
+  }
+
+  // WP28 COMPLETION: Handle Complex properties that need special logic
+  extractComplexProperties(figmaNode, altNode);
+}
+
+/**
+ * WP28 COMPLETION: Extract complex properties that require special handling
+ *
+ * Complex properties from WP27:
+ * 1. rectangleCornerRadii: 4-value array [topLeft, topRight, bottomRight, bottomLeft]
+ *
+ * @param figmaNode - Original Figma node
+ * @param altNode - AltNode being constructed
+ */
+function extractComplexProperties(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+  const node = figmaNode as any;
+
+  // rectangleCornerRadii: Individual corner radii (4 values)
+  if (node.rectangleCornerRadii && Array.isArray(node.rectangleCornerRadii)) {
+    const [tl, tr, br, bl] = node.rectangleCornerRadii;
+
+    // Check if all corners are the same
+    if (tl === tr && tr === br && br === bl) {
+      // All same: use simple border-radius
+      altNode.styles['border-radius'] = `${tl}px`;
+    } else {
+      // Different corners: use 4-value syntax
+      altNode.styles['border-radius'] = `${tl}px ${tr}px ${br}px ${bl}px`;
+
+      // Also set individual corner properties for specificity
+      if (tl !== 0) altNode.styles['border-top-left-radius'] = `${tl}px`;
+      if (tr !== 0) altNode.styles['border-top-right-radius'] = `${tr}px`;
+      if (br !== 0) altNode.styles['border-bottom-right-radius'] = `${br}px`;
+      if (bl !== 0) altNode.styles['border-bottom-left-radius'] = `${bl}px`;
     }
   }
 }
