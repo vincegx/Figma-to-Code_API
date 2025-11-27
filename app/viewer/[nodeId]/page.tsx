@@ -230,7 +230,7 @@ export default function ViewerPage() {
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const delta = moveEvent.clientX - startX;
       const newWidth = startWidth + delta;
-      const maxWidth = window.innerWidth * 0.15; // 15% max
+      const maxWidth = window.innerWidth * 0.30; // 30% max
       const constrainedWidth = Math.max(300, Math.min(newWidth, maxWidth));
       setLeftPanelWidth(constrainedWidth);
     };
@@ -252,7 +252,7 @@ export default function ViewerPage() {
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const delta = startX - moveEvent.clientX; // Reversed for right panel
       const newWidth = startWidth + delta;
-      const maxWidth = window.innerWidth * 0.15; // 15% max
+      const maxWidth = window.innerWidth * 0.30; // 30% max
       const constrainedWidth = Math.max(300, Math.min(newWidth, maxWidth));
       setRightPanelWidth(constrainedWidth);
     };
