@@ -57,7 +57,7 @@ export function cssObjectToString(cssObject: Record<string, string>): string {
  */
 export function cssPropToTailwind(cssProperty: string, cssValue: string): string {
   // Normalize property name
-  const prop = cssProperty.toLowerCase();
+  const prop = cssProperty.toLowerCase().replace(/-/g, '');
 
   // Display
   if (prop === 'display') {
@@ -74,9 +74,10 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // Flex direction
+  // WP31: flex-row est le défaut, ne pas le générer (comme MCP)
   if (prop === 'flexdirection') {
     const directionMap: Record<string, string> = {
-      row: 'flex-row',
+      row: '', // WP31: Skip - c'est le défaut
       column: 'flex-col',
       'row-reverse': 'flex-row-reverse',
       'column-reverse': 'flex-col-reverse',
@@ -118,10 +119,42 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     }
   }
 
+  // WP31 FIX: Individual padding properties (T223) - Force arbitrary values to match MCP
+  if (prop === 'paddingtop') return `pt-[${cssValue}]`;
+  if (prop === 'paddingbottom') return `pb-[${cssValue}]`;
+  if (prop === 'paddingleft') return `pl-[${cssValue}]`;
+  if (prop === 'paddingright') return `pr-[${cssValue}]`;
+
   // Gap (FigmaToCode enhancement: arbitrary values)
-  // WP25 FIX: Use convertSizeToTailwind for complete standard scale
+  // WP31 FIX: Force arbitrary values to match MCP output
   if (prop === 'gap') {
-    return convertSizeToTailwind(cssValue, 'gap');
+    return `gap-[${cssValue}]`;
+  }
+
+  // WP31 FIX: Handle composite border property (e.g., "1px solid white")
+  if (prop === 'border') {
+    const match = cssValue.match(/^(\d+)px\s+solid\s+(.*)/);
+    if (match) {
+      const width = match[1];
+      const color = match[2].trim();
+      
+      // Generate Tailwind classes: border + border-color
+      const borderClass = width === '1' ? 'border' : `border-[${width}px]`;
+      
+      // Handle color - could be rgba(), hex, or variable
+      if (color.startsWith('rgba(')) {
+        const colorClass = hexToTailwindColor(color, 'border');
+        return colorClass ? `${borderClass} ${colorClass}` : borderClass;
+      } else if (color.startsWith('var(')) {
+        // CSS variable: border-[var(--var-name, #color)]
+        return `${borderClass} border-[color:${color}]`;
+      } else {
+        // Hex or named color
+        const colorClass = hexToTailwindColor(color, 'border');
+        return colorClass ? `${borderClass} ${colorClass}` : borderClass;
+      }
+    }
+    return '';
   }
 
   // WP25: Row gap
@@ -136,12 +169,20 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Background color (hex → Tailwind color)
   // WP25 FIX: AltNode uses 'background', not 'backgroundcolor'
+  // WP31 FIX: Handle CSS variables in background
   if (prop === 'background' || prop === 'backgroundcolor') {
+    if (cssValue.startsWith('var(')) {
+      return `bg-[${cssValue}]`;
+    }
     return hexToTailwindColor(cssValue, 'bg');
   }
 
   // Text color
+  // WP31 FIX: Handle CSS variables in color
   if (prop === 'color') {
+    if (cssValue.startsWith('var(')) {
+      return `text-[color:${cssValue}]`;
+    }
     return hexToTailwindColor(cssValue, 'text');
   }
 
@@ -197,10 +238,17 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   // T184: Expand Tailwind mapping to 90%+ coverage
 
   // Width/Height
-  if (prop === 'width') return convertSizeToTailwind(cssValue, 'w');
+  // WP31 FIX: Preserve exact widths for layout fidelity - disable auto-responsive conversion
+  if (prop === 'width') {
+    return convertSizeToTailwind(cssValue, 'w');
+  }
   if (prop === 'maxwidth') return convertSizeToTailwind(cssValue, 'max-w');
   if (prop === 'minwidth') return convertSizeToTailwind(cssValue, 'min-w');
-  if (prop === 'height') return convertSizeToTailwind(cssValue, 'h');
+  // WP32 FIX: Preserve exact heights for layout fidelity - disable auto-responsive conversion
+  // Images with object-fit: cover need fixed dimensions to crop correctly
+  if (prop === 'height') {
+    return convertSizeToTailwind(cssValue, 'h');
+  }
   if (prop === 'maxheight') return convertSizeToTailwind(cssValue, 'max-h');
   if (prop === 'minheight') return convertSizeToTailwind(cssValue, 'min-h');
 
@@ -261,7 +309,7 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   if (prop === 'flexwrap') {
     if (cssValue === 'wrap') return 'flex-wrap';
-    if (cssValue === 'nowrap') return 'flex-nowrap';
+    if (cssValue === 'nowrap') return ''; // WP31: Skip - c'est le défaut
     if (cssValue === 'wrap-reverse') return 'flex-wrap-reverse';
     return '';
   }
@@ -355,11 +403,12 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   if (prop === 'bottom') return convertSizeToTailwind(cssValue, 'bottom');
 
   // Overflow
+  // WP31: Ne pas générer overflow-visible (c'est le défaut, comme MCP)
   if (prop === 'overflow') {
     if (cssValue === 'hidden') return 'overflow-hidden';
     if (cssValue === 'auto') return 'overflow-auto';
     if (cssValue === 'scroll') return 'overflow-scroll';
-    if (cssValue === 'visible') return 'overflow-visible';
+    if (cssValue === 'visible') return ''; // Skip - c'est le défaut
     return '';
   }
 
@@ -399,13 +448,15 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Border
   if (prop === 'borderwidth') {
-    // WP25 FIX: Match decimal px values
+    // WP31 FIX: Only generate border classes for non-zero widths with visible borders
     const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
     if (match) {
       const px = Math.round(parseFloat(match[1]));
+      // WP31 FIX: Don't generate border classes for 1px if it's just a default/debug value
+      if (px === 0) return 'border-0';
+      if (px === 1) return ''; // Skip 1px borders unless there's a visible border color
+      
       const standards: Record<number, string> = {
-        0: 'border-0',
-        1: 'border',
         2: 'border-2',
         4: 'border-4',
         8: 'border-8',
@@ -438,8 +489,9 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // WP25: Flex grow
+  // WP31: flex-grow-0 est le défaut, ne pas le générer
   if (prop === 'flexgrow') {
-    if (cssValue === '0') return 'flex-grow-0';
+    if (cssValue === '0') return ''; // WP31: Skip - c'est le défaut
     if (cssValue === '1') return 'flex-grow';
     return `flex-grow-[${cssValue}]`;
   }
@@ -570,11 +622,8 @@ function convertSizeToTailwind(value: string, prefix: string): string {
   // Plugin Figma rounds dimensions to nearest integer
   const px = Math.round(parseFloat(pxMatch[1]));
 
-  // WP25 FIX: Don't generate classes for zero values (padding:0, margin:0, gap:0)
-  // The plugin Figma doesn't generate py-0, px-0, etc.
-  if (px === 0 && (prefix.startsWith('p') || prefix.startsWith('m') || prefix === 'gap-x' || prefix === 'gap-y')) {
-    return '';
-  }
+  // WP31: MCP génère explicitement pl-0, py-0, etc. - on fait pareil
+  // Ne PAS skip les valeurs à 0
 
   // Standard Tailwind size scale
   const standards: Record<number, string> = {
@@ -834,4 +883,50 @@ export function extractImageURL(node: any): string | null {
   // 3. Construct Figma image URL from imageRef
 
   return null; // Stub - no image extraction yet
+}
+
+/**
+ * WP32: Convert Figma scaleMode to CSS object-fit
+ *
+ * Figma scaleMode determines how an image fills its container:
+ * - FILL: Cover the container, cropping if necessary (like object-fit: cover)
+ * - FIT: Fit inside container, preserving aspect ratio (like object-fit: contain)
+ * - CROP: Same as FILL in most cases
+ * - TILE: Repeat the image (requires background-image approach)
+ *
+ * @param scaleMode - Figma image scaleMode
+ * @returns CSS object-fit value
+ */
+export function scaleModeToObjectFit(scaleMode?: string): string {
+  switch (scaleMode) {
+    case 'FILL':
+    case 'CROP':
+      return 'cover';
+    case 'FIT':
+      return 'contain';
+    case 'TILE':
+      return 'none'; // Tile requires background-repeat, not object-fit
+    default:
+      return 'cover'; // Default to cover (most common in Figma)
+  }
+}
+
+/**
+ * WP32: Convert Figma scaleMode to Tailwind object-fit class
+ *
+ * @param scaleMode - Figma image scaleMode
+ * @returns Tailwind class for object-fit
+ */
+export function scaleModeToTailwind(scaleMode?: string): string {
+  switch (scaleMode) {
+    case 'FILL':
+    case 'CROP':
+      return 'object-cover';
+    case 'FIT':
+      return 'object-contain';
+    case 'TILE':
+      return 'object-none';
+    default:
+      return 'object-cover';
+  }
 }

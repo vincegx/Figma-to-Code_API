@@ -26,7 +26,8 @@ export async function fetchNode(
     throw new Error('FIGMA_ACCESS_TOKEN not set in .env.local');
   }
 
-  const url = `https://api.figma.com/v1/files/${fileKey}/nodes?ids=${nodeId}`;
+  // WP32: Add geometry=paths to get fillGeometry/strokeGeometry for VECTOR nodes
+  const url = `https://api.figma.com/v1/files/${fileKey}/nodes?ids=${nodeId}&geometry=paths`;
   const response = await fetch(url, {
     headers: { 'X-Figma-Token': token },
   });
@@ -207,6 +208,66 @@ export async function fetchSVG(
   } catch (error) {
     console.warn('Failed to fetch SVG:', error);
     return null;
+  }
+}
+
+/**
+ * WP32: Fetch multiple nodes as SVG (batch)
+ * Used for downloading SVG containers at import time
+ *
+ * @param fileKey - Figma file key from URL
+ * @param nodeIds - Array of node IDs to fetch as SVG
+ * @returns Map of nodeId → SVG content
+ */
+export async function fetchSVGBatch(
+  fileKey: string,
+  nodeIds: string[]
+): Promise<Record<string, string>> {
+  const token = process.env.FIGMA_ACCESS_TOKEN;
+  if (!token || nodeIds.length === 0) {
+    return {};
+  }
+
+  try {
+    // Request SVG URLs for all nodes
+    const idsParam = nodeIds.join(',');
+    const url = `https://api.figma.com/v1/images/${fileKey}?ids=${encodeURIComponent(idsParam)}&format=svg`;
+
+    const response = await fetch(url, {
+      headers: { 'X-Figma-Token': token },
+    });
+
+    if (!response.ok) {
+      console.warn(`SVG batch request failed:`, response.status);
+      return {};
+    }
+
+    const data = await response.json() as { images?: Record<string, string> };
+    const svgUrls = data.images || {};
+
+    // Fetch actual SVG content from each URL
+    const result: Record<string, string> = {};
+
+    await Promise.all(
+      Object.entries(svgUrls).map(async ([nodeId, svgUrl]) => {
+        if (svgUrl && typeof svgUrl === 'string') {
+          try {
+            const svgResponse = await fetch(svgUrl);
+            if (svgResponse.ok) {
+              result[nodeId] = await svgResponse.text();
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch SVG for ${nodeId}:`, err);
+          }
+        }
+      })
+    );
+
+    console.log(`✅ Fetched ${Object.keys(result).length} SVGs from Figma API`);
+    return result;
+  } catch (error) {
+    console.warn('Failed to fetch SVG batch:', error);
+    return {};
   }
 }
 

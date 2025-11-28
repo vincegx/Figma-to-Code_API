@@ -16,6 +16,8 @@ interface InformationPanelProps {
   onFrameworkChange: (framework: FrameworkType) => void;
   resolvedProperties?: Record<string, string>;
   allRules?: MultiFrameworkRule[];
+  nodeId?: string;
+  onCodeChange?: (code: string) => void;
 }
 
 export function InformationPanel({
@@ -24,7 +26,11 @@ export function InformationPanel({
   onFrameworkChange,
   resolvedProperties = {},
   allRules = [],
+  nodeId,
+  onCodeChange,
 }: InformationPanelProps) {
+  console.log('🟣 INFORMATION PANEL RENDER', Date.now());
+
   if (!node) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
@@ -186,6 +192,8 @@ export function InformationPanel({
         onFrameworkChange={onFrameworkChange}
         resolvedProperties={resolvedProperties}
         allRules={allRules}
+        nodeId={nodeId}
+        onCodeChange={onCodeChange}
       />
 
       {/* Raw Data Section */}

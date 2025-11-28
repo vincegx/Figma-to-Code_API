@@ -1,0 +1,24 @@
+<frame id="425:2146" name="Hero Header" x="44939" y="-1534" width="1440" height="624">
+  <frame id="425:2147" name="Top container" x="0" y="0" width="1440" height="542" />
+  <frame id="425:2191" name="Bottom container" x="0" y="542" width="1440" height="82">
+    <frame id="425:2192" name="Breadcrumb" x="0" y="10" width="375" height="62">
+      <frame id="425:2193" name="Content" x="24" y="0" width="327" height="62">
+        <instance id="425:2194" name="Button - CTA - Variables" x="0" y="16" width="28" height="30" />
+        <instance id="425:2195" name="Icons/Arrow right form" x="36" y="36" width="10" height="10" />
+        <instance id="425:2196" name="Button - CTA - Variables" x="54" y="16" width="55" height="30" />
+        <instance id="425:2197" name="Icons/Arrow right form" x="117" y="36" width="10" height="10" />
+        <instance id="425:2198" name="Button - CTA - Variables" x="135" y="16" width="55" height="30" />
+      </frame>
+    </frame>
+    <frame id="425:2199" name="Join us block" x="1037" y="0" width="403" height="82">
+      <frame id="425:2200" name="Text container" x="80" y="32" width="142" height="18">
+        <text id="425:2201" name="Text" x="0" y="0" width="126" height="18" />
+      </frame>
+      <frame id="425:2202" name="Button - CTA - Variables" x="238" y="24" width="85" height="34">
+        <instance id="425:2203" name="Icons/Arrow left" x="0" y="8" width="14" height="14" hidden="true" />
+        <text id="425:2204" name="Text" x="4" y="8" width="47" height="18" />
+        <instance id="425:2205" name="Icons/Arrow right" x="67" y="24" width="14" height="14" />
+      </frame>
+    </frame>
+  </frame>
+</frame>

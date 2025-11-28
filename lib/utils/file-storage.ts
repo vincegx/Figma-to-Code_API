@@ -231,3 +231,114 @@ export function getScreenshotPath(nodeId: string): string {
   const safeNodeId = sanitizeNodeId(nodeId);
   return path.join(FIGMA_DATA_DIR, safeNodeId, 'screenshot.png');
 }
+
+/**
+ * WP32: Save image assets (PNG/JPG) for a node
+ * Stores image files in figma-data/{nodeId}/img/
+ *
+ * @param nodeId - Figma node ID
+ * @param imageAssets - Map of filename → image Buffer
+ */
+export async function saveImageAssets(
+  nodeId: string,
+  imageAssets: Record<string, Buffer>
+): Promise<void> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const imgDir = path.join(FIGMA_DATA_DIR, safeNodeId, 'img');
+
+  // Create img directory
+  await fs.mkdir(imgDir, { recursive: true });
+
+  // Save each image file
+  for (const [filename, buffer] of Object.entries(imageAssets)) {
+    await fs.writeFile(path.join(imgDir, filename), new Uint8Array(buffer));
+  }
+}
+
+/**
+ * WP32: Save SVG assets for a node
+ * Stores SVG files in figma-data/{nodeId}/svg/
+ *
+ * @param nodeId - Figma node ID
+ * @param svgAssets - Map of assetName → SVG content
+ */
+export async function saveSvgAssets(
+  nodeId: string,
+  svgAssets: Record<string, string>
+): Promise<void> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const svgDir = path.join(FIGMA_DATA_DIR, safeNodeId, 'svg');
+
+  // Create svg directory
+  await fs.mkdir(svgDir, { recursive: true });
+
+  // Save each SVG file
+  for (const [assetName, svgContent] of Object.entries(svgAssets)) {
+    const safeName = assetName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    await fs.writeFile(
+      path.join(svgDir, `${safeName}.svg`),
+      svgContent,
+      'utf-8'
+    );
+  }
+}
+
+/**
+ * WP32: Load SVG assets for a node
+ * Reads all SVG files from figma-data/{nodeId}/svg/
+ *
+ * @param nodeId - Figma node ID
+ * @returns Map of assetName → SVG content (empty if no SVGs)
+ */
+export async function loadSvgAssets(nodeId: string): Promise<Record<string, string>> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const svgDir = path.join(FIGMA_DATA_DIR, safeNodeId, 'svg');
+
+  try {
+    const files = await fs.readdir(svgDir);
+    const assets: Record<string, string> = {};
+
+    for (const file of files) {
+      if (file.endsWith('.svg')) {
+        const content = await fs.readFile(path.join(svgDir, file), 'utf-8');
+        const assetName = file.replace('.svg', '');
+        assets[assetName] = content;
+      }
+    }
+
+    return assets;
+  } catch {
+    return {}; // No SVG directory
+  }
+}
+
+/**
+ * WP32: Get SVG asset path for serving
+ *
+ * @param nodeId - Figma node ID
+ * @param assetName - SVG asset name (without extension)
+ * @returns Absolute path to SVG file
+ */
+export function getSvgAssetPath(nodeId: string, assetName: string): string {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const safeName = assetName.replace(/[^a-zA-Z0-9_-]/g, '_');
+  return path.join(FIGMA_DATA_DIR, safeNodeId, 'svg', `${safeName}.svg`);
+}
+
+/**
+ * WP32: Check if SVG assets exist for a node
+ *
+ * @param nodeId - Figma node ID
+ * @returns true if svg directory exists and has files
+ */
+export async function hasSvgAssets(nodeId: string): Promise<boolean> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const svgDir = path.join(FIGMA_DATA_DIR, safeNodeId, 'svg');
+
+  try {
+    const files = await fs.readdir(svgDir);
+    return files.some(f => f.endsWith('.svg'));
+  } catch {
+    return false;
+  }
+}

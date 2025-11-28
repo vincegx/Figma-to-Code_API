@@ -34,7 +34,7 @@
         }
       },
       "react-tailwind": {
-        "className": "opacity-[${value}]"
+        "className": ""
       },
       "react-inline": {
         "style": {

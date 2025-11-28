@@ -51,6 +51,8 @@ interface GeneratedCodeSectionProps {
   onFrameworkChange: (framework: FrameworkType) => void;
   resolvedProperties?: Record<string, string>;
   allRules?: MultiFrameworkRule[];
+  nodeId?: string;
+  onCodeChange?: (code: string) => void;
 }
 
 // Helper to determine syntax highlighting language
@@ -80,6 +82,8 @@ export function GeneratedCodeSection({
   onFrameworkChange,
   resolvedProperties = {},
   allRules = [],
+  nodeId,
+  onCodeChange,
 }: GeneratedCodeSectionProps) {
   const [activeTab, setActiveTab] = useState<'component' | 'styles'>('component');
   const [copiedComponent, setCopiedComponent] = useState(false);
@@ -104,45 +108,88 @@ export function GeneratedCodeSection({
     }
   }, []);
 
-  // Generate code using the appropriate generator
-  const { componentCode, stylesCode } = useMemo(() => {
-    if (!node) {
-      return {
-        componentCode: '// No node selected',
-        stylesCode: '/* No node selected */',
-      };
+  // WP32: State for generated code (async generators)
+  const [generatedCode, setGeneratedCode] = useState<{ componentCode: string; stylesCode: string }>({
+    componentCode: '// Loading...',
+    stylesCode: '/* Loading... */',
+  });
+
+  // WP32: Generate code using async generators
+  useEffect(() => {
+    console.log('🔵 useEffect triggered:', {
+      hasNode: !!node,
+      nodeId: node?.id,
+      framework,
+      rulesCount: allRules.length,
+      propsKeys: Object.keys(resolvedProperties),
+      timestamp: Date.now()
+    });
+
+    // WP32 FIX: Don't generate if node missing OR rules not loaded (prevents multiple generations)
+    if (!node || allRules.length === 0) {
+      console.log('⏸️ SKIP: node or rules missing');
+      setGeneratedCode({
+        componentCode: '// Loading...',
+        stylesCode: '/* Loading... */',
+      });
+      return;
     }
 
-    try {
-      if (framework === 'react-tailwind') {
-        // FIX: Pass allRules and framework for child evaluation
-        const output = generateReactTailwind(node, resolvedProperties, allRules, framework);
-        return {
-          componentCode: output.code,
-          stylesCode: '/* Tailwind classes are inline - no separate styles needed */',
-        };
-      } else if (framework === 'html-css') {
-        // FIX: Pass allRules and framework for child evaluation
-        const output = generateHTMLCSS(node, resolvedProperties, allRules, framework);
-        return {
-          componentCode: output.code,
-          stylesCode: output.css || '/* No styles generated */',
-        };
-      } else {
-        // Placeholder for other frameworks
-        return {
-          componentCode: `// ${framework} generator not yet implemented for ${node.name}`,
-          stylesCode: `/* ${framework} styles not yet implemented */`,
-        };
+    console.log('▶️ GENERATING code for:', node.id);
+
+    // Capture node in closure to satisfy TypeScript
+    const currentNode = node;
+
+    async function generateAsync() {
+      try {
+        // WP32 FIX: NEVER pass credentials in viewer mode (nodeId exists)
+        // Credentials are ONLY for initial export/download, NOT for viewer
+        // This prevents calling Figma API on every page load
+        const figmaFileKey = nodeId ? undefined : (process.env.NEXT_PUBLIC_FIGMA_FILE_KEY || '');
+        const figmaAccessToken = nodeId ? undefined : (process.env.NEXT_PUBLIC_FIGMA_ACCESS_TOKEN || '');
+
+        if (framework === 'react-tailwind') {
+          // WP32: nodeId triggers local image paths, no API calls
+          const output = await generateReactTailwind(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
+          setGeneratedCode({
+            componentCode: output.code,
+            stylesCode: '/* Tailwind classes are inline - no separate styles needed */',
+          });
+          // Pass code to parent viewer for LivePreview
+          onCodeChange?.(output.code);
+        } else if (framework === 'html-css') {
+          // WP32: Pass nodeId for local images
+          const output = await generateHTMLCSS(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
+          setGeneratedCode({
+            componentCode: output.code,
+            stylesCode: output.css || '/* No styles generated */',
+          });
+          // Pass code to parent viewer for LivePreview
+          onCodeChange?.(output.code);
+        } else {
+          // Placeholder for other frameworks
+          const placeholderCode = `// ${framework} generator not yet implemented for ${currentNode.name}`;
+          setGeneratedCode({
+            componentCode: placeholderCode,
+            stylesCode: `/* ${framework} styles not yet implemented */`,
+          });
+          onCodeChange?.(placeholderCode);
+        }
+      } catch (error) {
+        console.error('Code generation error:', error);
+        setGeneratedCode({
+          componentCode: `// Error generating code: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          stylesCode: '/* Error generating styles */',
+        });
       }
-    } catch (error) {
-      console.error('Code generation error:', error);
-      return {
-        componentCode: `// Error generating code: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        stylesCode: '/* Error generating styles */',
-      };
     }
-  }, [node, framework, resolvedProperties, allRules]);
+
+    generateAsync();
+    // WP32 PERF: Use primitives to avoid re-generation when references change
+    // resolvedProperties is derived from node + allRules, no need to include it
+  }, [node?.id, framework, allRules.length]);
+
+  const { componentCode, stylesCode} = generatedCode;
 
   const handleCopy = async (text: string, type: 'component' | 'styles') => {
     try {

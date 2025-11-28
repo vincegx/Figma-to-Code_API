@@ -2,6 +2,16 @@ import type { SimpleAltNode } from '../altnode-transform';
 import { toPascalCase, extractTextContent, extractComponentDataAttributes } from './helpers';
 
 /**
+ * Asset file generated during export (SVG, images, etc.)
+ */
+export interface GeneratedAsset {
+  readonly filename: string;  // e.g., "vector.svg", "vector2.svg"
+  readonly path: string;      // e.g., "./img/vector.svg"
+  readonly content: string;   // File content (SVG string)
+  readonly type: 'svg' | 'image';
+}
+
+/**
  * Simple generated code structure for WP06 MVP
  */
 export interface GeneratedCodeOutput {
@@ -14,6 +24,7 @@ export interface GeneratedCodeOutput {
     readonly generatedAt: string;
   };
   readonly css?: string; // Optional CSS string for HTML/CSS format
+  readonly assets?: GeneratedAsset[]; // SVG and image files to export
 }
 
 /**

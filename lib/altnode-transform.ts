@@ -35,6 +35,46 @@ export interface SimpleAltNode {
   canBeFlattened: boolean;
   cumulativeRotation: number;
   isIcon?: boolean;
+
+  // T228: Add SVG data for VECTOR nodes
+  svgData?: {
+    fillGeometry?: any[];
+    strokeGeometry?: any[];
+    fills?: any[];
+    strokes?: any[];
+    strokeWeight?: number;
+    bounds: { x: number; y: number; width: number; height: number };
+  };
+
+  // T230: Add image data for IMAGE fills (kept for backward compatibility)
+  imageData?: {
+    imageRef: string;
+    nodeId: string;
+    scaleMode: string;
+  };
+
+  // WP32: All fills in render order (bottom to top)
+  // Enables rendering all layers like MCP does
+  fillsData?: FillData[];
+}
+
+// WP32: Fill data structure for multi-layer rendering
+export interface FillData {
+  type: 'IMAGE' | 'SOLID' | 'GRADIENT_LINEAR' | 'GRADIENT_RADIAL' | 'GRADIENT_ANGULAR' | 'GRADIENT_DIAMOND';
+  visible: boolean;
+  opacity?: number;
+  // For IMAGE fills
+  imageRef?: string;
+  scaleMode?: string;
+  // For SOLID fills
+  color?: { r: number; g: number; b: number; a?: number };
+  // For GRADIENT fills
+  gradientStops?: Array<{
+    color: { r: number; g: number; b: number; a?: number };
+    position: number;
+  }>;
+  gradientTransform?: number[][];
+  gradientHandlePositions?: Array<{ x: number; y: number }>;
 }
 
 // Global name counter for unique name generation
@@ -198,6 +238,11 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
     }
   }
 
+  // WP32: Check if this is an image element that needs fixed dimensions for cropping
+  // Images with scaleMode FILL/CROP need fixed dimensions for object-fit: cover to work
+  const imageFill = node.fills?.find((f: any) => f.type === 'IMAGE' && f.visible !== false);
+  const imageNeedsFixedDimensions = imageFill && (imageFill.scaleMode === 'FILL' || imageFill.scaleMode === 'CROP');
+
   // Extract enum properties with value mappings
   for (const [figmaProp, enumMapping] of Object.entries(figmaConfig.enumMappings)) {
     const figmaValue = node[figmaProp];
@@ -206,11 +251,33 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
       if (valueMapping && valueMapping.css) {
         // Apply all CSS properties from the mapping
         for (const [cssProp, cssValue] of Object.entries(valueMapping.css)) {
-          // Handle template variables like ${absoluteBoundingBox.width}px
           let finalValue = cssValue as string;
+
+          // WP32 FIX: For images with FILL/CROP scaleMode, force fixed dimensions
+          // This ensures object-fit: cover works correctly for cropping
+          if (imageNeedsFixedDimensions) {
+            const nodeSize = node.size;
+            if (cssProp === 'width' && finalValue === '100%' && nodeSize) {
+              finalValue = `${nodeSize.x}px`;
+            }
+            if (cssProp === 'height' && finalValue === '100%' && nodeSize) {
+              finalValue = `${nodeSize.y}px`;
+            }
+          }
+
+          // Handle template variables like ${absoluteBoundingBox.width}px
           if (finalValue.includes('${')) {
-            // Replace ${absoluteBoundingBox.width} with actual value
-            if (figmaNode.absoluteBoundingBox) {
+            // WP32 FIX: Use size.x/y for rotated elements (actual dimensions before rotation)
+            // absoluteBoundingBox gives the bounding box AFTER rotation which is incorrect
+            const hasRotation = node.rotation && node.rotation !== 0;
+            const nodeSize = node.size;
+
+            if (hasRotation && nodeSize) {
+              // Rotated element: use size.x/y
+              finalValue = finalValue.replace('${absoluteBoundingBox.width}', String(nodeSize.x));
+              finalValue = finalValue.replace('${absoluteBoundingBox.height}', String(nodeSize.y));
+            } else if (figmaNode.absoluteBoundingBox) {
+              // Non-rotated element: use absoluteBoundingBox
               finalValue = finalValue.replace('${absoluteBoundingBox.width}', String(figmaNode.absoluteBoundingBox.width));
               finalValue = finalValue.replace('${absoluteBoundingBox.height}', String(figmaNode.absoluteBoundingBox.height));
             }
@@ -219,6 +286,63 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
         }
       }
     }
+  }
+
+  // WP31 T224: Extract Figma variables (boundVariables)
+  if (node.boundVariables) {
+    for (const [figmaProp, varRef] of Object.entries(node.boundVariables)) {
+      const varArray = Array.isArray(varRef) ? varRef : [varRef];
+      for (const ref of varArray) {
+        if (ref?.id) {
+          const varName = resolveVariableName(ref.id, figmaNode);
+          const fallbackValue = node[figmaProp]; // Current value as fallback
+
+          if (varName) {
+            // Map Figma property to CSS property using config
+            const mapping = (figmaConfig.propertyMappings as Record<string, { cssProperty?: string; unit?: string }>)[figmaProp];
+            const cssProperty = mapping?.cssProperty || figmaProp;
+
+            // Format: var(--name, fallback)
+            const fallback = mapping?.unit ? `${fallbackValue}${mapping.unit}` : String(fallbackValue);
+            altNode.styles[cssProperty] = `var(--${varName}, ${fallback})`;
+          }
+        }
+      }
+    }
+  }
+
+  // WP31 T225: Extract TEXT node style properties
+  if (node.type === 'TEXT' && node.style) {
+    // Font properties
+    if (node.style.fontFamily) altNode.styles['font-family'] = node.style.fontFamily;
+    if (node.style.fontWeight) altNode.styles['font-weight'] = String(node.style.fontWeight);
+    if (node.style.fontSize) altNode.styles['font-size'] = `${node.style.fontSize}px`;
+
+    // Letter spacing
+    if (node.style.letterSpacing !== undefined && node.style.letterSpacing !== 0) {
+      altNode.styles['letter-spacing'] = `${node.style.letterSpacing}px`;
+    }
+
+    // Line-height (unitless for responsiveness)
+    if (node.style.lineHeightPercentFontSize) {
+      const unitless = (node.style.lineHeightPercentFontSize / 100).toFixed(2);
+      altNode.styles['line-height'] = unitless;
+    }
+
+    // Text alignment
+    if (node.style.textAlignHorizontal) {
+      const alignMap: Record<string, string> = {
+        'LEFT': 'left',
+        'CENTER': 'center',
+        'RIGHT': 'right',
+        'JUSTIFIED': 'justify'
+      };
+      altNode.styles['text-align'] = alignMap[node.style.textAlignHorizontal] || 'left';
+    }
+
+    // Text transform
+    if (node.style.textCase === 'UPPER') altNode.styles['text-transform'] = 'uppercase';
+    if (node.style.textCase === 'LOWER') altNode.styles['text-transform'] = 'lowercase';
   }
 
   // WP28 COMPLETION: Handle Complex properties that need special logic
@@ -254,6 +378,16 @@ function extractComplexProperties(figmaNode: FigmaNode, altNode: SimpleAltNode):
       if (tr !== 0) altNode.styles['border-top-right-radius'] = `${tr}px`;
       if (br !== 0) altNode.styles['border-bottom-right-radius'] = `${br}px`;
       if (bl !== 0) altNode.styles['border-bottom-left-radius'] = `${bl}px`;
+    }
+  }
+
+  // WP31 T226: Extract TEXT color from fills
+  if (node.type === 'TEXT' && node.fills && Array.isArray(node.fills)) {
+    const solidFill = node.fills.find((f: any) => f.type === 'SOLID');
+    if (solidFill?.color) {
+      const { r, g, b, a } = solidFill.color;
+      const rgba = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a ?? 1})`;
+      altNode.styles['color'] = rgba;
     }
   }
 }
@@ -325,9 +459,10 @@ function applyHighPriorityImprovements(
 ): void {
   // 1. Rotation conversion (radians → degrees)
   // WP28 T209: Now uses config default for rotation check
+  // WP32 FIX: Keep Figma's rotation sign - CSS rotate() uses same convention
   const rotation = (figmaNode as any).rotation;
   if (rotation && rotation !== figmaConfig.defaults.rotation) {
-    const rotationDegrees = -(rotation * 180 / Math.PI);
+    const rotationDegrees = rotation * 180 / Math.PI;
     altNode.styles.transform = `rotate(${rotationDegrees}deg)`;
   }
 
@@ -441,7 +576,17 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   // NOTE: alignItems (counterAxisAlignItems) handled by official-counteraxisalignitems rules
 
   // Width and height
-  if (figmaNode.absoluteBoundingBox) {
+  // WP32 FIX: Use node.size for rotated elements (actual dimensions before rotation)
+  // absoluteBoundingBox gives the bounding box AFTER rotation which is incorrect
+  const nodeSize = (figmaNode as any).size;
+  const hasRotation = (figmaNode as any).rotation && (figmaNode as any).rotation !== 0;
+
+  if (hasRotation && nodeSize) {
+    // Rotated element: use size.x/y (actual dimensions before rotation)
+    altNode.styles.width = `${nodeSize.x}px`;
+    altNode.styles.height = `${nodeSize.y}px`;
+  } else if (figmaNode.absoluteBoundingBox) {
+    // Non-rotated element: use absoluteBoundingBox
     altNode.styles.width = `${figmaNode.absoluteBoundingBox.width}px`;
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
   }
@@ -449,6 +594,7 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
 
 /**
  * Convert Figma fills to CSS background
+ * WP32: Now extracts ALL fills for multi-layer rendering like MCP
  *
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
@@ -459,36 +605,87 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     return;
   }
 
-  // Get first visible fill (Figma renders top-to-bottom)
-  const fill = fills.find((f: any) => f.visible !== false);
-  if (!fill) {
+  // WP32: Extract ALL visible fills for multi-layer rendering
+  const visibleFills = fills.filter((f: any) => f.visible !== false);
+  if (visibleFills.length === 0) {
     return;
   }
 
+  // WP32: Build fillsData array with all fills in render order (bottom to top)
+  const fillsData: FillData[] = [];
+  let lastImageFill: any = null;
+
+  for (const fill of visibleFills) {
+    const fillData: FillData = {
+      type: fill.type,
+      visible: true,
+      opacity: fill.opacity,
+    };
+
+    if (fill.type === 'IMAGE' && fill.imageRef) {
+      fillData.imageRef = fill.imageRef;
+      fillData.scaleMode = fill.scaleMode || 'FILL';
+      lastImageFill = fill; // Track last image for backward compat
+    } else if (fill.type === 'SOLID' && fill.color) {
+      fillData.color = {
+        r: fill.color.r,
+        g: fill.color.g,
+        b: fill.color.b,
+        a: fill.color.a ?? fill.opacity ?? 1
+      };
+    } else if (fill.type.startsWith('GRADIENT') && fill.gradientStops) {
+      fillData.gradientStops = fill.gradientStops.map((stop: any) => ({
+        color: {
+          r: stop.color.r,
+          g: stop.color.g,
+          b: stop.color.b,
+          a: stop.color.a ?? 1
+        },
+        position: stop.position
+      }));
+      fillData.gradientHandlePositions = fill.gradientHandlePositions;
+      fillData.gradientTransform = fill.gradientTransform;
+    }
+
+    fillsData.push(fillData);
+  }
+
+  // WP32: Store all fills for multi-layer rendering
+  if (fillsData.length > 0) {
+    altNode.fillsData = fillsData;
+  }
+
+  // WP32: Keep imageData for backward compatibility (use LAST image fill - topmost)
+  if (lastImageFill) {
+    altNode.imageData = {
+      imageRef: lastImageFill.imageRef,
+      nodeId: figmaNode.id,
+      scaleMode: lastImageFill.scaleMode || 'FILL'
+    };
+  }
+
   // WP25 FIX: TEXT nodes should use 'color' property, not 'background'
+  // For simple single-fill cases, also set CSS styles for fallback
   const isTextNode = figmaNode.type === 'TEXT';
   const colorProp = isTextNode ? 'color' : 'background';
+  const firstFill = visibleFills[0];
 
-  // WP28 T209: Now uses config constants for fill types
-  if (fill.type === figmaConfig.constants.fillTypes.solid && fill.color) {
-    const { r, g, b } = fill.color;
-    const a = fill.opacity ?? 1;
+  if (firstFill.type === figmaConfig.constants.fillTypes.solid && firstFill.color) {
+    const { r, g, b } = firstFill.color;
+    const a = firstFill.opacity ?? 1;
     const rgbaValue = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 
     // WP25 T181: Check for Figma variable bindings
     const boundVars = (figmaNode as any).boundVariables;
     if (boundVars && boundVars.fills && boundVars.fills[0]?.id) {
-      // Variable bound to this fill - generate CSS var() syntax
       const varId = boundVars.fills[0].id;
-      // Extract variable name from ID (e.g., "VariableID:...112:35" → "var-112-35")
       const varName = varId.replace(/^VariableID:.*\//, 'var-').replace(/:/g, '-');
       altNode.styles[colorProp] = `var(--${varName}, ${rgbaValue})`;
     } else {
       altNode.styles[colorProp] = rgbaValue;
     }
-  } else if (fill.type === figmaConfig.constants.fillTypes.gradientLinear && fill.gradientStops) {
-    // Simplified linear gradient
-    const stops = fill.gradientStops
+  } else if (firstFill.type === figmaConfig.constants.fillTypes.gradientLinear && firstFill.gradientStops) {
+    const stops = firstFill.gradientStops
       .map((stop: any) => {
         const { r, g, b } = stop.color;
         const a = stop.color.a ?? 1;
@@ -496,8 +693,9 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       })
       .join(', ');
     altNode.styles[colorProp] = `linear-gradient(180deg, ${stops})`;
-  } else if (fill.type === figmaConfig.constants.fillTypes.image && fill.imageRef) {
-    altNode.styles.backgroundImage = `url(${fill.imageRef})`;
+  } else if (firstFill.type === figmaConfig.constants.fillTypes.image && firstFill.imageRef) {
+    // Keep background-image style for CSS fallback
+    altNode.styles.backgroundImage = `url(${firstFill.imageRef})`;
     altNode.styles.backgroundSize = 'cover';
   }
 }
@@ -528,16 +726,9 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
         color = `var(--${varName}, ${color})`;
       }
 
-      // WP25 FIX: Use outline for INSIDE strokes (Figma best practice)
-      // INSIDE strokes render inside the bounds, similar to CSS outline with negative offset
-      // WP28 T209: Now uses config constant for stroke align comparison
-      if (node.strokeAlign === figmaConfig.constants.strokeAlign.inside) {
-        altNode.styles.outline = `${weight}px solid ${color}`;
-        altNode.styles.outlineOffset = `-${weight}px`;
-      } else {
-        // CENTER or OUTSIDE strokes use border
-        altNode.styles.border = `${weight}px solid ${color}`;
-      }
+      // WP31 FIX: Always use border to match MCP output (not outline)
+      // MCP generates border classes for all strokes regardless of strokeAlign
+      altNode.styles.border = `${weight}px solid ${color}`;
     }
   }
 
@@ -730,6 +921,22 @@ export function transformToAltNode(
   normalizeText(figmaNode, altNode);
   normalizeAdditionalProperties(figmaNode, altNode); // WP25: Extract ALL Figma properties
 
+  // T228: Extract VECTOR SVG data
+  if (figmaNode.type === 'VECTOR') {
+    const vectorNode = figmaNode as any;
+
+    if (vectorNode.fillGeometry || vectorNode.strokeGeometry) {
+      altNode.svgData = {
+        fillGeometry: vectorNode.fillGeometry,
+        strokeGeometry: vectorNode.strokeGeometry,
+        fills: vectorNode.fills,
+        strokes: vectorNode.strokes,
+        strokeWeight: vectorNode.strokeWeight,
+        bounds: vectorNode.absoluteBoundingBox || { x: 0, y: 0, width: 100, height: 100 }
+      };
+    }
+  }
+
   // WP28 T210: Extract universal fallbacks for ALL properties in config
   // This ensures every property has a CSS fallback, even if no rule matches
   // Rules will override these fallbacks with semantic classes (e.g., text-sm instead of text-[14px])
@@ -747,5 +954,44 @@ export function transformToAltNode(
       .filter((node): node is SimpleAltNode => node !== null);
   }
 
+  // WP32: Image containers with children need position:relative for proper z-stacking
+  // When a node has imageData AND children, the background image is rendered absolute
+  // The container needs position:relative as positioning context
+  // Children need position:relative to stack above the absolute background
+  if (altNode.imageData && altNode.children && altNode.children.length > 0) {
+    altNode.styles.position = 'relative';
+    for (const child of altNode.children) {
+      child.styles.position = 'relative';
+    }
+  }
+
   return altNode;
+}
+
+/**
+ * WP31 T224: Helper function to resolve Figma variable names from variable IDs
+ * 
+ * @param variableId - Figma variable ID (e.g., "VariableID:123:456")
+ * @param figmaNode - Original Figma node with document context
+ * @returns Variable name (e.g., "colors/main-01") or fallback based on ID
+ */
+function resolveVariableName(variableId: string, figmaNode: FigmaNode): string | null {
+  // Try to access figmaNode.document.variables if available
+  const doc = (figmaNode as any).document;
+  if (doc?.variables) {
+    const variable = doc.variables[variableId];
+    if (variable?.name) {
+      return variable.name; // e.g., "colors/main-01"
+    }
+  }
+
+  // Fallback: Extract a meaningful name from the variable ID
+  // "VariableID:710641395bac9f5822c4c329c8e7d6bb6fc986f8/125:11" -> "var-125-11"
+  const idMatch = variableId.match(/\/(\d+):(\d+)$/);
+  if (idMatch) {
+    return `var-${idMatch[1]}-${idMatch[2]}`;
+  }
+
+  // Last fallback: use a hash of the ID
+  return `var-${Math.abs(variableId.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)).toString(16)}`;
 }

@@ -10,9 +10,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getNode, addNode } from '@/lib/utils/library-index';
-import { loadNodeData, loadNodeMetadata, saveNodeData } from '@/lib/utils/file-storage';
-import { fetchNode, fetchScreenshot, fetchWithRetry } from '@/lib/figma-client';
+import { loadNodeData, loadNodeMetadata, saveNodeData, saveSvgAssets, saveImageAssets } from '@/lib/utils/file-storage';
+import { fetchNode, fetchScreenshot, fetchWithRetry, fetchSVGBatch } from '@/lib/figma-client';
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
+import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadFigmaImages } from '@/lib/utils/image-fetcher';
 
 interface RouteParams {
   params: {
@@ -115,6 +116,29 @@ export async function POST(
     // Re-fetch screenshot
     const screenshot = await fetchWithRetry(() => fetchScreenshot(fileKey, figmaNodeId));
 
+    // WP32: Detect and download SVG containers at refresh time
+    resetNameCounters();
+    const altNode = transformToAltNode(nodeData);
+    const svgContainers = altNode ? extractSvgContainers(altNode) : [];
+
+    let svgAssets: Record<string, string> = {};
+    if (svgContainers.length > 0) {
+      console.log(`📦 Found ${svgContainers.length} SVG containers to download`);
+      const containerIds = svgContainers.map(c => c.nodeId);
+
+      // Fetch all SVG containers from Figma API
+      const svgContent = await fetchWithRetry(() => fetchSVGBatch(fileKey, containerIds));
+
+      // Map nodeId to unique filename for storage
+      for (const container of svgContainers) {
+        if (svgContent[container.nodeId]) {
+          const filename = generateSvgFilename(container.name, container.nodeId);
+          const assetName = filename.replace('.svg', '');
+          svgAssets[assetName] = svgContent[container.nodeId];
+        }
+      }
+    }
+
     // Save updated data
     const updatedMetadata = await saveNodeData(
       figmaNodeId,
@@ -123,6 +147,29 @@ export async function POST(
       screenshot,
       currentMetadata.metadata.fileName
     );
+
+    // WP32: Save SVG assets if any
+    if (Object.keys(svgAssets).length > 0) {
+      await saveSvgAssets(figmaNodeId, svgAssets);
+      console.log(`✅ Saved ${Object.keys(svgAssets).length} SVG assets to disk`);
+    }
+
+    // WP32: Detect and download PNG/JPG images at refresh time
+    const imageNodes = altNode ? extractImageNodes(altNode) : [];
+    if (imageNodes.length > 0) {
+      console.log(`🖼️ Found ${imageNodes.length} image fills to download`);
+      const imageRefs = imageNodes.map(n => n.imageRef);
+      const accessToken = process.env.FIGMA_ACCESS_TOKEN || '';
+
+      const imageAssets = await fetchWithRetry(() =>
+        downloadFigmaImages(fileKey, imageRefs, figmaNodeId, accessToken)
+      );
+
+      if (Object.keys(imageAssets).length > 0) {
+        await saveImageAssets(figmaNodeId, imageAssets);
+        console.log(`✅ Saved ${Object.keys(imageAssets).length} image assets to disk`);
+      }
+    }
 
     // Preserve existing metadata (tags, category, usage stats)
     const mergedMetadata = {

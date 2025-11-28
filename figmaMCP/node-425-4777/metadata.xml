@@ -1,0 +1,37 @@
+<frame id="425:4777" name="welcome" x="46853" y="-1534" width="390" height="715">
+  <frame id="425:4778" name="container" x="2.5" y="3" width="385" height="405">
+    <frame id="425:4779" name="Frame 1618872337" x="0" y="0" width="385" height="405">
+      <rounded-rectangle id="425:4780" name="Group 1321314853 1" x="20.280303955078125" y="23.098968505859375" width="190.73236083984375" height="370.56573486328125" />
+      <vector id="425:4781" name="ccc 2" x="60.937644958496094" y="190.388671875" width="300.15032958984375" height="197.1630859375" />
+      <frame id="425:4782" name="g5457" x="153.50025939941406" y="47.080753326416016" width="77.99947357177734" height="44.99971008300781" />
+    </frame>
+    <frame id="425:4799" name="Frame 1321314731" x="18" y="19" width="339" height="5">
+      <frame id="425:4800" name="Frame 1618872540" x="0" y="0" width="339" height="5">
+        <rounded-rectangle id="425:4801" name="Rectangle 40856" x="0" y="0" width="74.25" height="5" />
+        <rounded-rectangle id="425:4802" name="Rectangle 40860" x="88.25" y="0" width="74.25" height="5" />
+        <rounded-rectangle id="425:4803" name="Rectangle 40858" x="176.5" y="0" width="74.25" height="5" />
+        <rounded-rectangle id="425:4804" name="Rectangle 40857" x="264.75" y="0" width="74.25" height="5" />
+      </frame>
+    </frame>
+    <frame id="425:4805" name="Appbar" x="18" y="39" width="42.560001373291016" height="42.560001373291016">
+      <instance id="425:4806" name="Button" x="1.2800006866455078" y="1.2800006866455078" width="40" height="40" />
+    </frame>
+  </frame>
+  <frame id="425:4807" name="block texxt" x="28.5" y="432" width="333" height="145">
+    <frame id="425:4808" name="Frame 1618872243" x="0" y="0" width="333" height="145">
+      <text id="425:4809" name="Unboxing and preparation" x="16" y="0" width="301" height="65" />
+      <text id="425:4810" name="textIci" x="0" y="86" width="333" height="60" />
+    </frame>
+  </frame>
+  <frame id="425:4811" name="boutons" x="36" y="601" width="318" height="63">
+    <frame id="425:4812" name="Group 1321314858" x="0" y="0" width="63" height="63">
+      <frame id="425:4813" name="Button" x="0" y="0" width="63" height="63" />
+      <frame id="425:4814" name="Layer_1" x="20" y="19" width="24" height="24" />
+    </frame>
+    <frame id="425:4820" name="Group 1321314779" x="73" y="0" width="245" height="61">
+      <frame id="425:4821" name="Button" x="73" y="0" width="245" height="61">
+        <text id="425:4822" name="I have everything" x="58" y="8" width="129" height="45" />
+      </frame>
+    </frame>
+  </frame>
+</frame>

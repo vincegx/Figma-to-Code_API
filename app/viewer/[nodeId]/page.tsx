@@ -56,6 +56,8 @@ const VIEWPORT_PRESETS = {
 } as const;
 
 export default function ViewerPage() {
+  console.log('🟠 VIEWER PAGE RENDER', Date.now());
+
   const params = useParams();
   const router = useRouter();
   const nodeId = params.nodeId as string;
@@ -159,6 +161,7 @@ export default function ViewerPage() {
   }, [loadLibrary, selectNode, nodeId]);
 
   // Fetch node data with AltNode transformation on-the-fly
+  // WP32 PERF: Set altNode AND selectedTreeNodeId together to avoid cascade
   useEffect(() => {
     async function fetchNodeWithAltNode() {
       if (!nodeId) return;
@@ -168,7 +171,9 @@ export default function ViewerPage() {
         const response = await fetch(`/api/figma/node/${nodeId}`);
         if (response.ok) {
           const data = await response.json();
-          setAltNode(data.altNode || null);
+          const node = data.altNode || null;
+          setAltNode(node);
+          if (node) setSelectedTreeNodeId(node.id);
         }
       } catch (error) {
         console.error('Failed to fetch node data:', error);
@@ -180,50 +185,10 @@ export default function ViewerPage() {
     fetchNodeWithAltNode();
   }, [nodeId]);
 
-  // Auto-select root node on first load if nothing is selected
-  useEffect(() => {
-    if (altNode && !selectedTreeNodeId) {
-      setSelectedTreeNodeId(altNode.id);
-    }
-  }, [altNode, selectedTreeNodeId]);
-
-  // Generate code whenever altNode, selectedNode, framework, or rules change
-  useEffect(() => {
-    async function generateCode() {
-      const targetNode = selectedNode || altNode;
-      if (!targetNode) {
-        setGeneratedCode('');
-        return;
-      }
-
-      try {
-        // Import code generators dynamically
-        const { generateReactTailwind } = await import('@/lib/code-generators/react-tailwind');
-        const { generateHTMLCSS } = await import('@/lib/code-generators/html-css');
-        const { generateReactJSX } = await import('@/lib/code-generators/react');
-
-        let codeOutput;
-        switch (previewFramework) {
-          case 'react-tailwind':
-            codeOutput = generateReactTailwind(targetNode, resolvedProperties);
-            break;
-          case 'html-css':
-            codeOutput = generateHTMLCSS(targetNode, resolvedProperties);
-            break;
-          case 'react-inline':
-            codeOutput = generateReactJSX(targetNode, resolvedProperties);
-            break;
-          default:
-            codeOutput = generateReactTailwind(targetNode, resolvedProperties);
-        }
-        setGeneratedCode(codeOutput.code);
-      } catch (error) {
-        console.error('Failed to generate code:', error);
-      }
-    }
-
-    generateCode();
-  }, [altNode, selectedNode, previewFramework, multiFrameworkRules]);
+  // WP32 PERF FIX: Code generation removed from viewer page
+  // Code is now generated ONCE in GeneratedCodeSection and passed via onCodeChange callback
+  // This eliminates duplicate generation (was 2x: viewer + code section = 4-6 generations total)
+  // generatedCode is now set by InformationPanel -> GeneratedCodeSection -> onCodeChange
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
@@ -591,6 +556,8 @@ export default function ViewerPage() {
                     onFrameworkChange={setPreviewFramework}
                     resolvedProperties={resolvedProperties}
                     allRules={multiFrameworkRules}
+                    nodeId={nodeId}
+                    onCodeChange={setGeneratedCode}
                   />
                 </TabsContent>
 

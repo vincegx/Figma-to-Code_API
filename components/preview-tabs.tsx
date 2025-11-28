@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { generateReactJSX } from '@/lib/code-generators/react';
@@ -16,6 +16,7 @@ interface PreviewTabsProps {
   resolvedProperties: Record<string, string>;
   onCodeChange?: (code: string) => void;
   scopedNode?: SimpleAltNode | null;
+  nodeId?: string;
 }
 
 export default function PreviewTabs({
@@ -25,33 +26,49 @@ export default function PreviewTabs({
   resolvedProperties,
   onCodeChange,
   scopedNode,
+  nodeId,
 }: PreviewTabsProps) {
   // T154: Use scoped node if provided, otherwise use full altNode
   const targetNode = scopedNode || altNode;
 
-  // Generate code for selected framework
-  const generatedCode = useMemo(() => {
-    if (!targetNode) return '';
+  // WP32: State for generated code (async generators)
+  const [generatedCode, setGeneratedCode] = useState<string>('');
 
-    const startTime = performance.now();
-    let codeOutput = '';
+  // WP32: Generate code using async generators
+  useEffect(() => {
+    if (!targetNode) {
+      setGeneratedCode('');
+      return;
+    }
 
-    try {
-      let result;
-      switch (selectedFramework) {
-        case 'react-tailwind':
-          result = generateReactTailwind(targetNode, resolvedProperties);
-          codeOutput = result.code;
-          break;
-        case 'html-css':
-          result = generateHTMLCSS(targetNode, resolvedProperties);
-          codeOutput = result.code;
-          if (result.css) {
-            codeOutput += '\n\n/* CSS */\n' + result.css;
-          }
-          break;
+    // Capture in closure for TypeScript
+    const currentNode = targetNode;
+
+    async function generateAsync() {
+      const startTime = performance.now();
+      let codeOutput = '';
+
+      try {
+        // WP32 FIX: NEVER pass credentials in viewer mode
+        // Credentials ONLY for export, NOT for viewer
+        const figmaFileKey = nodeId ? undefined : (process.env.NEXT_PUBLIC_FIGMA_FILE_KEY || '');
+        const figmaAccessToken = nodeId ? undefined : (process.env.NEXT_PUBLIC_FIGMA_ACCESS_TOKEN || '');
+
+        let result;
+        switch (selectedFramework) {
+          case 'react-tailwind':
+            result = await generateReactTailwind(currentNode, resolvedProperties, [], 'react-tailwind', figmaFileKey, figmaAccessToken, nodeId);
+            codeOutput = result.code;
+            break;
+          case 'html-css':
+            result = await generateHTMLCSS(currentNode, resolvedProperties, [], 'html-css', figmaFileKey, figmaAccessToken, nodeId);
+            codeOutput = result.code;
+            if (result.css) {
+              codeOutput += '\n\n/* CSS */\n' + result.css;
+            }
+            break;
         case 'react-inline':
-          result = generateReactJSX(targetNode, resolvedProperties);
+          result = generateReactJSX(currentNode, resolvedProperties);
           codeOutput = result.code;
           break;
         case 'swift-ui':
@@ -61,18 +78,21 @@ export default function PreviewTabs({
           codeOutput = '// Android XML generator coming soon';
           break;
       }
-    } catch (error) {
-      console.error('Code generation error:', error);
-      codeOutput = `// Error generating code: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`;
+      } catch (error) {
+        console.error('Code generation error:', error);
+        codeOutput = `// Error generating code: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`;
+      }
+
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      console.log(`Code generation (${selectedFramework}): ${duration.toFixed(2)}ms`);
+
+      setGeneratedCode(codeOutput);
     }
 
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-    console.log(`Code generation (${selectedFramework}): ${duration.toFixed(2)}ms`);
-
-    return codeOutput;
+    generateAsync();
   }, [targetNode, selectedFramework, resolvedProperties]);
 
   // Notify parent of code change via useEffect (not during render)

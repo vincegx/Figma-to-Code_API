@@ -1,8 +1,95 @@
-import type { SimpleAltNode } from '../altnode-transform';
-import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes } from './helpers';
-import { GeneratedCodeOutput } from './react';
+import type { SimpleAltNode, FillData } from '../altnode-transform';
+import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind } from './helpers';
+import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
+import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
+import { fetchFigmaImages, extractImageNodes, extractVectorNodes, extractSvgContainers, fetchNodesAsSVG, getNodesInsideSvgContainers, SvgContainerNode, generateSvgFilename } from '../utils/image-fetcher';
+
+/**
+ * WP32: SVG export info for generating imports and assets
+ */
+interface SvgExportInfo {
+  nodeId: string;
+  varName: string;      // vector, vector2, etc.
+  filename: string;     // vector.svg
+  path: string;         // ./img/vector.svg
+  svgContent: string;   // SVG string content
+  isComplex: boolean;
+}
+
+/**
+ * WP32: Generate unique variable name from node name
+ * Converts "My Icon" → "myIcon", handles duplicates with suffix
+ */
+function generateSvgVarName(nodeName: string, usedNames: Set<string>): string {
+  // Convert to camelCase: "My Icon" → "myIcon", "Vector" → "vector"
+  let baseName = nodeName
+    .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special chars
+    .trim()
+    .split(/\s+/)
+    .map((word, i) => i === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('');
+
+  // Default to "vector" if empty
+  if (!baseName) baseName = 'vector';
+
+  // Find unique name with suffix if needed
+  let varName = baseName;
+  let counter = 2;
+  while (usedNames.has(varName)) {
+    varName = `${baseName}${counter}`;
+    counter++;
+  }
+
+  usedNames.add(varName);
+  return varName;
+}
+
+/**
+ * WP32: Convert FillData gradient to CSS gradient string
+ * Applies fill opacity to gradient stop colors (like MCP does)
+ */
+function fillDataToGradientCSS(fill: FillData): string {
+  if (!fill.gradientStops) return '';
+
+  // WP32: Apply fill opacity to each stop's alpha
+  const fillOpacity = fill.opacity ?? 1;
+
+  const stops = fill.gradientStops
+    .map(stop => {
+      const { r, g, b, a = 1 } = stop.color;
+      // Multiply color alpha by fill opacity
+      const finalAlpha = a * fillOpacity;
+      return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${finalAlpha}) ${Math.round(stop.position * 100)}%`;
+    })
+    .join(', ');
+
+  // Calculate angle from gradient handles if available
+  let angle = 180; // Default: top to bottom
+  if (fill.gradientHandlePositions && fill.gradientHandlePositions.length >= 2) {
+    const [start, end] = fill.gradientHandlePositions;
+    angle = Math.round(Math.atan2(end.y - start.y, end.x - start.x) * 180 / Math.PI + 90);
+  }
+
+  if (fill.type === 'GRADIENT_RADIAL') {
+    return `radial-gradient(circle, ${stops})`;
+  }
+  return `linear-gradient(${angle}deg, ${stops})`;
+}
+
+/**
+ * WP32: Convert FillData solid color to CSS rgba string
+ * Applies fill opacity to color alpha (like MCP does)
+ */
+function fillDataToColorCSS(fill: FillData): string {
+  if (!fill.color) return '';
+  const { r, g, b, a = 1 } = fill.color;
+  // WP32: Multiply color alpha by fill opacity
+  const fillOpacity = fill.opacity ?? 1;
+  const finalAlpha = a * fillOpacity;
+  return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${finalAlpha})`;
+}
 
 /**
  * Filter out properties with unresolved variables or empty values
@@ -498,20 +585,161 @@ function consolidateSemanticSpacing(classes: string[]): string[] {
  * @param framework - Target framework for code generation
  * @returns GeneratedCodeOutput object with Tailwind JSX string
  */
-export function generateReactTailwind(
+export async function generateReactTailwind(
   altNode: SimpleAltNode,
   resolvedProperties: Record<string, string>,
   allRules: MultiFrameworkRule[] = [],
-  framework: FrameworkType = 'react-tailwind'
-): GeneratedCodeOutput {
+  framework: FrameworkType = 'react-tailwind',
+  figmaFileKey?: string,
+  figmaAccessToken?: string,
+  nodeId?: string
+): Promise<GeneratedCodeOutput> {
   const componentName = toPascalCase(altNode.name);
 
   // FIX: Clean properties to remove $value placeholders
   const cleanedProps = cleanResolvedProperties(resolvedProperties);
 
-  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework);
+  // WP32: Build image URLs map
+  // - For local viewer: use /api/images/{nodeId}/{filename}
+  // - For export: use Figma API URLs
+  let imageUrls: Record<string, string> = {};
 
-  const code = `export function ${componentName}() {
+  if (nodeId) {
+    // Local viewer mode: use local API route
+    // WP32: Extract real nodeId from lib-{nodeId} format
+    const realNodeId = nodeId.startsWith('lib-') ? nodeId.replace('lib-', '') : nodeId;
+
+    const imageNodes = extractImageNodes(altNode);
+    for (const imgNode of imageNodes) {
+      const filename = `${realNodeId}_${imgNode.imageRef.substring(0, 8)}.png`;
+      imageUrls[imgNode.imageRef] = `/api/images/${nodeId}/${filename}`;
+    }
+    console.log(`✅ Using ${Object.keys(imageUrls).length} local image paths`);
+  } else if (figmaFileKey && figmaAccessToken) {
+    // Export mode: fetch from Figma API
+    const imageNodes = extractImageNodes(altNode);
+    const imageRefs = imageNodes.map(n => n.imageRef);
+    if (imageRefs.length > 0) {
+      imageUrls = await fetchFigmaImages(figmaFileKey, imageRefs, figmaAccessToken);
+      console.log(`✅ Fetched ${Object.keys(imageUrls).length} image URLs from Figma API`);
+    }
+  }
+
+  // WP32: Build SVG exports with variable names for clean imports
+  // Viewer mode (nodeId present) → use pre-downloaded SVGs from local API
+  // Export mode (no nodeId) → use imports + separate files
+  const isViewerMode = !!nodeId;
+  const svgExports: SvgExportInfo[] = [];
+  const svgVarNames: Record<string, string> = {}; // nodeId → varName (for export mode)
+  const svgDataUrls: Record<string, string> = {}; // nodeId → data URL or local API URL (for viewer mode)
+  const usedVarNames = new Set<string>();
+
+  // WP32: SVG containers - used in BOTH modes now
+  // In viewer mode: use pre-downloaded SVGs from /api/images/{nodeId}/{filename}.svg
+  // In export mode: download whole container as single SVG
+  const svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map();
+  let nodesInsideContainers: Set<string> = new Set();
+
+  // WP32: Extract SVG containers in BOTH modes
+  const svgContainers = extractSvgContainers(altNode);
+  nodesInsideContainers = getNodesInsideSvgContainers(altNode, svgContainers);
+
+  // Build container map with metadata (isInstance + bounds)
+  for (const container of svgContainers) {
+    svgContainerMap.set(container.nodeId, {
+      isInstance: container.isInstance,
+      bounds: container.containerBounds,
+    });
+  }
+
+  if (isViewerMode && svgContainers.length > 0) {
+    // WP32: Viewer mode - use pre-downloaded SVGs from local API (NO API CALLS!)
+    for (const container of svgContainers) {
+      // Generate unique filename same way as import route (name + nodeId)
+      const filename = generateSvgFilename(container.name, container.nodeId);
+      // Use local API route to serve pre-downloaded SVG
+      svgDataUrls[container.nodeId] = `/api/images/${nodeId}/${filename}`;
+    }
+    console.log(`✅ Using ${Object.keys(svgDataUrls).length} local SVG paths for viewer`);
+  } else if (!isViewerMode && svgContainers.length > 0) {
+    // WP32: Export mode - fetch from Figma API (only at export time)
+    let containerSvgContent: Record<string, string> = {};
+    if (figmaFileKey && figmaAccessToken) {
+      const containerIds = svgContainers.map(c => c.nodeId);
+      containerSvgContent = await fetchNodesAsSVG(figmaFileKey, containerIds, figmaAccessToken);
+      console.log(`✅ Fetched ${Object.keys(containerSvgContent).length} SVG containers from Figma API`);
+    }
+
+    // Process SVG containers for export
+    for (const container of svgContainers) {
+      const varName = generateSvgVarName(container.name || 'svg', usedVarNames);
+      const filename = `${varName}.svg`;
+      const path = `./img/${filename}`;
+      const svgContent = containerSvgContent[container.nodeId] || `<svg xmlns="http://www.w3.org/2000/svg"><text y="20">Missing SVG</text></svg>`;
+
+      svgExports.push({
+        nodeId: container.nodeId,
+        varName,
+        filename,
+        path,
+        svgContent,
+        isComplex: true,
+      });
+      svgVarNames[container.nodeId] = varName;
+    }
+  }
+
+  // WP32: Extract VECTOR nodes
+  // Skip VECTORs inside containers in BOTH modes (containers render as single img)
+  const vectorNodes = extractVectorNodes(altNode, nodesInsideContainers);
+
+  for (const vecNode of vectorNodes) {
+    const varName = generateSvgVarName(vecNode.name || 'vector', usedVarNames);
+    const filename = `${varName}.svg`;
+    const path = `./img/${filename}`;
+
+    // WP32: Simple VECTORs - reconstruct from geometry
+    const svgContent = convertVectorToSVG(vecNode.svgData);
+
+    if (isViewerMode) {
+      // WP32: Viewer mode - use inline data URLs (works in iframe)
+      svgDataUrls[vecNode.nodeId] = vectorToDataURL(vecNode.svgData);
+    } else {
+      // WP32: Export mode - use imports + files
+      svgExports.push({
+        nodeId: vecNode.nodeId,
+        varName,
+        filename,
+        path,
+        svgContent,
+        isComplex: vecNode.isComplex,
+      });
+      svgVarNames[vecNode.nodeId] = varName;
+    }
+  }
+
+  // Generate SVG imports (export mode only)
+  const svgImports = !isViewerMode && svgExports.length > 0
+    ? svgExports.map(svg => `import ${svg.varName} from "${svg.path}";`).join('\n')
+    : '';
+
+  // Generate assets for export (export mode only)
+  const assets: GeneratedAsset[] = !isViewerMode
+    ? svgExports.map(svg => ({
+        filename: svg.filename,
+        path: svg.path,
+        content: svg.svgContent,
+        type: 'svg' as const,
+      }))
+    : [];
+
+  // WP32: Pass appropriate map based on mode
+  const svgMap = isViewerMode ? svgDataUrls : svgVarNames;
+  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+
+  // Build code with imports (export mode only)
+  const importSection = svgImports ? `${svgImports}\n\n` : '';
+  const code = `${importSection}export function ${componentName}() {
   return (
 ${jsx}  );
 }`;
@@ -525,6 +753,7 @@ ${jsx}  );
       nodeId: altNode.id,
       generatedAt: new Date().toISOString(),
     },
+    assets: assets.length > 0 ? assets : undefined,
   };
 }
 
@@ -536,6 +765,10 @@ ${jsx}  );
  * @param depth - Indentation depth
  * @param allRules - All available rules for child evaluation
  * @param framework - Target framework for code generation
+ * @param imageUrls - Map of imageRef → URL
+ * @param svgMap - WP32: nodeId → varName (export) or data URL (viewer)
+ * @param isViewerMode - WP32: true = data URLs inline, false = import variables
+ * @param svgContainerMap - WP32: Map of nodeId → { isInstance, bounds } for SVG containers
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
@@ -543,16 +776,88 @@ function generateTailwindJSXElement(
   properties: Record<string, string>,
   depth: number,
   allRules: MultiFrameworkRule[] = [],
-  framework: FrameworkType = 'react-tailwind'
+  framework: FrameworkType = 'react-tailwind',
+  imageUrls: Record<string, string> = {},
+  svgMap: Record<string, string> = {},  // WP32: nodeId → varName (export) or data URL (viewer)
+  isViewerMode: boolean = false,  // WP32: true = data URLs inline, false = import variables
+  svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map()
 ): string {
+  // WP32: Skip hidden nodes - they should not be rendered in generated code
+  if (node.visible === false) {
+    return '';
+  }
+
   const indent = '  '.repeat(depth + 1);
+
+  // WP32: Handle SVG containers - INSTANCE vs FRAME/GROUP (aligned with html-css.ts)
+  const containerInfo = svgContainerMap.get(node.id);
+  if (containerInfo) {
+    const svgValue = svgMap[node.id];
+    const altText = node.name || 'svg';
+
+    // Build data attributes
+    const componentAttrs = extractComponentDataAttributes(node);
+    const allDataAttrs = {
+      'data-layer': node.name,
+      'data-node-id': node.id,
+      ...componentAttrs
+    };
+    const dataAttrString = Object.entries(allDataAttrs)
+      .map(([key, value]) => `${key}="${value}"`)
+      .join(' ');
+
+    if (containerInfo.isInstance) {
+      // INSTANCE: Keep container div with Tailwind classes, put img inside
+      // Convert node.styles to Tailwind classes for the container
+      const baseStyles: Record<string, string> = {};
+      for (const [key, value] of Object.entries(node.styles || {})) {
+        baseStyles[key] = typeof value === 'number' ? String(value) : value;
+      }
+
+      // WP32 FIX: If width/height are 'auto', use container bounds for fixed dimensions
+      // SVG containers need explicit dimensions for the img to render correctly
+      const { width, height } = containerInfo.bounds;
+      if (baseStyles['width'] === 'auto' && width > 0) {
+        baseStyles['width'] = `${width}px`;
+      }
+      if (baseStyles['height'] === 'auto' && height > 0) {
+        baseStyles['height'] = `${height}px`;
+      }
+
+      const containerClasses = Object.entries(baseStyles)
+        .map(([cssProperty, cssValue]) => cssPropToTailwind(cssProperty, cssValue))
+        .filter(Boolean)
+        .join(' ');
+
+      if (svgValue) {
+        const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
+        return `${indent}<div ${dataAttrString} className="${containerClasses}">\n${indent}  <img alt="${altText}" className="block max-w-none w-full h-full" src=${imgSrc} />\n${indent}</div>\n`;
+      }
+      return `${indent}<div ${dataAttrString} className="${containerClasses}" />\n`;
+    } else {
+      // FRAME/GROUP: Simple structure - just the img with container dimensions as Tailwind
+      const { width, height } = containerInfo.bounds;
+      const sizeClasses = width > 0 && height > 0
+        ? `w-[${width}px] h-[${height}px]`
+        : '';
+
+      if (svgValue) {
+        const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
+        return `${indent}<img ${dataAttrString} className="block max-w-none ${sizeClasses}" alt="${altText}" src=${imgSrc} />\n`;
+      }
+      return `${indent}<div ${dataAttrString} className="block ${sizeClasses}" />\n`;
+    }
+  }
+
   const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
 
   // T178: Add data-layer attribute
   // T180: Extract component properties as data-* attributes
+  // WP31: Add data-node-id for node-by-node comparison with MCP reference
   const componentAttrs = extractComponentDataAttributes(node);
   const allDataAttrs = {
     'data-layer': node.name, // T178: Original Figma name
+    'data-node-id': node.id, // WP31: Figma node ID for comparison
     ...componentAttrs // T180: Component properties
   };
 
@@ -568,12 +873,7 @@ function generateTailwindJSXElement(
   const hasFlex = node.styles?.display === 'flex' || node.styles?.display === 'inline-flex';
 
   for (const [key, value] of Object.entries(node.styles || {})) {
-    // WP25 FIX: Don't generate height on flex containers with children
-    // Plugin Figma only generates height on leaf elements or when explicitly needed
-    if (key === 'height' && hasFlex && hasChildren) {
-      continue; // Skip height for flex containers with children
-    }
-
+    // WP31: MCP garde le height même sur flex containers - on fait pareil
     baseStyles[key] = typeof value === 'number' ? String(value) : value;
   }
 
@@ -591,12 +891,27 @@ function generateTailwindJSXElement(
     .map(([cssProperty, cssValue]) => cssPropToTailwind(cssProperty, cssValue))
     .filter(Boolean);
 
+  // WP31: Add MCP-style structural classes
+  const structuralClasses: string[] = [];
+
+  // MCP adds these utility classes systematically
+  structuralClasses.push('box-border'); // Ensure box-sizing: border-box
+  structuralClasses.push('content-stretch'); // MCP custom utility
+
+  // Add relative for positioned elements (like MCP)
+  if (node.originalType !== 'TEXT') {
+    structuralClasses.push('relative');
+  }
+
+  // Add shrink-0 for flex items (MCP adds it almost everywhere)
+  structuralClasses.push('shrink-0');
+
   if (properties.className) {
     // WP28 T211: Rules come LAST so they override fallback base classes
     // This ensures semantic classes from rules (text-sm) beat raw fallbacks (text-[14px])
     // Architecture: fallbacks provide CSS guarantee → rules optimize to semantic classes
     const ruleClasses = properties.className.split(/\s+/).filter(Boolean);
-    const allClasses = [...baseClasses, ...ruleClasses]; // WP28: baseClasses first, rules last
+    const allClasses = [...structuralClasses, ...baseClasses, ...ruleClasses]; // WP31: structural first, then baseClasses, rules last
 
     // WP28 T211: Deduplicate classes with correct priority
     // Rules win: text-sm overrides text-[14px], flex-col overrides flex-column
@@ -604,8 +919,9 @@ function generateTailwindJSXElement(
     const uniqueClasses = deduplicateTailwindClasses(allClasses);
     tailwindClasses = uniqueClasses.join(' ');
   } else {
-    // No rules - just use base classes (fallbacks)
-    tailwindClasses = baseClasses.join(' ');
+    // No rules - just use structural + base classes (fallbacks)
+    const allClasses = [...structuralClasses, ...baseClasses];
+    tailwindClasses = allClasses.join(' ');
   }
 
   const hasClasses = tailwindClasses.length > 0;
@@ -623,22 +939,108 @@ function generateTailwindJSXElement(
     } else {
       jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}></${htmlTag}>`;
     }
-  } else if (node.originalType === 'VECTOR') {
-    // WP25 T182: VECTOR nodes should render as SVG with wrapper
-    const componentName = node.name.includes('#') ? node.name.split('#')[0] : node.name;
-    const svgDataAttr = `data-svg-wrapper data-name="${componentName}" ${dataAttrString}`;
+  } else if (node.originalType === 'VECTOR' && node.svgData) {
+    // WP32: SVG rendering - viewer mode uses data URLs, export mode uses import variables
+    const svgValue = svgMap[node.id];
+    const altText = node.name || 'vector';
+    // Extract width/height from node.styles for proper sizing (JSX style object)
+    const width = node.styles?.width || '';
+    const height = node.styles?.height || '';
+    const sizeStyle = (width && height) ? ` style={{ width: '${width}', height: '${height}' }}` : '';
 
-    jsxString += `${indent}<div ${svgDataAttr}${hasClasses ? ` className="${tailwindClasses} relative"` : ' className="relative"'}>\n`;
-    jsxString += `${indent}  {/* TODO: Insert SVG content for ${node.name} here */}\n`;
-    jsxString += `${indent}  {/* Fetch SVG via Figma API: GET /v1/images/{fileKey}?ids=${(node.originalNode as any)?.id || ''}&format=svg */}\n`;
-    jsxString += `${indent}</div>`;
+    if (svgValue) {
+      if (isViewerMode) {
+        // WP32: Viewer mode - inline data URL with dimensions
+        jsxString += `${indent}<img ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}${sizeStyle} alt="${altText}" src="${svgValue}" />`;
+      } else {
+        // WP32: Export mode - use variable reference for clean imports
+        jsxString += `${indent}<img ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}${sizeStyle} alt="${altText}" src={${svgValue}} />`;
+      }
+    } else {
+      // Fallback: inline data URL
+      const svgDataUrl = vectorToDataURL(node.svgData);
+      jsxString += `${indent}<img ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}${sizeStyle} alt="${altText}" src="${svgDataUrl}" />`;
+    }
+  } else if (node.fillsData && node.fillsData.length > 0) {
+    // WP32: Multi-fill rendering - render ALL fills as stacked layers like MCP
+    const hasChildren = 'children' in node && node.children.length > 0;
+    const hasMultipleFills = node.fillsData.length > 1;
+    const hasImageFill = node.fillsData.some((f: FillData) => f.type === 'IMAGE');
+
+    // If multiple fills OR has image fill with children, use layered rendering
+    if (hasMultipleFills || (hasImageFill && hasChildren)) {
+      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>\n`;
+
+      // Render all fills as stacked layers (decorative, hidden from screen readers)
+      jsxString += `${indent}  <div aria-hidden="true" className="absolute inset-0 pointer-events-none">\n`;
+
+      for (const fill of node.fillsData) {
+        if (fill.type === 'IMAGE' && fill.imageRef) {
+          const imageUrl = imageUrls[fill.imageRef] || `https://placehold.co/300x200`;
+          // WP32: Use scaleMode for object-fit class
+          const objectFitClass = scaleModeToTailwind(fill.scaleMode);
+          jsxString += `${indent}    <img alt="" className="absolute inset-0 w-full h-full ${objectFitClass}" src="${imageUrl}" />\n`;
+        } else if (fill.type === 'SOLID') {
+          const colorCSS = fillDataToColorCSS(fill);
+          jsxString += `${indent}    <div className="absolute inset-0" style={{ backgroundColor: "${colorCSS}" }} />\n`;
+        } else if (fill.type.startsWith('GRADIENT')) {
+          const gradientCSS = fillDataToGradientCSS(fill);
+          jsxString += `${indent}    <div className="absolute inset-0" style={{ backgroundImage: "${gradientCSS}" }} />\n`;
+        }
+      }
+
+      jsxString += `${indent}  </div>\n`;
+
+      // Render children (position:relative comes from altnode-transform)
+      if (hasChildren) {
+        for (const child of (node as any).children) {
+          const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
+          const childProps = cleanResolvedProperties(childResult.properties);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+        }
+      }
+
+      jsxString += `${indent}</${htmlTag}>`;
+    } else if (hasImageFill && !hasChildren) {
+      // Single image fill without children - simple img tag
+      // WP32: Add object-fit based on scaleMode (FILL → object-cover, FIT → object-contain)
+      const imageFill = node.fillsData.find((f: FillData) => f.type === 'IMAGE');
+      const imageUrl = imageUrls[imageFill?.imageRef || ''] || 'https://placehold.co/300x200';
+      const altText = node.name || 'image';
+      const objectFitClass = scaleModeToTailwind(imageFill?.scaleMode);
+      const imgClasses = hasClasses ? `${tailwindClasses} ${objectFitClass}` : objectFitClass;
+      jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
+    } else {
+      // Single non-image fill (solid/gradient) - render as div with background
+      const fill = node.fillsData[0];
+      let bgStyle = '';
+      if (fill.type === 'SOLID') {
+        bgStyle = `backgroundColor: "${fillDataToColorCSS(fill)}"`;
+      } else if (fill.type.startsWith('GRADIENT')) {
+        bgStyle = `backgroundImage: "${fillDataToGradientCSS(fill)}"`;
+      }
+
+      if (hasChildren) {
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${bgStyle} }}>\n`;
+        for (const child of (node as any).children) {
+          const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
+          const childProps = cleanResolvedProperties(childResult.properties);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+        }
+        jsxString += `${indent}</${htmlTag}>`;
+      } else {
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${bgStyle} }} />`;
+      }
+    }
   } else if (shouldRenderAsImgTag(node)) {
-    // WP25 T183: Nodes with image fills that should be <img> tags
-    const imageUrl = extractImageUrl(node) || 'https://placehold.co/300x200';
-
-    jsxString += `${indent}<img ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} src="${imageUrl}" />`;
+    // WP32: Fallback for backward compatibility - single image without fillsData
+    const imageUrl = imageUrls[node.imageData?.imageRef || ''] || extractImageUrl(node) || 'https://placehold.co/300x200';
+    const altText = node.name || 'image';
+    const objectFitClass = scaleModeToTailwind(node.imageData?.scaleMode);
+    const imgClasses = hasClasses ? `${tailwindClasses} ${objectFitClass}` : objectFitClass;
+    jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
   } else {
-    // Non-TEXT, Non-VECTOR nodes: check for children
+    // Non-TEXT, Non-VECTOR, Non-IMAGE nodes: check for children
     const hasChildren = 'children' in node && node.children.length > 0;
 
     if (hasChildren) {
@@ -650,7 +1052,7 @@ function generateTailwindJSXElement(
         const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
         const childProps = cleanResolvedProperties(childResult.properties);
 
-        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework);
+        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
       }
 
       jsxString += `${indent}</${htmlTag}>`;
@@ -684,27 +1086,24 @@ function mapNodeTypeToHTMLTag(nodeType: string): string {
 /**
  * WP25 T183: Determine if a node should render as <img> tag vs background-image
  *
+ * WP32 FIX: Use imageData as primary criteria (set by altnode-transform)
  * Use <img> if:
- * - Node name contains "image", "img", "photo", "picture" (case-insensitive)
- * - Node has no children (leaf node)
- * - Node has an image fill
+ * - Node has imageData with imageRef (from altnode-transform)
+ * - OR node has image fill AND no children
  */
 function shouldRenderAsImgTag(node: SimpleAltNode): boolean {
-  // Check if node has image fill
+  // WP32: Primary check - imageData is set by altnode-transform for image fills
+  if (node.imageData?.imageRef) {
+    return true;
+  }
+
+  // Fallback: Check originalNode fills (for backward compatibility)
   const hasImageFill = (node.originalNode as any)?.fills?.some(
     (fill: any) => fill.type === 'IMAGE'
   );
-  if (!hasImageFill) {
-    return false;
-  }
-
-  // Check if node name suggests it's an image
-  const isImageNamed = /image|img|photo|picture/i.test(node.name);
-
-  // Check if node has no children (leaf node)
   const hasNoChildren = !node.children || node.children.length === 0;
 
-  return isImageNamed && hasNoChildren;
+  return hasImageFill && hasNoChildren;
 }
 
 /**

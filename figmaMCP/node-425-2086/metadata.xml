@@ -1,0 +1,39 @@
+<frame id="425:2086" name="Homepage - Landing" x="48056" y="413" width="1290" height="1069">
+  <frame id="425:2090" name="Section 3" x="0" y="64" width="1290" height="876.9999389648438">
+    <frame id="425:2091" name="Frame 58" x="48" y="0" width="597" height="876.9999389648438">
+      <frame id="425:2092" name="Image Hover" x="0" y="0" width="597" height="796.9999389648438" />
+      <frame id="425:2094" name="Slider" x="0" y="796.9999389648438" width="597" height="80">
+        <frame id="425:2095" name="Frame 4" x="48" y="29.5" width="240" height="21" hidden="true">
+          <text id="425:2096" name="01 - 08" x="0" y="0" width="47" height="21" />
+          <frame id="425:2097" name="Group 1" x="55" y="9.5" width="185" height="2" />
+        </frame>
+        <frame id="425:2100" name="Arrow" x="501" y="20" width="96" height="40">
+          <instance id="425:2101" name="Button" x="0" y="0" width="40" height="40" />
+          <instance id="425:2102" name="Button" x="96" y="0" width="40" height="40" />
+        </frame>
+      </frame>
+    </frame>
+    <frame id="425:2103" name="Content" x="645" y="0" width="597" height="826">
+      <frame id="425:2104" name="Headline" x="48" y="0" width="501" height="351">
+        <frame id="425:2105" name="Heading" x="0" y="0" width="557" height="143">
+          <text id="425:2106" name="The Bungalows" x="0" y="0" width="134" height="21" />
+          <text id="425:2107" name="Your Own Private Nest" x="0" y="37" width="557" height="106" />
+        </frame>
+        <text id="425:2108" name="Stay in your bungalow designed for comfort and convenience. Enjoy air conditioning, a fan, Wi-Fi, a hot shower, a private bathroom, and a choice between a king or twin beds.  Every bungalow ensures privacy while keeping you connected with nature, providing an ideal retreat after a day on the water." x="0" y="159" width="501" height="192" />
+      </frame>
+      <frame id="425:2109" name="Frame 857" x="48" y="391" width="501" height="243">
+        <frame id="425:2110" name="FAQ" x="0" y="0" width="501" height="243">
+          <vector id="425:2111" name="Vector 6" x="0" y="0" width="453" height="0" />
+          <instance id="425:2112" name="Dropdown" x="0" y="24" width="453" height="33" />
+          <vector id="425:2113" name="Vector 5" x="0" y="81" width="453" height="0" />
+          <instance id="425:2114" name="Dropdown" x="0" y="105" width="453" height="33" />
+          <vector id="425:2115" name="Vector 4" x="0" y="162" width="453" height="0" />
+          <instance id="425:2116" name="Dropdown" x="0" y="186" width="453" height="33" />
+          <vector id="425:2117" name="Vector 3" x="0" y="243" width="453" height="0" />
+        </frame>
+      </frame>
+      <instance id="425:2118" name="Button" x="48" y="674" width="166" height="56" />
+      <instance id="425:2119" name="Button" x="48" y="770" width="199" height="56" />
+    </frame>
+  </frame>
+</frame>
