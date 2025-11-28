@@ -3,8 +3,8 @@ import { toKebabCase, toPascalCase, extractTextContent, extractComponentDataAttr
 import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
-import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
-import { fetchFigmaImages, extractImageNodes, extractVectorNodes, extractSvgContainers, fetchNodesAsSVG, getNodesInsideSvgContainers, generateSvgFilename } from '../utils/image-fetcher';
+import { vectorToDataURL } from '../utils/svg-converter';
+import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename } from '../utils/image-fetcher';
 
 /**
  * WP32: SVG export info for generating assets
@@ -187,20 +187,15 @@ export async function generateHTMLCSS(
   // WP32: SVG containers - used in BOTH modes now
   // In viewer mode: use pre-downloaded SVGs from /api/images/{nodeId}/{filename}.svg
   // In export mode: download whole container as single SVG
-  // WP32: Map of SVG container nodeId → container info (isInstance, bounds)
-  const svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map();
-  let nodesInsideContainers: Set<string> = new Set();
+  // WP32: Simple SVG map - nodeId → bounds
+  const svgBoundsMap: Map<string, { width: number; height: number }> = new Map();
 
-  // WP32: Extract SVG containers in BOTH modes
+  // WP32: Extract all nodes to export as SVG (VECTORs + multi-VECTOR containers)
   const svgContainers = extractSvgContainers(altNode);
-  nodesInsideContainers = getNodesInsideSvgContainers(altNode, svgContainers);
 
-  // Build container map with metadata
+  // Build bounds map
   for (const container of svgContainers) {
-    svgContainerMap.set(container.nodeId, {
-      isInstance: container.isInstance,
-      bounds: container.containerBounds,
-    });
+    svgBoundsMap.set(container.nodeId, container.bounds);
   }
 
   if (isViewerMode && svgContainers.length > 0) {
@@ -233,26 +228,6 @@ export async function generateHTMLCSS(
     }
   }
 
-  // WP32: Extract VECTOR nodes
-  // Skip VECTORs inside containers in BOTH modes (containers render as single img)
-  const vectorNodes = extractVectorNodes(altNode, nodesInsideContainers);
-
-  for (const vecNode of vectorNodes) {
-    const varName = generateSvgVarName(vecNode.name || 'vector', usedVarNames);
-    const filename = `${varName}.svg`;
-    const path = `./img/${filename}`;
-
-    if (isViewerMode) {
-      // WP32: Viewer mode - inline data URLs
-      svgDataUrls[vecNode.nodeId] = vectorToDataURL(vecNode.svgData);
-    } else {
-      // WP32: Export mode - file paths + generate assets
-      const svgContent = convertVectorToSVG(vecNode.svgData);
-      svgExports.push({ nodeId: vecNode.nodeId, varName, filename, path, svgContent });
-      svgDataUrls[vecNode.nodeId] = path;
-    }
-  }
-
   // Generate assets for export (export mode only)
   const assets: GeneratedAsset[] = svgExports.map(svg => ({
     filename: svg.filename,
@@ -262,8 +237,7 @@ export async function generateHTMLCSS(
   }));
 
   // Generate HTML and collect CSS rules
-  // Pass svgContainerMap with isInstance/bounds info for proper SVG handling
-  const html = generateHTMLElement(altNode, cleanedProps, cssRules, 0, allRules, framework, imageUrls, svgDataUrls, svgContainerMap);
+  const html = generateHTMLElement(altNode, cleanedProps, cssRules, 0, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
 
   // Generate CSS from collected rules
   const css = cssRules
@@ -302,7 +276,7 @@ export async function generateHTMLCSS(
  * @param framework - Target framework for code generation
  * @param imageUrls - Map of imageRef → URL
  * @param svgDataUrls - Map of nodeId → data URL or file path
- * @param svgContainerMap - WP32: Map of nodeId → { isInstance, bounds } for SVG containers
+ * @param svgBoundsMap - WP32: Map of nodeId → { width, height } for SVG nodes
  * @returns HTML string
  */
 function generateHTMLElement(
@@ -314,7 +288,7 @@ function generateHTMLElement(
   framework: FrameworkType = 'html-css',
   imageUrls: Record<string, string> = {},
   svgDataUrls: Record<string, string> = {},
-  svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map()
+  svgBoundsMap: Map<string, { width: number; height: number }> = new Map()
 ): string {
   // WP32: Skip hidden nodes - they should not be rendered in generated code
   if (node.visible === false) {
@@ -323,13 +297,11 @@ function generateHTMLElement(
 
   const indent = '  '.repeat(depth);
 
-  // WP32: Handle SVG containers - INSTANCE vs FRAME/GROUP
-  const containerInfo = svgContainerMap.get(node.id);
-  if (containerInfo) {
+  // WP32: Handle SVG nodes (VECTORs or multi-VECTOR containers)
+  const svgBounds = svgBoundsMap.get(node.id);
+  if (svgBounds) {
     const svgValue = svgDataUrls[node.id];
     const altText = node.name || 'svg';
-    const htmlTag = mapNodeTypeToHTMLTag(node.originalType);
-    const className = toPascalCase(node.name);
 
     // Build data attributes
     const componentAttrs = extractComponentDataAttributes(node);
@@ -342,44 +314,16 @@ function generateHTMLElement(
       .map(([key, value]) => `${key}="${value}"`)
       .join(' ');
 
-    if (containerInfo.isInstance) {
-      // INSTANCE: Keep container with its CSS (size, overflow), put img inside
-      // Container CSS includes width, height, overflow from node.styles
-      const baseStyles: Record<string, string> = {};
-      for (const [key, value] of Object.entries(node.styles || {})) {
-        baseStyles[key] = typeof value === 'number' ? String(value) : value;
-      }
+    // Simple: img with SVG dimensions from Figma API
+    const { width, height } = svgBounds;
+    const sizeStyle = width > 0 && height > 0
+      ? `width: ${Math.round(width)}px; height: ${Math.round(height)}px;`
+      : '';
 
-      // WP32 FIX: If width/height are 'auto', use container bounds for fixed dimensions
-      // SVG containers need explicit dimensions for the img to render correctly
-      const { width, height } = containerInfo.bounds;
-      if (baseStyles['width'] === 'auto' && width > 0) {
-        baseStyles['width'] = `${width}px`;
-      }
-      if (baseStyles['height'] === 'auto' && height > 0) {
-        baseStyles['height'] = `${height}px`;
-      }
-
-      if (Object.keys(baseStyles).length > 0) {
-        cssRules.push({ selector: className, properties: baseStyles });
-      }
-
-      if (svgValue) {
-        return `${indent}<${htmlTag} ${dataAttrString} class="${className}">\n${indent}  <img alt="${altText}" style="display: block; max-width: none; width: 100%; height: 100%;" src="${svgValue}" />\n${indent}</${htmlTag}>\n`;
-      }
-      return `${indent}<${htmlTag} ${dataAttrString} class="${className}"></${htmlTag}>\n`;
-    } else {
-      // FRAME/GROUP: Simple structure - just the img with container dimensions
-      const { width, height } = containerInfo.bounds;
-      const sizeStyle = width > 0 && height > 0
-        ? `width: ${width}px; height: ${height}px;`
-        : '';
-
-      if (svgValue) {
-        return `${indent}<img ${dataAttrString} style="display: block; max-width: none; ${sizeStyle}" alt="${altText}" src="${svgValue}" />\n`;
-      }
-      return `${indent}<div ${dataAttrString} style="display: block; ${sizeStyle}"></div>\n`;
+    if (svgValue) {
+      return `${indent}<img ${dataAttrString} style="display: block; max-width: none; ${sizeStyle}" alt="${altText}" src="${svgValue}" />\n`;
     }
+    return `${indent}<div ${dataAttrString} style="display: block; ${sizeStyle}"></div>\n`;
   }
 
   const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
@@ -481,7 +425,7 @@ function generateHTMLElement(
         for (const child of (node as any).children) {
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgContainerMap);
+          htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
         }
       }
 
@@ -521,7 +465,7 @@ function generateHTMLElement(
         for (const child of (node as any).children) {
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgContainerMap);
+          htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
         }
         htmlString += `${indent}</${htmlTag}>`;
       } else {
@@ -559,7 +503,7 @@ function generateHTMLElement(
         const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
         const childProps = cleanResolvedProperties(childResult.properties);
 
-        htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgContainerMap);
+        htmlString += generateHTMLElement(child, childProps, cssRules, depth + 1, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
       }
 
       htmlString += `${indent}</${htmlTag}>`;

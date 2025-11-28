@@ -4,7 +4,7 @@ import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
 import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
-import { fetchFigmaImages, extractImageNodes, extractVectorNodes, extractSvgContainers, fetchNodesAsSVG, getNodesInsideSvgContainers, SvgContainerNode, generateSvgFilename } from '../utils/image-fetcher';
+import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename, SvgExportNode } from '../utils/image-fetcher';
 
 /**
  * WP32: SVG export info for generating imports and assets
@@ -637,84 +637,48 @@ export async function generateReactTailwind(
   // WP32: SVG containers - used in BOTH modes now
   // In viewer mode: use pre-downloaded SVGs from /api/images/{nodeId}/{filename}.svg
   // In export mode: download whole container as single SVG
-  const svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map();
-  let nodesInsideContainers: Set<string> = new Set();
+  // WP32: Simple SVG map - nodeId → bounds (from Figma API export)
+  const svgBoundsMap: Map<string, { width: number; height: number }> = new Map();
 
-  // WP32: Extract SVG containers in BOTH modes
-  const svgContainers = extractSvgContainers(altNode);
-  nodesInsideContainers = getNodesInsideSvgContainers(altNode, svgContainers);
+  // WP32: Extract all nodes to export as SVG (VECTORs + multi-VECTOR containers)
+  const svgNodes = extractSvgContainers(altNode);
 
-  // Build container map with metadata (isInstance + bounds)
-  for (const container of svgContainers) {
-    svgContainerMap.set(container.nodeId, {
-      isInstance: container.isInstance,
-      bounds: container.containerBounds,
-    });
+  // Build bounds map
+  for (const svgNode of svgNodes) {
+    svgBoundsMap.set(svgNode.nodeId, svgNode.bounds);
   }
 
-  if (isViewerMode && svgContainers.length > 0) {
-    // WP32: Viewer mode - use pre-downloaded SVGs from local API (NO API CALLS!)
-    for (const container of svgContainers) {
-      // Generate unique filename same way as import route (name + nodeId)
-      const filename = generateSvgFilename(container.name, container.nodeId);
-      // Use local API route to serve pre-downloaded SVG
-      svgDataUrls[container.nodeId] = `/api/images/${nodeId}/${filename}`;
+  if (isViewerMode && svgNodes.length > 0) {
+    // WP32: Viewer mode - use pre-downloaded SVGs from local API
+    for (const svgNode of svgNodes) {
+      const filename = generateSvgFilename(svgNode.name, svgNode.nodeId);
+      svgDataUrls[svgNode.nodeId] = `/api/images/${nodeId}/${filename}`;
     }
     console.log(`✅ Using ${Object.keys(svgDataUrls).length} local SVG paths for viewer`);
-  } else if (!isViewerMode && svgContainers.length > 0) {
-    // WP32: Export mode - fetch from Figma API (only at export time)
-    let containerSvgContent: Record<string, string> = {};
+  } else if (!isViewerMode && svgNodes.length > 0) {
+    // WP32: Export mode - fetch from Figma API
+    let svgContent: Record<string, string> = {};
     if (figmaFileKey && figmaAccessToken) {
-      const containerIds = svgContainers.map(c => c.nodeId);
-      containerSvgContent = await fetchNodesAsSVG(figmaFileKey, containerIds, figmaAccessToken);
-      console.log(`✅ Fetched ${Object.keys(containerSvgContent).length} SVG containers from Figma API`);
+      const nodeIds = svgNodes.map(n => n.nodeId);
+      svgContent = await fetchNodesAsSVG(figmaFileKey, nodeIds, figmaAccessToken);
+      console.log(`✅ Fetched ${Object.keys(svgContent).length} SVGs from Figma API`);
     }
 
-    // Process SVG containers for export
-    for (const container of svgContainers) {
-      const varName = generateSvgVarName(container.name || 'svg', usedVarNames);
+    for (const svgNode of svgNodes) {
+      const varName = generateSvgVarName(svgNode.name || 'svg', usedVarNames);
       const filename = `${varName}.svg`;
       const path = `./img/${filename}`;
-      const svgContent = containerSvgContent[container.nodeId] || `<svg xmlns="http://www.w3.org/2000/svg"><text y="20">Missing SVG</text></svg>`;
+      const content = svgContent[svgNode.nodeId] || `<svg xmlns="http://www.w3.org/2000/svg"><text y="20">Missing SVG</text></svg>`;
 
       svgExports.push({
-        nodeId: container.nodeId,
+        nodeId: svgNode.nodeId,
         varName,
         filename,
         path,
-        svgContent,
+        svgContent: content,
         isComplex: true,
       });
-      svgVarNames[container.nodeId] = varName;
-    }
-  }
-
-  // WP32: Extract VECTOR nodes
-  // Skip VECTORs inside containers in BOTH modes (containers render as single img)
-  const vectorNodes = extractVectorNodes(altNode, nodesInsideContainers);
-
-  for (const vecNode of vectorNodes) {
-    const varName = generateSvgVarName(vecNode.name || 'vector', usedVarNames);
-    const filename = `${varName}.svg`;
-    const path = `./img/${filename}`;
-
-    // WP32: Simple VECTORs - reconstruct from geometry
-    const svgContent = convertVectorToSVG(vecNode.svgData);
-
-    if (isViewerMode) {
-      // WP32: Viewer mode - use inline data URLs (works in iframe)
-      svgDataUrls[vecNode.nodeId] = vectorToDataURL(vecNode.svgData);
-    } else {
-      // WP32: Export mode - use imports + files
-      svgExports.push({
-        nodeId: vecNode.nodeId,
-        varName,
-        filename,
-        path,
-        svgContent,
-        isComplex: vecNode.isComplex,
-      });
-      svgVarNames[vecNode.nodeId] = varName;
+      svgVarNames[svgNode.nodeId] = varName;
     }
   }
 
@@ -735,7 +699,7 @@ export async function generateReactTailwind(
 
   // WP32: Pass appropriate map based on mode
   const svgMap = isViewerMode ? svgDataUrls : svgVarNames;
-  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
 
   // Build code with imports (export mode only)
   const importSection = svgImports ? `${svgImports}\n\n` : '';
@@ -768,7 +732,7 @@ ${jsx}  );
  * @param imageUrls - Map of imageRef → URL
  * @param svgMap - WP32: nodeId → varName (export) or data URL (viewer)
  * @param isViewerMode - WP32: true = data URLs inline, false = import variables
- * @param svgContainerMap - WP32: Map of nodeId → { isInstance, bounds } for SVG containers
+ * @param svgBoundsMap - WP32: Map of nodeId → { width, height } for SVG nodes
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
@@ -780,7 +744,7 @@ function generateTailwindJSXElement(
   imageUrls: Record<string, string> = {},
   svgMap: Record<string, string> = {},  // WP32: nodeId → varName (export) or data URL (viewer)
   isViewerMode: boolean = false,  // WP32: true = data URLs inline, false = import variables
-  svgContainerMap: Map<string, { isInstance: boolean; bounds: { width: number; height: number } }> = new Map()
+  svgBoundsMap: Map<string, { width: number; height: number }> = new Map()
 ): string {
   // WP32: Skip hidden nodes - they should not be rendered in generated code
   if (node.visible === false) {
@@ -789,11 +753,14 @@ function generateTailwindJSXElement(
 
   const indent = '  '.repeat(depth + 1);
 
-  // WP32: Handle SVG containers - INSTANCE vs FRAME/GROUP (aligned with html-css.ts)
-  const containerInfo = svgContainerMap.get(node.id);
-  if (containerInfo) {
+  // WP32: Handle SVG nodes (VECTORs or multi-VECTOR containers)
+  const svgBounds = svgBoundsMap.get(node.id);
+  if (svgBounds) {
     const svgValue = svgMap[node.id];
     const altText = node.name || 'svg';
+
+    // WP32 DEBUG
+    console.log(`🔍 SVG: ${node.name} (${node.id}) - bounds: ${JSON.stringify(svgBounds)}`);
 
     // Build data attributes
     const componentAttrs = extractComponentDataAttributes(node);
@@ -806,47 +773,17 @@ function generateTailwindJSXElement(
       .map(([key, value]) => `${key}="${value}"`)
       .join(' ');
 
-    if (containerInfo.isInstance) {
-      // INSTANCE: Keep container div with Tailwind classes, put img inside
-      // Convert node.styles to Tailwind classes for the container
-      const baseStyles: Record<string, string> = {};
-      for (const [key, value] of Object.entries(node.styles || {})) {
-        baseStyles[key] = typeof value === 'number' ? String(value) : value;
-      }
+    // Simple: img with SVG dimensions from Figma API
+    const { width, height } = svgBounds;
+    const sizeClasses = width > 0 && height > 0
+      ? `w-[${Math.round(width)}px] h-[${Math.round(height)}px]`
+      : '';
 
-      // WP32 FIX: If width/height are 'auto', use container bounds for fixed dimensions
-      // SVG containers need explicit dimensions for the img to render correctly
-      const { width, height } = containerInfo.bounds;
-      if (baseStyles['width'] === 'auto' && width > 0) {
-        baseStyles['width'] = `${width}px`;
-      }
-      if (baseStyles['height'] === 'auto' && height > 0) {
-        baseStyles['height'] = `${height}px`;
-      }
-
-      const containerClasses = Object.entries(baseStyles)
-        .map(([cssProperty, cssValue]) => cssPropToTailwind(cssProperty, cssValue))
-        .filter(Boolean)
-        .join(' ');
-
-      if (svgValue) {
-        const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
-        return `${indent}<div ${dataAttrString} className="${containerClasses}">\n${indent}  <img alt="${altText}" className="block max-w-none w-full h-full" src=${imgSrc} />\n${indent}</div>\n`;
-      }
-      return `${indent}<div ${dataAttrString} className="${containerClasses}" />\n`;
-    } else {
-      // FRAME/GROUP: Simple structure - just the img with container dimensions as Tailwind
-      const { width, height } = containerInfo.bounds;
-      const sizeClasses = width > 0 && height > 0
-        ? `w-[${width}px] h-[${height}px]`
-        : '';
-
-      if (svgValue) {
-        const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
-        return `${indent}<img ${dataAttrString} className="block max-w-none ${sizeClasses}" alt="${altText}" src=${imgSrc} />\n`;
-      }
-      return `${indent}<div ${dataAttrString} className="block ${sizeClasses}" />\n`;
+    if (svgValue) {
+      const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
+      return `${indent}<img ${dataAttrString} className="block max-w-none ${sizeClasses}" alt="${altText}" src=${imgSrc} />\n`;
     }
+    return `${indent}<div ${dataAttrString} className="block ${sizeClasses}" />\n`;
   }
 
   const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
@@ -996,7 +933,7 @@ function generateTailwindJSXElement(
         for (const child of (node as any).children) {
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
         }
       }
 
@@ -1025,7 +962,7 @@ function generateTailwindJSXElement(
         for (const child of (node as any).children) {
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
         }
         jsxString += `${indent}</${htmlTag}>`;
       } else {
@@ -1052,7 +989,7 @@ function generateTailwindJSXElement(
         const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
         const childProps = cleanResolvedProperties(childResult.properties);
 
-        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgContainerMap);
+        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
       }
 
       jsxString += `${indent}</${htmlTag}>`;

@@ -1,12 +1,12 @@
 import { generateReactTailwind } from './lib/code-generators/react-tailwind';
-import { transformFigmaToAltNode } from './lib/altnode-transform';
+import { transformToAltNode } from './lib/altnode-transform';
 import * as fs from 'fs';
 
 async function main() {
   const dataPath = './figma-data/425-4344/data.json';
   const rawData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
   
-  const altNode = transformFigmaToAltNode(rawData);
+  const altNode = transformToAltNode(rawData);
   
   if (!altNode) {
     console.log('Failed to transform');

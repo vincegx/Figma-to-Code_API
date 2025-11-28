@@ -171,51 +171,27 @@ export function extractImageNodes(altNode: any): ImageNode[] {
 }
 
 /**
- * WP32: Vector node info for SVG extraction
- * Used by generators to create SVG files and imports
- */
-interface VectorNode {
-  nodeId: string;
-  name: string;  // WP32: Figma node name for generating variable names (e.g., "Vector" → vector.svg)
-  svgData: {
-    fillGeometry?: Array<{ path: string; windingRule?: string }>;
-    strokeGeometry?: Array<{ path: string; windingRule?: string }>;
-    fills?: Array<{ type: string; color: { r: number; g: number; b: number; a: number } }>;
-    strokes?: Array<{ type: string; color: { r: number; g: number; b: number; a: number } }>;
-    strokeWeight?: number;
-    bounds: { x: number; y: number; width: number; height: number };
-  };
-  isComplex: boolean;
-}
-
-/**
- * WP32: SVG container - a parent node with VECTOR children
- * These should be downloaded as a single SVG from Figma API (not path by path)
+ * WP32: Node to export as SVG from Figma API
  *
- * Two types:
- * - INSTANCE: Reusable component with fixed bounds, content positioned inside
- * - FRAME/GROUP: Simple structure where container defines the SVG bounds
+ * Simple rules:
+ * - 1 VECTOR → export the VECTOR directly (compact SVG)
+ * - 2+ VECTORs in a container → export the container (composite SVG)
  */
-export interface SvgContainerNode {
+export interface SvgExportNode {
   nodeId: string;
   name: string;
-  vectorCount: number;
-  isInstance: boolean;  // true = INSTANCE component, false = FRAME/GROUP structure
-  containerBounds: { width: number; height: number };  // Size of the container
+  bounds: { width: number; height: number };
 }
 
 /**
- * WP32: Extract SVG containers from altNode tree
+ * WP32: Extract nodes to export as SVG from Figma API
  *
- * SVG container types:
- * 1. INSTANCE with VECTORs: Reusable component - keep container, replace content with img
- * 2. FRAME/GROUP with 2+ VECTORs: Simple structure - download as single SVG
- *
- * These containers should be downloaded as a single SVG file from Figma API
- * (not reconstructed path by path)
+ * Simple logic based on what Figma API returns:
+ * - Single VECTOR → export the VECTOR (gives compact SVG like 7x12)
+ * - Multiple VECTORs in GROUP/FRAME → export the parent (gives composite SVG)
  */
-export function extractSvgContainers(altNode: any): SvgContainerNode[] {
-  const containers: SvgContainerNode[] = [];
+export function extractSvgContainers(altNode: any): SvgExportNode[] {
+  const nodesToExport: SvgExportNode[] = [];
   const processedIds = new Set<string>();
 
   function countVectorChildren(node: any): number {
@@ -229,9 +205,16 @@ export function extractSvgContainers(altNode: any): SvgContainerNode[] {
     return count;
   }
 
+  // Check if node has content that shouldn't be combined into one SVG
   function hasNonVectorContent(node: any): boolean {
     if (node.originalType === 'TEXT') return true;
     if (node.fillsData?.some((f: any) => f.type === 'IMAGE')) return true;
+    // FRAME/GROUP with SOLID fill but NO vector children = standalone shape (like Button background)
+    if ((node.originalType === 'FRAME' || node.originalType === 'GROUP') &&
+        node.fillsData?.some((f: any) => f.type === 'SOLID' && f.visible !== false) &&
+        countVectorChildren(node) === 0) {
+      return true;
+    }
     if (node.children) {
       for (const child of node.children) {
         if (hasNonVectorContent(child)) return true;
@@ -240,68 +223,73 @@ export function extractSvgContainers(altNode: any): SvgContainerNode[] {
     return false;
   }
 
-  // Extract width/height from node styles, with fallback to originalNode bounds
+  // Get bounds from originalNode (what Figma API will use for SVG export)
   function getNodeBounds(node: any): { width: number; height: number } {
-    const styles = node.styles || {};
-    const parseSize = (val: string | number | undefined): number => {
-      if (typeof val === 'number') return val;
-      if (typeof val === 'string') {
-        const num = parseFloat(val);
-        return isNaN(num) ? 0 : num;
-      }
-      return 0;
-    };
-
-    let width = parseSize(styles.width);
-    let height = parseSize(styles.height);
-
-    // WP32 FIX: If styles give 0 (e.g., 'auto'), use originalNode bounds as fallback
-    // This ensures SVG containers always have proper dimensions
-    if ((width === 0 || height === 0) && node.originalNode) {
-      const orig = node.originalNode;
-      // Try size first (actual dimensions before rotation)
-      if (orig.size) {
-        if (width === 0) width = orig.size.x || 0;
-        if (height === 0) height = orig.size.y || 0;
-      }
-      // Fallback to absoluteBoundingBox
-      if ((width === 0 || height === 0) && orig.absoluteBoundingBox) {
-        if (width === 0) width = orig.absoluteBoundingBox.width || 0;
-        if (height === 0) height = orig.absoluteBoundingBox.height || 0;
-      }
+    if (node.originalNode?.absoluteBoundingBox) {
+      const box = node.originalNode.absoluteBoundingBox;
+      return { width: box.width || 0, height: box.height || 0 };
     }
+    return { width: 0, height: 0 };
+  }
 
-    return { width, height };
+  function findSingleVector(node: any): any | null {
+    if (node.originalType === 'VECTOR') return node;
+    if (node.children?.length === 1) {
+      return findSingleVector(node.children[0]);
+    }
+    return null;
   }
 
   function traverse(node: any) {
-    if (node.originalType === 'VECTOR') return;
-
-    // WP32 FIX: Skip hidden nodes - Figma API refuses to export hidden elements as SVG
     if (node.visible === false) return;
+    if (processedIds.has(node.id)) return;
 
     const vectorCount = countVectorChildren(node);
-    const isInstance = node.originalType === 'INSTANCE';
 
-    // WP32: SVG container conditions:
-    // - INSTANCE with any VECTORs (even 1) → treat as SVG container
-    // - FRAME/GROUP with 2+ VECTORs + no text/images → treat as SVG container
-    const isSvgContainer =
-      (isInstance && vectorCount >= 1 && !hasNonVectorContent(node)) ||
-      (!isInstance && vectorCount >= 2 && !hasNonVectorContent(node));
-
-    if (isSvgContainer && !processedIds.has(node.id)) {
+    // Case 1: This IS a VECTOR → export it directly
+    if (node.originalType === 'VECTOR') {
       processedIds.add(node.id);
-      containers.push({
+      nodesToExport.push({
         nodeId: node.id,
-        name: node.name || 'svg',
-        vectorCount,
-        isInstance,
-        containerBounds: getNodeBounds(node),
+        name: node.name || 'vector',
+        bounds: getNodeBounds(node),
       });
-      return; // Don't traverse children - this whole node is an SVG container
+      return;
     }
 
+    // Case 2: Container with 2+ VECTORs and no other content → export container
+    if (vectorCount >= 2 && !hasNonVectorContent(node)) {
+      processedIds.add(node.id);
+      // Mark all children as processed too
+      function markProcessed(n: any) {
+        processedIds.add(n.id);
+        n.children?.forEach(markProcessed);
+      }
+      markProcessed(node);
+
+      nodesToExport.push({
+        nodeId: node.id,
+        name: node.name || 'svg',
+        bounds: getNodeBounds(node),
+      });
+      return;
+    }
+
+    // Case 3: Container with exactly 1 VECTOR → find and export the VECTOR directly
+    if (vectorCount === 1 && !hasNonVectorContent(node)) {
+      const singleVector = findSingleVector(node);
+      if (singleVector && !processedIds.has(singleVector.id)) {
+        processedIds.add(singleVector.id);
+        nodesToExport.push({
+          nodeId: singleVector.id,
+          name: singleVector.name || 'vector',
+          bounds: getNodeBounds(singleVector),
+        });
+      }
+      // Continue traversing in case there are other branches
+    }
+
+    // Traverse children
     if (node.children) {
       for (const child of node.children) {
         traverse(child);
@@ -310,7 +298,7 @@ export function extractSvgContainers(altNode: any): SvgContainerNode[] {
   }
 
   traverse(altNode);
-  return containers;
+  return nodesToExport;
 }
 
 /**
@@ -371,79 +359,3 @@ export async function fetchNodesAsSVG(
   }
 }
 
-/**
- * WP32: Get node IDs that are inside SVG containers
- * Used to skip individual VECTOR processing for nodes inside containers
- */
-export function getNodesInsideSvgContainers(altNode: any, containers: SvgContainerNode[]): Set<string> {
-  const containerIds = new Set(containers.map(c => c.nodeId));
-  const insideIds = new Set<string>();
-
-  function collectChildIds(node: any) {
-    insideIds.add(node.id);
-    if (node.children) {
-      for (const child of node.children) {
-        collectChildIds(child);
-      }
-    }
-  }
-
-  function traverse(node: any) {
-    if (containerIds.has(node.id)) {
-      // This is a container - collect all children IDs
-      if (node.children) {
-        for (const child of node.children) {
-          collectChildIds(child);
-        }
-      }
-      return;
-    }
-    if (node.children) {
-      for (const child of node.children) {
-        traverse(child);
-      }
-    }
-  }
-
-  traverse(altNode);
-  return insideIds;
-}
-
-/**
- * WP32: Extract simple VECTOR nodes from altNode tree
- * Returns only VECTORs that are NOT inside SVG containers
- */
-export function extractVectorNodes(altNode: any, skipNodeIds?: Set<string>): VectorNode[] {
-  const vectorNodes: VectorNode[] = [];
-  const seenIds = new Set<string>();
-
-  function traverse(node: any) {
-    // WP32: Skip if this node is inside an SVG container
-    if (skipNodeIds?.has(node.id)) {
-      if (node.children) node.children.forEach(traverse);
-      return;
-    }
-
-    if (node.originalType === 'VECTOR' && node.svgData && !seenIds.has(node.id)) {
-      seenIds.add(node.id);
-
-      const fillCount = node.svgData.fillGeometry?.length ?? 0;
-      const strokeCount = node.svgData.strokeGeometry?.length ?? 0;
-      const isComplex = fillCount > 1 || strokeCount > 1;
-
-      vectorNodes.push({
-        nodeId: node.id,
-        name: node.name || 'Vector',
-        svgData: node.svgData,
-        isComplex
-      });
-    }
-
-    if (node.children) {
-      node.children.forEach(traverse);
-    }
-  }
-
-  traverse(altNode);
-  return vectorNodes;
-}
