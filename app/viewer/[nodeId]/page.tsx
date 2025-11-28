@@ -46,6 +46,8 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
+import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
+import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 
 // Viewport presets for responsive mode
 const VIEWPORT_PRESETS = {
@@ -56,7 +58,6 @@ const VIEWPORT_PRESETS = {
 } as const;
 
 export default function ViewerPage() {
-  console.log('🟠 VIEWER PAGE RENDER', Date.now());
 
   const params = useParams();
   const router = useRouter();
@@ -97,6 +98,9 @@ export default function ViewerPage() {
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
   const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
   const [isLoadingAltNode, setIsLoadingAltNode] = useState(false);
+
+  // Track if library is loaded (to avoid showing "Node not found" during initial load)
+  const [isLibraryLoaded, setIsLibraryLoaded] = useState(false);
 
   // Find current node
   const currentNode = nodes.find((n) => n.id === nodeId);
@@ -156,7 +160,11 @@ export default function ViewerPage() {
 
   // Load library data on mount
   useEffect(() => {
-    loadLibrary();
+    async function load() {
+      await loadLibrary();
+      setIsLibraryLoaded(true);
+    }
+    load();
     selectNode(nodeId);
   }, [loadLibrary, selectNode, nodeId]);
 
@@ -185,15 +193,44 @@ export default function ViewerPage() {
     fetchNodeWithAltNode();
   }, [nodeId]);
 
-  // WP32 PERF FIX: Code generation removed from viewer page
-  // Code is now generated ONCE in GeneratedCodeSection and passed via onCodeChange callback
-  // This eliminates duplicate generation (was 2x: viewer + code section = 4-6 generations total)
-  // generatedCode is now set by InformationPanel -> GeneratedCodeSection -> onCodeChange
+  // Generate code directly in ViewerPage (independent of right panel visibility)
+  useEffect(() => {
+    const targetNode = selectedNode || altNode;
+    if (!targetNode || multiFrameworkRules.length === 0) {
+      return;
+    }
+
+    async function generateCode() {
+      try {
+        if (previewFramework === 'react-tailwind') {
+          const output = await generateReactTailwind(targetNode, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setGeneratedCode(output.code);
+        } else if (previewFramework === 'html-css') {
+          const output = await generateHTMLCSS(targetNode, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setGeneratedCode(output.code);
+        }
+      } catch (error) {
+        console.error('Code generation error:', error);
+      }
+    }
+
+    generateCode();
+  }, [selectedNode?.id, altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, resolvedProperties]);
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
   const prevNode = currentIndex > 0 ? nodes[currentIndex - 1] : null;
   const nextNode = currentIndex < nodes.length - 1 ? nodes[currentIndex + 1] : null;
+
+  // Show loading state while library is being fetched
+  if (!isLibraryLoaded) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+      </div>
+    );
+  }
 
   if (!currentNode) {
     return (
@@ -557,7 +594,6 @@ export default function ViewerPage() {
                     resolvedProperties={resolvedProperties}
                     allRules={multiFrameworkRules}
                     nodeId={nodeId}
-                    onCodeChange={setGeneratedCode}
                   />
                 </TabsContent>
 

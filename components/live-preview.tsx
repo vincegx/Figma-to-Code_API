@@ -135,13 +135,40 @@ function buildReactDocument(
   `.trim();
 }
 
+// PERF: Module-level cache for React libs (never change, fetch once)
+let cachedReactCode: string | null = null;
+let cachedReactDomCode: string | null = null;
+
+async function getCachedReactLibs(): Promise<{ reactCode: string; reactDomCode: string }> {
+  if (cachedReactCode && cachedReactDomCode) {
+    console.log('🟢 [PERF] Using cached React libs');
+    return { reactCode: cachedReactCode, reactDomCode: cachedReactDomCode };
+  }
+
+  console.log('🟢 [PERF] Fetching React libs (first time)');
+  const [reactResponse, reactDomResponse] = await Promise.all([
+    fetch('/preview-libs/react.js'),
+    fetch('/preview-libs/react-dom.js'),
+  ]);
+
+  cachedReactCode = await reactResponse.text();
+  cachedReactDomCode = await reactDomResponse.text();
+
+  return { reactCode: cachedReactCode, reactDomCode: cachedReactDomCode };
+}
+
 export default function LivePreview({ code, framework, language }: LivePreviewProps) {
+  console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [iframeContent, setIframeContent] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const strategy = getRenderingStrategy(framework);
+
+  // PERF: Check if code is empty (used after hooks)
+  const hasCode = code && code.trim().length > 0;
 
   // Transpile React code on server and generate iframe content
   const transpileAndBuildReact = useCallback(async (sourceCode: string, fw: FrameworkType) => {
@@ -174,15 +201,21 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
         return '';
       }
 
-      // Fetch React libraries content (will be inlined in srcDoc to avoid CORS)
-      const [reactResponse, reactDomResponse, transpileResponse] = await Promise.all([
-        fetch('/preview-libs/react.js'),
-        fetch('/preview-libs/react-dom.js'),
+      // PERF: Fetch all in parallel - React libs (cached), transpile, and Tailwind CSS
+      const [libsResult, transpileResponse, tailwindResponse] = await Promise.all([
+        getCachedReactLibs(),
         fetch('/api/transpile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: sourceCode, framework: fw }),
         }),
+        fw === 'react-tailwind'
+          ? fetch('/api/generate-tailwind-css', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code: sourceCode }),
+            })
+          : Promise.resolve(null),
       ]);
 
       if (!transpileResponse.ok) {
@@ -190,25 +223,14 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
         throw new Error(errorData.message || 'Transpilation failed');
       }
 
-      const reactCode = await reactResponse.text();
-      const reactDomCode = await reactDomResponse.text();
+      const { reactCode, reactDomCode } = libsResult;
       const { transpiledCode, componentName } = await transpileResponse.json();
 
-      // Generate Tailwind CSS dynamically for react-tailwind (includes JIT for arbitrary values)
+      // Get Tailwind CSS from parallel fetch
       let tailwindCSS = '';
-      if (fw === 'react-tailwind') {
-        const tailwindResponse = await fetch('/api/generate-tailwind-css', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: sourceCode }),
-        });
-
-        if (tailwindResponse.ok) {
-          const { css } = await tailwindResponse.json();
-          tailwindCSS = css;
-        } else {
-          console.warn('Failed to generate Tailwind CSS, using fallback');
-        }
+      if (tailwindResponse && tailwindResponse.ok) {
+        const { css } = await tailwindResponse.json();
+        tailwindCSS = css;
       }
 
       // Build iframe document with inlined libraries (no external script tags = no CORS)
@@ -223,7 +245,17 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
 
   // Generate iframe content (HTML/CSS synchronously, React asynchronously)
   useEffect(() => {
+    // PERF: Skip if no code
+    if (!hasCode) {
+      console.log('🟢 [PERF] SKIP useEffect - no code');
+      return;
+    }
+
+    const effectStart = performance.now();
+    console.log('🟢 [PERF] LivePreview useEffect START', { codeLen: code.length, strategy });
+
     const generateContent = async () => {
+      const genStart = performance.now();
       try {
         setError(null);
         setIsLoading(true);
@@ -232,27 +264,34 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
 
         switch (strategy) {
           case 'html':
+            console.log('🟢 [PERF] buildHTMLDocument START');
             content = buildHTMLDocument(code);
+            console.log(`🟢 [PERF] buildHTMLDocument END: ${(performance.now() - genStart).toFixed(0)}ms`);
             break;
           case 'react':
+            console.log('🟢 [PERF] transpileAndBuildReact START');
             content = await transpileAndBuildReact(code, framework);
+            console.log(`🟢 [PERF] transpileAndBuildReact END: ${(performance.now() - genStart).toFixed(0)}ms`);
             break;
           case 'none':
           default:
             content = '';
         }
 
+        console.log(`🟢 [PERF] setIframeContent, len: ${content.length}`);
         setIframeContent(content);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Rendering failed');
         setIframeContent('');
       } finally {
         setIsLoading(false);
+        console.log(`🟢 [PERF] generateContent TOTAL: ${(performance.now() - genStart).toFixed(0)}ms`);
       }
     };
 
     generateContent();
-  }, [code, strategy, framework, transpileAndBuildReact]);
+    console.log(`🟢 [PERF] useEffect SYNC: ${(performance.now() - effectStart).toFixed(0)}ms`);
+  }, [code, strategy, framework, transpileAndBuildReact, hasCode]);
 
   // Listen for iframe runtime errors
   useEffect(() => {
@@ -265,6 +304,17 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
     window.addEventListener('message', handleIframeError);
     return () => window.removeEventListener('message', handleIframeError);
   }, []);
+
+  // PERF: Show placeholder while code is being generated
+  if (!hasCode) {
+    return (
+      <div className="h-full w-full bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-pulse text-gray-500 dark:text-gray-400">
+          Generating code...
+        </div>
+      </div>
+    );
+  }
 
   // No live preview for frameworks that don't support it
   if (strategy === 'none') {

@@ -29,7 +29,6 @@ export function InformationPanel({
   nodeId,
   onCodeChange,
 }: InformationPanelProps) {
-  console.log('🟣 INFORMATION PANEL RENDER', Date.now());
 
   if (!node) {
     return (

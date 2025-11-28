@@ -116,18 +116,18 @@ export function GeneratedCodeSection({
 
   // WP32: Generate code using async generators
   useEffect(() => {
-    console.log('🔵 useEffect triggered:', {
+    const effectStart = performance.now();
+    console.log('🔵 [PERF] useEffect START:', {
       hasNode: !!node,
       nodeId: node?.id,
       framework,
       rulesCount: allRules.length,
-      propsKeys: Object.keys(resolvedProperties),
       timestamp: Date.now()
     });
 
     // WP32 FIX: Don't generate if node missing OR rules not loaded (prevents multiple generations)
     if (!node || allRules.length === 0) {
-      console.log('⏸️ SKIP: node or rules missing');
+      console.log('⏸️ [PERF] SKIP: node or rules missing');
       setGeneratedCode({
         componentCode: '// Loading...',
         stylesCode: '/* Loading... */',
@@ -135,12 +135,13 @@ export function GeneratedCodeSection({
       return;
     }
 
-    console.log('▶️ GENERATING code for:', node.id);
+    console.log('▶️ [PERF] GENERATING code for:', node.id);
 
     // Capture node in closure to satisfy TypeScript
     const currentNode = node;
 
     async function generateAsync() {
+      const genStart = performance.now();
       try {
         // WP32 FIX: NEVER pass credentials in viewer mode (nodeId exists)
         // Credentials are ONLY for initial export/download, NOT for viewer
@@ -149,22 +150,32 @@ export function GeneratedCodeSection({
         const figmaAccessToken = nodeId ? undefined : (process.env.NEXT_PUBLIC_FIGMA_ACCESS_TOKEN || '');
 
         if (framework === 'react-tailwind') {
+          console.log('⚙️ [PERF] generateReactTailwind START');
+          const genCodeStart = performance.now();
           // WP32: nodeId triggers local image paths, no API calls
           const output = await generateReactTailwind(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
+          console.log(`⚙️ [PERF] generateReactTailwind END: ${(performance.now() - genCodeStart).toFixed(0)}ms`);
+
           setGeneratedCode({
             componentCode: output.code,
             stylesCode: '/* Tailwind classes are inline - no separate styles needed */',
           });
           // Pass code to parent viewer for LivePreview
+          console.log('📤 [PERF] onCodeChange called, code length:', output.code.length);
           onCodeChange?.(output.code);
         } else if (framework === 'html-css') {
+          console.log('⚙️ [PERF] generateHTMLCSS START');
+          const genCodeStart = performance.now();
           // WP32: Pass nodeId for local images
           const output = await generateHTMLCSS(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
+          console.log(`⚙️ [PERF] generateHTMLCSS END: ${(performance.now() - genCodeStart).toFixed(0)}ms`);
+
           setGeneratedCode({
             componentCode: output.code,
             stylesCode: output.css || '/* No styles generated */',
           });
           // Pass code to parent viewer for LivePreview
+          console.log('📤 [PERF] onCodeChange called, code length:', output.code.length);
           onCodeChange?.(output.code);
         } else {
           // Placeholder for other frameworks
@@ -175,6 +186,7 @@ export function GeneratedCodeSection({
           });
           onCodeChange?.(placeholderCode);
         }
+        console.log(`✅ [PERF] generateAsync TOTAL: ${(performance.now() - genStart).toFixed(0)}ms`);
       } catch (error) {
         console.error('Code generation error:', error);
         setGeneratedCode({
@@ -185,6 +197,7 @@ export function GeneratedCodeSection({
     }
 
     generateAsync();
+    console.log(`🔵 [PERF] useEffect SYNC part: ${(performance.now() - effectStart).toFixed(0)}ms`);
     // WP32 PERF: Use primitives to avoid re-generation when references change
     // resolvedProperties is derived from node + allRules, no need to include it
   }, [node?.id, framework, allRules.length]);
