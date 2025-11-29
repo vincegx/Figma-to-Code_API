@@ -1040,10 +1040,10 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     }
   }
 
-  // WP25: Paragraph spacing
-  if (style.paragraphSpacing) {
-    altNode.styles.marginBottom = `${style.paragraphSpacing}px`;
-  }
+  // WP25: Paragraph spacing - REMOVED
+  // paragraphSpacing is for spacing BETWEEN paragraphs in multi-line text,
+  // NOT an external margin. Converting it to marginBottom breaks flex centering.
+  // The gap property on parent flex containers handles spacing between elements.
 
   // WP25: Paragraph indent
   if (style.paragraphIndent) {
