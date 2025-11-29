@@ -362,10 +362,19 @@ function generateHTMLElement(
       .join(' ');
 
     // Simple: img with SVG dimensions from Figma API
+    // WP31: Respect width/height from AltNode styles (e.g., 100% from FILL) over fixed pixel bounds
+    const nodeWidth = node.styles?.width;
+    const nodeHeight = node.styles?.height;
     const { width, height } = svgBounds;
-    const sizeStyle = width > 0 && height > 0
-      ? `width: ${Math.round(width)}px; height: ${Math.round(height)}px;`
-      : '';
+
+    // Use percentage width/height if specified, otherwise use fixed pixel dimensions
+    const widthStyle = (typeof nodeWidth === 'string' && nodeWidth.includes('%'))
+      ? `width: ${nodeWidth};`
+      : (width > 0 ? `width: ${Math.round(width)}px;` : '');
+    const heightStyle = (typeof nodeHeight === 'string' && nodeHeight.includes('%'))
+      ? `height: ${nodeHeight};`
+      : (height > 0 ? `height: ${Math.round(height)}px;` : '');
+    const sizeStyle = [widthStyle, heightStyle].filter(Boolean).join(' ');
 
     if (svgValue) {
       return `${indent}<img ${dataAttrString} style="display: block; max-width: none; ${sizeStyle}" alt="${altText}" src="${svgValue}" />\n`;

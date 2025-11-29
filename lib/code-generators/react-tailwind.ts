@@ -8,16 +8,21 @@ import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAs
 import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
- * WP31: Extract unique font families from node tree
+ * WP31: Extract font families and their weights from node tree
  */
-function extractFonts(node: SimpleAltNode): Set<string> {
-  const fonts = new Set<string>();
+function extractFonts(node: SimpleAltNode): Map<string, Set<number>> {
+  const fonts = new Map<string, Set<number>>();
 
   function traverse(n: SimpleAltNode) {
     if (n.styles?.['font-family']) {
-      // Extract font name from "Poppins" or "'Inter'" format
       const fontFamily = String(n.styles['font-family']).replace(/['"]/g, '').split(',')[0].trim();
-      if (fontFamily) fonts.add(fontFamily);
+      if (fontFamily) {
+        if (!fonts.has(fontFamily)) {
+          fonts.set(fontFamily, new Set<number>());
+        }
+        const weight = parseInt(String(n.styles['font-weight'] || '400'), 10);
+        fonts.get(fontFamily)!.add(weight);
+      }
     }
     n.children?.forEach(traverse);
   }
@@ -27,16 +32,16 @@ function extractFonts(node: SimpleAltNode): Set<string> {
 }
 
 /**
- * WP31: Generate Google Fonts URL from font set
+ * WP31: Generate Google Fonts URL from font map with specific weights
  */
-function generateGoogleFontsUrl(fonts: Set<string>): string | undefined {
+function generateGoogleFontsUrl(fonts: Map<string, Set<number>>): string | undefined {
   if (fonts.size === 0) return undefined;
 
-  // Common weights to include
-  const weights = '400;500;600;700;800;900';
-
-  const families = Array.from(fonts)
-    .map(font => `family=${encodeURIComponent(font)}:wght@${weights}`)
+  const families = Array.from(fonts.entries())
+    .map(([font, weights]) => {
+      const sortedWeights = Array.from(weights).sort((a, b) => a - b).join(';');
+      return `family=${encodeURIComponent(font)}:wght@${sortedWeights}`;
+    })
     .join('&');
 
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
@@ -839,10 +844,19 @@ function generateTailwindJSXElement(
       .join(' ');
 
     // Simple: img with SVG dimensions from Figma API
+    // WP31: Respect width/height from AltNode styles (e.g., 100% from FILL) over fixed pixel bounds
+    const nodeWidth = node.styles?.width;
+    const nodeHeight = node.styles?.height;
     const { width, height } = svgBounds;
-    const sizeClasses = width > 0 && height > 0
-      ? `w-[${Math.round(width)}px] h-[${Math.round(height)}px]`
-      : '';
+
+    // Use percentage width/height if specified, otherwise use fixed pixel dimensions
+    const widthClass = (typeof nodeWidth === 'string' && nodeWidth.includes('%'))
+      ? cssPropToTailwind('width', nodeWidth)
+      : (width > 0 ? `w-[${Math.round(width)}px]` : '');
+    const heightClass = (typeof nodeHeight === 'string' && nodeHeight.includes('%'))
+      ? cssPropToTailwind('height', nodeHeight)
+      : (height > 0 ? `h-[${Math.round(height)}px]` : '');
+    const sizeClasses = [widthClass, heightClass].filter(Boolean).join(' ');
 
     // WP31: Include positioning and GROUP-related styles for SVG containers
     // position/top/left needed for free-positioned SVGs in frames without layoutMode

@@ -725,6 +725,23 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
  * @returns Tailwind class string
  */
 function convertSizeToTailwind(value: string, prefix: string): string {
+  // WP31: Handle percentage values with standard Tailwind classes
+  const percentMap: Record<string, string> = {
+    '100%': 'full',
+    '50%': '1/2',
+    '33.333333%': '1/3',
+    '66.666667%': '2/3',
+    '25%': '1/4',
+    '75%': '3/4',
+    '20%': '1/5',
+    '40%': '2/5',
+    '60%': '3/5',
+    '80%': '4/5',
+  };
+  if (percentMap[value]) {
+    return `${prefix}-${percentMap[value]}`;
+  }
+
   // WP25 FIX: Match both integer and decimal px values (876.9999389648438px)
   const pxMatch = value.match(/^(\d+(?:\.\d+)?)px$/);
   if (!pxMatch) {
