@@ -8,6 +8,36 @@ import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAs
 import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
+ * WP31: Extract unique font families from node tree
+ */
+function extractFonts(node: SimpleAltNode): Set<string> {
+  const fonts = new Set<string>();
+
+  function traverse(n: SimpleAltNode) {
+    if (n.styles?.['font-family']) {
+      const fontFamily = String(n.styles['font-family']).replace(/['"]/g, '').split(',')[0].trim();
+      if (fontFamily) fonts.add(fontFamily);
+    }
+    n.children?.forEach(traverse);
+  }
+
+  traverse(node);
+  return fonts;
+}
+
+/**
+ * WP31: Generate Google Fonts URL from font set
+ */
+function generateGoogleFontsUrl(fonts: Set<string>): string | undefined {
+  if (fonts.size === 0) return undefined;
+  const weights = '400;500;600;700;800;900';
+  const families = Array.from(fonts)
+    .map(font => `family=${encodeURIComponent(font)}:wght@${weights}`)
+    .join('&');
+  return `https://fonts.googleapis.com/css2?${families}&display=swap`;
+}
+
+/**
  * WP32: SVG export info for generating assets
  */
 interface SvgExportInfo {
@@ -241,15 +271,18 @@ export async function generateHTMLCSS(
   const html = generateHTMLElement(altNode, cleanedProps, cssRules, 0, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
 
   // WP31: Generate CSS variable definitions from system-variables.json
-  console.log('[HTML-CSS] Calling generateCssVariableDefinitions...');
   const cssVariables = generateCssVariableDefinitions();
-  console.log('[HTML-CSS] cssVariables result length:', cssVariables.length);
 
   // Generate CSS from collected rules
   const componentCss = cssRules
     .map(rule => {
       const properties = Object.entries(rule.properties)
-        .map(([key, value]) => `  ${toKebabCase(key)}: ${value.toLowerCase()};`)
+        .map(([key, value]) => {
+          const kebabKey = toKebabCase(key);
+          // WP31: Don't lowercase font-family values - Google Fonts is case-sensitive
+          const cssValue = kebabKey === 'font-family' ? `'${value}'` : value.toLowerCase();
+          return `  ${kebabKey}: ${cssValue};`;
+        })
         .join('\n');
       return `.${rule.selector} {\n${properties}\n}`;
     })
@@ -259,6 +292,10 @@ export async function generateHTMLCSS(
   const css = cssVariables ? `${cssVariables}\n\n${componentCss}` : componentCss;
 
   const code = `<!-- HTML -->\n${html}\n\n/* CSS */\n${css}`;
+
+  // WP31: Extract fonts and generate Google Fonts URL
+  const fonts = extractFonts(altNode);
+  const googleFontsUrl = generateGoogleFontsUrl(fonts);
 
   return {
     code,
@@ -271,6 +308,7 @@ export async function generateHTMLCSS(
       generatedAt: new Date().toISOString(),
     },
     css, // Include separate CSS string
+    googleFontsUrl, // WP31: Google Fonts URL for fonts used in design
   };
 }
 

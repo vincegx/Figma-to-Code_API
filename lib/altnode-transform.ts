@@ -163,15 +163,50 @@ function handleGroupInlining(
 
   // Multiple children: create container but mark as GROUP
   // WP25 FIX: GROUP doesn't have layoutMode, so pass parent's layoutMode to children
+  // WP31: GROUPs use CSS Grid to stack children (MCP pattern)
+  // Pattern: inline-grid + grid-area:1/1 for all children + margin for positioning
+  const groupBounds = groupNode.absoluteBoundingBox;
+
+  // WP31: Calculate GROUP position relative to parent (for free-positioned GROUPs)
+  const groupStyles: Record<string, string> = {
+    display: 'inline-grid',
+    'grid-template-columns': 'max-content',
+    'grid-template-rows': 'max-content',
+    'place-items': 'start',
+  };
+
+  // WP31: If parent has no layoutMode, GROUP needs absolute positioning
+  if (!parentLayoutMode && parentBounds && groupBounds) {
+    groupStyles.position = 'absolute';
+    groupStyles.top = `${groupBounds.y - parentBounds.y}px`;
+    groupStyles.left = `${groupBounds.x - parentBounds.x}px`;
+    groupStyles.width = `${groupBounds.width}px`;
+    groupStyles.height = `${groupBounds.height}px`;
+  }
+
   const container: SimpleAltNode = {
     id: groupNode.id,
     name: groupNode.name,
     uniqueName: generateUniqueName(groupNode.name),
     type: 'group',
     originalType: groupNode.type, // T177: Preserve original type
-    styles: {},
+    styles: groupStyles,
     children: groupNode.children
-      .map(child => transformToAltNode(child, newCumulativeRotation, parentLayoutMode, parentBounds))
+      .map(child => {
+        const altChild = transformToAltNode(child, newCumulativeRotation, parentLayoutMode, parentBounds);
+        if (altChild && groupBounds && child.absoluteBoundingBox) {
+          // WP31: Calculate margin offset from GROUP origin
+          const childBounds = child.absoluteBoundingBox;
+          const marginLeft = Math.round(childBounds.x - groupBounds.x);
+          const marginTop = Math.round(childBounds.y - groupBounds.y);
+
+          // Add grid-area and margins for stacking
+          altChild.styles['grid-area'] = '1 / 1';
+          if (marginLeft > 0) altChild.styles['margin-left'] = `${marginLeft}px`;
+          if (marginTop > 0) altChild.styles['margin-top'] = `${marginTop}px`;
+        }
+        return altChild;
+      })
       .filter((node): node is SimpleAltNode => node !== null),
     originalNode: groupNode,
     visible: true,

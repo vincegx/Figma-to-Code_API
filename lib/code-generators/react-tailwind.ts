@@ -8,6 +8,41 @@ import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAs
 import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
+ * WP31: Extract unique font families from node tree
+ */
+function extractFonts(node: SimpleAltNode): Set<string> {
+  const fonts = new Set<string>();
+
+  function traverse(n: SimpleAltNode) {
+    if (n.styles?.['font-family']) {
+      // Extract font name from "Poppins" or "'Inter'" format
+      const fontFamily = String(n.styles['font-family']).replace(/['"]/g, '').split(',')[0].trim();
+      if (fontFamily) fonts.add(fontFamily);
+    }
+    n.children?.forEach(traverse);
+  }
+
+  traverse(node);
+  return fonts;
+}
+
+/**
+ * WP31: Generate Google Fonts URL from font set
+ */
+function generateGoogleFontsUrl(fonts: Set<string>): string | undefined {
+  if (fonts.size === 0) return undefined;
+
+  // Common weights to include
+  const weights = '400;500;600;700;800;900';
+
+  const families = Array.from(fonts)
+    .map(font => `family=${encodeURIComponent(font)}:wght@${weights}`)
+    .join('&');
+
+  return `https://fonts.googleapis.com/css2?${families}&display=swap`;
+}
+
+/**
  * WP32: SVG export info for generating imports and assets
  */
 interface SvgExportInfo {
@@ -234,9 +269,17 @@ function deduplicateTailwindClasses(classes: string[]): string[] {
   // gap-[10px] → gap-2.5, w-[16px] → w-4
   const normalized = normalizeArbitraryValues(result);
 
+  // WP31 FIX: Remove negative gap classes - CSS gap doesn't support negative values
+  // gap-[-380px] is invalid, negative spacing is handled via margin on children
+  // Only match gap-[-Xpx] or gap-x-[-Xpx] or gap-y-[-Xpx] with NEGATIVE values inside brackets
+  const withoutNegativeGap = normalized.filter(cls => {
+    const negativeGapMatch = cls.match(/^gap(-[xy])?\[-\d/);
+    return !negativeGapMatch;
+  });
+
   // WP25 FIX: Remove default flex properties that are redundant
   // flex-nowrap, self-auto, grow-0, shrink are defaults
-  const filtered = removeDefaultFlexProperties(normalized);
+  const filtered = removeDefaultFlexProperties(withoutNegativeGap);
 
   // WP25 FIX: Consolidate semantic padding/margin pairs
   // pl-[48px] pr-[48px] → px-12 (only for standard Tailwind values)
@@ -597,6 +640,10 @@ export async function generateReactTailwind(
 ): Promise<GeneratedCodeOutput> {
   const componentName = toPascalCase(altNode.name);
 
+  // WP31: Extract fonts and generate Google Fonts URL
+  const fonts = extractFonts(altNode);
+  const googleFontsUrl = generateGoogleFontsUrl(fonts);
+
   // FIX: Clean properties to remove $value placeholders
   const cleanedProps = cleanResolvedProperties(resolvedProperties);
 
@@ -703,9 +750,9 @@ export async function generateReactTailwind(
   const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
 
   // WP31: Generate CSS variable definitions for React-Tailwind
-  console.log('[REACT-TAILWIND] Calling generateCssVariableDefinitions...');
+  // console.log('[REACT-TAILWIND] Calling generateCssVariableDefinitions...');
   const cssVariables = generateCssVariableDefinitions();
-  console.log('[REACT-TAILWIND] cssVariables length:', cssVariables.length);
+  // console.log('[REACT-TAILWIND] cssVariables length:', cssVariables.length);
 
   // Build style tag with CSS variables (if any)
   const styleTag = cssVariables
@@ -731,6 +778,7 @@ ${styleTag}${jsx}    </>
       generatedAt: new Date().toISOString(),
     },
     assets: assets.length > 0 ? assets : undefined,
+    googleFontsUrl,
   };
 }
 
@@ -746,6 +794,8 @@ ${styleTag}${jsx}    </>
  * @param svgMap - WP32: nodeId → varName (export) or data URL (viewer)
  * @param isViewerMode - WP32: true = data URLs inline, false = import variables
  * @param svgBoundsMap - WP32: Map of nodeId → { width, height } for SVG nodes
+ * @param parentNegativeSpacing - WP31: Negative itemSpacing from parent (for margin)
+ * @param isLastChild - WP31: Whether this is the last child (no margin needed)
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
@@ -757,7 +807,9 @@ function generateTailwindJSXElement(
   imageUrls: Record<string, string> = {},
   svgMap: Record<string, string> = {},  // WP32: nodeId → varName (export) or data URL (viewer)
   isViewerMode: boolean = false,  // WP32: true = data URLs inline, false = import variables
-  svgBoundsMap: Map<string, { width: number; height: number }> = new Map()
+  svgBoundsMap: Map<string, { width: number; height: number }> = new Map(),
+  parentNegativeSpacing?: { value: number; direction: 'row' | 'column' },  // WP31: From parent
+  isLastChild: boolean = false  // WP31: Last child doesn't need margin
 ): string {
   // WP32: Skip hidden nodes - they should not be rendered in generated code
   if (node.visible === false) {
@@ -792,11 +844,21 @@ function generateTailwindJSXElement(
       ? `w-[${Math.round(width)}px] h-[${Math.round(height)}px]`
       : '';
 
+    // WP31: Include positioning and GROUP-related styles for SVG containers
+    // position/top/left needed for free-positioned SVGs in frames without layoutMode
+    const positioningStyles = ['position', 'top', 'left', 'right', 'bottom', 'grid-area', 'margin-left', 'margin-top', 'margin-right', 'margin-bottom'];
+    const nodeStyleClasses = Object.entries(node.styles || {})
+      .filter(([prop]) => positioningStyles.includes(prop))
+      .map(([prop, value]) => cssPropToTailwind(prop, String(value)))
+      .filter(Boolean)
+      .join(' ');
+    const allClasses = ['block', 'max-w-none', sizeClasses, nodeStyleClasses].filter(Boolean).join(' ');
+
     if (svgValue) {
       const imgSrc = isViewerMode ? `"${svgValue}"` : `{${svgValue}}`;
-      return `${indent}<img ${dataAttrString} className="block max-w-none ${sizeClasses}" alt="${altText}" src=${imgSrc} />\n`;
+      return `${indent}<img ${dataAttrString} className="${allClasses}" alt="${altText}" src=${imgSrc} />\n`;
     }
-    return `${indent}<div ${dataAttrString} className="block ${sizeClasses}" />\n`;
+    return `${indent}<div ${dataAttrString} className="${allClasses}" />\n`;
   }
 
   const htmlTag = mapNodeTypeToHTMLTag(node.originalType); // T177: Use originalType for tag mapping
@@ -848,13 +910,24 @@ function generateTailwindJSXElement(
   structuralClasses.push('box-border'); // Ensure box-sizing: border-box
   structuralClasses.push('content-stretch'); // MCP custom utility
 
-  // Add relative for positioned elements (like MCP)
-  if (node.originalType !== 'TEXT') {
+  // Add relative for positioned elements (like MCP), unless already absolute
+  // WP31: Skip relative for GROUP children (grid-area stacking) - relative creates stacking context issues
+  const isGridChild = node.styles?.['grid-area'];
+  if (node.originalType !== 'TEXT' && node.styles?.position !== 'absolute' && !isGridChild) {
     structuralClasses.push('relative');
   }
 
   // Add shrink-0 for flex items (MCP adds it almost everywhere)
   structuralClasses.push('shrink-0');
+
+  // WP31: Add negative margin from parent's negative itemSpacing
+  // This replaces invalid gap-[-Xpx] with valid mr-[-Xpx] or mb-[-Xpx]
+  if (parentNegativeSpacing && !isLastChild) {
+    const marginClass = parentNegativeSpacing.direction === 'row'
+      ? `mr-[${parentNegativeSpacing.value}px]`
+      : `mb-[${parentNegativeSpacing.value}px]`;
+    structuralClasses.push(marginClass);
+  }
 
   // WP31: Add flex centering for icon containers (fixed size with SVG children)
   const hasVectorChildren = 'children' in node && node.children.some(
@@ -933,20 +1006,24 @@ function generateTailwindJSXElement(
       jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>\n`;
 
       // Render all fills as stacked layers (decorative, hidden from screen readers)
-      jsxString += `${indent}  <div aria-hidden="true" className="absolute inset-0 pointer-events-none">\n`;
+      // WP31 FIX: Add rounded-[inherit] only if parent has border-radius
+      const hasBorderRadius = node.styles['border-radius'] && node.styles['border-radius'] !== '0px';
+      const inheritRadius = hasBorderRadius ? ' overflow-hidden rounded-[inherit]' : '';
+      const childInheritRadius = hasBorderRadius ? ' rounded-[inherit]' : '';
+      jsxString += `${indent}  <div aria-hidden="true" className="absolute inset-0 pointer-events-none${inheritRadius}">\n`;
 
       for (const fill of node.fillsData) {
         if (fill.type === 'IMAGE' && fill.imageRef) {
           const imageUrl = imageUrls[fill.imageRef] || `https://placehold.co/300x200`;
           // WP32: Use scaleMode for object-fit class
           const objectFitClass = scaleModeToTailwind(fill.scaleMode);
-          jsxString += `${indent}    <img alt="" className="absolute inset-0 w-full h-full ${objectFitClass}" src="${imageUrl}" />\n`;
+          jsxString += `${indent}    <img alt="" className="absolute inset-0 w-full h-full ${objectFitClass}${childInheritRadius}" src="${imageUrl}" />\n`;
         } else if (fill.type === 'SOLID') {
           const colorCSS = fillDataToColorCSS(fill);
-          jsxString += `${indent}    <div className="absolute inset-0" style={{ backgroundColor: "${colorCSS}" }} />\n`;
+          jsxString += `${indent}    <div className="absolute inset-0${childInheritRadius}" style={{ backgroundColor: "${colorCSS}" }} />\n`;
         } else if (fill.type.startsWith('GRADIENT')) {
           const gradientCSS = fillDataToGradientCSS(fill);
-          jsxString += `${indent}    <div className="absolute inset-0" style={{ backgroundImage: "${gradientCSS}" }} />\n`;
+          jsxString += `${indent}    <div className="absolute inset-0${childInheritRadius}" style={{ backgroundImage: "${gradientCSS}" }} />\n`;
         }
       }
 
@@ -954,10 +1031,17 @@ function generateTailwindJSXElement(
 
       // Render children (position:relative comes from altnode-transform)
       if (hasChildren) {
-        for (const child of (node as any).children) {
+        // WP31: Prepare negative spacing for children
+        const childNegativeSpacing = node.negativeItemSpacing && node.layoutDirection
+          ? { value: node.negativeItemSpacing, direction: node.layoutDirection }
+          : undefined;
+        const childrenArray = (node as any).children;
+        for (let i = 0; i < childrenArray.length; i++) {
+          const child = childrenArray[i];
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
+          const isLast = i === childrenArray.length - 1;
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
         }
       }
 
@@ -983,10 +1067,17 @@ function generateTailwindJSXElement(
 
       if (hasChildren) {
         jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${bgStyle} }}>\n`;
-        for (const child of (node as any).children) {
+        // WP31: Prepare negative spacing for children
+        const childNegativeSpacing = node.negativeItemSpacing && node.layoutDirection
+          ? { value: node.negativeItemSpacing, direction: node.layoutDirection }
+          : undefined;
+        const childrenArray = (node as any).children;
+        for (let i = 0; i < childrenArray.length; i++) {
+          const child = childrenArray[i];
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
+          const isLast = i === childrenArray.length - 1;
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
         }
         jsxString += `${indent}</${htmlTag}>`;
       } else {
@@ -1007,13 +1098,19 @@ function generateTailwindJSXElement(
     if (hasChildren) {
       jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>\n`;
 
-      // FIX: Recursively generate children with their own rule evaluation
-      for (const child of (node as any).children) {
+      // WP31: Prepare negative spacing for children
+      const childNegativeSpacing = node.negativeItemSpacing && node.layoutDirection
+        ? { value: node.negativeItemSpacing, direction: node.layoutDirection }
+        : undefined;
+      const childrenArray = (node as any).children;
+      for (let i = 0; i < childrenArray.length; i++) {
+        const child = childrenArray[i];
         // Evaluate rules for this child
         const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
         const childProps = cleanResolvedProperties(childResult.properties);
+        const isLast = i === childrenArray.length - 1;
 
-        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
+        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
       }
 
       jsxString += `${indent}</${htmlTag}>`;

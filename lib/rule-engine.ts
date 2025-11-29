@@ -41,15 +41,7 @@ export function evaluateRules(
 ): SimpleRuleMatch[] {
   // Filter to matching rules
   const matchingRules = rules.filter(rule => {
-    // DEBUG: Log official-itemspacing rule evaluation
-    if (rule.id === 'official-itemspacing' && (altNode.name === 'Tab' || altNode.name === 'Tab titleleft')) {
-      console.log(`\n--- Evaluating official-itemspacing for ${altNode.name} ---`);
-      console.log(`Selector: ${JSON.stringify(rule.selector)}`);
-    }
     const matches = selectorMatches(altNode, rule.selector);
-    if (rule.id === 'official-itemspacing' && (altNode.name === 'Tab' || altNode.name === 'Tab titleleft')) {
-      console.log(`Result: ${matches ? '✅ MATCH' : '❌ NO MATCH'}\n`);
-    }
     return matches;
   });
 

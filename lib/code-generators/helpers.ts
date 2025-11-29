@@ -68,9 +68,30 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
       inline: 'inline',
       'inline-block': 'inline-block',
       grid: 'grid',
+      'inline-grid': 'inline-grid', // WP31: GROUP stacking pattern
       hidden: 'hidden',
     };
     return displayMap[cssValue] || '';
+  }
+
+  // WP31: CSS Grid properties for GROUP stacking (MCP pattern)
+  if (prop === 'gridtemplatecolumns') {
+    if (cssValue === 'max-content') return 'grid-cols-[max-content]';
+    return `grid-cols-[${cssValue}]`;
+  }
+  if (prop === 'gridtemplaterows') {
+    if (cssValue === 'max-content') return 'grid-rows-[max-content]';
+    return `grid-rows-[${cssValue}]`;
+  }
+  if (prop === 'placeitems') {
+    if (cssValue === 'start') return 'place-items-start';
+    if (cssValue === 'center') return 'place-items-center';
+    if (cssValue === 'end') return 'place-items-end';
+    return `place-items-${cssValue}`;
+  }
+  if (prop === 'gridarea') {
+    // MCP uses [grid-area:1_/_1] format
+    return `[grid-area:${cssValue.replace(/ /g, '_')}]`;
   }
 
   // Flex direction
@@ -349,7 +370,9 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   // Typography
   if (prop === 'fontfamily') {
     // Custom fonts use arbitrary values: font-['Poppins']
-    const cleanFont = cssValue.replace(/['"]/g, '');
+    // WP31: Tailwind uses underscores for spaces in arbitrary values
+    // 'Baloo 2' → font-['Baloo_2'] (Tailwind converts _ to space in CSS output)
+    const cleanFont = cssValue.replace(/['"]/g, '').replace(/ /g, '_');
     return `font-['${cleanFont}']`;
   }
 

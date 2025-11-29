@@ -95,6 +95,7 @@ export default function ViewerPage() {
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
+  const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
   const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
@@ -185,16 +186,12 @@ export default function ViewerPage() {
           if (node) setSelectedTreeNodeId(node.id);
 
           // WP31: Cache variables for CSS variable generation
-          console.log('[VIEWER] API returned variables:', data.variables ? Object.keys(data.variables).length : 'NONE');
           if (data.variables && Object.keys(data.variables).length > 0) {
             setCachedVariablesMap({
               variables: data.variables,
               lastUpdated: new Date().toISOString(),
               version: 1
             });
-            console.log(`[VIEWER] 📦 Cached ${Object.keys(data.variables).length} variables for code generation`);
-          } else {
-            console.log('[VIEWER] ⚠️ No variables received from API');
           }
         }
       } catch (error) {
@@ -218,17 +215,15 @@ export default function ViewerPage() {
     const node = targetNode;
 
     async function generateCode() {
-      console.log('[VIEWER-GENERATE] Starting code generation, framework:', previewFramework);
       try {
         if (previewFramework === 'react-tailwind') {
-          console.log('[VIEWER-GENERATE] Calling generateReactTailwind...');
           const output = await generateReactTailwind(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
+          setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
-          console.log('[VIEWER-GENERATE] Calling generateHTMLCSS...');
           const output = await generateHTMLCSS(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
-          console.log('[VIEWER-GENERATE] HTML-CSS output.code length:', output.code.length);
           setGeneratedCode(output.code);
+          setGoogleFontsUrl(output.googleFontsUrl); // WP31
         }
       } catch (error) {
         console.error('Code generation error:', error);
@@ -558,6 +553,7 @@ export default function ViewerPage() {
               code={generatedCode}
               framework={previewFramework}
               language={previewFramework === 'html-css' ? 'html' : 'tsx'}
+              googleFontsUrl={googleFontsUrl}
             />
           </ResizablePreviewViewport>
         </ResizablePanel>

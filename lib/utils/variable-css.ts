@@ -31,7 +31,6 @@ let cachedMap: VariablesMap | null = null;
  */
 export function setCachedVariablesMap(map: VariablesMap): void {
   cachedMap = map;
-  console.log('[VAR-CSS] Cache set with', Object.keys(map.variables).length, 'variables');
 }
 
 /**
@@ -67,10 +66,7 @@ export function getVariableCssNameSync(fullId: string): string | null {
  * Used by code generators to include variable definitions in output
  */
 export function generateCssVariableDefinitions(): string {
-  console.log('[VAR-CSS] generateCssVariableDefinitions called, cachedMap:', cachedMap ? Object.keys(cachedMap.variables).length + ' variables' : 'NULL');
-
   if (!cachedMap || Object.keys(cachedMap.variables).length === 0) {
-    console.log('[VAR-CSS] No variables in cache, returning empty');
     return '';
   }
 
@@ -83,9 +79,7 @@ export function generateCssVariableDefinitions(): string {
   }
 
   lines.push('}');
-  const result = lines.join('\n');
-  console.log('[VAR-CSS] Generated :root with', Object.keys(cachedMap.variables).length, 'variables');
-  return result;
+  return lines.join('\n');
 }
 
 /**
