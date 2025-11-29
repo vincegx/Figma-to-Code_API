@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Copy, Check } from 'lucide-react';
+import { ChevronRight, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RawDataSectionProps {
@@ -25,24 +25,26 @@ export function RawDataSection({ node }: RawDataSectionProps) {
   };
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+    <div className="mt-3 bg-gray-800/40 rounded-md border border-gray-700/50">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between w-full text-sm font-semibold mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        className="w-full flex items-center gap-1.5 py-2 px-2.5 hover:bg-gray-700/30 transition-colors text-left"
       >
-        <span className="text-gray-900 dark:text-white">Raw Figma Data</span>
-        <ChevronDown
+        <ChevronRight
           className={cn(
-            "w-4 h-4 transition-transform text-gray-500",
-            isExpanded && "rotate-180"
+            "w-3 h-3 transition-transform text-gray-500",
+            isExpanded && "rotate-90"
           )}
         />
+        <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          Raw Figma Data
+        </span>
       </button>
 
       {isExpanded && (
-        <div className="relative">
-          <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto text-xs border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
-            <code className="text-gray-900 dark:text-gray-100">{jsonData}</code>
+        <div className="relative px-2.5 pb-2.5">
+          <pre className="bg-gray-900/50 p-3 rounded overflow-x-auto text-[10px] max-h-60 overflow-y-auto">
+            <code className="text-gray-300">{jsonData}</code>
           </pre>
           <div
             role="button"
@@ -54,13 +56,13 @@ export function RawDataSection({ node }: RawDataSectionProps) {
                 handleCopy();
               }
             }}
-            className="absolute top-2 right-2 p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors cursor-pointer"
+            className="absolute top-2 right-4 p-1.5 hover:bg-gray-700 rounded transition-colors cursor-pointer"
             aria-label="Copy JSON data"
           >
             {copied ? (
-              <Check size={14} className="text-green-500" />
+              <Check size={12} className="text-green-500" />
             ) : (
-              <Copy size={14} className="text-gray-400" />
+              <Copy size={12} className="text-gray-400" />
             )}
           </div>
         </div>

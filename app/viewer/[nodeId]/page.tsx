@@ -607,11 +607,17 @@ export default function ViewerPage() {
                 onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
                 className="flex-1 flex flex-col overflow-hidden h-full pt-10"
               >
-                <TabsList className="w-full justify-start border-b border-border-primary rounded-none bg-bg-secondary px-2">
-                  <TabsTrigger value="information" className="text-sm">
+                <TabsList className="w-full justify-start border-b border-gray-700 rounded-none bg-transparent h-auto p-0">
+                  <TabsTrigger
+                    value="information"
+                    className="text-xs text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                  >
                     Information
                   </TabsTrigger>
-                  <TabsTrigger value="rules" className="text-sm">
+                  <TabsTrigger
+                    value="rules"
+                    className="text-xs text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                  >
                     Rules
                   </TabsTrigger>
                 </TabsList>

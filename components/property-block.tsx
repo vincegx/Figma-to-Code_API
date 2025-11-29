@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PropertyBlockProps {
@@ -15,32 +15,27 @@ export function PropertyBlock({
   title,
   children,
   defaultOpen = true,
-  icon,
 }: PropertyBlockProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-border-primary last:border-0">
+    <div className="bg-gray-800/40 rounded-md border border-gray-700/50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-2.5 px-2 hover:bg-bg-hover transition-colors text-left"
+        className="w-full flex items-center gap-1.5 py-2 px-2.5 hover:bg-gray-700/30 transition-colors text-left rounded-t-md"
       >
-        <div className="flex items-center gap-2">
-          <ChevronDown
-            className={cn(
-              "w-3.5 h-3.5 transition-transform text-text-muted",
-              isOpen && "rotate-180"
-            )}
-          />
-          {icon && <span className="text-text-muted">{icon}</span>}
-          <h3 className="font-semibold text-xs text-text-primary">
-            {title}
-          </h3>
-        </div>
+        <ChevronRight
+          className={cn(
+            "w-3 h-3 transition-transform text-gray-500",
+            isOpen && "rotate-90"
+          )}
+        />
+        <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          {title}
+        </span>
       </button>
-
       {isOpen && (
-        <div className="px-4 pb-3 space-y-1.5">
+        <div className="px-3 pb-2.5 pt-1 space-y-1">
           {children}
         </div>
       )}
@@ -56,16 +51,16 @@ interface PropertyItemProps {
 
 export function PropertyItem({ label, value, inline = true }: PropertyItemProps) {
   const displayValue = value === null || value === undefined
-    ? 'N/A'
+    ? '—'
     : typeof value === 'boolean'
     ? (value ? '✓' : '✗')
     : value;
 
   if (inline) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-text-secondary">{label}:</span>
-        <span className="text-[11px] font-medium text-text-primary">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-gray-500">{label}</span>
+        <span className="text-[11px] text-gray-200">
           {displayValue}
         </span>
       </div>
@@ -74,8 +69,8 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
 
   return (
     <div className="space-y-0.5">
-      <div className="text-xs text-text-secondary">{label}:</div>
-      <div className="text-[11px] font-medium text-text-primary pl-2">
+      <div className="text-[11px] text-gray-500">{label}</div>
+      <div className="text-[11px] text-gray-200 pl-2">
         {displayValue}
       </div>
     </div>

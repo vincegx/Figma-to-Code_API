@@ -1,12 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
 import { PropertyBlock, PropertyItem } from './property-block';
 import { GeneratedCodeSection } from './generated-code-section';
 import { RawDataSection } from './raw-data-section';
-import { Box, Palette, Layout, Type, Move, Network } from 'lucide-react';
 
 type FrameworkType = 'react-tailwind' | 'html-css' | 'react-inline' | 'swift-ui' | 'android-xml';
 
@@ -43,12 +41,12 @@ export function InformationPanel({
   const hasLayout = figmaNode?.layoutMode && figmaNode.layoutMode !== 'NONE';
 
   return (
-    <div className="h-full overflow-y-auto p-4">
+    <div className="h-full overflow-y-auto p-3">
       {/* Properties Blocks */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="space-y-2">
 
         {/* Basic Properties */}
-        <PropertyBlock title="Basic" defaultOpen={true} icon={<Box size={16} />}>
+        <PropertyBlock title="Basic" defaultOpen={true}>
           <PropertyItem label="ID" value={node.id} />
           <PropertyItem label="Name" value={node.name} />
           <PropertyItem label="Type" value={node.type} />
@@ -60,7 +58,7 @@ export function InformationPanel({
         </PropertyBlock>
 
         {/* Appearance */}
-        <PropertyBlock title="Appearance" defaultOpen={true} icon={<Palette size={16} />}>
+        <PropertyBlock title="Appearance" defaultOpen={true}>
           {figmaNode?.fills && figmaNode.fills.length > 0 && (
             <PropertyItem label="Fills" value={`${figmaNode.fills.length} fill(s)`} />
           )}
@@ -77,7 +75,7 @@ export function InformationPanel({
         </PropertyBlock>
 
         {/* Layout */}
-        <PropertyBlock title="Layout" defaultOpen={hasLayout} icon={<Layout size={16} />}>
+        <PropertyBlock title="Layout" defaultOpen={hasLayout}>
           <div className="grid grid-cols-2 gap-2">
             <PropertyItem label="X" value={`${Math.round(figmaNode?.x || figmaNode?.absoluteBoundingBox?.x || 0)}px`} />
             <PropertyItem label="Y" value={`${Math.round(figmaNode?.y || figmaNode?.absoluteBoundingBox?.y || 0)}px`} />
@@ -93,12 +91,10 @@ export function InformationPanel({
             <>
               <PropertyItem label="Layout Mode" value={figmaNode.layoutMode} />
               {figmaNode.paddingLeft !== undefined && (
-                <div className="text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Padding:</span>
-                  <span className="font-medium text-gray-900 dark:text-white ml-2">
-                    {figmaNode.paddingTop}px {figmaNode.paddingRight}px {figmaNode.paddingBottom}px {figmaNode.paddingLeft}px
-                  </span>
-                </div>
+                <PropertyItem
+                  label="Padding"
+                  value={`${figmaNode.paddingTop} ${figmaNode.paddingRight} ${figmaNode.paddingBottom} ${figmaNode.paddingLeft}`}
+                />
               )}
               {figmaNode.itemSpacing !== undefined && (
                 <PropertyItem label="Gap" value={`${figmaNode.itemSpacing}px`} />
@@ -115,7 +111,7 @@ export function InformationPanel({
 
         {/* Typography - Only for TEXT nodes */}
         {hasTextContent && (
-          <PropertyBlock title="Typography" defaultOpen={false} icon={<Type size={16} />}>
+          <PropertyBlock title="Typography" defaultOpen={false}>
             {figmaNode?.style?.fontFamily && (
               <PropertyItem label="Font Family" value={figmaNode.style.fontFamily} />
             )}
@@ -141,7 +137,7 @@ export function InformationPanel({
         )}
 
         {/* Constraints & Behavior */}
-        <PropertyBlock title="Constraints & Behavior" defaultOpen={false} icon={<Move size={16} />}>
+        <PropertyBlock title="Constraints" defaultOpen={false}>
           {figmaNode?.constraints && (
             <>
               <PropertyItem label="Horizontal" value={figmaNode.constraints.horizontal || 'SCALE'} />
@@ -152,30 +148,30 @@ export function InformationPanel({
         </PropertyBlock>
 
         {/* Hierarchy */}
-        <PropertyBlock title="Hierarchy" defaultOpen={true} icon={<Network size={16} />}>
+        <PropertyBlock title="Hierarchy" defaultOpen={true}>
           {figmaNode?.parent && (
-            <div className="text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Parent:</span>
-              <span className="font-medium text-gray-900 dark:text-white ml-2">
-                {figmaNode.parent.name} ({figmaNode.parent.type})
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-gray-500">Parent</span>
+              <span className="text-[11px] text-gray-200">
+                {figmaNode.parent.name}
               </span>
             </div>
           )}
           {node.children && node.children.length > 0 && (
-            <div className="text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Children:</span>
-              <span className="font-medium text-gray-900 dark:text-white ml-2">
-                {node.children.length} node(s)
-              </span>
-              <div className="ml-4 mt-1 space-y-1">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-gray-500">Children</span>
+                <span className="text-[11px] text-gray-200">{node.children.length}</span>
+              </div>
+              <div className="space-y-0.5 pt-1">
                 {node.children.slice(0, 5).map((child: any, idx: number) => (
-                  <div key={idx} className="text-xs text-gray-500 dark:text-gray-400">
-                    • {child.name} ({child.type})
+                  <div key={idx} className="text-[10px] text-gray-400 pl-2">
+                    · {child.name}
                   </div>
                 ))}
                 {node.children.length > 5 && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    ... and {node.children.length - 5} more
+                  <div className="text-[10px] text-gray-500 pl-2">
+                    +{node.children.length - 5} more
                   </div>
                 )}
               </div>

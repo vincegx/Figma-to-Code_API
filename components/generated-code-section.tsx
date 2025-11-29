@@ -209,13 +209,13 @@ export function GeneratedCodeSection({
   };
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="mt-3 bg-gray-800/40 rounded-md border border-gray-700/50">
+      <div className="flex items-center justify-between px-2.5 py-2 border-b border-gray-700/50">
+        <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">
           Generated Code
-        </h3>
+        </span>
         <Select value={framework} onValueChange={(v: string) => onFrameworkChange(v as FrameworkType)}>
-          <SelectTrigger className="w-40 h-8 text-xs">
+          <SelectTrigger className="w-32 h-6 text-[10px] bg-gray-700/50 border-gray-600">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -229,14 +229,14 @@ export function GeneratedCodeSection({
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'component' | 'styles')}>
-        <TabsList className="w-full">
-          <TabsTrigger value="component" className="flex-1">Component</TabsTrigger>
-          <TabsTrigger value="styles" className="flex-1">Styles</TabsTrigger>
+        <TabsList className="w-full justify-start border-b border-gray-700/50 rounded-none bg-transparent h-auto p-0">
+          <TabsTrigger value="component" className="flex-1 text-[11px] text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Component</TabsTrigger>
+          <TabsTrigger value="styles" className="flex-1 text-[11px] text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Styles</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="component" className="mt-3">
+        <TabsContent value="component" className="mt-0 p-2">
           <div className="relative">
-            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-auto max-h-96">
+            <div className="bg-gray-900/50 rounded text-xs overflow-auto max-h-80">
               <SyntaxHighlighter
                 language={getLanguage(framework, false)}
                 style={getCustomTheme(isDark)}
@@ -335,9 +335,9 @@ export function GeneratedCodeSection({
           </div>
         </TabsContent>
 
-        <TabsContent value="styles" className="mt-3">
+        <TabsContent value="styles" className="mt-0 p-2">
           <div className="relative">
-            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg text-xs border border-gray-200 dark:border-gray-700 overflow-auto max-h-96">
+            <div className="bg-gray-900/50 rounded text-xs overflow-auto max-h-80">
               <SyntaxHighlighter
                 language={getLanguage(framework, true)}
                 style={getCustomTheme(isDark)}
