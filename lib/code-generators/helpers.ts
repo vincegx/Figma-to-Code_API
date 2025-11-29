@@ -146,8 +146,13 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
         const colorClass = hexToTailwindColor(color, 'border');
         return colorClass ? `${borderClass} ${colorClass}` : borderClass;
       } else if (color.startsWith('var(')) {
-        // CSS variable: border-[var(--var-name, #color)]
-        return `${borderClass} border-[color:${color}]`;
+        // WP31: CSS variable - Tailwind v3: border-[var(--name)]
+        const varMatch = color.match(/var\((--[\w-]+)/);
+        if (varMatch) {
+          const varName = varMatch[1];
+          return `${borderClass} border-[var(${varName})] border-solid`;
+        }
+        return `${borderClass} border-solid`;
       } else {
         // Hex or named color
         const colorClass = hexToTailwindColor(color, 'border');

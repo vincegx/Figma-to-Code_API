@@ -1,0 +1,149 @@
+{
+  "variables": {
+    "125:11": {
+      "name": "var-125-11",
+      "realName": null,
+      "type": "spacing",
+      "value": 32,
+      "usageCount": 11
+    },
+    "125:12": {
+      "name": "var-125-12",
+      "realName": null,
+      "type": "spacing",
+      "value": 24,
+      "usageCount": 1
+    },
+    "112:554": {
+      "name": "var-112-554",
+      "realName": null,
+      "type": "color",
+      "value": {
+        "blendMode": "NORMAL",
+        "type": "SOLID",
+        "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:55c365fb08db7811f8f32d3e08df15f8d783e04e/112:554"
+          }
+        }
+      },
+      "usageCount": 60
+    },
+    "128:143": {
+      "name": "var-128-143",
+      "realName": null,
+      "type": "spacing",
+      "value": 20,
+      "usageCount": 2
+    },
+    "123:148": {
+      "name": "var-123-148",
+      "realName": null,
+      "type": "spacing",
+      "value": 8,
+      "usageCount": 10
+    },
+    "129:241": {
+      "name": "var-129-241",
+      "realName": null,
+      "type": "spacing",
+      "value": 12,
+      "usageCount": 11
+    },
+    "128:135": {
+      "name": "var-128-135",
+      "realName": null,
+      "type": "spacing",
+      "value": 8,
+      "usageCount": 8
+    },
+    "112:32": {
+      "name": "var-112-32",
+      "realName": null,
+      "type": "color",
+      "value": {
+        "blendMode": "NORMAL",
+        "type": "SOLID",
+        "color": {
+          "r": 0.16470588743686676,
+          "g": 0.3450980484485626,
+          "b": 0.48627451062202454,
+          "a": 1
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:ac1fa92ab7cfb3f9c355ecf15a1fd4970b4adeee/112:32"
+          }
+        }
+      },
+      "usageCount": 14
+    },
+    "126:53": {
+      "name": "var-126-53",
+      "realName": null,
+      "type": "fontSize",
+      "value": 0,
+      "usageCount": 5
+    },
+    "128:144": {
+      "name": "var-128-144",
+      "realName": null,
+      "type": "spacing",
+      "value": 16,
+      "usageCount": 1
+    },
+    "112:35": {
+      "name": "var-112-35",
+      "realName": null,
+      "type": "color",
+      "value": {
+        "blendMode": "NORMAL",
+        "type": "SOLID",
+        "color": {
+          "r": 0.6313725709915161,
+          "g": 0.0784313753247261,
+          "b": 0.12156862765550613,
+          "a": 1
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:d0a4925f15571cc8c99bbff89e850b967ada40bb/112:35"
+          }
+        }
+      },
+      "usageCount": 2
+    },
+    "126:54": {
+      "name": "var-126-54",
+      "realName": null,
+      "type": "fontSize",
+      "value": 0,
+      "usageCount": 1
+    },
+    "128:146": {
+      "name": "var-128-146",
+      "realName": null,
+      "type": "fontSize",
+      "value": 0,
+      "usageCount": 1
+    },
+    "128:170": {
+      "name": "var-128-170",
+      "realName": null,
+      "type": "fontSize",
+      "value": 0,
+      "usageCount": 1
+    }
+  },
+  "lastUpdated": "2025-11-29T00:44:51.226Z",
+  "version": 2
+}

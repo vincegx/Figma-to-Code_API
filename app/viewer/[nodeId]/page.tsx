@@ -48,6 +48,7 @@ import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
+import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 
 // Viewport presets for responsive mode
 const VIEWPORT_PRESETS = {
@@ -182,6 +183,19 @@ export default function ViewerPage() {
           const node = data.altNode || null;
           setAltNode(node);
           if (node) setSelectedTreeNodeId(node.id);
+
+          // WP31: Cache variables for CSS variable generation
+          console.log('[VIEWER] API returned variables:', data.variables ? Object.keys(data.variables).length : 'NONE');
+          if (data.variables && Object.keys(data.variables).length > 0) {
+            setCachedVariablesMap({
+              variables: data.variables,
+              lastUpdated: new Date().toISOString(),
+              version: 1
+            });
+            console.log(`[VIEWER] 📦 Cached ${Object.keys(data.variables).length} variables for code generation`);
+          } else {
+            console.log('[VIEWER] ⚠️ No variables received from API');
+          }
         }
       } catch (error) {
         console.error('Failed to fetch node data:', error);
@@ -200,13 +214,20 @@ export default function ViewerPage() {
       return;
     }
 
+    // Capture non-null node for closure
+    const node = targetNode;
+
     async function generateCode() {
+      console.log('[VIEWER-GENERATE] Starting code generation, framework:', previewFramework);
       try {
         if (previewFramework === 'react-tailwind') {
-          const output = await generateReactTailwind(targetNode, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          console.log('[VIEWER-GENERATE] Calling generateReactTailwind...');
+          const output = await generateReactTailwind(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
         } else if (previewFramework === 'html-css') {
-          const output = await generateHTMLCSS(targetNode, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          console.log('[VIEWER-GENERATE] Calling generateHTMLCSS...');
+          const output = await generateHTMLCSS(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          console.log('[VIEWER-GENERATE] HTML-CSS output.code length:', output.code.length);
           setGeneratedCode(output.code);
         }
       } catch (error) {

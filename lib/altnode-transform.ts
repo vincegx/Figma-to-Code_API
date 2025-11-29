@@ -20,6 +20,7 @@
 
 import type { FigmaNode } from './types/figma';
 import figmaConfig from './figma-transform-config.json';
+import { getVariableCssNameSync } from './utils/variable-css';
 
 // Simple AltNode structure for transformation engine
 export interface SimpleAltNode {
@@ -231,6 +232,13 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
   for (const [figmaProp, mapping] of Object.entries(figmaConfig.propertyMappings)) {
     if (!mapping.extract) continue;
 
+    // Skip gap (itemSpacing) when justify-content is space-between - flexbox handles spacing
+    if (figmaProp === 'itemSpacing') {
+      if (node.primaryAxisAlignItems === 'SPACE_BETWEEN') {
+        continue;
+      }
+    }
+
     const value = node[figmaProp];
     if (value !== undefined && value !== null) {
       const cssValue = mapping.unit ? `${value}${mapping.unit}` : String(value);
@@ -282,6 +290,13 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
               finalValue = finalValue.replace('${absoluteBoundingBox.height}', String(figmaNode.absoluteBoundingBox.height));
             }
           }
+
+          // Skip width/height if layoutSizing is FILL (already set to 100% in normalizeLayout)
+          const layoutSizingH = node.layoutSizingHorizontal;
+          const layoutSizingV = node.layoutSizingVertical;
+          if (cssProp === 'width' && layoutSizingH === 'FILL') continue;
+          if (cssProp === 'height' && layoutSizingV === 'FILL') continue;
+
           altNode.styles[cssProp] = finalValue;
         }
       }
@@ -581,13 +596,27 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   const nodeSize = (figmaNode as any).size;
   const hasRotation = (figmaNode as any).rotation && (figmaNode as any).rotation !== 0;
 
-  if (hasRotation && nodeSize) {
-    // Rotated element: use size.x/y (actual dimensions before rotation)
+  // Figma Auto Layout sizing: FILL = responsive (100%), FIXED = pixel value, HUG = auto
+  const layoutSizingH = (figmaNode as any).layoutSizingHorizontal;
+  const layoutSizingV = (figmaNode as any).layoutSizingVertical;
+
+  // Width
+  if (layoutSizingH === 'FILL') {
+    altNode.styles.width = '100%';
+  } else if (hasRotation && nodeSize) {
     altNode.styles.width = `${nodeSize.x}px`;
+  } else if (figmaNode.absoluteBoundingBox) {
+    altNode.styles.width = `${figmaNode.absoluteBoundingBox.width}px`;
+  }
+
+  // Height
+  if (layoutSizingV === 'FILL') {
+    altNode.styles.height = '100%';
+  } else if (layoutSizingV === 'HUG') {
+    altNode.styles.height = 'auto';
+  } else if (hasRotation && nodeSize) {
     altNode.styles.height = `${nodeSize.y}px`;
   } else if (figmaNode.absoluteBoundingBox) {
-    // Non-rotated element: use absoluteBoundingBox
-    altNode.styles.width = `${figmaNode.absoluteBoundingBox.width}px`;
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
   }
 }
@@ -675,12 +704,16 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
     const a = firstFill.opacity ?? 1;
     const rgbaValue = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 
-    // WP25 T181: Check for Figma variable bindings
+    // WP31 T224: Check for Figma variable bindings (uses loaded variables map)
     const boundVars = (figmaNode as any).boundVariables;
     if (boundVars && boundVars.fills && boundVars.fills[0]?.id) {
       const varId = boundVars.fills[0].id;
-      const varName = varId.replace(/^VariableID:.*\//, 'var-').replace(/:/g, '-');
-      altNode.styles[colorProp] = `var(--${varName}, ${rgbaValue})`;
+      const varName = resolveVariableName(varId, figmaNode);
+      if (varName) {
+        altNode.styles[colorProp] = `var(--${varName}, ${rgbaValue})`;
+      } else {
+        altNode.styles[colorProp] = rgbaValue;
+      }
     } else {
       altNode.styles[colorProp] = rgbaValue;
     }
@@ -718,12 +751,16 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       const a = stroke.opacity ?? 1;
       let color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 
-      // WP25 T181: Check for Figma variable bindings on strokes
-      const boundVars = (figmaNode as any).boundVariables;
-      if (boundVars && boundVars.strokes && boundVars.strokes[0]?.id) {
-        const varId = boundVars.strokes[0].id;
-        const varName = varId.replace(/^VariableID:.*\//, 'var-').replace(/:/g, '-');
-        color = `var(--${varName}, ${color})`;
+      // WP31 T224: Check for Figma variable bindings on strokes
+      // Variables can be bound at stroke level (stroke.boundVariables.color) or node level
+      const strokeBoundVars = stroke.boundVariables;
+      const nodeBoundVars = (figmaNode as any).boundVariables;
+      const varBinding = strokeBoundVars?.color || nodeBoundVars?.strokes?.[0];
+      if (varBinding?.id) {
+        const varName = resolveVariableName(varBinding.id, figmaNode);
+        if (varName) {
+          color = `var(--${varName}, ${color})`;
+        }
       }
 
       // WP31 FIX: Always use border to match MCP output (not outline)
@@ -856,6 +893,9 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   }
 }
 
+// WP31 T224: Module-level variable map for resolveVariableName
+let currentVariablesMap: Record<string, unknown> = {};
+
 /**
  * Transform Figma node to AltNode
  *
@@ -869,13 +909,19 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
  * @param figmaNode - Figma node from API
  * @param cumulativeRotation - Cumulative rotation from parent nodes (degrees)
  * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
+ * @param variables - WP31 T224: Figma variables map for CSS variable resolution
  * @returns Transformed AltNode or null if filtered out
  */
 export function transformToAltNode(
   figmaNode: FigmaNode,
   cumulativeRotation: number = 0,
-  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'
+  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
+  variables?: Record<string, unknown>
 ): SimpleAltNode | null {
+  // WP31 T224: Store variables in module scope for resolveVariableName
+  if (variables) {
+    currentVariablesMap = variables;
+  }
   // NOTE: Hidden nodes (visible === false) are KEPT in tree with visible: false
   // This allows the UI to show hidden nodes with EyeOff indicator (T156)
   // The `visible` property is preserved at line 531
@@ -970,24 +1016,62 @@ export function transformToAltNode(
 
 /**
  * WP31 T224: Helper function to resolve Figma variable names from variable IDs
- * 
- * @param variableId - Figma variable ID (e.g., "VariableID:123:456")
+ *
+ * Resolution order:
+ * 1. Check system-variables.json (extracted from node, may have user-updated names)
+ * 2. Check Figma API variables (Enterprise only)
+ * 3. Fallback to ID-based name
+ *
+ * @param variableId - Figma variable ID (e.g., "VariableID:abc/123:45")
  * @param figmaNode - Original Figma node with document context
- * @returns Variable name (e.g., "colors/main-01") or fallback based on ID
+ * @returns Variable name (e.g., "colors-main-01") or fallback based on ID
  */
 function resolveVariableName(variableId: string, figmaNode: FigmaNode): string | null {
-  // Try to access figmaNode.document.variables if available
+  // WP31: First check system-variables.json (has user-updatable names)
+  const cachedName = getVariableCssNameSync(variableId);
+  if (cachedName) {
+    return cachedName;
+  }
+
+  // WP31 T224: Check module-level variables map from Figma API (Enterprise only)
+  if (currentVariablesMap && Object.keys(currentVariablesMap).length > 0) {
+    // API response has nested structure: { variables: { id → { name, ... } } }
+    const variablesObj = (currentVariablesMap as any).variables || currentVariablesMap;
+
+    // Try direct lookup first
+    const variable = variablesObj[variableId] as { name?: string } | undefined;
+    if (variable?.name) {
+      // Sanitize name for CSS custom property (replace / and spaces)
+      return variable.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
+    }
+
+    // Try matching by the numeric ID part (e.g., "125:11")
+    const idMatch = variableId.match(/(\d+:\d+)$/);
+    if (idMatch) {
+      const numericId = idMatch[1];
+      for (const [key, val] of Object.entries(variablesObj)) {
+        if (key.includes(numericId)) {
+          const v = val as { name?: string };
+          if (v?.name) {
+            return v.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
+          }
+        }
+      }
+    }
+  }
+
+  // Try to access figmaNode.document.variables if available (legacy path)
   const doc = (figmaNode as any).document;
   if (doc?.variables) {
     const variable = doc.variables[variableId];
     if (variable?.name) {
-      return variable.name; // e.g., "colors/main-01"
+      return variable.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
     }
   }
 
   // Fallback: Extract a meaningful name from the variable ID
   // "VariableID:710641395bac9f5822c4c329c8e7d6bb6fc986f8/125:11" -> "var-125-11"
-  const idMatch = variableId.match(/\/(\d+):(\d+)$/);
+  const idMatch = variableId.match(/(\d+):(\d+)$/);
   if (idMatch) {
     return `var-${idMatch[1]}-${idMatch[2]}`;
   }

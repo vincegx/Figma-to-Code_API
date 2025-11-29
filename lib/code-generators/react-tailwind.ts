@@ -5,6 +5,7 @@ import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
 import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
 import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename, SvgExportNode } from '../utils/image-fetcher';
+import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
  * WP32: SVG export info for generating imports and assets
@@ -614,14 +615,14 @@ export async function generateReactTailwind(
       const filename = `${realNodeId}_${imgNode.imageRef.substring(0, 8)}.png`;
       imageUrls[imgNode.imageRef] = `/api/images/${nodeId}/${filename}`;
     }
-    console.log(`✅ Using ${Object.keys(imageUrls).length} local image paths`);
+    // console.log(`✅ Using ${Object.keys(imageUrls).length} local image paths`);
   } else if (figmaFileKey && figmaAccessToken) {
     // Export mode: fetch from Figma API
     const imageNodes = extractImageNodes(altNode);
     const imageRefs = imageNodes.map(n => n.imageRef);
     if (imageRefs.length > 0) {
       imageUrls = await fetchFigmaImages(figmaFileKey, imageRefs, figmaAccessToken);
-      console.log(`✅ Fetched ${Object.keys(imageUrls).length} image URLs from Figma API`);
+      // console.log(`✅ Fetched ${Object.keys(imageUrls).length} image URLs from Figma API`);
     }
   }
 
@@ -654,14 +655,14 @@ export async function generateReactTailwind(
       const filename = generateSvgFilename(svgNode.name, svgNode.nodeId);
       svgDataUrls[svgNode.nodeId] = `/api/images/${nodeId}/${filename}`;
     }
-    console.log(`✅ Using ${Object.keys(svgDataUrls).length} local SVG paths for viewer`);
+    // console.log(`✅ Using ${Object.keys(svgDataUrls).length} local SVG paths for viewer`);
   } else if (!isViewerMode && svgNodes.length > 0) {
     // WP32: Export mode - fetch from Figma API
     let svgContent: Record<string, string> = {};
     if (figmaFileKey && figmaAccessToken) {
       const nodeIds = svgNodes.map(n => n.nodeId);
       svgContent = await fetchNodesAsSVG(figmaFileKey, nodeIds, figmaAccessToken);
-      console.log(`✅ Fetched ${Object.keys(svgContent).length} SVGs from Figma API`);
+      // console.log(`✅ Fetched ${Object.keys(svgContent).length} SVGs from Figma API`);
     }
 
     for (const svgNode of svgNodes) {
@@ -701,11 +702,23 @@ export async function generateReactTailwind(
   const svgMap = isViewerMode ? svgDataUrls : svgVarNames;
   const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
 
+  // WP31: Generate CSS variable definitions for React-Tailwind
+  console.log('[REACT-TAILWIND] Calling generateCssVariableDefinitions...');
+  const cssVariables = generateCssVariableDefinitions();
+  console.log('[REACT-TAILWIND] cssVariables length:', cssVariables.length);
+
+  // Build style tag with CSS variables (if any)
+  const styleTag = cssVariables
+    ? `      <style dangerouslySetInnerHTML={{ __html: \`${cssVariables}\` }} />\n`
+    : '';
+
   // Build code with imports (export mode only)
   const importSection = svgImports ? `${svgImports}\n\n` : '';
   const code = `${importSection}export function ${componentName}() {
   return (
-${jsx}  );
+    <>
+${styleTag}${jsx}    </>
+  );
 }`;
 
   return {
@@ -760,7 +773,7 @@ function generateTailwindJSXElement(
     const altText = node.name || 'svg';
 
     // WP32 DEBUG
-    console.log(`🔍 SVG: ${node.name} (${node.id}) - bounds: ${JSON.stringify(svgBounds)}`);
+    // console.log(`🔍 SVG: ${node.name} (${node.id}) - bounds: ${JSON.stringify(svgBounds)}`);
 
     // Build data attributes
     const componentAttrs = extractComponentDataAttributes(node);
@@ -842,6 +855,17 @@ function generateTailwindJSXElement(
 
   // Add shrink-0 for flex items (MCP adds it almost everywhere)
   structuralClasses.push('shrink-0');
+
+  // WP31: Add flex centering for icon containers (fixed size with SVG children)
+  const hasVectorChildren = 'children' in node && node.children.some(
+    (child: SimpleAltNode) => child.originalType === 'VECTOR' || child.svgData
+  );
+  const hasFixedSize = node.styles?.width && node.styles?.height;
+  const displayValue = String(node.styles?.display || '');
+  const isNotFlexContainer = !displayValue.includes('flex');
+  if (hasVectorChildren && hasFixedSize && isNotFlexContainer) {
+    structuralClasses.push('flex', 'items-center', 'justify-center');
+  }
 
   if (properties.className) {
     // WP28 T211: Rules come LAST so they override fallback base classes

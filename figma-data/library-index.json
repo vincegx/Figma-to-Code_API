@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-28T22:05:47.295Z",
+  "lastUpdated": "2025-11-29T01:51:18.005Z",
   "nodes": [
     {
       "id": "lib-124-21142",
@@ -116,8 +116,8 @@
       "name": "hero responsive - hide",
       "altNode": null,
       "tags": [],
-      "addedAt": "2025-11-28T21:51:12.171Z",
-      "lastModified": "2025-11-28T21:51:12.171Z",
+      "addedAt": "2025-11-29T01:51:15.416Z",
+      "lastModified": "2025-11-29T01:51:15.416Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0

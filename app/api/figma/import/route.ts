@@ -19,11 +19,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { parseFigmaUrl } from '@/lib/utils/url-parser';
-import { fetchNode, fetchScreenshot, fetchFileMetadata, fetchWithRetry, fetchSVGBatch } from '@/lib/figma-client';
-import { saveNodeData, saveSvgAssets, saveImageAssets } from '@/lib/utils/file-storage';
+import { fetchNode, fetchScreenshot, fetchFileMetadata, fetchWithRetry, fetchSVGBatch, fetchVariables } from '@/lib/figma-client';
+import { saveNodeData, saveSvgAssets, saveImageAssets, saveVariables } from '@/lib/utils/file-storage';
 import { addNode } from '@/lib/utils/library-index';
 import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadFigmaImages } from '@/lib/utils/image-fetcher';
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
+import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,6 +65,18 @@ export async function POST(request: NextRequest) {
     // Fetch screenshot with retry
     const screenshot = await fetchWithRetry(() => fetchScreenshot(fileKey, nodeId));
 
+    // WP31 T224: Fetch Figma variables for CSS variable resolution (Enterprise only)
+    const variablesData = await fetchVariables(fileKey);
+    console.log(`📦 Fetched ${Object.keys(variablesData).length > 0 ? 'variables' : 'no variables'} from Figma API`);
+
+    // WP31: Extract boundVariables from node tree and save per-node
+    const extractedVars = extractVariablesFromNode(nodeData);
+    if (Object.keys(extractedVars).length > 0) {
+      const formattedVars = formatExtractedVariablesForStorage(extractedVars);
+      await saveVariables(nodeId, formattedVars);
+      console.log(`📦 Extracted and saved ${Object.keys(extractedVars).length} variable references for node ${nodeId}`);
+    }
+
     // WP32: Detect and download SVG containers at import time
     // This ensures SVGs are available locally without API calls during viewing
     resetNameCounters();
@@ -103,6 +116,12 @@ export async function POST(request: NextRequest) {
     if (Object.keys(svgAssets).length > 0) {
       await saveSvgAssets(nodeId, svgAssets);
       console.log(`✅ Saved ${Object.keys(svgAssets).length} SVG assets to disk`);
+    }
+
+    // WP31 T224: Save Figma variables for CSS variable resolution
+    if (Object.keys(variablesData).length > 0) {
+      await saveVariables(nodeId, variablesData);
+      console.log(`✅ Saved Figma variables to disk`);
     }
 
     // WP32: Detect and download PNG/JPG images at import time

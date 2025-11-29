@@ -284,6 +284,47 @@ export async function saveSvgAssets(
 }
 
 /**
+ * WP31 T224: Save Figma variables to disk
+ * Saves variables.json in figma-data/{nodeId}/
+ *
+ * @param nodeId - Figma node ID
+ * @param variables - Variables data from Figma API
+ */
+export async function saveVariables(
+  nodeId: string,
+  variables: Record<string, unknown>
+): Promise<void> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const nodeDir = path.join(FIGMA_DATA_DIR, safeNodeId);
+
+  await fs.mkdir(nodeDir, { recursive: true });
+  await fs.writeFile(
+    path.join(nodeDir, 'variables.json'),
+    JSON.stringify(variables, null, 2),
+    'utf-8'
+  );
+}
+
+/**
+ * WP31 T224: Load Figma variables from disk
+ * Reads variables.json from figma-data/{nodeId}/
+ *
+ * @param nodeId - Figma node ID
+ * @returns Variables data (empty object if not found)
+ */
+export async function loadVariables(nodeId: string): Promise<Record<string, unknown>> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const variablesPath = path.join(FIGMA_DATA_DIR, safeNodeId, 'variables.json');
+
+  try {
+    const content = await fs.readFile(variablesPath, 'utf-8');
+    return JSON.parse(content);
+  } catch {
+    return {}; // No variables file
+  }
+}
+
+/**
  * WP32: Load SVG assets for a node
  * Reads all SVG files from figma-data/{nodeId}/svg/
  *

@@ -10,10 +10,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getNode, addNode } from '@/lib/utils/library-index';
-import { loadNodeData, loadNodeMetadata, saveNodeData, saveSvgAssets, saveImageAssets } from '@/lib/utils/file-storage';
-import { fetchNode, fetchScreenshot, fetchWithRetry, fetchSVGBatch } from '@/lib/figma-client';
+import { loadNodeData, loadNodeMetadata, saveNodeData, saveSvgAssets, saveImageAssets, loadVariables, saveVariables } from '@/lib/utils/file-storage';
+import { fetchNode, fetchScreenshot, fetchWithRetry, fetchSVGBatch, fetchVariables } from '@/lib/figma-client';
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadFigmaImages } from '@/lib/utils/image-fetcher';
+import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
+import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 
 interface RouteParams {
   params: {
@@ -57,15 +59,28 @@ export async function GET(
       );
     }
 
+    // WP31 T224: Load Figma variables for CSS variable resolution (per-node)
+    const variables = await loadVariables(metadata.figmaNodeId);
+
+    // WP31: Cache per-node variables for sync access during transform and code generation
+    if (Object.keys(variables).length > 0) {
+      setCachedVariablesMap({
+        variables: variables as Record<string, any>,
+        lastUpdated: new Date().toISOString(),
+        version: 1
+      });
+    }
+
     // Transform to AltNode on-the-fly (Constitutional Principle III: don't persist)
     resetNameCounters(); // Reset for clean unique name generation
-    const altNode = transformToAltNode(nodeData);
+    const altNode = transformToAltNode(nodeData, 0, undefined, variables);
 
     return NextResponse.json({
       success: true,
       metadata,
       nodeData,
       altNode,
+      variables, // WP31 T224: Include variables in response
     });
   } catch (error) {
     console.error('Node fetch error:', error);
@@ -115,6 +130,22 @@ export async function POST(
 
     // Re-fetch screenshot
     const screenshot = await fetchWithRetry(() => fetchScreenshot(fileKey, figmaNodeId));
+
+    // WP31 T224: Fetch and save Figma variables at refresh time
+    const variablesData = await fetchVariables(fileKey);
+    console.log(`📦 Fetched ${Object.keys(variablesData).length > 0 ? 'variables' : 'no variables'} from Figma API`);
+    if (Object.keys(variablesData).length > 0) {
+      await saveVariables(figmaNodeId, variablesData);
+      console.log(`✅ Saved Figma variables to disk`);
+    }
+
+    // WP31: Extract boundVariables from node tree and save per-node
+    const extractedVars = extractVariablesFromNode(nodeData);
+    if (Object.keys(extractedVars).length > 0) {
+      const formattedVars = formatExtractedVariablesForStorage(extractedVars);
+      await saveVariables(figmaNodeId, formattedVars);
+      console.log(`📦 Extracted and saved ${Object.keys(extractedVars).length} variable references for node ${figmaNodeId}`);
+    }
 
     // WP32: Detect and download SVG containers at refresh time
     resetNameCounters();

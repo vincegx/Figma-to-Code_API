@@ -5,6 +5,7 @@ import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
 import { vectorToDataURL } from '../utils/svg-converter';
 import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename } from '../utils/image-fetcher';
+import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
  * WP32: SVG export info for generating assets
@@ -239,8 +240,13 @@ export async function generateHTMLCSS(
   // Generate HTML and collect CSS rules
   const html = generateHTMLElement(altNode, cleanedProps, cssRules, 0, allRules, framework, imageUrls, svgDataUrls, svgBoundsMap);
 
+  // WP31: Generate CSS variable definitions from system-variables.json
+  console.log('[HTML-CSS] Calling generateCssVariableDefinitions...');
+  const cssVariables = generateCssVariableDefinitions();
+  console.log('[HTML-CSS] cssVariables result length:', cssVariables.length);
+
   // Generate CSS from collected rules
-  const css = cssRules
+  const componentCss = cssRules
     .map(rule => {
       const properties = Object.entries(rule.properties)
         .map(([key, value]) => `  ${toKebabCase(key)}: ${value.toLowerCase()};`)
@@ -248,6 +254,9 @@ export async function generateHTMLCSS(
       return `.${rule.selector} {\n${properties}\n}`;
     })
     .join('\n\n');
+
+  // WP31: Combine variable definitions with component CSS
+  const css = cssVariables ? `${cssVariables}\n\n${componentCss}` : componentCss;
 
   const code = `<!-- HTML -->\n${html}\n\n/* CSS */\n${css}`;
 

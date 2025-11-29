@@ -88,6 +88,14 @@ export function selectorMatches(
   altNode: SimpleAltNode,
   selector: Selector
 ): boolean {
+  // Skip itemSpacing rules when justify-content is space-between (flexbox handles spacing)
+  if ('itemSpacing' in selector) {
+    const originalNode = altNode.originalNode as any;
+    if (originalNode?.primaryAxisAlignItems === 'SPACE_BETWEEN') {
+      return false;
+    }
+  }
+
   // Type matching (WP19: support single type or array of types)
   // T176 FIX: Use originalType for Figma type comparison, not HTML-mapped type
   if (selector.type !== undefined) {

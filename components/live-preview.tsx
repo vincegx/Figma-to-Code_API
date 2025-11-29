@@ -54,8 +54,14 @@ function buildHTMLDocument(code: string): string {
     <style>
       body {
         margin: 0;
-        padding: 16px;
+        padding: 0;
         font-family: system-ui, -apple-system, sans-serif;
+      }
+      /* Preview responsive: force root to fill viewport width */
+      body > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
       }
       ${css}
     </style>
@@ -87,7 +93,13 @@ function buildReactDocument(
     <style>
       body {
         margin: 0;
-        padding: 16px;
+        padding: 0;
+      }
+      /* Preview responsive: force root to fill viewport width */
+      #root > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
       }
       ${tailwindCSS}
     </style>
@@ -141,11 +153,11 @@ let cachedReactDomCode: string | null = null;
 
 async function getCachedReactLibs(): Promise<{ reactCode: string; reactDomCode: string }> {
   if (cachedReactCode && cachedReactDomCode) {
-    console.log('🟢 [PERF] Using cached React libs');
+    // console.log('🟢 [PERF] Using cached React libs');
     return { reactCode: cachedReactCode, reactDomCode: cachedReactDomCode };
   }
 
-  console.log('🟢 [PERF] Fetching React libs (first time)');
+  // console.log('🟢 [PERF] Fetching React libs (first time)');
   const [reactResponse, reactDomResponse] = await Promise.all([
     fetch('/preview-libs/react.js'),
     fetch('/preview-libs/react-dom.js'),
@@ -158,7 +170,7 @@ async function getCachedReactLibs(): Promise<{ reactCode: string; reactDomCode: 
 }
 
 export default function LivePreview({ code, framework, language }: LivePreviewProps) {
-  console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
+  // console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -247,12 +259,10 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
   useEffect(() => {
     // PERF: Skip if no code
     if (!hasCode) {
-      console.log('🟢 [PERF] SKIP useEffect - no code');
       return;
     }
 
     const effectStart = performance.now();
-    console.log('🟢 [PERF] LivePreview useEffect START', { codeLen: code.length, strategy });
 
     const generateContent = async () => {
       const genStart = performance.now();
@@ -264,33 +274,26 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
 
         switch (strategy) {
           case 'html':
-            console.log('🟢 [PERF] buildHTMLDocument START');
             content = buildHTMLDocument(code);
-            console.log(`🟢 [PERF] buildHTMLDocument END: ${(performance.now() - genStart).toFixed(0)}ms`);
             break;
           case 'react':
-            console.log('🟢 [PERF] transpileAndBuildReact START');
             content = await transpileAndBuildReact(code, framework);
-            console.log(`🟢 [PERF] transpileAndBuildReact END: ${(performance.now() - genStart).toFixed(0)}ms`);
             break;
           case 'none':
           default:
             content = '';
         }
 
-        console.log(`🟢 [PERF] setIframeContent, len: ${content.length}`);
         setIframeContent(content);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Rendering failed');
         setIframeContent('');
       } finally {
         setIsLoading(false);
-        console.log(`🟢 [PERF] generateContent TOTAL: ${(performance.now() - genStart).toFixed(0)}ms`);
       }
     };
 
     generateContent();
-    console.log(`🟢 [PERF] useEffect SYNC: ${(performance.now() - effectStart).toFixed(0)}ms`);
   }, [code, strategy, framework, transpileAndBuildReact, hasCode]);
 
   // Listen for iframe runtime errors

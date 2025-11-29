@@ -1,0 +1,119 @@
+/**
+ * WP31: CSS Variable Utilities (Client-safe)
+ *
+ * This module contains functions for working with CSS variables that can be
+ * safely imported in client-side code (no fs/node dependencies).
+ */
+
+export type VariableType = 'color' | 'spacing' | 'fontSize' | 'borderRadius' | 'size' | 'other';
+
+export interface ExtractedVariable {
+  name: string;           // Auto-generated CSS name (e.g., "var-125-11")
+  realName: string | null; // Real Figma name after user update (e.g., "margin/r")
+  type: VariableType;     // Inferred type
+  value: string | number | object; // Resolved value
+  usageCount: number;     // How many times used
+}
+
+export interface VariablesMap {
+  variables: Record<string, ExtractedVariable>;
+  lastUpdated: string;
+  version: number;
+}
+
+/**
+ * Cache for variables map (set by server-side code before code generation)
+ */
+let cachedMap: VariablesMap | null = null;
+
+/**
+ * Set the cached variables map (call from server-side before generating code)
+ */
+export function setCachedVariablesMap(map: VariablesMap): void {
+  cachedMap = map;
+  console.log('[VAR-CSS] Cache set with', Object.keys(map.variables).length, 'variables');
+}
+
+/**
+ * Get the cached variables map
+ */
+export function getCachedVariablesMap(): VariablesMap | null {
+  return cachedMap;
+}
+
+/**
+ * Extract short ID from full variable ID
+ * "VariableID:710641395bac9f5822c4c329c8e7d6bb6fc986f8/125:11" → "125:11"
+ */
+function extractShortId(fullId: string): string {
+  const match = fullId.match(/(\d+:\d+)$/);
+  return match ? match[1] : fullId;
+}
+
+/**
+ * Get CSS variable name for a Figma variable ID (sync version using cache)
+ */
+export function getVariableCssNameSync(fullId: string): string | null {
+  if (!cachedMap) return null;
+
+  const shortId = extractShortId(fullId);
+  const variable = cachedMap.variables[shortId];
+
+  return variable?.name || null;
+}
+
+/**
+ * Generate CSS :root block with all variable definitions
+ * Used by code generators to include variable definitions in output
+ */
+export function generateCssVariableDefinitions(): string {
+  console.log('[VAR-CSS] generateCssVariableDefinitions called, cachedMap:', cachedMap ? Object.keys(cachedMap.variables).length + ' variables' : 'NULL');
+
+  if (!cachedMap || Object.keys(cachedMap.variables).length === 0) {
+    console.log('[VAR-CSS] No variables in cache, returning empty');
+    return '';
+  }
+
+  const lines: string[] = [];
+  lines.push(':root {');
+
+  for (const [_shortId, variable] of Object.entries(cachedMap.variables)) {
+    const cssValue = formatValueForCss(variable.type, variable.value);
+    lines.push(`  --${variable.name}: ${cssValue};`);
+  }
+
+  lines.push('}');
+  const result = lines.join('\n');
+  console.log('[VAR-CSS] Generated :root with', Object.keys(cachedMap.variables).length, 'variables');
+  return result;
+}
+
+/**
+ * Format a variable value for CSS output
+ */
+function formatValueForCss(type: VariableType, value: string | number | object): string {
+  if (type === 'color') {
+    // Color values are already stored as hex or rgba
+    if (typeof value === 'string') {
+      return value;
+    }
+    // Handle color object stored in value (from FillData)
+    if (value && typeof value === 'object' && 'color' in value) {
+      const c = (value as { color: { r: number; g: number; b: number; a?: number } }).color;
+      if (c.a !== undefined && c.a < 1) {
+        return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${c.a})`;
+      }
+      const toHex = (n: number) => Math.round(n * 255).toString(16).padStart(2, '0');
+      return `#${toHex(c.r)}${toHex(c.g)}${toHex(c.b)}`;
+    }
+  }
+
+  if (type === 'spacing' || type === 'fontSize' || type === 'borderRadius' || type === 'size') {
+    // Numeric values need px unit
+    if (typeof value === 'number') {
+      return `${value}px`;
+    }
+  }
+
+  return String(value);
+}

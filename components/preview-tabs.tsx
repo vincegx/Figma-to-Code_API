@@ -61,7 +61,9 @@ export default function PreviewTabs({
             codeOutput = result.code;
             break;
           case 'html-css':
+            console.log('[PREVIEW-TABS] Calling generateHTMLCSS...');
             result = await generateHTMLCSS(currentNode, resolvedProperties, [], 'html-css', figmaFileKey, figmaAccessToken, nodeId);
+            console.log('[PREVIEW-TABS] generateHTMLCSS done, css length:', result.css?.length || 0);
             codeOutput = result.code;
             if (result.css) {
               codeOutput += '\n\n/* CSS */\n' + result.css;
