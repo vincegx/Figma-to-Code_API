@@ -28,10 +28,10 @@ function formatTime(date: Date): string {
 }
 
 const levelStyles: Record<LogLevel, string> = {
-  info: 'text-gray-600 dark:text-gray-400',
-  success: 'text-green-600 dark:text-green-400',
-  warning: 'text-amber-600 dark:text-amber-400',
-  error: 'text-red-600 dark:text-red-400',
+  info: 'text-text-muted',
+  success: 'text-status-success-text',
+  warning: 'text-status-warning-text',
+  error: 'text-status-error-text',
 };
 
 const levelPrefix: Record<LogLevel, string> = {
@@ -59,7 +59,7 @@ export function ImportLogs({ logs, className, maxHeight = '200px' }: ImportLogsP
     <div
       ref={containerRef}
       className={cn(
-        'font-mono text-xs bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 overflow-auto',
+        'font-mono text-xs bg-bg-secondary rounded-lg border border-border-primary p-3 overflow-auto',
         className
       )}
       style={{ maxHeight }}
@@ -72,7 +72,7 @@ export function ImportLogs({ logs, className, maxHeight = '200px' }: ImportLogsP
           key={log.id}
           className={cn('flex gap-2 py-0.5', levelStyles[log.level])}
         >
-          <span className="text-gray-400 dark:text-gray-600 shrink-0">
+          <span className="text-text-muted shrink-0">
             [{formatTime(log.timestamp)}]
           </span>
           <span className="shrink-0">{levelPrefix[log.level]}</span>

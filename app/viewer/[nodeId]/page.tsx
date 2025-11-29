@@ -235,24 +235,24 @@ export default function ViewerPage() {
   // Show loading state while library is being fetched
   if (!isLibraryLoaded) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+      <div className="h-screen flex items-center justify-center bg-bg-primary">
+        <div className="animate-spin h-8 w-8 border-4 border-accent-primary border-t-transparent rounded-full"></div>
+        <span className="ml-3 text-text-secondary">Loading...</span>
       </div>
     );
   }
 
   if (!currentNode) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 bg-bg-primary min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Node not found</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <h1 className="text-2xl font-bold mb-4 text-text-primary">Node not found</h1>
+          <p className="text-text-secondary mb-4">
             The node you&apos;re looking for doesn&apos;t exist or hasn&apos;t been imported yet.
           </p>
           <Link
             href="/nodes"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-block"
+            className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-hover inline-block"
           >
             Return to Library
           </Link>
@@ -266,9 +266,9 @@ export default function ViewerPage() {
   const nodeColors = getNodeColors(nodeType);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-bg-primary">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+      <div className="border-b border-border-primary p-4 bg-bg-card">
         <div className="mx-auto flex items-center justify-between">
           {/* Left: Breadcrumbs + Thumbnail + Name */}
           <div className="flex items-center gap-4">
@@ -282,7 +282,7 @@ export default function ViewerPage() {
             />
 
             {/* Thumbnail */}
-            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500">
+            <div className="w-12 h-12 bg-bg-secondary rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-accent-primary">
               {currentNode.thumbnail ? (
                 <Image
                   src={currentNode.thumbnail}
@@ -292,7 +292,7 @@ export default function ViewerPage() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl">
+                <div className="w-full h-full flex items-center justify-center text-text-muted text-2xl">
                   📦
                 </div>
               )}
@@ -300,11 +300,11 @@ export default function ViewerPage() {
 
             {/* Name and metadata */}
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
                 <FigmaTypeIcon type={nodeType} size={18} className={nodeColors.text} />
                 {currentNode.name}
               </h1>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-text-secondary">
                 {nodeType} • {new Date(currentNode.addedAt).toLocaleDateString()}
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function ViewerPage() {
                 }
               }}
               disabled={!prevNode}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-primary"
               title="Previous node"
             >
               <ChevronLeft size={20} />
@@ -332,7 +332,7 @@ export default function ViewerPage() {
                 }
               }}
               disabled={!nextNode}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-primary"
               title="Next node"
             >
               <ChevronRight size={20} />
@@ -354,7 +354,7 @@ export default function ViewerPage() {
             {/* Refresh Preview (WP33: reload iframe without refetching) */}
             <button
               onClick={() => setIframeKey(prev => prev + 1)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="p-2 rounded-lg hover:bg-bg-hover text-text-primary"
               title="Refresh preview"
             >
               <RefreshCw size={20} />
@@ -364,7 +364,7 @@ export default function ViewerPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="p-2 rounded-lg hover:bg-bg-hover text-text-primary"
                   title="Export"
                 >
                   <Download size={20} />
@@ -405,7 +405,7 @@ export default function ViewerPage() {
             {/* "Edit Rules" button */}
             <button
               onClick={() => (window.location.href = `/rules?nodeId=${nodeId}`)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+              className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-hover flex items-center gap-2"
             >
               <Settings size={16} />
               Edit Rules
@@ -415,7 +415,7 @@ export default function ViewerPage() {
       </div>
 
       {/* Responsive Mode Toolbar */}
-      <div className="flex gap-2 items-center border-b border-gray-200 dark:border-gray-700 p-2 bg-white dark:bg-gray-800">
+      <div className="flex gap-2 items-center border-b border-border-primary p-2 bg-bg-card">
         {/* Toggle Responsive Mode */}
         <Button
           variant={viewerResponsiveMode ? 'default' : 'outline'}
@@ -461,7 +461,7 @@ export default function ViewerPage() {
 
         {/* Framework Selector */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Framework:</span>
+          <span className="text-sm text-text-secondary">Framework:</span>
           <Select value={previewFramework} onValueChange={(v: string) => setPreviewFramework(v as FrameworkType)}>
             <SelectTrigger className="w-40 h-8 text-xs">
               <SelectValue />
@@ -486,7 +486,7 @@ export default function ViewerPage() {
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative"
+              className="border-r border-border-primary bg-bg-primary relative"
             >
               <div className="h-full overflow-auto pt-10">
                 <FigmaTreeView
@@ -499,14 +499,14 @@ export default function ViewerPage() {
               {/* Collapse Button */}
               <button
                 onClick={() => setViewerLeftPanelCollapsed(true)}
-                className="absolute top-2 right-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+                className="absolute top-2 right-2 z-[60] p-1.5 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
                 title="Collapse tree"
               >
                 <PanelLeftClose size={14} />
               </button>
             </ResizablePanel>
 
-            <ResizableHandle className="bg-gray-200 dark:bg-gray-700" />
+            <ResizableHandle className="bg-border-primary" />
           </>
         )}
 
@@ -514,7 +514,7 @@ export default function ViewerPage() {
         {viewerLeftPanelCollapsed && (
           <button
             onClick={() => setViewerLeftPanelCollapsed(false)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
             title="Expand tree"
           >
             <PanelLeftOpen size={16} />
@@ -522,7 +522,7 @@ export default function ViewerPage() {
         )}
 
         {/* Center Panel - Live Preview (Elastic) */}
-        <ResizablePanel className="relative bg-slate-50 dark:bg-slate-900">
+        <ResizablePanel className="relative bg-bg-canvas">
           <ResizablePreviewViewport>
             <LivePreview
               key={iframeKey} // WP33: Force re-render when refresh button clicked
@@ -538,7 +538,7 @@ export default function ViewerPage() {
         {viewerRightPanelCollapsed && (
           <button
             onClick={() => setViewerRightPanelCollapsed(false)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
             title="Expand info"
           >
             <PanelRightOpen size={16} />
@@ -548,18 +548,18 @@ export default function ViewerPage() {
         {/* Right Panel - Information/Rules Tabs (Collapsable & Resizable) */}
         {!viewerRightPanelCollapsed && (
           <>
-            <ResizableHandle className="bg-gray-200 dark:bg-gray-700" />
+            <ResizableHandle className="bg-border-primary" />
 
             <ResizablePanel
               defaultSize={20}
               minSize={15}
               maxSize={30}
-              className="border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative"
+              className="border-l border-border-primary bg-bg-primary relative"
             >
               {/* Collapse Button */}
               <button
                 onClick={() => setViewerRightPanelCollapsed(true)}
-                className="absolute top-2 left-2 z-[60] p-1.5 rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-slate-100 dark:hover:bg-slate-600 shadow-lg"
+                className="absolute top-2 left-2 z-[60] p-1.5 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
                 title="Collapse info"
               >
                 <PanelRightClose size={14} />
@@ -570,7 +570,7 @@ export default function ViewerPage() {
                 onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
                 className="flex-1 flex flex-col overflow-hidden h-full pt-10"
               >
-                <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-gray-50 dark:bg-gray-900 px-2">
+                <TabsList className="w-full justify-start border-b border-border-primary rounded-none bg-bg-secondary px-2">
                   <TabsTrigger value="information" className="text-sm">
                     Information
                   </TabsTrigger>

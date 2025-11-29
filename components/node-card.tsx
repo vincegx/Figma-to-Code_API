@@ -17,24 +17,24 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transition-all ${
-        isSelected ? 'ring-2 ring-blue-500' : ''
+      className={`bg-bg-card rounded-lg border border-border-primary shadow-sm overflow-hidden transition-all ${
+        isSelected ? 'ring-2 ring-accent-primary' : ''
       }`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       {/* Thumbnail */}
       <Link href={`/viewer/${node.id}`} className="block relative">
-        <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+        <div className="aspect-video bg-bg-secondary relative overflow-hidden">
           {node.thumbnail ? (
             <Image
               src={node.thumbnail}
               alt={node.name}
               fill
-              className="object-cover"
+              className="object-cover object-top"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
+            <div className="w-full h-full flex items-center justify-center text-text-muted text-4xl">
               📦
             </div>
           )}
@@ -53,7 +53,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
           {/* Category Badge */}
           {node.category && (
             <div className="absolute top-2 right-2">
-              <span className="px-2 py-1 bg-blue-500 text-white text-xs rounded">
+              <span className="px-2 py-1 bg-accent-primary text-white text-xs rounded">
                 {node.category}
               </span>
             </div>
@@ -64,30 +64,30 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center gap-2">
               <Link
                 href={`/viewer/${node.id}`}
-                className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 bg-bg-card rounded-full hover:bg-bg-hover transition-colors"
                 title="View"
               >
-                <Eye className="w-5 h-5 text-gray-700" />
+                <Eye className="w-5 h-5 text-text-primary" />
               </Link>
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   alert('Export feature - to be implemented');
                 }}
-                className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 bg-bg-card rounded-full hover:bg-bg-hover transition-colors"
                 title="Export"
               >
-                <Download className="w-5 h-5 text-gray-700" />
+                <Download className="w-5 h-5 text-text-primary" />
               </button>
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   alert('Re-fetch feature - to be implemented');
                 }}
-                className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 bg-bg-card rounded-full hover:bg-bg-hover transition-colors"
                 title="Re-fetch from Figma"
               >
-                <RefreshCw className="w-5 h-5 text-gray-700" />
+                <RefreshCw className="w-5 h-5 text-text-primary" />
               </button>
             </div>
           )}
@@ -100,12 +100,12 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
           href={`/viewer/${node.id}`}
           className="block mb-2"
         >
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate hover:text-blue-600 dark:hover:text-blue-400">
+          <h3 className="font-semibold text-text-primary truncate hover:text-accent-primary">
             {node.name}
           </h3>
         </Link>
 
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
+        <div className="flex items-center justify-between text-sm text-text-secondary mb-3">
           <span className="flex items-center gap-1">
             <span className="font-medium">{node.altNode?.type || 'Node'}</span>
           </span>
@@ -118,13 +118,13 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
             {node.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 rounded"
+                className="px-2 py-0.5 bg-bg-secondary text-xs text-text-secondary rounded"
               >
                 {tag}
               </span>
             ))}
             {node.tags.length > 3 && (
-              <span className="px-2 py-0.5 text-xs text-gray-500">
+              <span className="px-2 py-0.5 text-xs text-text-muted">
                 +{node.tags.length - 3} more
               </span>
             )}
@@ -132,7 +132,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
         )}
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <div className="flex items-center justify-between text-xs text-text-muted mb-3">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <Eye className="w-3 h-3" />
@@ -147,19 +147,19 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
 
         {/* Description */}
         {node.description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+          <p className="text-sm text-text-secondary line-clamp-2 mb-3">
             {node.description}
           </p>
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-2 pt-3 border-t border-border-primary">
           <button
             onClick={(e) => {
               e.preventDefault();
               alert('Rename feature - to be implemented');
             }}
-            className="flex-1 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center gap-1"
+            className="flex-1 text-xs text-text-secondary hover:text-accent-primary flex items-center justify-center gap-1"
             title="Rename"
           >
             <Edit className="w-3 h-3" />
@@ -173,7 +173,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect }: NodeCardP
                 alert('Delete action - to be wired to store');
               }
             }}
-            className="flex-1 text-xs text-red-600 hover:text-red-700 dark:text-red-400 flex items-center justify-center gap-1"
+            className="flex-1 text-xs text-status-error-text hover:opacity-80 flex items-center justify-center gap-1"
             title="Delete"
           >
             <Trash2 className="w-3 h-3" />

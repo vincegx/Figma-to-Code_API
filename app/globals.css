@@ -20,30 +20,31 @@
   --color-white: #ffffff;
 
   /* Semantic Background Colors */
-  --bg-primary: var(--color-2);
-  --bg-secondary: var(--color-5);
+  --bg-primary: #e8f4fc;
+  --bg-secondary: #f0f7fc;
   --bg-card: #ffffff;
-  --bg-hover: var(--color-3);
+  --bg-hover: #dbeafe;
+  --bg-canvas: #e5e7eb;
   --bg-overlay-light: rgba(255, 255, 255, 0.1);
   --bg-overlay-medium: rgba(255, 255, 255, 0.7);
   --bg-overlay-dark: rgba(0, 0, 0, 0.2);
 
   /* Semantic Text Colors */
-  --text-primary: var(--color-black);
-  --text-secondary: color-mix(in srgb, var(--color-black) 60%, transparent);
-  --text-muted: color-mix(in srgb, var(--color-2) 60%, transparent);
-  --text-inverse: var(--color-white);
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-inverse: #ffffff;
 
   /* Semantic Border Colors */
-  --border-primary: var(--color-4);
-  --border-secondary: var(--color-3);
+  --border-primary: #d1d5db;
+  --border-secondary: #e5e7eb;
   --border-light: rgba(255, 255, 255, 0.2);
-  --border-subtle: #e5e7eb;
+  --border-subtle: #f3f4f6;
 
   /* Accent Colors */
-  --accent-primary: var(--color-4);
-  --accent-secondary: var(--color-5);
-  --accent-hover: var(--color-3);
+  --accent-primary: #3b82f6;
+  --accent-secondary: #eff6ff;
+  --accent-hover: #2563eb;
 
   /* Status Colors */
   --status-success-bg: #dcfce7;
@@ -80,6 +81,19 @@
   /* Focus Ring */
   --focus-ring: 0 0 0 1px var(--color-5);
 
+  /* Typography */
+  --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+
   /* Legacy variables for compatibility */
   --background: var(--bg-card);
   --foreground: var(--text-primary);
@@ -90,76 +104,78 @@
    ============================================ */
 
 [data-theme="dark"] {
-  --color-0: #455975;
-  --color-1: #1f2937;
-  --color-2: #61a6fb;
-  --color-3: #94c5fd;
-  --color-4: #c3defe;
-  --color-5: #ebf4ff;
+  /* Dark Theme Base Colors */
+  --color-0: #0f172a;
+  --color-1: #1e293b;
+  --color-2: #334155;
+  --color-3: #475569;
+  --color-4: #64748b;
+  --color-5: #94a3b8;
 
-  --color-black: #494949;
-  --color-white: #ffffff;
+  --color-black: #f8fafc;
+  --color-white: #0f172a;
 
   /* Semantic Background Colors */
-  --bg-primary: var(--color-1);
-  --bg-secondary: var(--color-2);
-  --bg-card: #ffffff;
-  --bg-hover: var(--color-3);
-  --bg-overlay-light: rgba(135, 129, 139, 0.1);
-  --bg-overlay-medium: rgba(135, 129, 139, 0.3);
-  --bg-overlay-dark: rgba(135, 129, 139, 0.6);
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e3a5f;
+  --bg-hover: #334155;
+  --bg-canvas: #374151;
+  --bg-overlay-light: rgba(255, 255, 255, 0.05);
+  --bg-overlay-medium: rgba(255, 255, 255, 0.1);
+  --bg-overlay-dark: rgba(0, 0, 0, 0.5);
 
   /* Semantic Text Colors */
-  --text-primary: var(--color-black);
-  --text-secondary: color-mix(in srgb, var(--color-black) 60%, transparent);
-  --text-muted: color-mix(in srgb, var(--color-3) 60%, transparent);
-  --text-inverse: var(--color-white);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a;
 
   /* Semantic Border Colors */
-  --border-primary: var(--color-3);
-  --border-secondary: var(--color-2);
-  --border-light: var(--color-3);
-  --border-subtle: var(--color-2);
+  --border-primary: #253548;
+  --border-secondary: #1f2d3d;
+  --border-light: #2a3f55;
+  --border-subtle: #1a2636;
 
   /* Accent Colors */
-  --accent-primary: var(--color-4);
-  --accent-secondary: var(--color-5);
-  --accent-hover: var(--color-3);
+  --accent-primary: #3b82f6;
+  --accent-secondary: rgba(59, 130, 246, 0.15);
+  --accent-hover: #2563eb;
 
   /* Status Colors (adjusted for dark) */
-  --status-success-bg: #dcfce7;
-  --status-success-text: #166534;
-  --status-success-border: #86efac;
+  --status-success-bg: rgba(34, 197, 94, 0.15);
+  --status-success-text: #4ade80;
+  --status-success-border: rgba(34, 197, 94, 0.3);
 
   --status-error-bg: rgba(239, 68, 68, 0.15);
-  --status-error-text: #fca5a5;
-  --status-error-border: rgba(252, 165, 165, 0.3);
+  --status-error-text: #f87171;
+  --status-error-border: rgba(239, 68, 68, 0.3);
 
   --status-warning-bg: rgba(245, 158, 11, 0.15);
-  --status-warning-text: #fcd34d;
-  --status-warning-border: rgba(252, 211, 77, 0.3);
+  --status-warning-text: #fbbf24;
+  --status-warning-border: rgba(245, 158, 11, 0.3);
 
-  --status-info-bg: #dbeafe;
-  --status-info-text: #1e40af;
-  --status-info-border: #93c5fd;
+  --status-info-bg: rgba(59, 130, 246, 0.15);
+  --status-info-text: #60a5fa;
+  --status-info-border: rgba(59, 130, 246, 0.3);
 
   /* Interactive Elements */
-  --button-primary-bg: var(--color-4);
-  --button-primary-hover: var(--color-3);
-  --button-primary-text: var(--color-1);
+  --button-primary-bg: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-primary-text: #ffffff;
 
-  --button-secondary-bg: var(--bg-card);
-  --button-secondary-hover: var(--bg-hover);
-  --button-secondary-text: var(--text-primary);
-  --button-secondary-border: var(--border-primary);
+  --button-secondary-bg: #1e293b;
+  --button-secondary-hover: #334155;
+  --button-secondary-text: #f8fafc;
+  --button-secondary-border: #334155;
 
   /* Shadows (enhanced for dark) */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 
   /* Focus Ring */
-  --focus-ring: 0 0 0 1px var(--color-3);
+  --focus-ring: 0 0 0 2px rgba(59, 130, 246, 0.5);
 
   /* Legacy variables for compatibility */
   --background: var(--bg-card);
@@ -169,5 +185,58 @@
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography hierarchy - compact UI */
+.text-heading-1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.text-heading-2 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.text-heading-3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-heading-4 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-body {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.text-label {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
 }

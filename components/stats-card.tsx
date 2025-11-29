@@ -10,7 +10,7 @@ interface StatsCardProps {
 
 export default function StatsCard({ title, value, icon, trend }: StatsCardProps) {
   return (
-    <div className="bg-bg-card rounded-lg shadow p-6">
+    <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-text-secondary">
           {title}

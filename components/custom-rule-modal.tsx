@@ -145,14 +145,14 @@ export function CustomRuleModal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-50 w-[90vw] max-w-5xl max-h-[90vh] overflow-auto">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-card rounded-lg border border-border-primary shadow-xl z-50 w-[90vw] max-w-5xl max-h-[90vh] overflow-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between z-10">
-            <Dialog.Title className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="sticky top-0 bg-bg-card border-b border-border-primary p-6 flex items-center justify-between z-10">
+            <Dialog.Title className="text-2xl font-bold text-text-primary">
               {mode === 'create' ? '+ New Custom Rule' : 'Edit Custom Rule'}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <button className="text-text-muted hover:text-text-secondary">
                 <X size={24} />
               </button>
             </Dialog.Close>
@@ -162,11 +162,11 @@ export function CustomRuleModal({
           <div className="p-6 space-y-6">
             {/* Errors */}
             {errors.length > 0 && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">
+              <div className="bg-status-error-bg border border-status-error-border rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-status-error-text mb-2">
                   Validation Errors:
                 </h4>
-                <ul className="text-sm text-red-700 dark:text-red-300 list-disc list-inside">
+                <ul className="text-sm text-status-error-text list-disc list-inside">
                   {errors.map((err, i) => (
                     <li key={i}>{err}</li>
                   ))}
@@ -176,12 +176,12 @@ export function CustomRuleModal({
 
             {/* Basic Info Section */}
             <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-text-primary">
                 Basic Info
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Rule ID *
                   </label>
                   <input
@@ -190,11 +190,11 @@ export function CustomRuleModal({
                     onChange={(e) => setId(e.target.value)}
                     disabled={mode === 'edit'}
                     placeholder="custom-my-rule"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Rule Name *
                   </label>
                   <input
@@ -202,17 +202,17 @@ export function CustomRuleModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="My Custom Rule"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as typeof CATEGORIES[number])}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -220,7 +220,7 @@ export function CustomRuleModal({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Priority (min: 100)
                   </label>
                   <input
@@ -228,12 +228,12 @@ export function CustomRuleModal({
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
                     min={100}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Tags
                 </label>
                 <div className="flex gap-2 mb-2">
@@ -248,12 +248,12 @@ export function CustomRuleModal({
                       }
                     }}
                     placeholder="Add tag..."
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
                   />
                   <button
                     type="button"
                     onClick={handleAddTag}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    className="px-4 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
                   >
                     Add
                   </button>
@@ -262,12 +262,12 @@ export function CustomRuleModal({
                   {tags.map(tag => (
                     <span
                       key={tag}
-                      className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm flex items-center gap-2"
+                      className="px-3 py-1 bg-bg-secondary text-text-secondary rounded-full text-sm flex items-center gap-2"
                     >
                       {tag}
                       <button
                         onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-red-500"
+                        className="hover:text-status-error-text"
                       >
                         <X size={14} />
                       </button>
@@ -276,7 +276,7 @@ export function CustomRuleModal({
                 </div>
               </div>
               <div>
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
                   <input
                     type="checkbox"
                     checked={enabled}
@@ -290,7 +290,7 @@ export function CustomRuleModal({
 
             {/* Selector Section */}
             <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-text-primary">
                 Selector *
               </h3>
               <SelectorEditor
@@ -301,31 +301,31 @@ export function CustomRuleModal({
 
             {/* Transformers Section */}
             <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-text-primary">
                 Transformers *
               </h3>
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div className="border border-border-primary rounded-lg overflow-hidden">
                 {/* Framework Tabs */}
-                <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <div className="flex border-b border-border-primary bg-bg-secondary">
                   {FRAMEWORKS.map(fw => (
                     <button
                       key={fw}
                       onClick={() => setSelectedFramework(fw)}
                       className={`px-4 py-2 text-sm font-medium transition-colors ${
                         selectedFramework === fw
-                          ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                          ? 'bg-bg-card text-accent-primary border-b-2 border-accent-primary'
+                          : 'text-text-secondary hover:text-text-primary'
                       }`}
                     >
                       {fw}
                       {transformers[fw] && (
-                        <span className="ml-1 text-green-500">✓</span>
+                        <span className="ml-1 text-status-success-text">✓</span>
                       )}
                     </button>
                   ))}
                 </div>
                 {/* Transformer Editor */}
-                <div className="p-4 bg-white dark:bg-gray-800">
+                <div className="p-4 bg-bg-card">
                   <TransformerEditor
                     framework={selectedFramework}
                     transformer={transformers[selectedFramework]}
@@ -345,7 +345,7 @@ export function CustomRuleModal({
 
             {/* Preview Section */}
             <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-text-primary">
                 Preview
               </h3>
               <RulePreview
@@ -365,10 +365,10 @@ export function CustomRuleModal({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6 flex items-center justify-end gap-4 z-10">
+          <div className="sticky bottom-0 bg-bg-card border-t border-border-primary p-6 flex items-center justify-end gap-4 z-10">
             <Dialog.Close asChild>
               <button
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="px-6 py-2 border border-border-primary text-text-secondary rounded-lg hover:bg-bg-hover"
                 disabled={isSaving}
               >
                 Cancel
@@ -377,7 +377,7 @@ export function CustomRuleModal({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? 'Saving...' : mode === 'create' ? 'Create Rule' : 'Update Rule'}
             </button>

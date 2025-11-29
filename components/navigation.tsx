@@ -58,7 +58,7 @@ export function Navigation() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                     active
-                      ? 'bg-accent-primary text-text-primary'
+                      ? 'bg-accent-primary text-white'
                       : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
                   )}
                 >

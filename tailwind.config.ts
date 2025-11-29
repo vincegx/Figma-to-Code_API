@@ -29,6 +29,7 @@ const config: Config = {
         'bg-secondary': 'var(--bg-secondary)',
         'bg-card': 'var(--bg-card)',
         'bg-hover': 'var(--bg-hover)',
+        'bg-canvas': 'var(--bg-canvas)',
 
         // Semantic text
         'text-primary': 'var(--text-primary)',

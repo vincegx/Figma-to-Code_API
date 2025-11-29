@@ -70,8 +70,8 @@ function StepIcon({ status, compact = false }: { status: ImportStepStatus; compa
       );
     default:
       return (
-        <div className={cn(baseClass, 'border-2 border-gray-300 dark:border-gray-600', compact ? 'w-6 h-6' : 'w-8 h-8')}>
-          <Circle size={compact ? 6 : 10} className="text-gray-300 dark:text-gray-600" />
+        <div className={cn(baseClass, 'border-2 border-border-primary', compact ? 'w-6 h-6' : 'w-8 h-8')}>
+          <Circle size={compact ? 6 : 10} className="text-text-muted" />
         </div>
       );
   }
@@ -102,11 +102,11 @@ export function ImportProgress({ steps, className, compact = false }: ImportProg
                 className={cn(
                   'mt-1 text-center whitespace-nowrap',
                   useCompact ? 'text-[10px]' : 'text-xs mt-2',
-                  step.status === 'completed' && 'text-green-600 dark:text-green-400 font-medium',
-                  step.status === 'in-progress' && 'text-blue-600 dark:text-blue-400 font-medium',
-                  step.status === 'error' && 'text-red-600 dark:text-red-400 font-medium',
-                  step.status === 'skipped' && 'text-amber-600 dark:text-amber-400',
-                  step.status === 'pending' && 'text-gray-500 dark:text-gray-400'
+                  step.status === 'completed' && 'text-status-success-text font-medium',
+                  step.status === 'in-progress' && 'text-accent-primary font-medium',
+                  step.status === 'error' && 'text-status-error-text font-medium',
+                  step.status === 'skipped' && 'text-status-warning-text',
+                  step.status === 'pending' && 'text-text-muted'
                 )}
                 aria-current={step.status === 'in-progress' ? 'step' : undefined}
               >
@@ -120,9 +120,9 @@ export function ImportProgress({ steps, className, compact = false }: ImportProg
                 className={cn(
                   'flex-1 h-0.5 mx-1',
                   useCompact ? 'mt-[-16px]' : 'mt-[-20px]',
-                  step.status === 'completed' && 'bg-green-500',
-                  step.status === 'skipped' && 'bg-amber-500',
-                  step.status !== 'completed' && step.status !== 'skipped' && 'bg-gray-200 dark:bg-gray-700'
+                  step.status === 'completed' && 'bg-status-success-text',
+                  step.status === 'skipped' && 'bg-status-warning-text',
+                  step.status !== 'completed' && step.status !== 'skipped' && 'bg-bg-secondary'
                 )}
               />
             )}

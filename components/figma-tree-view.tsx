@@ -109,7 +109,7 @@ export default function FigmaTreeView({
 }: FigmaTreeViewProps) {
   if (!altNode) {
     return (
-      <div className="p-4 text-gray-500 dark:text-gray-400">
+      <div className="p-4 text-text-muted">
         <p>Loading Figma tree...</p>
         <p className="text-sm mt-2">
           The node structure will appear here once loaded.
@@ -120,9 +120,9 @@ export default function FigmaTreeView({
 
   return (
     <div className="p-4">
-      <h3 className="text-sm font-semibold mb-4 text-gray-700 dark:text-gray-300 flex items-center justify-between">
+      <h3 className="text-sm font-semibold mb-4 text-text-secondary flex items-center justify-between">
         <span>Figma Tree</span>
-        <span className="text-xs font-normal text-gray-500">
+        <span className="text-xs font-normal text-text-muted">
           Click to inspect
         </span>
       </h3>
@@ -173,8 +173,8 @@ function TreeNode({
         className={cn(
           'flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors',
           isSelected
-            ? cn(colors.bg, colors.text, colors.border, 'border')
-            : 'hover:bg-gray-100 dark:hover:bg-gray-700',
+            ? cn('bg-white/10', colors.text)
+            : 'hover:bg-bg-hover',
           !node.visible && 'opacity-50' // T156: Dim hidden nodes
         )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
@@ -187,7 +187,7 @@ function TreeNode({
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded flex-shrink-0"
+            className="p-0.5 hover:bg-bg-hover rounded flex-shrink-0"
           >
             {isExpanded ? (
               <ChevronDown size={14} />
@@ -201,7 +201,7 @@ function TreeNode({
 
         {/* Icon: Layout icon for auto-layout nodes, type icon otherwise (WP18 - T157) */}
         {getLayoutIcon(node) ? (
-          <div className="flex-shrink-0 text-gray-400 dark:text-gray-500">
+          <div className="flex-shrink-0 text-text-muted">
             {getLayoutIcon(node)}
           </div>
         ) : (
@@ -216,7 +216,7 @@ function TreeNode({
         <span
           className={cn(
             'text-sm truncate flex-1',
-            isSelected ? colors.text : 'text-gray-900 dark:text-white'
+            isSelected ? colors.text : 'text-text-primary'
           )}
         >
           {node.name}
@@ -230,16 +230,16 @@ function TreeNode({
         {/* Metadata badges */}
         <div className="flex items-center gap-1 flex-shrink-0">
           {/* HTML type badge - shows the rendered HTML element type */}
-          <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-1 rounded font-mono">
+          <span className="text-xs text-text-muted bg-bg-secondary px-1 rounded font-mono">
             {node.type}
           </span>
           {/* Invisible badge */}
           {!node.visible && (
-            <EyeOff size={12} className="text-gray-400 dark:text-gray-500" />
+            <EyeOff size={12} className="text-text-muted" />
           )}
           {/* Children count */}
           {hasChildren && 'children' in node && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 min-w-[20px] text-right">
+            <span className="text-xs text-text-muted min-w-[20px] text-right">
               {node.children.length}
             </span>
           )}

@@ -165,17 +165,17 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
   };
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900 space-y-4">
+    <div className="border border-border-primary rounded-lg p-4 bg-bg-secondary space-y-4">
       <div className="grid grid-cols-2 gap-4">
         {/* Node Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Node Type
           </label>
           <select
             value={type}
             onChange={(e) => handleTypeChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           >
             <option value="">Any</option>
             {NODE_TYPES.map(t => (
@@ -186,7 +186,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
 
         {/* Node Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Name (text or regex pattern)
           </label>
           <input
@@ -194,13 +194,13 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="e.g., Button or ^btn-.*"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
 
         {/* Width Min/Max */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Width Min (px)
           </label>
           <input
@@ -208,11 +208,11 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={widthMin}
             onChange={(e) => handleWidthMinChange(e.target.value)}
             placeholder="e.g., 100"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Width Max (px)
           </label>
           <input
@@ -220,13 +220,13 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={widthMax}
             onChange={(e) => handleWidthMaxChange(e.target.value)}
             placeholder="e.g., 500"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
 
         {/* Height Min/Max */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Height Min (px)
           </label>
           <input
@@ -234,11 +234,11 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={heightMin}
             onChange={(e) => handleHeightMinChange(e.target.value)}
             placeholder="e.g., 40"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Height Max (px)
           </label>
           <input
@@ -246,19 +246,19 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={heightMax}
             onChange={(e) => handleHeightMaxChange(e.target.value)}
             placeholder="e.g., 200"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
 
         {/* Has Children */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Has Children
           </label>
           <select
             value={hasChildren === null ? '' : hasChildren.toString()}
             onChange={(e) => handleHasChildrenChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           >
             <option value="">Any</option>
             <option value="true">Yes</option>
@@ -268,13 +268,13 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
 
         {/* Parent Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Parent Type
           </label>
           <select
             value={parentType}
             onChange={(e) => handleParentTypeChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           >
             <option value="">Any</option>
             {NODE_TYPES.map(t => (

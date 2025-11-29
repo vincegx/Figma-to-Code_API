@@ -14,7 +14,7 @@ export default function RecentNodes() {
 
   if (recentNodes.length === 0) {
     return (
-      <div className="bg-bg-card rounded-lg shadow p-6">
+      <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
         <h3 className="text-lg font-semibold mb-4 text-text-primary">Recent Nodes</h3>
         <p className="text-text-muted">No nodes imported yet</p>
       </div>
@@ -22,7 +22,7 @@ export default function RecentNodes() {
   }
 
   return (
-    <div className="bg-bg-card rounded-lg shadow p-6">
+    <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
       <h3 className="text-lg font-semibold mb-4 text-text-primary">Recent Nodes</h3>
 
       <div className="space-y-4">
@@ -64,7 +64,7 @@ export default function RecentNodes() {
             {/* Category or description badge */}
             <div className="flex-shrink-0">
               {node.category && (
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-accent-primary text-text-primary">
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-accent-primary text-white">
                   {node.category}
                 </span>
               )}

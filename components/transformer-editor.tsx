@@ -231,7 +231,7 @@ export function TransformerEditor({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             HTML Tag
           </label>
           <input
@@ -239,11 +239,11 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Tailwind Classes
           </label>
           <input
@@ -251,21 +251,21 @@ export function TransformerEditor({
             value={className}
             onChange={(e) => handleFieldChange('className', e.target.value)}
             placeholder="e.g., flex items-center gap-2 px-4 py-2"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Props (key-value pairs)
           </label>
           <div className="space-y-2">
             {Object.entries(props).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('props', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -278,18 +278,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -305,7 +305,7 @@ export function TransformerEditor({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             HTML Tag
           </label>
           <input
@@ -313,11 +313,11 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             CSS Class
           </label>
           <input
@@ -325,21 +325,21 @@ export function TransformerEditor({
             value={cssClass}
             onChange={(e) => handleFieldChange('cssClass', e.target.value)}
             placeholder="e.g., my-custom-class"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             CSS Properties
           </label>
           <div className="space-y-2">
             {Object.entries(cssProperties).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('cssProperties', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -352,18 +352,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="property"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('cssProperties')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -379,7 +379,7 @@ export function TransformerEditor({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             HTML Tag
           </label>
           <input
@@ -387,21 +387,21 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Inline Style
           </label>
           <div className="space-y-2">
             {Object.entries(style).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('style', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -414,18 +414,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="property"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('style')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -433,17 +433,17 @@ export function TransformerEditor({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Props
           </label>
           <div className="space-y-2">
             {Object.entries(props).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('props', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -456,18 +456,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -483,7 +483,7 @@ export function TransformerEditor({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Component
           </label>
           <input
@@ -491,11 +491,11 @@ export function TransformerEditor({
             value={component}
             onChange={(e) => handleFieldChange('component', e.target.value)}
             placeholder="e.g., VStack, HStack, Text"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Modifiers
           </label>
           <div className="space-y-2">
@@ -503,12 +503,12 @@ export function TransformerEditor({
               {modifiers.map(mod => (
                 <span
                   key={mod}
-                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm flex items-center gap-2"
+                  className="px-3 py-1 bg-bg-secondary text-text-secondary rounded-full text-sm flex items-center gap-2"
                 >
                   {mod}
                   <button
                     onClick={() => handleRemoveModifier(mod)}
-                    className="hover:text-red-500"
+                    className="hover:text-status-error-text"
                   >
                     <X size={14} />
                   </button>
@@ -527,11 +527,11 @@ export function TransformerEditor({
                   }
                 }}
                 placeholder="e.g., .padding(), .background(Color.blue)"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={handleAddModifier}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -539,17 +539,17 @@ export function TransformerEditor({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Props
           </label>
           <div className="space-y-2">
             {Object.entries(props).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('props', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -562,18 +562,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>
@@ -589,7 +589,7 @@ export function TransformerEditor({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             View Type
           </label>
           <input
@@ -597,21 +597,21 @@ export function TransformerEditor({
             value={viewType}
             onChange={(e) => handleFieldChange('viewType', e.target.value)}
             placeholder="e.g., LinearLayout, TextView, Button"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Attributes
           </label>
           <div className="space-y-2">
             {Object.entries(attributes).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded flex-1 flex items-center justify-between">
+                <span className="px-3 py-2 bg-bg-secondary text-text-secondary rounded flex-1 flex items-center justify-between">
                   <span><strong>{key}:</strong> {value}</span>
                   <button
                     onClick={() => handleRemoveKeyValue('attributes', key)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-status-error-text hover:opacity-80"
                   >
                     <X size={16} />
                   </button>
@@ -624,18 +624,18 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="attribute"
-                className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('attributes')}
-                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-3 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
               >
                 <Plus size={20} />
               </button>

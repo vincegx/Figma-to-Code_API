@@ -217,12 +217,12 @@ function RulesPageContent() {
       />
 
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+      <div className="border-b border-border-primary p-4 bg-bg-card">
         <div className="container mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-text-primary">
             Rules Manager
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {filteredRules.length} rules • {selectedFramework}
           </p>
         </div>
@@ -231,7 +231,7 @@ function RulesPageContent() {
       {/* Main 3-column layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - 20% desktop */}
-        <div className="hidden lg:block lg:w-1/5 border-r border-gray-200 dark:border-gray-700 overflow-auto bg-white dark:bg-gray-800">
+        <div className="hidden lg:block lg:w-1/5 border-r border-border-primary overflow-auto bg-bg-secondary">
           <RulesSidebar
             selectedFramework={selectedFramework}
             onFrameworkChange={setSelectedFramework}
@@ -251,7 +251,7 @@ function RulesPageContent() {
         </div>
 
         {/* Rules list - 40% desktop */}
-        <div className="w-full lg:w-2/5 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="w-full lg:w-2/5 border-r border-border-primary flex flex-col bg-bg-card">
           <RulesList
             rules={paginatedRules}
             selectedRuleId={selectedRuleId}
@@ -268,7 +268,7 @@ function RulesPageContent() {
         </div>
 
         {/* Rule editor - 40% desktop */}
-        <div className="hidden lg:block lg:w-2/5 overflow-auto bg-white dark:bg-gray-800">
+        <div className="hidden lg:block lg:w-2/5 overflow-auto bg-bg-secondary">
           {selectedRule ? (
             <RuleEditor
               rule={selectedRule}
@@ -276,7 +276,7 @@ function RulesPageContent() {
               onClose={() => setSelectedRuleId(null)}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-text-muted">
               <div className="text-center">
                 <p className="text-lg mb-2">No rule selected</p>
                 <p className="text-sm">Select a rule from the list to edit</p>
@@ -295,7 +295,7 @@ export default function RulesPage() {
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading Rules Manager...</p>
+          <p className="text-text-secondary">Loading Rules Manager...</p>
         </div>
       </div>
     }>

@@ -26,16 +26,16 @@ export default function RuleUsageChart() {
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Rule Usage</h3>
-        <p className="text-gray-500">No rules created yet</p>
+      <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
+        <h3 className="text-lg font-semibold mb-4 text-text-primary">Rule Usage</h3>
+        <p className="text-text-muted">No rules created yet</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Top 5 Rules by Match Count</h3>
+    <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
+      <h3 className="text-lg font-semibold mb-4 text-text-primary">Top 5 Rules by Match Count</h3>
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
@@ -43,7 +43,7 @@ export default function RuleUsageChart() {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="matches" fill="#3B82F6" />
+          <Bar dataKey="matches" fill="var(--accent-primary)" />
         </BarChart>
       </ResponsiveContainer>
     </div>

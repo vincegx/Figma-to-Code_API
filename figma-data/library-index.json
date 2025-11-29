@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-29T20:29:28.175Z",
+  "lastUpdated": "2025-11-29T23:13:25.814Z",
   "nodes": [
     {
       "id": "lib-124-21142",
@@ -18,7 +18,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=124:21142"
-      }
+      },
+      "thumbnail": "/api/images/124-21142/screenshot.png"
     },
     {
       "id": "lib-425-4344",
@@ -36,7 +37,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:4344"
-      }
+      },
+      "thumbnail": "/api/images/425-4344/screenshot.png"
     },
     {
       "id": "lib-425-4777",
@@ -54,16 +56,18 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:4777"
-      }
+      },
+      "thumbnail": "/api/images/425-4777/screenshot.png"
     },
     {
       "id": "lib-425-2086",
       "figmaNodeId": "425:2086",
       "name": "Homepage - Landing",
       "altNode": null,
+      "thumbnail": "/api/images/425-2086/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T20:24:21.107Z",
-      "lastModified": "2025-11-29T20:24:21.107Z",
+      "addedAt": "2025-11-29T23:13:25.805Z",
+      "lastModified": "2025-11-29T23:13:25.805Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -90,7 +94,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2237"
-      }
+      },
+      "thumbnail": "/api/images/425-2237/screenshot.png"
     },
     {
       "id": "lib-465-14116",
@@ -108,7 +113,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:14116"
-      }
+      },
+      "thumbnail": "/api/images/465-14116/screenshot.png"
     },
     {
       "id": "lib-465-16388",
@@ -126,7 +132,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:16388"
-      }
+      },
+      "thumbnail": "/api/images/465-16388/screenshot.png"
     },
     {
       "id": "lib-425-2146",
@@ -144,7 +151,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2146"
-      }
+      },
+      "thumbnail": "/api/images/425-2146/screenshot.png"
     },
     {
       "id": "lib-493-2811",
@@ -162,7 +170,8 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
-      }
+      },
+      "thumbnail": "/api/images/493-2811/screenshot.png"
     }
   ],
   "totalNodes": 9

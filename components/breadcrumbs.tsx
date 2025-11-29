@@ -20,12 +20,12 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cn('flex items-center text-sm text-gray-500 dark:text-gray-400', className)}
+      className={cn('flex items-center text-sm text-text-muted', className)}
     >
       {/* Home link */}
       <Link
         href="/"
-        className="flex items-center hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+        className="flex items-center hover:text-text-secondary transition-colors"
       >
         <Home className="h-4 w-4" />
         <span className="sr-only">Home</span>
@@ -33,12 +33,12 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
 
       {items.map((item, index) => (
         <div key={index} className="flex items-center">
-          <ChevronRight className="h-4 w-4 mx-2 text-gray-400 dark:text-gray-600" />
+          <ChevronRight className="h-4 w-4 mx-2 text-text-muted" />
 
           {item.href ? (
             <Link
               href={item.href}
-              className="flex items-center gap-1.5 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              className="flex items-center gap-1.5 hover:text-text-secondary transition-colors"
             >
               {item.figmaType && (
                 <FigmaTypeIcon type={item.figmaType} size={14} />
@@ -49,7 +49,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
               <span>{item.label}</span>
             </Link>
           ) : (
-            <span className="flex items-center gap-1.5 text-gray-900 dark:text-white font-medium">
+            <span className="flex items-center gap-1.5 text-text-primary font-medium">
               {item.figmaType && (
                 <FigmaTypeIcon type={item.figmaType} size={14} />
               )}

@@ -97,7 +97,7 @@ export default function ImportDialog() {
   const isComplete = importedNode !== null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div className="bg-bg-card rounded-lg border border-border-primary shadow-sm p-6">
       <h3 className="text-lg font-semibold mb-4">Import Figma Node</h3>
 
       {/* Input and buttons */}
@@ -107,7 +107,7 @@ export default function ImportDialog() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.figma.com/file/..."
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50"
+          className="flex-1 px-4 py-2 border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary bg-white text-gray-900 placeholder:text-gray-400 disabled:opacity-50"
           disabled={isRunning}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && url && !isRunning) {
@@ -154,14 +154,14 @@ export default function ImportDialog() {
 
       {/* Error display (fallback if toast doesn't show) */}
       {error && !isRunning && (
-        <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
+        <div className="mt-4 p-3 bg-status-error-bg text-status-error-text rounded-lg text-sm">
           {error}
         </div>
       )}
 
       {/* Success state */}
       {isComplete && (
-        <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg">
+        <div className="mt-4 p-4 bg-status-success-bg text-status-success-text rounded-lg">
           <p className="font-medium">Import successful!</p>
           <p className="text-sm mt-1">
             &quot;{importedNode.name}&quot; has been added to your library.
@@ -187,7 +187,7 @@ export default function ImportDialog() {
 
       {/* Helper text */}
       {!hasStarted && (
-        <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-4 text-sm text-text-muted">
           Paste a Figma URL with a node-id parameter to import a node into your library.
         </p>
       )}

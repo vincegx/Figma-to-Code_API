@@ -70,13 +70,13 @@ export function RulesSidebar({
     <div className="p-4 space-y-6">
       {/* Framework Selector */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-text-secondary mb-2">
           Target Framework
         </label>
         <select
           value={selectedFramework}
           onChange={(e) => onFrameworkChange(e.target.value as FrameworkType)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary focus:ring-2 focus:ring-accent-primary"
         >
           {FRAMEWORKS.map((fw) => (
             <option key={fw.value} value={fw.value}>
@@ -88,7 +88,7 @@ export function RulesSidebar({
 
       {/* Categories (WP20: with counters) */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <h3 className="text-sm font-semibold text-text-secondary mb-2">
           Categories
         </h3>
         <div className="space-y-1">
@@ -96,8 +96,8 @@ export function RulesSidebar({
             onClick={() => onCategoryChange(null)}
             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
               selectedCategory === null
-                ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-medium'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'bg-accent-secondary text-accent-primary font-medium'
+                : 'text-text-secondary hover:bg-bg-hover'
             }`}
           >
             <span>All Categories</span>
@@ -109,8 +109,8 @@ export function RulesSidebar({
               onClick={() => onCategoryChange(cat.id)}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
                 selectedCategory === cat.id
-                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-medium'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-accent-secondary text-accent-primary font-medium'
+                  : 'text-text-secondary hover:bg-bg-hover'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -126,13 +126,13 @@ export function RulesSidebar({
       {/* Filters (WP20: 3-tier system with counters) */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <h3 className="text-sm font-semibold text-text-secondary">
             Rule Types
           </h3>
           {onCreateRule && (
             <button
               onClick={onCreateRule}
-              className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors"
+              className="px-2 py-1 bg-button-primary text-button-primary-text rounded text-xs font-medium hover:bg-button-primary-hover transition-colors"
               title="Create new custom rule"
             >
               + New
@@ -140,13 +140,13 @@ export function RulesSidebar({
           )}
         </div>
         <div className="space-y-2">
-          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+          <label className="flex items-center justify-between text-sm text-text-secondary cursor-pointer hover:bg-bg-hover p-2 rounded-lg transition-colors">
             <span className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={showOfficialRules}
                 onChange={(e) => onShowOfficialRulesChange(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600"
+                className="rounded border-border-primary"
               />
               <span className="flex items-center gap-1">
                 <span className="text-blue-500">🔵</span>
@@ -155,13 +155,13 @@ export function RulesSidebar({
             </span>
             <span className="text-xs opacity-70">{officialCount}</span>
           </label>
-          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+          <label className="flex items-center justify-between text-sm text-text-secondary cursor-pointer hover:bg-bg-hover p-2 rounded-lg transition-colors">
             <span className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={showCommunityRules}
                 onChange={(e) => onShowCommunityRulesChange(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600"
+                className="rounded border-border-primary"
               />
               <span className="flex items-center gap-1">
                 <span className="text-purple-500">🟣</span>
@@ -170,13 +170,13 @@ export function RulesSidebar({
             </span>
             <span className="text-xs opacity-70">{communityCount}</span>
           </label>
-          <label className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors">
+          <label className="flex items-center justify-between text-sm text-text-secondary cursor-pointer hover:bg-bg-hover p-2 rounded-lg transition-colors">
             <span className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={showCustomRules}
                 onChange={(e) => onShowCustomRulesChange(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600"
+                className="rounded border-border-primary"
               />
               <span className="flex items-center gap-1">
                 <span className="text-green-500">🟢</span>
@@ -190,16 +190,16 @@ export function RulesSidebar({
 
       {/* Status Filters */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <h3 className="text-sm font-semibold text-text-secondary mb-2">
           Status
         </h3>
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-2 text-sm text-text-secondary">
             <input
               type="checkbox"
               checked={showEnabledOnly}
               onChange={(e) => onShowEnabledOnlyChange(e.target.checked)}
-              className="rounded border-gray-300 dark:border-gray-600"
+              className="rounded border-border-primary"
             />
             <span>Enabled Only</span>
           </label>

@@ -61,8 +61,8 @@ function SettingsSection({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-            <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="p-2 bg-accent-secondary rounded-lg">
+            <Icon className="h-5 w-5 text-accent-primary" />
           </div>
           <div>
             <CardTitle className="text-lg">{title}</CardTitle>
@@ -87,11 +87,11 @@ function FormField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label className="text-sm font-medium text-text-secondary">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+        <p className="text-xs text-text-muted">{description}</p>
       )}
       {children}
     </div>
@@ -273,11 +273,11 @@ export default function SettingsPage() {
       )}
       <div className="container max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
           <Settings className="h-8 w-8" />
           Settings
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-text-secondary mt-2">
           Configure your Figma Rules Builder preferences
         </p>
       </div>
@@ -308,7 +308,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowToken(!showToken)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
                 >
                   {showToken ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -331,8 +331,8 @@ export default function SettingsPage() {
               className={cn(
                 'flex items-center gap-2 text-sm p-3 rounded-lg',
                 connectionStatus === 'success'
-                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                  ? 'bg-status-success-bg text-status-success-text'
+                  : 'bg-status-error-bg text-status-error-text'
               )}
             >
               {connectionStatus === 'success' ? (
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                 onChange={(e) =>
                   setSettings({ ...settings, defaultFramework: e.target.value as AppSettings['defaultFramework'] })
                 }
-                className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 rounded-md border border-border-primary bg-bg-card text-text-primary"
               >
                 <option value="react-jsx">React JSX</option>
                 <option value="react-tailwind">React + Tailwind</option>
@@ -377,7 +377,7 @@ export default function SettingsPage() {
                 onChange={(e) =>
                   setSettings({ ...settings, defaultLanguage: e.target.value as AppSettings['defaultLanguage'] })
                 }
-                className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 rounded-md border border-border-primary bg-bg-card text-text-primary"
               >
                 <option value="typescript">TypeScript</option>
                 <option value="javascript">JavaScript</option>
@@ -391,9 +391,9 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={settings.formatOnExport}
                 onChange={(e) => setSettings({ ...settings, formatOnExport: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-text-secondary">
                 Automatically format generated code
               </span>
             </label>
@@ -412,9 +412,9 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={settings.autoSave}
                 onChange={(e) => setSettings({ ...settings, autoSave: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-text-secondary">
                 Automatically save rules while editing
               </span>
             </label>
@@ -443,19 +443,19 @@ export default function SettingsPage() {
           title="Cache Management"
           description="Manage locally cached Figma data"
         >
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-bg-secondary rounded-lg">
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-text-primary">
                 Cache Statistics
               </p>
               {loadingCache ? (
-                <p className="text-sm text-gray-500">Loading...</p>
+                <p className="text-sm text-text-muted">Loading...</p>
               ) : cacheStats ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-text-muted">
                   {cacheStats.nodeCount} nodes • {cacheStats.size}
                 </p>
               ) : (
-                <p className="text-sm text-gray-500">No data cached</p>
+                <p className="text-sm text-text-muted">No data cached</p>
               )}
             </div>
             <Button variant="outline" onClick={loadCacheStats} disabled={loadingCache}>
@@ -469,7 +469,7 @@ export default function SettingsPage() {
               variant="outline"
               onClick={clearCache}
               disabled={clearingCache}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="text-status-error-text hover:bg-status-error-bg"
             >
               {clearingCache ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -500,8 +500,8 @@ export default function SettingsPage() {
                   className={cn(
                     'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
                     theme === value
-                      ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300'
-                      : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'bg-accent-secondary border-accent-primary text-accent-primary'
+                      : 'border-border-primary hover:bg-bg-hover'
                   )}
                 >
                   <Icon className="h-4 w-4" />

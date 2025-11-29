@@ -64,21 +64,6 @@ export default function HomePage() {
         <RuleUsageChart />
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex gap-4 mt-8">
-        <button
-          onClick={() => (window.location.href = '/nodes')}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          View All Nodes
-        </button>
-        <button
-          onClick={() => (window.location.href = '/rules')}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-        >
-          Manage Rules
-        </button>
-      </div>
     </div>
   );
 }

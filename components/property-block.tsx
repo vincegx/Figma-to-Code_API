@@ -20,27 +20,27 @@ export function PropertyBlock({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+    <div className="border-b border-border-primary last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+        className="w-full flex items-center justify-between py-2.5 px-2 hover:bg-bg-hover transition-colors text-left"
       >
         <div className="flex items-center gap-2">
           <ChevronDown
             className={cn(
-              "w-4 h-4 transition-transform text-gray-500",
+              "w-3.5 h-3.5 transition-transform text-text-muted",
               isOpen && "rotate-180"
             )}
           />
-          {icon && <span className="text-gray-600 dark:text-gray-400">{icon}</span>}
-          <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
+          {icon && <span className="text-text-muted">{icon}</span>}
+          <h3 className="font-semibold text-xs text-text-primary">
             {title}
           </h3>
         </div>
       </button>
 
       {isOpen && (
-        <div className="px-4 pb-4 space-y-2">
+        <div className="px-4 pb-3 space-y-1.5">
           {children}
         </div>
       )}
@@ -63,9 +63,9 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
 
   if (inline) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <span className="text-gray-600 dark:text-gray-400">{label}:</span>
-        <span className="font-medium text-gray-900 dark:text-white">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-text-secondary">{label}:</span>
+        <span className="text-[11px] font-medium text-text-primary">
           {displayValue}
         </span>
       </div>
@@ -73,9 +73,9 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
   }
 
   return (
-    <div className="space-y-1 text-sm">
-      <div className="text-gray-600 dark:text-gray-400">{label}:</div>
-      <div className="font-medium text-gray-900 dark:text-white pl-2">
+    <div className="space-y-0.5">
+      <div className="text-xs text-text-secondary">{label}:</div>
+      <div className="text-[11px] font-medium text-text-primary pl-2">
         {displayValue}
       </div>
     </div>

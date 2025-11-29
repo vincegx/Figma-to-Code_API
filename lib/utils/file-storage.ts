@@ -72,6 +72,7 @@ export async function saveNodeData(
     figmaNodeId: nodeId,
     name: nodeData.name,
     altNode: null as any, // Will be populated by transformation engine (WP04)
+    thumbnail: `/api/images/${safeNodeId}/screenshot.png`,
     tags: [],
     category: undefined,
     description: undefined,
