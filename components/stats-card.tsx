@@ -10,26 +10,26 @@ interface StatsCardProps {
 
 export default function StatsCard({ title, value, icon, trend }: StatsCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div className="bg-bg-card rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+        <h3 className="text-sm font-medium text-text-secondary">
           {title}
         </h3>
         {icon && <span className="text-2xl">{icon}</span>}
       </div>
 
-      <div className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="text-3xl font-bold text-text-primary">
         {value}
       </div>
 
       {trend && (
         <div className="mt-2 text-sm">
           <span
-            className={trend.value >= 0 ? 'text-green-600' : 'text-red-600'}
+            className={trend.value >= 0 ? 'text-status-success-text' : 'text-status-error-text'}
           >
             {trend.value >= 0 ? '↑' : '↓'} {Math.abs(trend.value)}
           </span>
-          <span className="text-gray-500 ml-2">{trend.label}</span>
+          <span className="text-text-muted ml-2">{trend.label}</span>
         </div>
       )}
     </div>

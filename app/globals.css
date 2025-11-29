@@ -2,20 +2,172 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   COLOR PALETTE (Base Colors)
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Theme (Default) */
+  --color-0: #5f7470;
+  --color-1: #5f7470;
+  --color-2: #889696;
+  --color-3: #b8bdb5;
+  --color-4: #d2d4c8;
+  --color-5: #e0e2db;
+
+  /* Extra colors */
+  --color-black: #494949;
+  --color-white: #ffffff;
+
+  /* Semantic Background Colors */
+  --bg-primary: var(--color-2);
+  --bg-secondary: var(--color-5);
+  --bg-card: #ffffff;
+  --bg-hover: var(--color-3);
+  --bg-overlay-light: rgba(255, 255, 255, 0.1);
+  --bg-overlay-medium: rgba(255, 255, 255, 0.7);
+  --bg-overlay-dark: rgba(0, 0, 0, 0.2);
+
+  /* Semantic Text Colors */
+  --text-primary: var(--color-black);
+  --text-secondary: color-mix(in srgb, var(--color-black) 60%, transparent);
+  --text-muted: color-mix(in srgb, var(--color-2) 60%, transparent);
+  --text-inverse: var(--color-white);
+
+  /* Semantic Border Colors */
+  --border-primary: var(--color-4);
+  --border-secondary: var(--color-3);
+  --border-light: rgba(255, 255, 255, 0.2);
+  --border-subtle: #e5e7eb;
+
+  /* Accent Colors */
+  --accent-primary: var(--color-4);
+  --accent-secondary: var(--color-5);
+  --accent-hover: var(--color-3);
+
+  /* Status Colors */
+  --status-success-bg: #dcfce7;
+  --status-success-text: #166534;
+  --status-success-border: #86efac;
+
+  --status-error-bg: #fee2e2;
+  --status-error-text: #991b1b;
+  --status-error-border: #fca5a5;
+
+  --status-warning-bg: #fef3c7;
+  --status-warning-text: #92400e;
+  --status-warning-border: #fcd34d;
+
+  --status-info-bg: #dbeafe;
+  --status-info-text: #1e40af;
+  --status-info-border: #93c5fd;
+
+  /* Interactive Elements */
+  --button-primary-bg: var(--color-4);
+  --button-primary-hover: var(--color-3);
+  --button-primary-text: var(--text-inverse);
+
+  --button-secondary-bg: var(--bg-card);
+  --button-secondary-hover: var(--bg-hover);
+  --button-secondary-text: var(--text-primary);
+  --button-secondary-border: var(--border-primary);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 1px var(--color-5);
+
+  /* Legacy variables for compatibility */
+  --background: var(--bg-card);
+  --foreground: var(--text-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   DARK THEME
+   ============================================ */
+
+[data-theme="dark"] {
+  --color-0: #455975;
+  --color-1: #1f2937;
+  --color-2: #61a6fb;
+  --color-3: #94c5fd;
+  --color-4: #c3defe;
+  --color-5: #ebf4ff;
+
+  --color-black: #494949;
+  --color-white: #ffffff;
+
+  /* Semantic Background Colors */
+  --bg-primary: var(--color-1);
+  --bg-secondary: var(--color-2);
+  --bg-card: #ffffff;
+  --bg-hover: var(--color-3);
+  --bg-overlay-light: rgba(135, 129, 139, 0.1);
+  --bg-overlay-medium: rgba(135, 129, 139, 0.3);
+  --bg-overlay-dark: rgba(135, 129, 139, 0.6);
+
+  /* Semantic Text Colors */
+  --text-primary: var(--color-black);
+  --text-secondary: color-mix(in srgb, var(--color-black) 60%, transparent);
+  --text-muted: color-mix(in srgb, var(--color-3) 60%, transparent);
+  --text-inverse: var(--color-white);
+
+  /* Semantic Border Colors */
+  --border-primary: var(--color-3);
+  --border-secondary: var(--color-2);
+  --border-light: var(--color-3);
+  --border-subtle: var(--color-2);
+
+  /* Accent Colors */
+  --accent-primary: var(--color-4);
+  --accent-secondary: var(--color-5);
+  --accent-hover: var(--color-3);
+
+  /* Status Colors (adjusted for dark) */
+  --status-success-bg: #dcfce7;
+  --status-success-text: #166534;
+  --status-success-border: #86efac;
+
+  --status-error-bg: rgba(239, 68, 68, 0.15);
+  --status-error-text: #fca5a5;
+  --status-error-border: rgba(252, 165, 165, 0.3);
+
+  --status-warning-bg: rgba(245, 158, 11, 0.15);
+  --status-warning-text: #fcd34d;
+  --status-warning-border: rgba(252, 211, 77, 0.3);
+
+  --status-info-bg: #dbeafe;
+  --status-info-text: #1e40af;
+  --status-info-border: #93c5fd;
+
+  /* Interactive Elements */
+  --button-primary-bg: var(--color-4);
+  --button-primary-hover: var(--color-3);
+  --button-primary-text: var(--color-1);
+
+  --button-secondary-bg: var(--bg-card);
+  --button-secondary-hover: var(--bg-hover);
+  --button-secondary-text: var(--text-primary);
+  --button-secondary-border: var(--border-primary);
+
+  /* Shadows (enhanced for dark) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 1px var(--color-3);
+
+  /* Legacy variables for compatibility */
+  --background: var(--bg-card);
+  --foreground: var(--text-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
 }

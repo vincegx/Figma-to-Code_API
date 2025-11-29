@@ -34,13 +34,13 @@ export function Navigation() {
   };
 
   return (
-    <nav className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="border-b border-border-primary bg-bg-card">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Layers className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            <span className="font-semibold text-gray-900 dark:text-white hidden sm:block">
+            <Layers className="h-6 w-6 text-accent-primary" />
+            <span className="font-semibold text-text-primary hidden sm:block">
               Figma Rules Builder
             </span>
           </Link>
@@ -58,8 +58,8 @@ export function Navigation() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                     active
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-accent-primary text-text-primary'
+                      : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
                   )}
                 >
                   <Icon className="h-4 w-4" />
