@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useNodesStore, useUIStore } from '@/lib/store';
@@ -26,6 +26,7 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Crosshair,
 } from 'lucide-react';
 import { RefetchButton } from '@/components/refetch-button';
 import {
@@ -39,7 +40,7 @@ import FigmaTreeView from '@/components/figma-tree-view';
 import { InformationPanel } from '@/components/information-panel';
 import { RulesPanel } from '@/components/rules-panel';
 import { ResizablePreviewViewport } from '@/components/resizable-preview-viewport';
-import LivePreview from '@/components/live-preview';
+import LivePreview, { type LivePreviewHandle } from '@/components/live-preview';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import { cn } from '@/lib/utils';
@@ -70,13 +71,18 @@ export default function ViewerPage() {
     viewerGridSpacing,
     viewerLeftPanelCollapsed,
     viewerRightPanelCollapsed,
+    viewerHighlightEnabled,
     setViewerResponsiveMode,
     setViewerViewportSize,
     setViewerGridVisible,
     setViewerGridSpacing,
     setViewerLeftPanelCollapsed,
     setViewerRightPanelCollapsed,
+    setViewerHighlightEnabled,
   } = useUIStore();
+
+  // WP35: Ref for LivePreview to send highlight messages
+  const livePreviewRef = useRef<LivePreviewHandle>(null);
 
   // Multi-framework rules state
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
@@ -119,12 +125,18 @@ export default function ViewerPage() {
     return findNode(altNode);
   }, [altNode, selectedTreeNodeId]);
 
-  // Evaluate rules for preview
+  // Evaluate rules for selected node (used in sidebar panels)
   const resolvedProperties = useMemo(() => {
     const targetNode = selectedNode || altNode;
     if (!targetNode || multiFrameworkRules.length === 0) return {};
     return evaluateMultiFrameworkRules(targetNode, multiFrameworkRules, previewFramework).properties;
   }, [selectedNode, altNode, multiFrameworkRules, previewFramework]);
+
+  // Evaluate rules for root node (used in code generation - always show full component)
+  const rootResolvedProperties = useMemo(() => {
+    if (!altNode || multiFrameworkRules.length === 0) return {};
+    return evaluateMultiFrameworkRules(altNode, multiFrameworkRules, previewFramework).properties;
+  }, [altNode, multiFrameworkRules, previewFramework]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
@@ -199,23 +211,23 @@ export default function ViewerPage() {
   }, [nodeId]);
 
   // Generate code directly in ViewerPage (independent of right panel visibility)
+  // WP35: Always use altNode (root) for code generation - selection only affects highlight
   useEffect(() => {
-    const targetNode = selectedNode || altNode;
-    if (!targetNode || multiFrameworkRules.length === 0) {
+    if (!altNode || multiFrameworkRules.length === 0) {
       return;
     }
 
-    // Capture non-null node for closure
-    const node = targetNode;
+    // Capture non-null altNode for closure
+    const rootNode = altNode;
 
     async function generateCode() {
       try {
         if (previewFramework === 'react-tailwind') {
-          const output = await generateReactTailwind(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          const output = await generateReactTailwind(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
-          const output = await generateHTMLCSS(node, resolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          const output = await generateHTMLCSS(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         }
@@ -225,7 +237,21 @@ export default function ViewerPage() {
     }
 
     generateCode();
-  }, [selectedNode?.id, altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, resolvedProperties]);
+  }, [altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, rootResolvedProperties]);
+
+  // WP35: Send highlight message to iframe when selection changes
+  useEffect(() => {
+    if (!livePreviewRef.current) return;
+
+    const isInstance = selectedNode?.type === 'INSTANCE' || selectedNode?.originalType === 'INSTANCE';
+
+    livePreviewRef.current.sendHighlight(
+      selectedTreeNodeId,
+      selectedNode?.name || '',
+      isInstance,
+      viewerHighlightEnabled
+    );
+  }, [selectedTreeNodeId, selectedNode?.name, selectedNode?.type, selectedNode?.originalType, viewerHighlightEnabled]);
 
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
@@ -459,6 +485,16 @@ export default function ViewerPage() {
           </>
         )}
 
+        {/* WP35: Toggle Selection Highlight */}
+        <Button
+          variant={viewerHighlightEnabled ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewerHighlightEnabled(!viewerHighlightEnabled)}
+          title={viewerHighlightEnabled ? 'Disable selection highlight' : 'Enable selection highlight'}
+        >
+          <Crosshair className="w-4 h-4" />
+        </Button>
+
         {/* Framework Selector */}
         <div className="ml-auto flex items-center gap-2">
           <span className="text-sm text-text-secondary">Framework:</span>
@@ -525,6 +561,7 @@ export default function ViewerPage() {
         <ResizablePanel className="relative bg-bg-canvas">
           <ResizablePreviewViewport>
             <LivePreview
+              ref={livePreviewRef}
               key={iframeKey} // WP33: Force re-render when refresh button clicked
               code={generatedCode}
               framework={previewFramework}

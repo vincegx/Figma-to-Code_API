@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import type { FrameworkType } from '@/lib/types/rules';
+import { HIGHLIGHT_STYLES, HIGHLIGHT_SCRIPT } from './selection-highlight';
 
 /**
  * LivePreview Security Model:
@@ -39,6 +40,7 @@ function getRenderingStrategy(framework: FrameworkType): 'html' | 'react' | 'non
 
 /**
  * Build complete HTML document from generated HTML/CSS code
+ * WP35: Includes highlight styles and script for selection overlay
  */
 function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
   // Split generated code on '/* CSS */' marker
@@ -69,10 +71,16 @@ function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
         box-sizing: border-box;
       }
       ${css}
+      /* WP35: Selection highlight styles */
+      ${HIGHLIGHT_STYLES}
     </style>
   </head>
   <body>
     ${html}
+    <script>
+      /* WP35: Selection highlight listener */
+      ${HIGHLIGHT_SCRIPT}
+    </script>
   </body>
 </html>
   `.trim();
@@ -81,6 +89,7 @@ function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
 /**
  * Build React document with server-transpiled code
  * Inlines React, ReactDOM, and Tailwind CSS to avoid CORS issues in srcDoc iframe
+ * WP35: Includes highlight styles and script for selection overlay
  */
 function buildReactDocument(
   transpiledCode: string,
@@ -112,6 +121,8 @@ function buildReactDocument(
         box-sizing: border-box;
       }
       ${tailwindCSS}
+      /* WP35: Selection highlight styles */
+      ${HIGHLIGHT_STYLES}
     </style>
   </head>
   <body>
@@ -151,6 +162,9 @@ function buildReactDocument(
           stack: event.error?.stack
         }, '*');
       });
+
+      /* WP35: Selection highlight listener */
+      ${HIGHLIGHT_SCRIPT}
     </script>
   </body>
 </html>
@@ -179,13 +193,39 @@ async function getCachedReactLibs(): Promise<{ reactCode: string; reactDomCode: 
   return { reactCode: cachedReactCode, reactDomCode: cachedReactDomCode };
 }
 
-export default function LivePreview({ code, framework, language, googleFontsUrl }: LivePreviewProps) {
+/**
+ * WP35: Handle for parent to access iframe for postMessage
+ */
+export interface LivePreviewHandle {
+  sendHighlight: (nodeId: string | null, nodeName: string, isInstance: boolean, enabled: boolean) => void;
+}
+
+const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function LivePreview(
+  { code, framework, language, googleFontsUrl },
+  ref
+) {
   // console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [iframeContent, setIframeContent] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // WP35: Expose sendHighlight method to parent
+  useImperativeHandle(ref, () => ({
+    sendHighlight: (nodeId: string | null, nodeName: string, isInstance: boolean, enabled: boolean) => {
+      const iframe = iframeRef.current;
+      if (iframe?.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'highlight',
+          nodeId,
+          nodeName,
+          isInstance,
+          enabled,
+        }, '*');
+      }
+    },
+  }), []);
 
   const strategy = getRenderingStrategy(framework);
 
@@ -390,4 +430,6 @@ export default function LivePreview({ code, framework, language, googleFontsUrl 
       )}
     </div>
   );
-}
+});
+
+export default LivePreview;

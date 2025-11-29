@@ -35,6 +35,9 @@ export interface UIState {
   viewerLeftPanelCollapsed: boolean;
   viewerRightPanelCollapsed: boolean;
 
+  // Selection highlight (persisted in localStorage)
+  viewerHighlightEnabled: boolean;
+
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setImporting: (isImporting: boolean) => void;
@@ -49,6 +52,7 @@ export interface UIState {
   setViewerGridSpacing: (spacing: 8 | 16 | 24) => void;
   setViewerLeftPanelCollapsed: (collapsed: boolean) => void;
   setViewerRightPanelCollapsed: (collapsed: boolean) => void;
+  setViewerHighlightEnabled: (enabled: boolean) => void;
 }
 
 /**
@@ -73,6 +77,7 @@ export const useUIStore = create<UIState>()(
         viewerGridSpacing: 16,
         viewerLeftPanelCollapsed: false,
         viewerRightPanelCollapsed: false,
+        viewerHighlightEnabled: true,
 
         // Actions
         setTheme: (theme: 'light' | 'dark' | 'system') => {
@@ -148,6 +153,10 @@ export const useUIStore = create<UIState>()(
         setViewerRightPanelCollapsed: (collapsed: boolean) => {
           set({ viewerRightPanelCollapsed: collapsed });
         },
+
+        setViewerHighlightEnabled: (enabled: boolean) => {
+          set({ viewerHighlightEnabled: enabled });
+        },
       }),
       {
         name: 'ui-store', // localStorage key
@@ -161,6 +170,7 @@ export const useUIStore = create<UIState>()(
           viewerGridSpacing: state.viewerGridSpacing,
           viewerLeftPanelCollapsed: state.viewerLeftPanelCollapsed,
           viewerRightPanelCollapsed: state.viewerRightPanelCollapsed,
+          viewerHighlightEnabled: state.viewerHighlightEnabled,
         }),
       }
     ),
