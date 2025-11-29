@@ -229,6 +229,14 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     }
   }
 
+  // WP31: Separate translateX/translateY for CENTER constraints (MCP pattern)
+  if (prop === 'translatex') {
+    return `translate-x-[${cssValue}]`;
+  }
+  if (prop === 'translatey') {
+    return `translate-y-[${cssValue}]`;
+  }
+
   // Rotation (FigmaToCode enhancement)
   if (prop === 'transform' && cssValue.includes('rotate')) {
     // WP25 FIX: Match decimal degrees (47.5deg)

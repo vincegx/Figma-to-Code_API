@@ -73,7 +73,7 @@ export async function GET(
 
     // Transform to AltNode on-the-fly (Constitutional Principle III: don't persist)
     resetNameCounters(); // Reset for clean unique name generation
-    const altNode = transformToAltNode(nodeData, 0, undefined, variables);
+    const altNode = transformToAltNode(nodeData, 0, undefined, undefined, variables);
 
     return NextResponse.json({
       success: true,

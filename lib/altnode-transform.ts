@@ -591,14 +591,55 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
 
   // WP25: layoutPositioning ABSOLUTE → calculate top/left (COMPLEX calculation, not in rules)
   // WP28 T209: Now uses config constant for layout positioning comparison
+  // WP31: Handle CENTER constraints with calc(50% + offset) + translate(-50%, -50%)
   if (node.layoutPositioning === figmaConfig.constants.layoutPositioning.absolute) {
     // NOTE: position: absolute is handled by official-layoutpositioning rule
     // But top/left require parent calculation, so we keep them here
-    if (node.absoluteBoundingBox && node.parent?.absoluteBoundingBox) {
-      const parentBox = node.parent.absoluteBoundingBox;
+    // WP31 FIX: Use parentBounds parameter (from recursive call) OR node.parent.absoluteBoundingBox
+    const parentBox = parentBounds || node.parent?.absoluteBoundingBox;
+    if (node.absoluteBoundingBox && parentBox) {
       const nodeBox = node.absoluteBoundingBox;
-      altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
-      altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
+      const constraints = (node as any).constraints;
+
+      // WP31: CENTER constraints use calc(50% + offset) pattern
+      const isVerticalCenter = constraints?.vertical === 'CENTER';
+      const isHorizontalCenter = constraints?.horizontal === 'CENTER';
+
+      if (isVerticalCenter || isHorizontalCenter) {
+        // Calculate center of parent and node
+        const parentCenterX = parentBox.width / 2;
+        const parentCenterY = parentBox.height / 2;
+        const nodeCenterX = (nodeBox.x - parentBox.x) + nodeBox.width / 2;
+        const nodeCenterY = (nodeBox.y - parentBox.y) + nodeBox.height / 2;
+
+        if (isHorizontalCenter) {
+          const offsetX = nodeCenterX - parentCenterX;
+          const sign = offsetX >= 0 ? '+' : '';
+          altNode.styles.left = `calc(50%${sign}${offsetX.toFixed(2)}px)`;
+        } else {
+          altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
+        }
+
+        if (isVerticalCenter) {
+          const offsetY = nodeCenterY - parentCenterY;
+          const sign = offsetY >= 0 ? '+' : '';
+          altNode.styles.top = `calc(50%${sign}${offsetY.toFixed(2)}px)`;
+        } else {
+          altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
+        }
+
+        // Add translate(-50%, -50%) for proper centering
+        // WP31: Use separate translateX/Y styles to avoid overwriting rotation
+        if (isHorizontalCenter) {
+          altNode.styles.translateX = '-50%';
+        }
+        if (isVerticalCenter) {
+          altNode.styles.translateY = '-50%';
+        }
+      } else {
+        altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
+        altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
+      }
     }
   }
 
