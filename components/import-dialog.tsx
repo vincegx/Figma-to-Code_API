@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNodesStore, useUIStore } from '@/lib/store';
-import { parseFigmaUrl } from '@/lib/utils/url-parser';
-import { useImportProgress } from '@/hooks/use-import-progress';
-import { ImportProgress } from '@/components/import-progress';
+import { useFigmaProgress, type ProgressStep } from '@/hooks/use-figma-progress';
+import { ImportProgress, type ImportStep } from '@/components/import-progress';
 import { ImportLogs } from '@/components/import-logs';
 import { ImportSuccess, FigmaErrors } from '@/lib/toast-utils';
 import { X, RotateCcw } from 'lucide-react';
@@ -12,153 +11,87 @@ import { Button } from '@/components/ui/button';
 
 export default function ImportDialog() {
   const [url, setUrl] = useState('');
-  const importNodeToStore = useNodesStore((state) => state.importNode);
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
+  const importNodeToStore = useNodesStore((state) => state.importNode);
   const setImporting = useUIStore((state) => state.setImporting);
   const invalidateStats = useUIStore((state) => state.invalidateStats);
 
   const {
-    isImporting,
+    isRunning,
     steps,
     logs,
     error,
+    result,
     startImport,
-    advanceStep,
-    completeStep,
-    setStepError,
-    addLog,
-    cancelImport,
+    cancel,
     reset,
-    abortController,
-  } = useImportProgress();
+  } = useFigmaProgress();
 
   const [importedNode, setImportedNode] = useState<{ name: string; id: string } | null>(null);
 
-  const handleImport = useCallback(async () => {
-    // Reset any previous import state
-    setImportedNode(null);
-    startImport();
-    setImporting(true);
+  // Sync isRunning with UI store
+  useEffect(() => {
+    setImporting(isRunning);
+  }, [isRunning, setImporting]);
 
-    // Step 1: URL Parsing
-    advanceStep('parse');
-    let fileKey: string;
-    let nodeId: string;
+  // Handle successful completion
+  useEffect(() => {
+    if (!isRunning && result && !error) {
+      const nodeResult = result as { nodeId: string; name: string };
+      setImportedNode({ name: nodeResult.name, id: nodeResult.nodeId });
 
-    try {
-      const parsed = parseFigmaUrl(url);
-      fileKey = parsed.fileKey;
-      nodeId = parsed.nodeId;
-      addLog(`File key: ${fileKey}`, 'info');
-      addLog(`Node ID: ${nodeId}`, 'info');
-      completeStep('parse');
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Invalid Figma URL';
-      setStepError('parse', message);
-      setImporting(false);
-      return;
-    }
-
-    // Step 2-4: API calls (combined into one request)
-    // We advance through steps to show progress, though the actual API does them together
-    advanceStep('metadata');
-
-    try {
-      const response = await fetch('/api/figma/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-        signal: abortController?.signal,
-      });
-
-      // Simulate progress through remaining steps
-      completeStep('metadata');
-      advanceStep('node');
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-
-      completeStep('node');
-      advanceStep('screenshot');
-
-      const apiResponse = await response.json();
-      completeStep('screenshot');
-
-      // Extract metadata
-      const nodeMetadata = apiResponse.metadata;
-
-      // Update nodes store
-      importNodeToStore(nodeMetadata);
-
-      // Reload library
-      await loadLibrary();
-
-      // Invalidate stats cache
+      // Update library
+      loadLibrary();
       invalidateStats();
 
-      // Store imported node info for success state
-      setImportedNode({ name: nodeMetadata.name, id: apiResponse.nodeId });
-
       // Show success toast
-      ImportSuccess.nodeImported(nodeMetadata.name, apiResponse.nodeId);
+      ImportSuccess.nodeImported(nodeResult.name, nodeResult.nodeId);
+    }
+  }, [isRunning, result, error, loadLibrary, invalidateStats]);
 
-      addLog(`Import completed: "${nodeMetadata.name}"`, 'success');
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        // Import was cancelled
-        return;
-      }
-
-      const message = err instanceof Error ? err.message : 'Import failed';
-
-      // Determine which step failed based on current progress
-      const currentStep = steps.find((s) => s.status === 'in-progress');
-      if (currentStep) {
-        setStepError(currentStep.id as 'parse' | 'metadata' | 'node' | 'screenshot', message);
-      }
-
+  // Handle errors
+  useEffect(() => {
+    if (!isRunning && error) {
       // Show appropriate error toast based on message
-      if (message.includes('access token') || message.includes('Invalid token')) {
+      if (error.includes('access token') || error.includes('Invalid token')) {
         FigmaErrors.invalidToken();
-      } else if (message.includes('rate limit')) {
+      } else if (error.includes('rate limit')) {
         FigmaErrors.rateLimit();
-      } else if (message.includes('not found')) {
-        FigmaErrors.nodeNotFound(nodeId!);
-      } else if (message.includes('Network') || message.includes('fetch')) {
+      } else if (error.includes('not found')) {
+        FigmaErrors.nodeNotFound('unknown');
+      } else if (error.includes('Network') || error.includes('fetch')) {
         FigmaErrors.networkError(() => handleImport());
       } else {
-        FigmaErrors.generic(message);
+        FigmaErrors.generic(error);
       }
-    } finally {
-      setImporting(false);
     }
-  }, [
-    url,
-    startImport,
-    advanceStep,
-    completeStep,
-    setStepError,
-    addLog,
-    setImporting,
-    importNodeToStore,
-    loadLibrary,
-    invalidateStats,
-    abortController,
-    steps,
-  ]);
+  }, [isRunning, error]);
+
+  const handleImport = useCallback(async () => {
+    setImportedNode(null);
+    await startImport(url);
+  }, [url, startImport]);
 
   const handleCancel = useCallback(() => {
-    cancelImport();
-    setImporting(false);
-  }, [cancelImport, setImporting]);
+    cancel();
+  }, [cancel]);
 
   const handleImportAnother = useCallback(() => {
     reset();
     setUrl('');
     setImportedNode(null);
   }, [reset]);
+
+  // Convert ProgressStep to ImportStep for compatibility
+  const importSteps: ImportStep[] = steps.map((step: ProgressStep) => ({
+    id: step.id,
+    label: step.label,
+    status: step.status === 'skipped' ? 'skipped' :
+            step.status === 'in-progress' ? 'in-progress' :
+            step.status === 'completed' ? 'completed' :
+            step.status === 'error' ? 'error' : 'pending',
+    message: step.message,
+  }));
 
   const hasStarted = logs.length > 0;
   const isComplete = importedNode !== null;
@@ -175,14 +108,14 @@ export default function ImportDialog() {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.figma.com/file/..."
           className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50"
-          disabled={isImporting}
+          disabled={isRunning}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && url && !isImporting) {
+            if (e.key === 'Enter' && url && !isRunning) {
               handleImport();
             }
           }}
         />
-        {isImporting ? (
+        {isRunning ? (
           <Button
             onClick={handleCancel}
             variant="destructive"
@@ -211,16 +144,16 @@ export default function ImportDialog() {
         )}
       </div>
 
-      {/* Progress UI */}
+      {/* Progress UI - 8 steps with SSE */}
       {hasStarted && (
         <div className="mt-6 space-y-4">
-          <ImportProgress steps={steps} />
+          <ImportProgress steps={importSteps} />
           <ImportLogs logs={logs} />
         </div>
       )}
 
       {/* Error display (fallback if toast doesn't show) */}
-      {error && !isImporting && (
+      {error && !isRunning && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
           {error}
         </div>

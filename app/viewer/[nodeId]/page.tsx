@@ -27,6 +27,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
 } from 'lucide-react';
+import { RefetchButton } from '@/components/refetch-button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,6 +97,7 @@ export default function ViewerPage() {
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
+  const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
   const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
@@ -344,23 +346,24 @@ export default function ViewerPage() {
               <ChevronRight size={20} />
             </button>
 
-            {/* Re-fetch */}
-            <button
-              onClick={async () => {
-                try {
-                  await fetch(`/api/figma/node/${nodeId}`, { method: 'POST' });
-                  await loadLibrary();
-                  const response = await fetch(`/api/figma/node/${nodeId}`);
-                  if (response.ok) {
-                    const data = await response.json();
-                    setAltNode(data.altNode || null);
-                  }
-                } catch (error) {
-                  console.error('Failed to re-fetch node:', error);
+            {/* Re-fetch from Figma (WP33: with SSE progress) */}
+            <RefetchButton
+              nodeId={nodeId}
+              onRefetchComplete={async () => {
+                await loadLibrary();
+                const response = await fetch(`/api/figma/node/${nodeId}`);
+                if (response.ok) {
+                  const data = await response.json();
+                  setAltNode(data.altNode || null);
                 }
               }}
+            />
+
+            {/* Refresh Preview (WP33: reload iframe without refetching) */}
+            <button
+              onClick={() => setIframeKey(prev => prev + 1)}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              title="Re-fetch from Figma"
+              title="Refresh preview"
             >
               <RefreshCw size={20} />
             </button>
@@ -550,6 +553,7 @@ export default function ViewerPage() {
         <ResizablePanel className="relative bg-slate-50 dark:bg-slate-900">
           <ResizablePreviewViewport>
             <LivePreview
+              key={iframeKey} // WP33: Force re-render when refresh button clicked
               code={generatedCode}
               framework={previewFramework}
               language={previewFramework === 'html-css' ? 'html' : 'tsx'}

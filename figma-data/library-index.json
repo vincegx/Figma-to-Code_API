@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-29T19:05:54.739Z",
+  "lastUpdated": "2025-11-29T20:29:28.175Z",
   "nodes": [
     {
       "id": "lib-124-21142",
@@ -62,8 +62,8 @@
       "name": "Homepage - Landing",
       "altNode": null,
       "tags": [],
-      "addedAt": "2025-11-29T19:05:50.666Z",
-      "lastModified": "2025-11-29T19:05:50.666Z",
+      "addedAt": "2025-11-29T20:24:21.107Z",
+      "lastModified": "2025-11-29T20:24:21.107Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -145,7 +145,25 @@
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2146"
       }
+    },
+    {
+      "id": "lib-493-2811",
+      "figmaNodeId": "493:2811",
+      "name": "Home - long",
+      "altNode": null,
+      "tags": [],
+      "addedAt": "2025-11-29T20:29:28.164Z",
+      "lastModified": "2025-11-29T20:29:28.164Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
+        "fileName": "Sans titre",
+        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
+      }
     }
   ],
-  "totalNodes": 8
+  "totalNodes": 9
 }
