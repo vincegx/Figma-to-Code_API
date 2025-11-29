@@ -127,12 +127,22 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Gap (FigmaToCode enhancement: arbitrary values)
   // WP31 FIX: Force arbitrary values to match MCP output
+  // WP31 FIX: Skip negative gap values - CSS gap doesn't support negative (handled via margin)
   if (prop === 'gap') {
+    // Parse value to check if negative
+    const numericValue = parseFloat(cssValue);
+    if (numericValue < 0) {
+      return ''; // Skip negative gap - will be handled by margin on children
+    }
     return `gap-[${cssValue}]`;
   }
 
   // WP31 FIX: Handle composite border property (e.g., "1px solid white")
   if (prop === 'border') {
+    // WP31: Handle border reset for individual stroke weights
+    if (cssValue === '0px') {
+      return 'border-0';
+    }
     const match = cssValue.match(/^(\d+)px\s+solid\s+(.*)/);
     if (match) {
       const width = match[1];
@@ -193,6 +203,15 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Border radius
   if (prop === 'borderradius') {
+    // WP31 FIX: Handle CSS variables in border-radius (Tailwind v3 syntax)
+    if (cssValue.startsWith('var(')) {
+      // Extract the variable part: var(--var-128-217, 28px) → var(--var-128-217)
+      const varMatch = cssValue.match(/var\((--[\w-]+)/);
+      if (varMatch) {
+        return `rounded-[var(${varMatch[1]})]`;
+      }
+    }
+
     // WP25 FIX: Match decimal px values (35.55555725097656px)
     const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
     if (match) {
@@ -451,23 +470,69 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     return `outline-offset-[${cssValue}]`;
   }
 
-  // Border
+  // Border - global width (only used when no individualStrokeWeights)
   if (prop === 'borderwidth') {
-    // WP31 FIX: Only generate border classes for non-zero widths with visible borders
     const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
     if (match) {
       const px = Math.round(parseFloat(match[1]));
-      // WP31 FIX: Don't generate border classes for 1px if it's just a default/debug value
       if (px === 0) return 'border-0';
-      if (px === 1) return ''; // Skip 1px borders unless there's a visible border color
-      
-      const standards: Record<number, string> = {
-        2: 'border-2',
-        4: 'border-4',
-        8: 'border-8',
-      };
+      if (px === 1) return 'border';
+      const standards: Record<number, string> = { 2: 'border-2', 4: 'border-4', 8: 'border-8' };
       return standards[px] || `border-[${px}px]`;
     }
+    return '';
+  }
+
+  // WP31: Individual border widths (border on specific sides only)
+  // Use border-t/r/b/l for 1px (standard), arbitrary for other values
+  if (prop === 'bordertopwidth') {
+    if (cssValue === '0px') return '';
+    return cssValue === '1px' ? 'border-t' : `border-t-[${cssValue}]`;
+  }
+  if (prop === 'borderrightwidth') {
+    if (cssValue === '0px') return '';
+    return cssValue === '1px' ? 'border-r' : `border-r-[${cssValue}]`;
+  }
+  if (prop === 'borderbottomwidth') {
+    if (cssValue === '0px') return '';
+    return cssValue === '1px' ? 'border-b' : `border-b-[${cssValue}]`;
+  }
+  if (prop === 'borderleftwidth') {
+    if (cssValue === '0px') return '';
+    return cssValue === '1px' ? 'border-l' : `border-l-[${cssValue}]`;
+  }
+
+  // WP31: Individual border colors - use Tailwind arbitrary value syntax
+  // Syntax: border-b-[rgba(40,40,40,1)] (no spaces, no "color:" prefix)
+  if (prop === 'bordertopcolor') {
+    const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    return `border-t-[${colorNoSpaces}]`;
+  }
+  if (prop === 'borderrightcolor') {
+    const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    return `border-r-[${colorNoSpaces}]`;
+  }
+  if (prop === 'borderbottomcolor') {
+    const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    return `border-b-[${colorNoSpaces}]`;
+  }
+  if (prop === 'borderleftcolor') {
+    const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    return `border-l-[${colorNoSpaces}]`;
+  }
+  // WP31: Generic border-color like MCP: border-[#282828] or border-[rgba(...)]
+  if (prop === 'bordercolor') {
+    const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    return `border-[${colorNoSpaces}]`;
+  }
+  // WP31: Border style conversion
+  // Note: Tailwind v3 only has global border-style classes (no border-b-solid)
+  // All per-side styles map to global classes since Preflight is disabled
+  if (prop === 'borderstyle' || prop === 'bordertopstyle' || prop === 'borderrightstyle' ||
+      prop === 'borderbottomstyle' || prop === 'borderleftstyle') {
+    if (cssValue === 'solid') return 'border-solid';
+    if (cssValue === 'dashed') return 'border-dashed';
+    if (cssValue === 'dotted') return 'border-dotted';
     return '';
   }
 
@@ -492,6 +557,19 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     };
     return standards[cssValue] || `z-[${cssValue}]`;
   }
+
+  // WP31: Position and inset properties for constraints-based positioning
+  if (prop === 'position') {
+    if (cssValue === 'absolute') return 'absolute';
+    if (cssValue === 'relative') return 'relative';
+    if (cssValue === 'fixed') return 'fixed';
+    if (cssValue === 'sticky') return 'sticky';
+    return '';
+  }
+  if (prop === 'top') return `top-[${cssValue}]`;
+  if (prop === 'bottom') return `bottom-[${cssValue}]`;
+  if (prop === 'left') return `left-[${cssValue}]`;
+  if (prop === 'right') return `right-[${cssValue}]`;
 
   // WP25: Flex grow
   // WP31: flex-grow-0 est le défaut, ne pas le générer
@@ -588,16 +666,16 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // WP25: Text properties
+  // WP31: Skip vertical-align → self-* conversion
+  // In flexbox, alignment is controlled by parent's items-center + child's layoutAlign
+  // Converting textAlignVertical to self-start conflicts with parent alignment
   if (prop === 'verticalalign') {
-    const alignMap: Record<string, string> = {
-      'baseline': 'align-baseline',
-      'top': 'self-start',  // WP25: In flexbox, use self-start instead of align-top
-      'middle': 'self-center',  // WP25: In flexbox, use self-center instead of align-middle
-      'bottom': 'self-end',  // WP25: In flexbox, use self-end instead of align-bottom
-      'text-top': 'align-text-top',
-      'text-bottom': 'align-text-bottom',
-    };
-    return alignMap[cssValue] || '';
+    // Only keep non-flex specific values
+    if (cssValue === 'baseline') return 'align-baseline';
+    if (cssValue === 'text-top') return 'align-text-top';
+    if (cssValue === 'text-bottom') return 'align-text-bottom';
+    // Skip top/middle/bottom - let layoutAlign handle flex alignment
+    return '';
   }
 
   if (prop === 'textindent') {

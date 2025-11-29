@@ -57,6 +57,11 @@ export interface SimpleAltNode {
   // WP32: All fills in render order (bottom to top)
   // Enables rendering all layers like MCP does
   fillsData?: FillData[];
+
+  // WP31: Negative itemSpacing handling (gap doesn't support negative values)
+  // Store negative spacing so children can apply margin instead
+  negativeItemSpacing?: number;
+  layoutDirection?: 'row' | 'column';
 }
 
 // WP32: Fill data structure for multi-layer rendering
@@ -139,7 +144,8 @@ function mapNodeType(figmaType: string): string {
 function handleGroupInlining(
   groupNode: FigmaNode,
   cumulativeRotation: number,
-  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'
+  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
+  parentBounds?: { x: number; y: number; width: number; height: number }
 ): SimpleAltNode | null {
   if (!groupNode.children || groupNode.children.length === 0) {
     return null; // Empty GROUP, skip entirely
@@ -152,7 +158,7 @@ function handleGroupInlining(
   // WP25 FIX: Pass parent layoutMode through GROUP inlining
   // If GROUP has only 1 child, return child directly (inline the GROUP)
   if (groupNode.children.length === 1) {
-    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode);
+    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode, parentBounds);
   }
 
   // Multiple children: create container but mark as GROUP
@@ -165,7 +171,7 @@ function handleGroupInlining(
     originalType: groupNode.type, // T177: Preserve original type
     styles: {},
     children: groupNode.children
-      .map(child => transformToAltNode(child, newCumulativeRotation, parentLayoutMode))
+      .map(child => transformToAltNode(child, newCumulativeRotation, parentLayoutMode, parentBounds))
       .filter((node): node is SimpleAltNode => node !== null),
     originalNode: groupNode,
     visible: true,
@@ -233,10 +239,25 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
     if (!mapping.extract) continue;
 
     // Skip gap (itemSpacing) when justify-content is space-between - flexbox handles spacing
+    // WP31 FIX: Skip negative itemSpacing - will be handled as margin on children
     if (figmaProp === 'itemSpacing') {
       if (node.primaryAxisAlignItems === 'SPACE_BETWEEN') {
         continue;
       }
+      // Negative gap is invalid in CSS - store for child margin processing
+      if (typeof node[figmaProp] === 'number' && node[figmaProp] < 0) {
+        altNode.negativeItemSpacing = node[figmaProp];
+        altNode.layoutDirection = node.layoutMode === 'HORIZONTAL' ? 'row' : 'column';
+        continue;
+      }
+    }
+
+    // WP31: Skip strokeWeight in these cases:
+    // 1. When individualStrokeWeights exists (handled separately with shorthand)
+    // 2. When strokes array is empty (no visible border)
+    if (figmaProp === 'strokeWeight') {
+      if (node.individualStrokeWeights) continue;
+      if (!node.strokes || node.strokes.length === 0) continue;
     }
 
     const value = node[figmaProp];
@@ -306,18 +327,34 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
   // WP31 T224: Extract Figma variables (boundVariables)
   if (node.boundVariables) {
     for (const [figmaProp, varRef] of Object.entries(node.boundVariables)) {
+      // Handle nested refs (rectangleCornerRadii has 4 sub-properties)
+      if (figmaProp === 'rectangleCornerRadii' && varRef && typeof varRef === 'object' && !(varRef as any).id) {
+        // Check if all 4 corners use the same variable
+        const corners = varRef as Record<string, { id?: string }>;
+        const ids = Object.values(corners).map(c => c?.id).filter(Boolean);
+        const uniqueIds = [...new Set(ids)];
+
+        if (uniqueIds.length === 1 && uniqueIds[0]) {
+          // All corners use same variable - use single border-radius
+          const varName = resolveVariableName(uniqueIds[0], figmaNode);
+          const fallbackValue = node.cornerRadius ?? 0;
+          if (varName) {
+            altNode.styles['border-radius'] = `var(--${varName}, ${fallbackValue}px)`;
+          }
+        }
+        // TODO: Handle 4 different variables for each corner if needed
+        continue;
+      }
+
       const varArray = Array.isArray(varRef) ? varRef : [varRef];
       for (const ref of varArray) {
         if (ref?.id) {
           const varName = resolveVariableName(ref.id, figmaNode);
-          const fallbackValue = node[figmaProp]; // Current value as fallback
+          const fallbackValue = node[figmaProp];
 
           if (varName) {
-            // Map Figma property to CSS property using config
             const mapping = (figmaConfig.propertyMappings as Record<string, { cssProperty?: string; unit?: string }>)[figmaProp];
             const cssProperty = mapping?.cssProperty || figmaProp;
-
-            // Format: var(--name, fallback)
             const fallback = mapping?.unit ? `${fallbackValue}${mapping.unit}` : String(fallbackValue);
             altNode.styles[cssProperty] = `var(--${varName}, ${fallback})`;
           }
@@ -377,22 +414,29 @@ function extractComplexProperties(figmaNode: FigmaNode, altNode: SimpleAltNode):
   const node = figmaNode as any;
 
   // rectangleCornerRadii: Individual corner radii (4 values)
+  // WP31 FIX: Skip if border-radius already set with CSS variable (from boundVariables)
   if (node.rectangleCornerRadii && Array.isArray(node.rectangleCornerRadii)) {
-    const [tl, tr, br, bl] = node.rectangleCornerRadii;
+    const existingBorderRadius = altNode.styles['border-radius'];
+    const hasVariableBinding = typeof existingBorderRadius === 'string' && existingBorderRadius.includes('var(--');
 
-    // Check if all corners are the same
-    if (tl === tr && tr === br && br === bl) {
-      // All same: use simple border-radius
-      altNode.styles['border-radius'] = `${tl}px`;
-    } else {
-      // Different corners: use 4-value syntax
-      altNode.styles['border-radius'] = `${tl}px ${tr}px ${br}px ${bl}px`;
+    // Only set fixed values if not already bound to a variable
+    if (!hasVariableBinding) {
+      const [tl, tr, br, bl] = node.rectangleCornerRadii;
 
-      // Also set individual corner properties for specificity
-      if (tl !== 0) altNode.styles['border-top-left-radius'] = `${tl}px`;
-      if (tr !== 0) altNode.styles['border-top-right-radius'] = `${tr}px`;
-      if (br !== 0) altNode.styles['border-bottom-right-radius'] = `${br}px`;
-      if (bl !== 0) altNode.styles['border-bottom-left-radius'] = `${bl}px`;
+      // Check if all corners are the same
+      if (tl === tr && tr === br && br === bl) {
+        // All same: use simple border-radius
+        altNode.styles['border-radius'] = `${tl}px`;
+      } else {
+        // Different corners: use 4-value syntax
+        altNode.styles['border-radius'] = `${tl}px ${tr}px ${br}px ${bl}px`;
+
+        // Also set individual corner properties for specificity
+        if (tl !== 0) altNode.styles['border-top-left-radius'] = `${tl}px`;
+        if (tr !== 0) altNode.styles['border-top-right-radius'] = `${tr}px`;
+        if (br !== 0) altNode.styles['border-bottom-right-radius'] = `${br}px`;
+        if (bl !== 0) altNode.styles['border-bottom-left-radius'] = `${bl}px`;
+      }
     }
   }
 
@@ -442,21 +486,22 @@ function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltN
     }
   }
 
-  // WP25: Individual stroke weights
-  // WP28 T209: Fixed bug - borderBottomWidth was using 'left' instead of 'bottom'
+  // WP31: Individual stroke weights - use per-side classes (border-t, border-b, etc.)
+  // Reset all borders with border-0 first, then apply individual sides
   if (node.individualStrokeWeights) {
     const { top, right, bottom, left } = node.individualStrokeWeights;
-    if (top || right || bottom || left) {
-      altNode.styles.borderTopWidth = `${top || 0}px`;
-      altNode.styles.borderRightWidth = `${right || 0}px`;
-      altNode.styles.borderBottomWidth = `${bottom || 0}px`; // ✅ Fixed: was using 'left'
-      altNode.styles.borderLeftWidth = `${left || 0}px`;
-    }
+    // border-0 resets all sides (must come before individual sides)
+    altNode.styles.border = '0px';
+    if (top) altNode.styles.borderTopWidth = `${top}px`;
+    if (right) altNode.styles.borderRightWidth = `${right}px`;
+    if (bottom) altNode.styles.borderBottomWidth = `${bottom}px`;
+    if (left) altNode.styles.borderLeftWidth = `${left}px`;
   }
 
-  // WP25: Stroke dash pattern
-  if (node.strokeDashes && node.strokeDashes.length > 0) {
-    altNode.styles.borderStyle = 'dashed';
+  // WP31: Stroke style - always needed for border to be visible
+  if (node.strokes && node.strokes.length > 0) {
+    const style = (node.strokeDashes && node.strokeDashes.length > 0) ? 'dashed' : 'solid';
+    altNode.styles['border-style'] = style;
   }
 }
 
@@ -506,8 +551,9 @@ function applyHighPriorityImprovements(
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
+ * @param parentBounds - Parent's absoluteBoundingBox for constraints positioning (WP31)
  */
-function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE'): void {
+function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE', parentBounds?: { x: number; y: number; width: number; height: number }): void {
   const node = figmaNode as any;
 
   // Grid template columns/rows (COMPLEX - calculated values, not in rules)
@@ -555,6 +601,26 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
       altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
     }
   }
+
+  // WP31: Handle constraints for free-positioned children (parent has no layoutMode)
+  const constraints = (node as any).constraints;
+  if (!parentLayoutMode && constraints && node.absoluteBoundingBox && parentBounds) {
+    const nodeBox = node.absoluteBoundingBox;
+    altNode.styles.position = 'absolute';
+
+    if (constraints.vertical === 'BOTTOM') {
+      altNode.styles.bottom = `${parentBounds.height - (nodeBox.y - parentBounds.y) - nodeBox.height}px`;
+    } else {
+      altNode.styles.top = `${nodeBox.y - parentBounds.y}px`;
+    }
+
+    if (constraints.horizontal === 'RIGHT') {
+      altNode.styles.right = `${parentBounds.width - (nodeBox.x - parentBounds.x) - nodeBox.width}px`;
+    } else {
+      altNode.styles.left = `${nodeBox.x - parentBounds.x}px`;
+    }
+  }
+
 
   // WP25: Grid child properties
   if (node.gridRowSpan && node.gridRowSpan > 1) {
@@ -610,7 +676,12 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   }
 
   // Height
-  if (layoutSizingV === 'FILL') {
+  // WP31: Images with scaleMode FILL need fixed height for object-fit: cover to crop correctly
+  const hasImageFill = (figmaNode as any).fills?.some((f: any) => f.type === 'IMAGE' && f.scaleMode === 'FILL');
+  if (layoutSizingV === 'FILL' && hasImageFill && figmaNode.absoluteBoundingBox) {
+    // Use pixel height for images to enable proper cropping
+    altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
+  } else if (layoutSizingV === 'FILL') {
     altNode.styles.height = '100%';
   } else if (layoutSizingV === 'HUG') {
     altNode.styles.height = 'auto';
@@ -618,6 +689,15 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
     altNode.styles.height = `${nodeSize.y}px`;
   } else if (figmaNode.absoluteBoundingBox) {
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
+  }
+
+  // WP31: Add min-height for elements with layoutGrow=1 and FILL vertical sizing
+  // Use absoluteBoundingBox height as fallback when h-[100%] fails (parent has h-auto)
+  // Note: We only set min-height, not min-width, because elements should shrink horizontally
+  // to fit their container (responsive behavior)
+  const hasLayoutGrow = (figmaNode as any).layoutGrow === 1;
+  if (hasLayoutGrow && figmaNode.absoluteBoundingBox && layoutSizingV === 'FILL') {
+    altNode.styles['min-height'] = `${figmaNode.absoluteBoundingBox.height}px`;
   }
 }
 
@@ -629,6 +709,12 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
  * @param altNode - AltNode being constructed
  */
 function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+  // WP31: Skip fills for SVG types - fill is in the SVG, not as CSS background
+  const nodeType = figmaNode.type as string;
+  if (nodeType === 'VECTOR' || nodeType === 'BOOLEAN_OPERATION') {
+    return;
+  }
+
   const fills = (figmaNode as any).fills;
   if (!fills || fills.length === 0) {
     return;
@@ -763,9 +849,17 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
         }
       }
 
-      // WP31 FIX: Always use border to match MCP output (not outline)
-      // MCP generates border classes for all strokes regardless of strokeAlign
-      altNode.styles.border = `${weight}px solid ${color}`;
+      // WP31: Apply color per-side if individualStrokeWeights exists
+      if (node.individualStrokeWeights) {
+        const { top, right, bottom, left } = node.individualStrokeWeights;
+        if (top) altNode.styles['border-top-color'] = color;
+        if (right) altNode.styles['border-right-color'] = color;
+        if (bottom) altNode.styles['border-bottom-color'] = color;
+        if (left) altNode.styles['border-left-color'] = color;
+      } else {
+        // WP31 FIX: Always use border to match MCP output (not outline)
+        altNode.styles.border = `${weight}px solid ${color}`;
+      }
     }
   }
 
@@ -909,6 +1003,7 @@ let currentVariablesMap: Record<string, unknown> = {};
  * @param figmaNode - Figma node from API
  * @param cumulativeRotation - Cumulative rotation from parent nodes (degrees)
  * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
+ * @param parentBounds - Parent's absoluteBoundingBox for constraints positioning (WP31)
  * @param variables - WP31 T224: Figma variables map for CSS variable resolution
  * @returns Transformed AltNode or null if filtered out
  */
@@ -916,6 +1011,7 @@ export function transformToAltNode(
   figmaNode: FigmaNode,
   cumulativeRotation: number = 0,
   parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
+  parentBounds?: { x: number; y: number; width: number; height: number },
   variables?: Record<string, unknown>
 ): SimpleAltNode | null {
   // WP31 T224: Store variables in module scope for resolveVariableName
@@ -928,7 +1024,7 @@ export function transformToAltNode(
 
   // CRITICAL: GROUP node inlining
   if (figmaNode.type === 'GROUP' && figmaNode.children) {
-    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode);
+    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode, parentBounds);
   }
 
   // CRITICAL: Unique name generation
@@ -960,7 +1056,7 @@ export function transformToAltNode(
   };
 
   // Normalize properties
-  normalizeLayout(figmaNode, altNode, parentLayoutMode);
+  normalizeLayout(figmaNode, altNode, parentLayoutMode, parentBounds);
   normalizeFills(figmaNode, altNode);
   normalizeStrokes(figmaNode, altNode);
   normalizeEffects(figmaNode, altNode);
@@ -993,10 +1089,12 @@ export function transformToAltNode(
 
   // Transform children recursively with updated cumulative rotation
   // WP25 FIX: Pass this node's layoutMode to children for flex vs inline-flex logic
+  // WP31: Pass this node's bounds to children for constraints positioning
   if (figmaNode.children) {
     const currentLayoutMode = (figmaNode as any).layoutMode as 'HORIZONTAL' | 'VERTICAL' | 'NONE' | undefined;
+    const currentBounds = figmaNode.absoluteBoundingBox;
     altNode.children = figmaNode.children
-      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode))
+      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds))
       .filter((node): node is SimpleAltNode => node !== null);
   }
 
@@ -1007,7 +1105,9 @@ export function transformToAltNode(
   if (altNode.imageData && altNode.children && altNode.children.length > 0) {
     altNode.styles.position = 'relative';
     for (const child of altNode.children) {
-      child.styles.position = 'relative';
+      if (child.styles.position !== 'absolute') {
+        child.styles.position = 'relative';
+      }
     }
   }
 
