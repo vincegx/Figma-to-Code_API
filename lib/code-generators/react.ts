@@ -25,6 +25,7 @@ export interface GeneratedCodeOutput {
   };
   readonly css?: string; // Optional CSS string for HTML/CSS format
   readonly assets?: GeneratedAsset[]; // SVG and image files to export
+  readonly googleFontsUrl?: string; // WP31: Google Fonts URL for fonts used in design
 }
 
 /**

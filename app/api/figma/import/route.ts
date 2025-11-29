@@ -118,10 +118,10 @@ export async function POST(request: NextRequest) {
       console.log(`✅ Saved ${Object.keys(svgAssets).length} SVG assets to disk`);
     }
 
-    // WP31 T224: Save Figma variables for CSS variable resolution
+    // WP31 T224: Figma API variables (Enterprise only) - already extracted and saved above
+    // Don't overwrite extracted variables with empty API data
     if (Object.keys(variablesData).length > 0) {
-      await saveVariables(nodeId, variablesData);
-      console.log(`✅ Saved Figma variables to disk`);
+      console.log(`📦 Figma API returned ${Object.keys(variablesData).length} variables (Enterprise)`);
     }
 
     // WP32: Detect and download PNG/JPG images at import time

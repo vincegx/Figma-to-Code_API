@@ -209,6 +209,8 @@ export function extractSvgContainers(altNode: any): SvgExportNode[] {
   function hasNonVectorContent(node: any): boolean {
     if (node.originalType === 'TEXT') return true;
     if (node.fillsData?.some((f: any) => f.type === 'IMAGE')) return true;
+    // INSTANCE with layoutMode = container with children, not just icon
+    if (node.originalType === 'INSTANCE' && node.originalNode?.layoutMode) return true;
     // FRAME/GROUP with SOLID fill but NO vector children = standalone shape (like Button background)
     if ((node.originalType === 'FRAME' || node.originalType === 'GROUP') &&
         node.fillsData?.some((f: any) => f.type === 'SOLID' && f.visible !== false) &&

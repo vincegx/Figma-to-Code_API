@@ -93,7 +93,8 @@ export function extractVariablesFromNode(node: any): Record<string, { type: Vari
     // Process node-level boundVariables
     const boundVars = n.boundVariables || {};
     for (const [prop, ref] of Object.entries(boundVars)) {
-      processVariableRef(prop, ref, n[prop], n);
+      const resolvedValue = n[prop] ?? (prop === 'rectangleCornerRadii' ? n.cornerRadius : null);
+      processVariableRef(prop, ref, resolvedValue, n);
     }
 
     // Process fills boundVariables
@@ -123,6 +124,16 @@ export function extractVariablesFromNode(node: any): Record<string, { type: Vari
     const refs = Array.isArray(ref) ? ref : [ref];
 
     for (const r of refs) {
+      // Handle nested refs first (like rectangleCornerRadii with individual corners)
+      if (!r?.id && typeof r === 'object') {
+        for (const [subProp, subRef] of Object.entries(r)) {
+          if ((subRef as any)?.id) {
+            processVariableRef(`${prop}.${subProp}`, subRef, resolvedValue, node);
+          }
+        }
+        continue;
+      }
+
       if (!r?.id) continue;
 
       const shortId = extractShortId(r.id);
@@ -136,19 +147,8 @@ export function extractVariablesFromNode(node: any): Record<string, { type: Vari
         } else if ('x' in value) {
           value = value.x; // size.x
         } else if (Array.isArray(value)) {
-          // rectangleCornerRadii
           value = value[0];
         }
-      }
-
-      // Handle nested refs (like rectangleCornerRadii with individual corners)
-      if (r.type !== 'VARIABLE_ALIAS' && typeof r === 'object') {
-        for (const [subProp, subRef] of Object.entries(r)) {
-          if ((subRef as any)?.id) {
-            processVariableRef(`${prop}.${subProp}`, subRef, resolvedValue, node);
-          }
-        }
-        continue;
       }
 
       if (variables[shortId]) {

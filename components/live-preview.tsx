@@ -17,6 +17,7 @@ interface LivePreviewProps {
   code: string;
   framework: FrameworkType;
   language: 'html' | 'tsx' | 'jsx' | 'typescript' | 'css';
+  googleFontsUrl?: string; // WP31: Google Fonts URL for dynamic font loading
 }
 
 /**
@@ -39,11 +40,14 @@ function getRenderingStrategy(framework: FrameworkType): 'html' | 'react' | 'non
 /**
  * Build complete HTML document from generated HTML/CSS code
  */
-function buildHTMLDocument(code: string): string {
+function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
   // Split generated code on '/* CSS */' marker
   const parts = code.split('/* CSS */');
   const html = parts[0]?.trim() || '';
   const css = parts[1]?.trim() || '';
+
+  // WP31: Generate Google Fonts link tag if URL provided
+  const fontLink = googleFontsUrl ? `<link rel="stylesheet" href="${googleFontsUrl}">` : '';
 
   return `
 <!DOCTYPE html>
@@ -51,6 +55,7 @@ function buildHTMLDocument(code: string): string {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ${fontLink}
     <style>
       body {
         margin: 0;
@@ -82,14 +87,19 @@ function buildReactDocument(
   componentName: string,
   reactCode: string,
   reactDomCode: string,
-  tailwindCSS: string
+  tailwindCSS: string,
+  googleFontsUrl?: string
 ): string {
+  // WP31: Generate Google Fonts link tag if URL provided
+  const fontLink = googleFontsUrl ? `<link rel="stylesheet" href="${googleFontsUrl}">` : '';
+
   return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ${fontLink}
     <style>
       body {
         margin: 0;
@@ -169,7 +179,7 @@ async function getCachedReactLibs(): Promise<{ reactCode: string; reactDomCode: 
   return { reactCode: cachedReactCode, reactDomCode: cachedReactDomCode };
 }
 
-export default function LivePreview({ code, framework, language }: LivePreviewProps) {
+export default function LivePreview({ code, framework, language, googleFontsUrl }: LivePreviewProps) {
   // console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
 
   const [error, setError] = useState<string | null>(null);
@@ -246,14 +256,14 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
       }
 
       // Build iframe document with inlined libraries (no external script tags = no CORS)
-      return buildReactDocument(transpiledCode, componentName, reactCode, reactDomCode, tailwindCSS);
+      return buildReactDocument(transpiledCode, componentName, reactCode, reactDomCode, tailwindCSS, googleFontsUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Transpilation failed');
       return '';
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [googleFontsUrl]);
 
   // Generate iframe content (HTML/CSS synchronously, React asynchronously)
   useEffect(() => {
@@ -274,7 +284,7 @@ export default function LivePreview({ code, framework, language }: LivePreviewPr
 
         switch (strategy) {
           case 'html':
-            content = buildHTMLDocument(code);
+            content = buildHTMLDocument(code, googleFontsUrl);
             break;
           case 'react':
             content = await transpileAndBuildReact(code, framework);

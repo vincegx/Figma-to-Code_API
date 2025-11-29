@@ -201,12 +201,29 @@ export async function removeNode(nodeId: string): Promise<void> {
 /**
  * Get a specific node from the library index
  *
- * @param nodeId - Library node ID
+ * @param nodeId - Library node ID or Figma node ID (with : or -)
  * @returns LibraryNode or undefined if not found
  */
 export async function getNode(nodeId: string): Promise<LibraryNode | undefined> {
   const index = await loadLibraryIndex();
-  return index.nodeMap.get(nodeId);
+
+  // Try direct lookup by library ID first
+  const direct = index.nodeMap.get(nodeId);
+  if (direct) return direct;
+
+  // Try with lib- prefix
+  const withPrefix = index.nodeMap.get(`lib-${nodeId}`);
+  if (withPrefix) return withPrefix;
+
+  // Try by figmaNodeId (handles 465-16388 → 465:16388 conversion)
+  const normalizedId = nodeId.replace(/-/, ':');
+  for (const node of index.nodeMap.values()) {
+    if (node.figmaNodeId === normalizedId || node.figmaNodeId === nodeId) {
+      return node;
+    }
+  }
+
+  return undefined;
 }
 
 /**

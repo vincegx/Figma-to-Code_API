@@ -56,16 +56,28 @@ async function test() {
   console.log('\n=== HTML-CSS OUTPUT ===');
   const htmlOutput = await generateHTMLCSS(altNode, {}, [], 'html-css', undefined, undefined, '465-16388');
 
+  // Show :root block
   const cssLines = (htmlOutput.css || '').split('\n');
+  const rootLines = cssLines.filter(l => l.includes(':root') || l.includes('--var-128-217'));
+  console.log(':root and border-radius variable lines:');
+  rootLines.forEach(l => console.log(l));
+
   const borderCssLines = cssLines.filter(l => l.includes('border'));
 
-  console.log('Lines with "border":');
+  console.log('\nLines with "border":');
   borderCssLines.slice(0, 10).forEach(l => console.log(l));
 
   if (htmlOutput.css && htmlOutput.css.includes('var(--var-112-554')) {
     console.log('\n✅ var(--var-112-554) found in HTML-CSS');
   } else {
     console.log('\n❌ var(--var-112-554) NOT found in HTML-CSS');
+  }
+
+  // Check border-radius variable
+  if (htmlOutput.css && htmlOutput.css.includes('--var-128-217')) {
+    console.log('✅ --var-128-217 (border-radius) found in :root');
+  } else {
+    console.log('❌ --var-128-217 (border-radius) NOT found in :root');
   }
 }
 

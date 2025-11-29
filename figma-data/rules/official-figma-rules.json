@@ -354,7 +354,7 @@
         }
       },
       "react-tailwind": {
-        "className": "grow"
+        "className": "basis-0 grow"
       }
     }
   },
