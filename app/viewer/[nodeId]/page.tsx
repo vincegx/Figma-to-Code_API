@@ -51,14 +51,6 @@ import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLCSS } from '@/lib/code-generators/html-css';
 import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 
-// Viewport presets for responsive mode
-const VIEWPORT_PRESETS = {
-  mobile: { width: 375, height: 667, name: 'Mobile (iPhone SE)' },
-  tablet: { width: 768, height: 1024, name: 'Tablet (iPad)' },
-  desktop: { width: 1920, height: 1080, name: 'Desktop (Full HD)' },
-  custom: { width: 1200, height: 800, name: 'Custom' },
-} as const;
-
 export default function ViewerPage() {
 
   const params = useParams();
@@ -277,7 +269,7 @@ export default function ViewerPage() {
     <div className="h-screen flex flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
-        <div className="container mx-auto flex items-center justify-between">
+        <div className="mx-auto flex items-center justify-between">
           {/* Left: Breadcrumbs + Thumbnail + Name */}
           <div className="flex items-center gap-4">
             {/* Breadcrumbs with type icons */}
@@ -464,26 +456,6 @@ export default function ViewerPage() {
               </Select>
             )}
 
-            {/* Viewport Presets */}
-            <Select
-              value="custom"
-              onValueChange={(preset: string) => {
-                if (preset in VIEWPORT_PRESETS) {
-                  const { width, height } = VIEWPORT_PRESETS[preset as keyof typeof VIEWPORT_PRESETS];
-                  setViewerViewportSize(width, height);
-                }
-              }}
-            >
-              <SelectTrigger className="w-32 h-8 text-xs">
-                <SelectValue placeholder="Presets" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mobile">📱 Mobile</SelectItem>
-                <SelectItem value="tablet">📱 Tablet</SelectItem>
-                <SelectItem value="desktop">🖥️ Desktop</SelectItem>
-                <SelectItem value="custom">⚙️ Custom</SelectItem>
-              </SelectContent>
-            </Select>
           </>
         )}
 

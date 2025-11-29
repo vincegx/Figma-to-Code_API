@@ -12,9 +12,9 @@ export function InstanceBadge({ componentName }: InstanceBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 text-xs py-0 px-1.5 h-5"
+      className="bg-transparent text-purple-600 dark:text-purple-400 border-none text-xs py-0 px-0"
     >
-      ↳ {componentName}
+      ◆
     </Badge>
   );
 }
