@@ -101,14 +101,20 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
         minHeight={300}
         maxWidth={maxWidth}
         maxHeight={maxHeight}
-        enable={{ top: false, right: true, bottom: false, left: true, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false }}
+        enable={{ top: false, right: true, bottom: true, left: true, topRight: false, bottomRight: true, bottomLeft: true, topLeft: false }}
         handleStyles={{
           left: { width: '8px', left: '-4px', cursor: 'ew-resize' },
           right: { width: '8px', right: '-4px', cursor: 'ew-resize' },
+          bottom: { height: '8px', bottom: '-4px', cursor: 'ns-resize' },
+          bottomRight: { width: '12px', height: '12px', right: '-6px', bottom: '-6px', cursor: 'nwse-resize' },
+          bottomLeft: { width: '12px', height: '12px', left: '-6px', bottom: '-6px', cursor: 'nesw-resize' },
         }}
         handleClasses={{
           left: 'hover:bg-blue-500 transition-colors',
           right: 'hover:bg-blue-500 transition-colors',
+          bottom: 'hover:bg-blue-500 transition-colors',
+          bottomRight: 'hover:bg-blue-500 transition-colors rounded-full',
+          bottomLeft: 'hover:bg-blue-500 transition-colors rounded-full',
         }}
         className="relative bg-white dark:bg-slate-900"
       >
