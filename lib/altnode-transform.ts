@@ -402,7 +402,30 @@ function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode)
   if (node.type === 'TEXT' && node.style) {
     // Font properties
     if (node.style.fontFamily) altNode.styles['font-family'] = node.style.fontFamily;
-    if (node.style.fontWeight) altNode.styles['font-weight'] = String(node.style.fontWeight);
+    // WP31: Use fontStyle to derive correct CSS weight (Figma's fontWeight can be non-standard variable font values)
+    // fontStyle contains the style name (Regular, Bold, Black, etc.) which maps to standard CSS weights
+    if (node.style.fontStyle) {
+      const styleToWeight: Record<string, number> = {
+        'Thin': 100, 'Hairline': 100,
+        'ExtraLight': 200, 'Extra Light': 200, 'UltraLight': 200, 'Ultra Light': 200,
+        'Light': 300,
+        'Regular': 400, 'Normal': 400,
+        'Medium': 500,
+        'SemiBold': 600, 'Semi Bold': 600, 'DemiBold': 600, 'Demi Bold': 600,
+        'Bold': 700,
+        'ExtraBold': 800, 'Extra Bold': 800, 'UltraBold': 800, 'Ultra Bold': 800,
+        'Black': 900, 'Heavy': 900
+      };
+      const weight = styleToWeight[node.style.fontStyle];
+      if (weight) {
+        altNode.styles['font-weight'] = String(weight);
+      } else if (node.style.fontWeight) {
+        // Fallback to Figma's fontWeight if style not recognized
+        altNode.styles['font-weight'] = String(node.style.fontWeight);
+      }
+    } else if (node.style.fontWeight) {
+      altNode.styles['font-weight'] = String(node.style.fontWeight);
+    }
     if (node.style.fontSize) altNode.styles['font-size'] = `${node.style.fontSize}px`;
 
     // Letter spacing
