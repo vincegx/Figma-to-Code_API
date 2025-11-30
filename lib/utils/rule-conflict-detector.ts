@@ -17,6 +17,9 @@ export function detectRuleConflicts(
   rules: MultiFrameworkRule[],
   framework: FrameworkType
 ): Map<string, RuleConflict> {
+  // WP39: For react-tailwind-v4, fallback to react-tailwind transformer
+  const effectiveFramework = framework === 'react-tailwind-v4' ? 'react-tailwind' : framework;
+
   // Sort rules by priority (ascending - lower priority first)
   const sortedRules = [...rules].sort((a, b) => a.priority - b.priority);
   const conflicts = new Map<string, RuleConflict>();
@@ -25,7 +28,7 @@ export function detectRuleConflicts(
   const propertyOwnership = new Map<string, string>(); // property -> ruleId
 
   for (const rule of sortedRules) {
-    const transformer = rule.transformers[framework];
+    const transformer = rule.transformers[framework] || rule.transformers[effectiveFramework];
     if (!transformer) {
       conflicts.set(rule.id, {
         ruleId: rule.id,
@@ -90,7 +93,9 @@ export function getContributedProperties(
   rule: MultiFrameworkRule,
   framework: FrameworkType
 ): string[] {
-  const transformer = rule.transformers[framework];
+  // WP39: For react-tailwind-v4, fallback to react-tailwind transformer
+  const effectiveFramework = framework === 'react-tailwind-v4' ? 'react-tailwind' : framework;
+  const transformer = rule.transformers[framework] || rule.transformers[effectiveFramework];
   if (!transformer) return [];
   return Object.keys(transformer);
 }

@@ -13,10 +13,11 @@ export interface GeneratedAsset {
 
 /**
  * Simple generated code structure for WP06 MVP
+ * WP39: Added 'react-tailwind-v4' format for Tailwind v4 syntax
  */
 export interface GeneratedCodeOutput {
   readonly code: string;
-  readonly format: 'react-jsx' | 'react-tailwind' | 'html-css';
+  readonly format: 'react-jsx' | 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
   readonly language: 'tsx' | 'html';
   readonly metadata: {
     readonly componentName: string;

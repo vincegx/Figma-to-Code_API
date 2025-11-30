@@ -276,9 +276,11 @@ export interface SimpleRuleMatch {
 
 /**
  * Supported output frameworks
+ * WP39: Added 'react-tailwind-v4' for Tailwind v4 syntax support
  */
 export type FrameworkType =
   | 'react-tailwind'
+  | 'react-tailwind-v4'
   | 'html-css'
   | 'react-inline'
   | 'swift-ui'
@@ -363,6 +365,7 @@ export interface MultiFrameworkRule {
   readonly selector: Selector;
   readonly transformers: {
     readonly 'react-tailwind'?: ReactTailwindTransformer;
+    readonly 'react-tailwind-v4'?: ReactTailwindTransformer; // WP39: Tailwind v4 uses same transformer
     readonly 'html-css'?: HTMLCSSTransformer;
     readonly 'react-inline'?: ReactInlineTransformer;
     readonly 'swift-ui'?: SwiftUITransformer;

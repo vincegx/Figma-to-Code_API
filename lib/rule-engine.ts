@@ -409,11 +409,13 @@ export function evaluateMultiFrameworkRules(
 
   // Filter to rules that:
   // 1. Are enabled
-  // 2. Have a transformer for the selected framework
+  // 2. Have a transformer for the selected framework (or fallback for v4)
   // 3. Match the selector
+  // WP39: For react-tailwind-v4, fallback to react-tailwind transformer
+  const effectiveFramework = framework === 'react-tailwind-v4' ? 'react-tailwind' : framework;
   const matchingRules = rules.filter(rule =>
     rule.enabled &&
-    rule.transformers[framework] !== undefined &&
+    (rule.transformers[framework] !== undefined || rule.transformers[effectiveFramework] !== undefined) &&
     selectorMatches(altNode, rule.selector)
   );
 
@@ -448,9 +450,12 @@ function resolveMultiFrameworkConflicts(
   const provenance: Record<string, string> = {};
   const conflictMap: Map<string, Set<string>> = new Map(); // property → Set of rule IDs
 
+  // WP39: For react-tailwind-v4, fallback to react-tailwind transformer
+  const effectiveFramework = framework === 'react-tailwind-v4' ? 'react-tailwind' : framework;
+
   // Process rules in priority order (highest first)
   for (const rule of matchedRules) {
-    const transformer = rule.transformers[framework];
+    const transformer = rule.transformers[framework] || rule.transformers[effectiveFramework];
     if (!transformer) continue;
 
     // Extract properties from transformer based on framework
@@ -466,7 +471,7 @@ function resolveMultiFrameworkConflicts(
         // No conflict - this rule owns the property
         properties[propName] = propValue;
         provenance[propName] = rule.id;
-      } else if (propName === 'className' && framework === 'react-tailwind') {
+      } else if (propName === 'className' && (framework === 'react-tailwind' || framework === 'react-tailwind-v4')) {
         // WP25 FIX: Concatenate className values instead of treating as conflict
         // Multiple rules can contribute classes: "flex flex-row" + "gap-[32px]" → "flex flex-row gap-[32px]"
         properties[propName] = `${properties[propName]} ${propValue}`;
@@ -618,10 +623,13 @@ export function getMultiFrameworkRuleMatches(
   rules: MultiFrameworkRule[],
   framework: FrameworkType
 ): MultiFrameworkRuleMatch[] {
+  // WP39: For react-tailwind-v4, fallback to react-tailwind transformer
+  const effectiveFramework = framework === 'react-tailwind-v4' ? 'react-tailwind' : framework;
+
   // Filter to matching rules
   const matchingRules = rules.filter(rule =>
     rule.enabled &&
-    rule.transformers[framework] !== undefined &&
+    (rule.transformers[framework] !== undefined || rule.transformers[effectiveFramework] !== undefined) &&
     selectorMatches(altNode, rule.selector)
   );
 
@@ -633,7 +641,7 @@ export function getMultiFrameworkRuleMatches(
 
   // Process rules in priority order
   for (const rule of sortedRules) {
-    const transformer = rule.transformers[framework];
+    const transformer = rule.transformers[framework] || rule.transformers[effectiveFramework];
     if (!transformer) continue;
 
     const ruleProperties = extractTransformerProperties(transformer, framework, altNode, rule.selector);

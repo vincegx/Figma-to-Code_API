@@ -112,8 +112,10 @@ export function getClassMapper(version: TailwindVersion): ClassMapper {
     case 'v3':
       return classMapperV3;
     case 'v4':
-      // V4 mapper will be added in T324
-      throw new Error('Tailwind v4 mapper not yet implemented');
+      // Import v4 mapper dynamically to avoid circular dependency
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { classMapperV4 } = require('./class-mapper-v4');
+      return classMapperV4;
     default:
       return classMapperV3;
   }
