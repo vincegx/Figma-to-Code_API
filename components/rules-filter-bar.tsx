@@ -117,7 +117,7 @@ export function RulesFilterBar({
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border-primary bg-bg-primary">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border-primary bg-bg-secondary">
       {/* Search with Autocomplete */}
       <Popover open={showDropdown} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
