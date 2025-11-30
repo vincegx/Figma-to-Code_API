@@ -85,7 +85,7 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
   const maxHeight = Math.max(300, availableHeight - 40);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-slate-950 flex items-center justify-center">
+    <div ref={containerRef} className="w-full h-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
       <DimensionLabel
         width={viewerViewportWidth}
         height={viewerViewportHeight}

@@ -447,7 +447,7 @@ export default function ViewerPage() {
       </div>
 
       {/* Responsive Mode Toolbar */}
-      <div className="flex gap-2 items-center border-b border-border-primary px-4 py-1.5">
+      <div className="flex gap-2 items-center border-b border-border-primary px-4 py-4">
         {/* Toggle Responsive Mode */}
         <Button
           variant={viewerResponsiveMode ? 'default' : 'outline'}
