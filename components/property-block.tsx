@@ -19,18 +19,18 @@ export function PropertyBlock({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-gray-800/40 rounded-md border border-gray-700/50">
+    <div className="bg-gray-100 dark:bg-gray-800/40 rounded-md border border-gray-200 dark:border-gray-700/50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-1.5 py-2 px-2.5 hover:bg-gray-700/30 transition-colors text-left rounded-t-md"
+        className="w-full flex items-center gap-1.5 py-2 px-2.5 hover:bg-gray-200/50 dark:hover:bg-gray-700/30 transition-colors text-left rounded-t-md"
       >
         <ChevronRight
           className={cn(
-            "w-3 h-3 transition-transform text-gray-500",
+            "w-3 h-3 transition-transform text-gray-400 dark:text-gray-500",
             isOpen && "rotate-90"
           )}
         />
-        <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           {title}
         </span>
       </button>
@@ -60,7 +60,7 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
     return (
       <div className="flex items-center justify-between">
         <span className="text-[11px] text-gray-500">{label}</span>
-        <span className="text-[11px] text-gray-200">
+        <span className="text-[11px] text-gray-700 dark:text-gray-200">
           {displayValue}
         </span>
       </div>
@@ -70,7 +70,7 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
   return (
     <div className="space-y-0.5">
       <div className="text-[11px] text-gray-500">{label}</div>
-      <div className="text-[11px] text-gray-200 pl-2">
+      <div className="text-[11px] text-gray-700 dark:text-gray-200 pl-2">
         {displayValue}
       </div>
     </div>

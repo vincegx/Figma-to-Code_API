@@ -131,7 +131,7 @@ export default function NodesLibraryPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search nodes by name..."
-                className="w-full pl-10 pr-4 py-2 border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary bg-bg-card text-text-primary"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary bg-white dark:bg-gray-700 text-text-primary"
               />
             </div>
           </div>

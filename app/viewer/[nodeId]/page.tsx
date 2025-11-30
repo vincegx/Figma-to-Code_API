@@ -293,32 +293,34 @@ export default function ViewerPage() {
 
   return (
     <div className="h-screen flex flex-col bg-bg-primary">
-      {/* Header */}
-      <div className="border-b border-border-primary p-4 bg-bg-card">
-        <div className="mx-auto flex items-center justify-between">
-          {/* Left: Breadcrumbs + Thumbnail + Name */}
-          <div className="flex items-center gap-4">
-            {/* Breadcrumbs with type icons */}
-            <Breadcrumbs
-              items={[
-                { label: 'Library', href: '/nodes' },
-                { label: currentNode.name, figmaType: nodeType },
-              ]}
-              className="mr-4"
-            />
+      {/* Breadcrumb Row */}
+      <div className="px-4 py-1.5 border-b border-border-primary bg-bg-card/50">
+        <Breadcrumbs
+          items={[
+            { label: 'Library', href: '/nodes' },
+            { label: currentNode.name, figmaType: nodeType },
+          ]}
+          className="text-xs"
+        />
+      </div>
 
+      {/* Node Info Header */}
+      <div className="border-b border-border-primary px-4 py-3 bg-bg-card">
+        <div className="flex items-center justify-between">
+          {/* Left: Thumbnail + Name */}
+          <div className="flex items-center gap-3">
             {/* Thumbnail */}
-            <div className="w-12 h-12 bg-bg-secondary rounded overflow-hidden cursor-pointer hover:ring-2 hover:ring-accent-primary">
+            <div className="w-10 h-10 bg-bg-secondary rounded overflow-hidden">
               {currentNode.thumbnail ? (
                 <Image
                   src={currentNode.thumbnail}
                   alt={currentNode.name}
-                  width={48}
-                  height={48}
+                  width={40}
+                  height={40}
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-text-muted text-2xl">
+                <div className="w-full h-full flex items-center justify-center text-text-muted text-xl">
                   📦
                 </div>
               )}
@@ -326,18 +328,18 @@ export default function ViewerPage() {
 
             {/* Name and metadata */}
             <div>
-              <h1 className="text-xl font-bold text-text-primary flex items-center gap-2">
-                <FigmaTypeIcon type={nodeType} size={18} className={nodeColors.text} />
+              <h1 className="text-base font-semibold text-text-primary flex items-center gap-2">
+                <FigmaTypeIcon type={nodeType} size={16} className={nodeColors.text} />
                 {currentNode.name}
               </h1>
-              <div className="text-sm text-text-secondary">
+              <div className="text-xs text-text-secondary">
                 {nodeType} • {new Date(currentNode.addedAt).toLocaleDateString()}
               </div>
             </div>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {/* Prev/Next navigation */}
             <button
               onClick={() => {
@@ -346,10 +348,10 @@ export default function ViewerPage() {
                 }
               }}
               disabled={!prevNode}
-              className="p-2 rounded-lg hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-primary"
+              className="p-1.5 rounded hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-secondary"
               title="Previous node"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={18} />
             </button>
             <button
               onClick={() => {
@@ -358,11 +360,13 @@ export default function ViewerPage() {
                 }
               }}
               disabled={!nextNode}
-              className="p-2 rounded-lg hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-primary"
+              className="p-1.5 rounded hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-secondary"
               title="Next node"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={18} />
             </button>
+
+            <div className="w-px h-5 bg-border-primary mx-1" />
 
             {/* Re-fetch from Figma (WP33: with SSE progress) */}
             <RefetchButton
@@ -380,20 +384,20 @@ export default function ViewerPage() {
             {/* Refresh Preview (WP33: reload iframe without refetching) */}
             <button
               onClick={() => setIframeKey(prev => prev + 1)}
-              className="p-2 rounded-lg hover:bg-bg-hover text-text-primary"
+              className="p-1.5 rounded hover:bg-bg-hover text-text-secondary"
               title="Refresh preview"
             >
-              <RefreshCw size={20} />
+              <RefreshCw size={18} />
             </button>
 
             {/* Export dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="p-2 rounded-lg hover:bg-bg-hover text-text-primary"
+                  className="p-1.5 rounded hover:bg-bg-hover text-text-secondary"
                   title="Export"
                 >
-                  <Download size={20} />
+                  <Download size={18} />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -428,12 +432,14 @@ export default function ViewerPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <div className="w-px h-5 bg-border-primary mx-1" />
+
             {/* "Edit Rules" button */}
             <button
               onClick={() => (window.location.href = `/rules?nodeId=${nodeId}`)}
-              className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-hover flex items-center gap-2"
+              className="px-3 py-1.5 bg-accent-primary text-white text-sm rounded hover:bg-accent-hover flex items-center gap-1.5"
             >
-              <Settings size={16} />
+              <Settings size={14} />
               Edit Rules
             </button>
           </div>
@@ -441,7 +447,7 @@ export default function ViewerPage() {
       </div>
 
       {/* Responsive Mode Toolbar */}
-      <div className="flex gap-2 items-center border-b border-border-primary p-2 bg-bg-card">
+      <div className="flex gap-2 items-center border-b border-border-primary px-4 py-1.5">
         {/* Toggle Responsive Mode */}
         <Button
           variant={viewerResponsiveMode ? 'default' : 'outline'}
@@ -497,9 +503,9 @@ export default function ViewerPage() {
 
         {/* Framework Selector */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-text-secondary">Framework:</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">Framework:</span>
           <Select value={previewFramework} onValueChange={(v: string) => setPreviewFramework(v as FrameworkType)}>
-            <SelectTrigger className="w-40 h-8 text-xs">
+            <SelectTrigger className="w-36 h-7 text-xs bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -605,18 +611,18 @@ export default function ViewerPage() {
               <Tabs
                 value={rightPanelTab}
                 onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
-                className="flex-1 flex flex-col overflow-hidden h-full pt-10"
+                className="flex-1 flex flex-col overflow-hidden h-full pt-12"
               >
-                <TabsList className="w-full justify-start border-b border-gray-700 rounded-none bg-transparent h-auto p-0">
+                <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-transparent h-auto p-0">
                   <TabsTrigger
                     value="information"
-                    className="text-xs text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                    className="text-xs text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
                   >
                     Information
                   </TabsTrigger>
                   <TabsTrigger
                     value="rules"
-                    className="text-xs text-gray-400 data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                    className="text-xs text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
                   >
                     Rules
                   </TabsTrigger>

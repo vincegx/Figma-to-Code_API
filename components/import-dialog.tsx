@@ -107,7 +107,7 @@ export default function ImportDialog() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.figma.com/file/..."
-          className="flex-1 px-4 py-2 border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary bg-white text-gray-900 placeholder:text-gray-400 disabled:opacity-50"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 disabled:opacity-50"
           disabled={isRunning}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && url && !isRunning) {
