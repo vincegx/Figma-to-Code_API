@@ -49,7 +49,7 @@ import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
-import { generateHTMLCSS } from '@/lib/code-generators/html-css';
+import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
 import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 
 export default function ViewerPage() {
@@ -227,8 +227,8 @@ export default function ViewerPage() {
           setGeneratedCode(output.code);
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
-          const output = await generateHTMLCSS(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
-          setGeneratedCode(output.code);
+          const output = await generateHTMLTailwindCSS(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setGeneratedCode(output.code + (output.css ? '\n\n/* CSS */\n' + output.css : ''));
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         }
       } catch (error) {
@@ -509,7 +509,8 @@ export default function ViewerPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="react-tailwind">React + Tailwind</SelectItem>
+              <SelectItem value="react-tailwind">React + Tailwind v3</SelectItem>
+              <SelectItem value="react-tailwind-v4">React + Tailwind v4</SelectItem>
               <SelectItem value="html-css">HTML + CSS</SelectItem>
               <SelectItem value="react-inline">React Inline</SelectItem>
               <SelectItem value="swift-ui">SwiftUI</SelectItem>

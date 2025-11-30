@@ -21,11 +21,9 @@ import {
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
-import type { MultiFrameworkRule } from '@/lib/types/rules';
+import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
-import { generateHTMLCSS } from '@/lib/code-generators/html-css';
-
-type FrameworkType = 'react-tailwind' | 'html-css' | 'react-inline' | 'swift-ui' | 'android-xml';
+import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
 
 // Custom theme based on oneDark/oneLight but with transparent background
 function getCustomTheme(isDark: boolean) {
@@ -147,8 +145,8 @@ export function GeneratedCodeSection({
           // Pass code to parent viewer for LivePreview
           onCodeChange?.(output.code);
         } else if (framework === 'html-css') {
-          // WP32: Pass nodeId for local images
-          const output = await generateHTMLCSS(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
+          // WP39: Use Tailwind v4 compiler for pure CSS output
+          const output = await generateHTMLTailwindCSS(currentNode, resolvedProperties, allRules, framework, figmaFileKey, figmaAccessToken, nodeId);
 
           setGeneratedCode({
             componentCode: output.code,
@@ -219,7 +217,8 @@ export function GeneratedCodeSection({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="react-tailwind">React + Tailwind</SelectItem>
+            <SelectItem value="react-tailwind">React + Tailwind v3</SelectItem>
+            <SelectItem value="react-tailwind-v4">React + Tailwind v4</SelectItem>
             <SelectItem value="html-css">HTML + CSS</SelectItem>
             <SelectItem value="react-inline">React Inline</SelectItem>
             <SelectItem value="swift-ui">SwiftUI</SelectItem>

@@ -5,7 +5,8 @@ import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { generateReactJSX } from '@/lib/code-generators/react';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
-import { generateHTMLCSS } from '@/lib/code-generators/html-css';
+import { generateReactTailwindV4 } from '@/lib/code-generators/react-tailwind-v4';
+import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
 import CodePreview from './code-preview';
 import LivePreview from './live-preview';
 
@@ -60,10 +61,17 @@ export default function PreviewTabs({
             result = await generateReactTailwind(currentNode, resolvedProperties, [], 'react-tailwind', figmaFileKey, figmaAccessToken, nodeId);
             codeOutput = result.code;
             break;
+          case 'react-tailwind-v4':
+            result = await generateReactTailwindV4(currentNode, resolvedProperties, [], 'react-tailwind-v4', figmaFileKey, figmaAccessToken, nodeId);
+            codeOutput = result.code;
+            break;
           case 'html-css':
-            console.log('[PREVIEW-TABS] Calling generateHTMLCSS...');
-            result = await generateHTMLCSS(currentNode, resolvedProperties, [], 'html-css', figmaFileKey, figmaAccessToken, nodeId);
-            console.log('[PREVIEW-TABS] generateHTMLCSS done, css length:', result.css?.length || 0);
+            console.log('[PREVIEW-TABS] Calling generateHTMLTailwindCSS...');
+            result = await generateHTMLTailwindCSS(currentNode, resolvedProperties, [], 'html-css', figmaFileKey, figmaAccessToken, nodeId);
+            console.log('[PREVIEW-TABS] HTML length:', result.code?.length || 0);
+            console.log('[PREVIEW-TABS] CSS length:', result.css?.length || 0);
+            console.log('[PREVIEW-TABS] HTML preview:', result.code?.substring(0, 300));
+            console.log('[PREVIEW-TABS] CSS preview:', result.css?.substring(0, 300));
             codeOutput = result.code;
             if (result.css) {
               codeOutput += '\n\n/* CSS */\n' + result.css;
@@ -109,6 +117,7 @@ export default function PreviewTabs({
   const language: 'tsx' | 'html' | 'jsx' | 'typescript' | 'css' = useMemo(() => {
     switch (selectedFramework) {
       case 'react-tailwind':
+      case 'react-tailwind-v4':
       case 'react-inline':
         return 'tsx';
       case 'html-css':
@@ -140,6 +149,7 @@ export default function PreviewTabs({
   const showLivePreview =
     selectedFramework === 'html-css' ||
     selectedFramework === 'react-tailwind' ||
+    selectedFramework === 'react-tailwind-v4' ||
     selectedFramework === 'react-inline';
 
   return (
