@@ -4,13 +4,24 @@ import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
-import { RulesSidebar } from '@/components/rules-sidebar';
-import { RulesList } from '@/components/rules-list';
-import { RuleEditor } from '@/components/rule-editor';
+import { useUIStore } from '@/lib/store';
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '@/components/ui/resizable';
+import { RulesFilterBar } from '@/components/rules-filter-bar';
+import { RulesGroupedList } from '@/components/rules-grouped-list';
+import { RulesDetailPanel } from '@/components/rules-detail-panel';
+import { RulesDetailSheet } from '@/components/rules-detail-sheet';
 import { CustomRuleModal } from '@/components/custom-rule-modal';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 function RulesPageContent() {
   const searchParams = useSearchParams();
+
+  // Detect mobile viewport
+  const isMobile = !useMediaQuery('(min-width: 768px)');
 
   // Framework selection (from URL or default)
   const [selectedFramework, setSelectedFramework] = useState<FrameworkType>(
@@ -19,27 +30,36 @@ function RulesPageContent() {
 
   // Rules state (WP20: 3-tier system)
   const [officialRules, setOfficialRules] = useState<MultiFrameworkRule[]>([]);
-  const [communityRules, setCommunityRules] = useState<MultiFrameworkRule[]>([]);
+  const [communityRules, setCommunityRules] = useState<MultiFrameworkRule[]>(
+    []
+  );
   const [customRules, setCustomRules] = useState<MultiFrameworkRule[]>([]);
-  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showOfficialRules, setShowOfficialRules] = useState(true);
-  const [showCommunityRules, setShowCommunityRules] = useState(true);
-  const [showCustomRules, setShowCustomRules] = useState(true);
-  const [showEnabledOnly, setShowEnabledOnly] = useState(false);
+  // UI Store for panel states
+  const {
+    rulesDetailPanelVisible,
+    rulesSelectedRuleId,
+    rulesOfficialCollapsed,
+    rulesCommunityCollapsed,
+    rulesCustomCollapsed,
+    setRulesDetailPanelVisible,
+    setRulesSelectedRuleId,
+    setRulesOfficialCollapsed,
+    setRulesCommunityCollapsed,
+    setRulesCustomCollapsed,
+  } = useUIStore();
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const RULES_PER_PAGE = 50;
+  // Filters
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showEnabledOnly, setShowEnabledOnly] = useState(false);
 
   // Custom Rule Modal (WP23)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [editingRule, setEditingRule] = useState<MultiFrameworkRule | null>(null);
+  const [editingRule, setEditingRule] = useState<MultiFrameworkRule | null>(
+    null
+  );
 
   // Load rules from API (WP20: 3-tier system)
   const loadRules = async () => {
@@ -74,12 +94,22 @@ function RulesPageContent() {
   };
 
   const handleEditRule = (rule: MultiFrameworkRule) => {
-    if (rule.type !== 'custom') {
-      toast.error('Only custom rules can be edited');
-      return;
-    }
+    // Allow editing all rules (for official/community, it will create an override)
     setModalMode('edit');
     setEditingRule(rule);
+    setIsModalOpen(true);
+  };
+
+  const handleDuplicateRule = (rule: MultiFrameworkRule) => {
+    // Create a copy with new ID
+    const duplicatedRule: MultiFrameworkRule = {
+      ...rule,
+      id: `custom-${rule.id}-copy-${Date.now()}`,
+      name: `${rule.name} (Copy)`,
+      type: 'custom',
+    };
+    setModalMode('create');
+    setEditingRule(duplicatedRule);
     setIsModalOpen(true);
   };
 
@@ -105,17 +135,24 @@ function RulesPageContent() {
       }
 
       toast.success(`Rule "${rule.name}" deleted successfully`);
+      setRulesSelectedRuleId(null);
+      setRulesDetailPanelVisible(false);
       await loadRules();
     } catch (error) {
       console.error('Failed to delete rule:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete rule');
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete rule'
+      );
     }
   };
 
   const handleSaveRule = async (rule: MultiFrameworkRule) => {
     try {
       const method = modalMode === 'create' ? 'POST' : 'PUT';
-      const url = modalMode === 'create' ? '/api/rules/custom' : `/api/rules/custom/${rule.id}`;
+      const url =
+        modalMode === 'create'
+          ? '/api/rules/custom'
+          : `/api/rules/custom/${rule.id}`;
 
       const response = await fetch(url, {
         method,
@@ -129,7 +166,9 @@ function RulesPageContent() {
         throw new Error(data.error || 'Failed to save rule');
       }
 
-      toast.success(`Rule "${rule.name}" ${modalMode === 'create' ? 'created' : 'updated'} successfully`);
+      toast.success(
+        `Rule "${rule.name}" ${modalMode === 'create' ? 'created' : 'updated'} successfully`
+      );
       await loadRules();
     } catch (error) {
       console.error('Failed to save rule:', error);
@@ -137,43 +176,29 @@ function RulesPageContent() {
     }
   };
 
-  // Combine and filter rules (WP20: 3-tier system)
+  // Handle rule selection
+  const handleRuleSelect = (ruleId: string) => {
+    setRulesSelectedRuleId(ruleId);
+    setRulesDetailPanelVisible(true);
+  };
+
+  // Handle close panel
+  const handleClosePanel = () => {
+    setRulesSelectedRuleId(null);
+    setRulesDetailPanelVisible(false);
+  };
+
+  // All rules combined (for search)
   const allRules = useMemo(() => {
-    const combined: MultiFrameworkRule[] = [];
+    return [...officialRules, ...communityRules, ...customRules];
+  }, [officialRules, communityRules, customRules]);
 
-    if (showOfficialRules) {
-      combined.push(...officialRules);
-    }
-
-    if (showCommunityRules) {
-      combined.push(...communityRules);
-    }
-
-    if (showCustomRules) {
-      combined.push(...customRules);
-    }
-
-    return combined;
-  }, [officialRules, communityRules, customRules, showOfficialRules, showCommunityRules, showCustomRules]);
-
-  // Filter rules
-  const filteredRules = useMemo(() => {
-    return allRules.filter(rule => {
+  // Filter rules by framework, category, and enabled status
+  const filterRules = (rules: MultiFrameworkRule[]) => {
+    return rules.filter((rule) => {
       // Framework filter
       if (!rule.transformers[selectedFramework]) {
         return false;
-      }
-
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = rule.name.toLowerCase().includes(query);
-        const matchesId = rule.id.toLowerCase().includes(query);
-        const matchesTags = rule.tags.some(tag => tag.toLowerCase().includes(query));
-
-        if (!matchesName && !matchesId && !matchesTags) {
-          return false;
-        }
       }
 
       // Category filter
@@ -188,25 +213,48 @@ function RulesPageContent() {
 
       return true;
     });
-  }, [allRules, selectedFramework, searchQuery, selectedCategory, showEnabledOnly]);
+  };
 
-  // Paginate rules
-  const paginatedRules = useMemo(() => {
-    const startIndex = (currentPage - 1) * RULES_PER_PAGE;
-    const endIndex = startIndex + RULES_PER_PAGE;
-    return filteredRules.slice(startIndex, endIndex);
-  }, [filteredRules, currentPage]);
+  const filteredOfficialRules = useMemo(
+    () => filterRules(officialRules),
+    [officialRules, selectedFramework, selectedCategory, showEnabledOnly]
+  );
 
-  const totalPages = Math.ceil(filteredRules.length / RULES_PER_PAGE);
+  const filteredCommunityRules = useMemo(
+    () => filterRules(communityRules),
+    [communityRules, selectedFramework, selectedCategory, showEnabledOnly]
+  );
+
+  const filteredCustomRules = useMemo(
+    () => filterRules(customRules),
+    [customRules, selectedFramework, selectedCategory, showEnabledOnly]
+  );
+
+  const totalFilteredRules =
+    filteredOfficialRules.length +
+    filteredCommunityRules.length +
+    filteredCustomRules.length;
 
   // Get selected rule
   const selectedRule = useMemo(() => {
-    if (!selectedRuleId) return null;
-    return allRules.find(r => r.id === selectedRuleId) || null;
-  }, [selectedRuleId, allRules]);
+    if (!rulesSelectedRuleId) return null;
+    return allRules.find((r) => r.id === rulesSelectedRuleId) || null;
+  }, [rulesSelectedRuleId, allRules]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-bg-primary">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent-primary border-r-transparent mb-4"></div>
+          <p className="text-text-secondary">Loading Rules Manager...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-bg-primary">
       {/* Custom Rule Modal (WP23) */}
       <CustomRuleModal
         open={isModalOpen}
@@ -216,74 +264,111 @@ function RulesPageContent() {
         mode={modalMode}
       />
 
-      {/* Header */}
-      <div className="border-b border-border-primary p-4 bg-bg-card">
-        <div className="container mx-auto">
-          <h1 className="text-2xl font-bold text-text-primary">
-            Rules Manager
-          </h1>
-          <p className="text-sm text-text-muted mt-1">
-            {filteredRules.length} rules • {selectedFramework}
-          </p>
-        </div>
-      </div>
+      {/* Unified Filter Bar with Search */}
+      <RulesFilterBar
+        rules={allRules}
+        onRuleSelect={handleRuleSelect}
+        selectedFramework={selectedFramework}
+        onFrameworkChange={setSelectedFramework}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        showEnabledOnly={showEnabledOnly}
+        onShowEnabledOnlyChange={setShowEnabledOnly}
+        onCreateRule={handleCreateRule}
+        onEditRule={() => selectedRule && handleEditRule(selectedRule)}
+        onDeleteRule={() => selectedRule && handleDeleteRule(selectedRule)}
+        hasSelection={!!selectedRule}
+        canDelete={selectedRule?.type === 'custom'}
+      />
 
-      {/* Main 3-column layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - 20% desktop */}
-        <div className="hidden lg:block lg:w-1/5 border-r border-border-primary overflow-auto bg-bg-secondary">
-          <RulesSidebar
-            selectedFramework={selectedFramework}
-            onFrameworkChange={setSelectedFramework}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            showOfficialRules={showOfficialRules}
-            onShowOfficialRulesChange={setShowOfficialRules}
-            showCommunityRules={showCommunityRules}
-            onShowCommunityRulesChange={setShowCommunityRules}
-            showCustomRules={showCustomRules}
-            onShowCustomRulesChange={setShowCustomRules}
-            showEnabledOnly={showEnabledOnly}
-            onShowEnabledOnlyChange={setShowEnabledOnly}
-            allRules={allRules}
-            onCreateRule={handleCreateRule}
-          />
-        </div>
-
-        {/* Rules list - 40% desktop */}
-        <div className="w-full lg:w-2/5 border-r border-border-primary flex flex-col bg-bg-card">
-          <RulesList
-            rules={paginatedRules}
-            selectedRuleId={selectedRuleId}
-            onRuleSelect={setSelectedRuleId}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            isLoading={isLoading}
-            onEditRule={handleEditRule}
-            onDeleteRule={handleDeleteRule}
-          />
-        </div>
-
-        {/* Rule editor - 40% desktop */}
-        <div className="hidden lg:block lg:w-2/5 overflow-auto bg-bg-secondary">
-          {selectedRule ? (
-            <RuleEditor
-              rule={selectedRule}
-              framework={selectedFramework}
-              onClose={() => setSelectedRuleId(null)}
+      {/* Main Content - Master-Detail Layout */}
+      <div className="flex-1 overflow-hidden">
+        {isMobile ? (
+          // Mobile: Full-width list + Sheet for details
+          <>
+            <RulesGroupedList
+              officialRules={filteredOfficialRules}
+              communityRules={filteredCommunityRules}
+              customRules={filteredCustomRules}
+              selectedRuleId={rulesSelectedRuleId}
+              onRuleSelect={handleRuleSelect}
+              officialCollapsed={rulesOfficialCollapsed}
+              communityCollapsed={rulesCommunityCollapsed}
+              customCollapsed={rulesCustomCollapsed}
+              onOfficialCollapsedChange={setRulesOfficialCollapsed}
+              onCommunityCollapsedChange={setRulesCommunityCollapsed}
+              onCustomCollapsedChange={setRulesCustomCollapsed}
             />
-          ) : (
-            <div className="flex items-center justify-center h-full text-text-muted">
-              <div className="text-center">
-                <p className="text-lg mb-2">No rule selected</p>
-                <p className="text-sm">Select a rule from the list to edit</p>
-              </div>
-            </div>
-          )}
-        </div>
+            <RulesDetailSheet
+              rule={selectedRule}
+              selectedFramework={selectedFramework}
+              open={rulesDetailPanelVisible && !!selectedRule}
+              onClose={handleClosePanel}
+              onEdit={() => selectedRule && handleEditRule(selectedRule)}
+              onDuplicate={() => selectedRule && handleDuplicateRule(selectedRule)}
+              onDelete={() => selectedRule && handleDeleteRule(selectedRule)}
+            />
+          </>
+        ) : rulesDetailPanelVisible && selectedRule ? (
+          // Desktop: Two-panel layout with ResizablePanelGroup
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            {/* List Panel */}
+            <ResizablePanel
+              defaultSize={35}
+              minSize={25}
+              maxSize={50}
+              className="bg-bg-primary"
+            >
+              <RulesGroupedList
+                officialRules={filteredOfficialRules}
+                communityRules={filteredCommunityRules}
+                customRules={filteredCustomRules}
+                selectedRuleId={rulesSelectedRuleId}
+                onRuleSelect={handleRuleSelect}
+                officialCollapsed={rulesOfficialCollapsed}
+                communityCollapsed={rulesCommunityCollapsed}
+                customCollapsed={rulesCustomCollapsed}
+                onOfficialCollapsedChange={setRulesOfficialCollapsed}
+                onCommunityCollapsedChange={setRulesCommunityCollapsed}
+                onCustomCollapsedChange={setRulesCustomCollapsed}
+              />
+            </ResizablePanel>
+
+            <ResizableHandle className="w-1 bg-border-primary hover:bg-accent-primary transition-colors" />
+
+            {/* Detail Panel */}
+            <ResizablePanel
+              defaultSize={65}
+              minSize={50}
+              maxSize={75}
+              className="bg-bg-card"
+            >
+              <RulesDetailPanel
+                rule={selectedRule}
+                selectedFramework={selectedFramework}
+                onClose={handleClosePanel}
+                onEdit={() => handleEditRule(selectedRule)}
+                onDuplicate={() => handleDuplicateRule(selectedRule)}
+                onDelete={() => handleDeleteRule(selectedRule)}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
+          // Desktop: Full-width list (no selection)
+          <RulesGroupedList
+            officialRules={filteredOfficialRules}
+            communityRules={filteredCommunityRules}
+            customRules={filteredCustomRules}
+            selectedRuleId={rulesSelectedRuleId}
+            onRuleSelect={handleRuleSelect}
+            officialCollapsed={rulesOfficialCollapsed}
+            communityCollapsed={rulesCommunityCollapsed}
+            customCollapsed={rulesCustomCollapsed}
+            onOfficialCollapsedChange={setRulesOfficialCollapsed}
+            onCommunityCollapsedChange={setRulesCommunityCollapsed}
+            onCustomCollapsedChange={setRulesCustomCollapsed}
+          />
+        )}
       </div>
     </div>
   );
@@ -291,14 +376,16 @@ function RulesPageContent() {
 
 export default function RulesPage() {
   return (
-    <Suspense fallback={
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent mb-4"></div>
-          <p className="text-text-secondary">Loading Rules Manager...</p>
+    <Suspense
+      fallback={
+        <div className="h-screen flex items-center justify-center bg-bg-primary">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent-primary border-r-transparent mb-4"></div>
+            <p className="text-text-secondary">Loading Rules Manager...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <RulesPageContent />
     </Suspense>
   );

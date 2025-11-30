@@ -239,7 +239,7 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -251,7 +251,7 @@ export function TransformerEditor({
             value={className}
             onChange={(e) => handleFieldChange('className', e.target.value)}
             placeholder="e.g., flex items-center gap-2 px-4 py-2"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -278,14 +278,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
@@ -313,7 +313,7 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -325,7 +325,7 @@ export function TransformerEditor({
             value={cssClass}
             onChange={(e) => handleFieldChange('cssClass', e.target.value)}
             placeholder="e.g., my-custom-class"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -352,14 +352,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="property"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('cssProperties')}
@@ -387,7 +387,7 @@ export function TransformerEditor({
             value={htmlTag}
             onChange={(e) => handleFieldChange('htmlTag', e.target.value)}
             placeholder="e.g., div, button, span"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -414,14 +414,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="property"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('style')}
@@ -456,14 +456,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
@@ -491,7 +491,7 @@ export function TransformerEditor({
             value={component}
             onChange={(e) => handleFieldChange('component', e.target.value)}
             placeholder="e.g., VStack, HStack, Text"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -527,7 +527,7 @@ export function TransformerEditor({
                   }
                 }}
                 placeholder="e.g., .padding(), .background(Color.blue)"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={handleAddModifier}
@@ -562,14 +562,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="key"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('props')}
@@ -597,7 +597,7 @@ export function TransformerEditor({
             value={viewType}
             onChange={(e) => handleFieldChange('viewType', e.target.value)}
             placeholder="e.g., LinearLayout, TextView, Button"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -624,14 +624,14 @@ export function TransformerEditor({
                 value={newPropKey}
                 onChange={(e) => setNewPropKey(e.target.value)}
                 placeholder="attribute"
-                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="w-1/3 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <input
                 type="text"
                 value={newPropValue}
                 onChange={(e) => setNewPropValue(e.target.value)}
                 placeholder="value"
-                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
               />
               <button
                 onClick={() => handleAddKeyValue('attributes')}

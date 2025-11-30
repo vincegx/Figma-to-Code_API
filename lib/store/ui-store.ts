@@ -38,6 +38,13 @@ export interface UIState {
   // Selection highlight (persisted in localStorage)
   viewerHighlightEnabled: boolean;
 
+  // Rules page states (persisted in localStorage)
+  rulesDetailPanelVisible: boolean;
+  rulesSelectedRuleId: string | null;
+  rulesOfficialCollapsed: boolean;
+  rulesCommunityCollapsed: boolean;
+  rulesCustomCollapsed: boolean;
+
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setImporting: (isImporting: boolean) => void;
@@ -53,6 +60,13 @@ export interface UIState {
   setViewerLeftPanelCollapsed: (collapsed: boolean) => void;
   setViewerRightPanelCollapsed: (collapsed: boolean) => void;
   setViewerHighlightEnabled: (enabled: boolean) => void;
+
+  // Rules page actions
+  setRulesDetailPanelVisible: (visible: boolean) => void;
+  setRulesSelectedRuleId: (ruleId: string | null) => void;
+  setRulesOfficialCollapsed: (collapsed: boolean) => void;
+  setRulesCommunityCollapsed: (collapsed: boolean) => void;
+  setRulesCustomCollapsed: (collapsed: boolean) => void;
 }
 
 /**
@@ -78,6 +92,13 @@ export const useUIStore = create<UIState>()(
         viewerLeftPanelCollapsed: false,
         viewerRightPanelCollapsed: false,
         viewerHighlightEnabled: true,
+
+        // Rules page initial state
+        rulesDetailPanelVisible: false,
+        rulesSelectedRuleId: null,
+        rulesOfficialCollapsed: false,
+        rulesCommunityCollapsed: false,
+        rulesCustomCollapsed: false,
 
         // Actions
         setTheme: (theme: 'light' | 'dark' | 'system') => {
@@ -157,6 +178,27 @@ export const useUIStore = create<UIState>()(
         setViewerHighlightEnabled: (enabled: boolean) => {
           set({ viewerHighlightEnabled: enabled });
         },
+
+        // Rules page actions
+        setRulesDetailPanelVisible: (visible: boolean) => {
+          set({ rulesDetailPanelVisible: visible });
+        },
+
+        setRulesSelectedRuleId: (ruleId: string | null) => {
+          set({ rulesSelectedRuleId: ruleId });
+        },
+
+        setRulesOfficialCollapsed: (collapsed: boolean) => {
+          set({ rulesOfficialCollapsed: collapsed });
+        },
+
+        setRulesCommunityCollapsed: (collapsed: boolean) => {
+          set({ rulesCommunityCollapsed: collapsed });
+        },
+
+        setRulesCustomCollapsed: (collapsed: boolean) => {
+          set({ rulesCustomCollapsed: collapsed });
+        },
       }),
       {
         name: 'ui-store', // localStorage key
@@ -171,6 +213,12 @@ export const useUIStore = create<UIState>()(
           viewerLeftPanelCollapsed: state.viewerLeftPanelCollapsed,
           viewerRightPanelCollapsed: state.viewerRightPanelCollapsed,
           viewerHighlightEnabled: state.viewerHighlightEnabled,
+          // Rules page preferences
+          rulesDetailPanelVisible: state.rulesDetailPanelVisible,
+          rulesSelectedRuleId: state.rulesSelectedRuleId,
+          rulesOfficialCollapsed: state.rulesOfficialCollapsed,
+          rulesCommunityCollapsed: state.rulesCommunityCollapsed,
+          rulesCustomCollapsed: state.rulesCustomCollapsed,
         }),
       }
     ),

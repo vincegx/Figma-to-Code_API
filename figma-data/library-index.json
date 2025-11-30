@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-29T23:13:25.814Z",
+  "lastUpdated": "2025-11-30T01:24:44.500Z",
   "nodes": [
     {
       "id": "lib-124-21142",
@@ -172,7 +172,45 @@
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
       },
       "thumbnail": "/api/images/493-2811/screenshot.png"
+    },
+    {
+      "id": "lib-6055-2436",
+      "figmaNodeId": "6055:2436",
+      "name": "BGS Homepage - 1440px",
+      "altNode": null,
+      "thumbnail": "/api/images/6055-2436/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-11-30T01:18:50.747Z",
+      "lastModified": "2025-11-30T01:18:50.747Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "SXKkSjdmfiJ6omi9BqBXVE",
+        "fileName": "BGS iBanking - Sample Project (Community)",
+        "nodeUrl": "https://www.figma.com/file/SXKkSjdmfiJ6omi9BqBXVE?node-id=6055:2436"
+      }
+    },
+    {
+      "id": "lib-6055-2872",
+      "figmaNodeId": "6055:2872",
+      "name": "BGS Homepage - 420px",
+      "altNode": null,
+      "thumbnail": "/api/images/6055-2872/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-11-30T01:24:44.489Z",
+      "lastModified": "2025-11-30T01:24:44.489Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "SXKkSjdmfiJ6omi9BqBXVE",
+        "fileName": "BGS iBanking - Sample Project (Community)",
+        "nodeUrl": "https://www.figma.com/file/SXKkSjdmfiJ6omi9BqBXVE?node-id=6055:2872"
+      }
     }
   ],
-  "totalNodes": 9
+  "totalNodes": 11
 }

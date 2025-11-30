@@ -175,7 +175,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
           <select
             value={type}
             onChange={(e) => handleTypeChange(e.target.value)}
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           >
             <option value="">Any</option>
             {NODE_TYPES.map(t => (
@@ -194,7 +194,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="e.g., Button or ^btn-.*"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
 
@@ -208,7 +208,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={widthMin}
             onChange={(e) => handleWidthMinChange(e.target.value)}
             placeholder="e.g., 100"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -220,7 +220,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={widthMax}
             onChange={(e) => handleWidthMaxChange(e.target.value)}
             placeholder="e.g., 500"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
 
@@ -234,7 +234,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={heightMin}
             onChange={(e) => handleHeightMinChange(e.target.value)}
             placeholder="e.g., 40"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
         <div>
@@ -246,7 +246,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
             value={heightMax}
             onChange={(e) => handleHeightMaxChange(e.target.value)}
             placeholder="e.g., 200"
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           />
         </div>
 
@@ -258,7 +258,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
           <select
             value={hasChildren === null ? '' : hasChildren.toString()}
             onChange={(e) => handleHasChildrenChange(e.target.value)}
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           >
             <option value="">Any</option>
             <option value="true">Yes</option>
@@ -274,7 +274,7 @@ export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
           <select
             value={parentType}
             onChange={(e) => handleParentTypeChange(e.target.value)}
-            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+            className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
           >
             <option value="">Any</option>
             {NODE_TYPES.map(t => (

@@ -190,7 +190,7 @@ export function CustomRuleModal({
                     onChange={(e) => setId(e.target.value)}
                     disabled={mode === 'edit'}
                     placeholder="custom-my-rule"
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -202,7 +202,7 @@ export function CustomRuleModal({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="My Custom Rule"
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
                   />
                 </div>
                 <div>
@@ -212,7 +212,7 @@ export function CustomRuleModal({
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as typeof CATEGORIES[number])}
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -228,7 +228,7 @@ export function CustomRuleModal({
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
                     min={100}
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
                   />
                 </div>
               </div>
@@ -248,7 +248,7 @@ export function CustomRuleModal({
                       }
                     }}
                     placeholder="Add tag..."
-                    className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-card text-text-primary"
+                    className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
                   />
                   <button
                     type="button"

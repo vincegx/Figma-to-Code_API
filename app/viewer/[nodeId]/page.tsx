@@ -643,7 +643,6 @@ export default function ViewerPage() {
                   <RulesPanel
                     node={selectedNode}
                     selectedFramework={previewFramework}
-                    onFrameworkChange={setPreviewFramework}
                     allRules={multiFrameworkRules}
                   />
                 </TabsContent>

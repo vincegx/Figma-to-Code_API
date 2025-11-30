@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
 import { RuleCard } from './rule-card';
@@ -33,63 +33,59 @@ const categoryLabels: Record<string, string> = {
 export function RuleCategorySection({
   category,
   rules,
-  defaultCollapsed = true,
+  defaultCollapsed = false,
 }: RuleCategorySectionProps) {
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
 
-  // Calculate priority statistics
-  const highestPriority = rules.length > 0 ? Math.max(...rules.map(r => r.rule.priority)) : 0;
-  const lowestPriority = rules.length > 0 ? Math.min(...rules.map(r => r.rule.priority)) : 0;
-  const activeRules = rules.filter(r => !r.isOverridden).length;
-  const overriddenRules = rules.filter(r => r.isOverridden).length;
+  const activeRules = rules.filter((r) => !r.isOverridden).length;
+  const overriddenRules = rules.filter((r) => r.isOverridden).length;
+  const priorityRange =
+    rules.length > 0
+      ? `${Math.min(...rules.map((r) => r.rule.priority))}-${Math.max(...rules.map((r) => r.rule.priority))}`
+      : '';
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 last:border-0">
+    <div className="bg-gray-100 dark:bg-gray-800/40 rounded-md border border-gray-200 dark:border-gray-700/50 mx-3 mb-2">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="w-full flex items-center gap-2 py-2 px-2.5 hover:bg-gray-200/50 dark:hover:bg-gray-700/30 transition-colors text-left rounded-t-md"
       >
-        <div className="flex items-center gap-2 flex-1">
-          <ChevronDown
-            className={cn(
-              "w-4 h-4 transition-transform text-gray-500",
-              isOpen && "rotate-180"
-            )}
-          />
-          <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
-            {categoryLabels[category] || category}
-          </h3>
-          <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
-            {rules.length}
-          </span>
-          {overriddenRules > 0 && (
-            <span className="text-xs text-orange-500" title={`${overriddenRules} overridden rules`}>
-              ⚠️ {overriddenRules}
-            </span>
+        <ChevronRight
+          className={cn(
+            'w-3.5 h-3.5 transition-transform text-gray-400 dark:text-gray-500',
+            isOpen && 'rotate-90'
           )}
-        </div>
-        <div className="flex items-center gap-1 text-xs text-gray-500">
-          <span className="font-mono">Priority: {lowestPriority}-{highestPriority}</span>
-        </div>
+        />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wide">
+          {categoryLabels[category] || category}
+        </span>
+        <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">
+          {rules.length}
+        </span>
+        {overriddenRules > 0 && (
+          <span
+            className="text-xs text-orange-500"
+            title={`${overriddenRules} overridden`}
+          >
+            ⚠️ {overriddenRules}
+          </span>
+        )}
+        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400 font-mono">
+          {priorityRange}
+        </span>
       </button>
 
       {isOpen && (
-        <div className="px-2 pb-3 space-y-2">
-          {rules.length > 0 ? (
-            rules.map(({ rule, order, isOverridden, contributedProperties }) => (
-              <RuleCard
-                key={rule.id}
-                rule={rule}
-                order={order}
-                isOverridden={isOverridden}
-                contributedProperties={contributedProperties}
-              />
-            ))
-          ) : (
-            <div className="text-sm text-gray-500 dark:text-gray-400 px-2 py-2">
-              No rules in this category
-            </div>
-          )}
+        <div className="px-2.5 pb-2.5 pt-1 space-y-1.5">
+          {rules.map(({ rule, order, isOverridden, contributedProperties }) => (
+            <RuleCard
+              key={rule.id}
+              rule={rule}
+              order={order}
+              isOverridden={isOverridden}
+              contributedProperties={contributedProperties}
+            />
+          ))}
         </div>
       )}
     </div>
