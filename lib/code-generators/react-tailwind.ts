@@ -366,9 +366,8 @@ function normalizeArbitraryValues(classes: string[]): string[] {
     40: '10',
     44: '11',
     48: '12',
-    52: '13',
+    // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
     56: '14',
-    60: '15',
     64: '16',
     72: '18',
     80: '20',
@@ -399,6 +398,12 @@ function normalizeArbitraryValues(classes: string[]): string[] {
       // If exact match in standard scale, use it
       if (standardSpacing[px]) {
         return `${prefix}${standardSpacing[px]}`;
+      }
+
+      // WP38: Don't round w-/h- dimensions - MCP keeps exact pixel values
+      // Only apply nearest-value rounding to gap/padding/margin
+      if (prefix === 'w-' || prefix === 'h-' || prefix === 'min-w-' || prefix === 'max-w-' || prefix === 'min-h-' || prefix === 'max-h-') {
+        return cls; // Keep exact arbitrary value
       }
 
       // WP25 FIX: Find nearest standard value (within 5% tolerance)
@@ -458,9 +463,8 @@ function consolidateSemanticSpacing(classes: string[]): string[] {
     40: '10',
     44: '11',
     48: '12',
-    52: '13',
+    // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
     56: '14',
-    60: '15',
     64: '16',
     72: '18',
     80: '20',
@@ -964,7 +968,15 @@ function generateTailwindJSXElement(
     // WP28 T211: Deduplicate classes with correct priority
     // Rules win: text-sm overrides text-[14px], flex-col overrides flex-column
     // Last occurrence wins in deduplicateTailwindClasses(), so rules (last) beat fallbacks (first)
-    const uniqueClasses = deduplicateTailwindClasses(allClasses);
+    let uniqueClasses = deduplicateTailwindClasses(allClasses);
+
+    // WP38: Remove self-stretch when max-width is present (like MCP)
+    // Elements with max-width should be centered by parent's items-center, not stretched
+    const hasMaxWidth = uniqueClasses.some(c => c.startsWith('max-w-'));
+    if (hasMaxWidth) {
+      uniqueClasses = uniqueClasses.filter(c => c !== 'self-stretch');
+    }
+
     tailwindClasses = uniqueClasses.join(' ');
   } else {
     // No rules - just use structural + base classes (fallbacks)

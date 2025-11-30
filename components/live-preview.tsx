@@ -114,10 +114,9 @@ function buildReactDocument(
         margin: 0;
         padding: 0;
       }
-      /* Preview responsive: force root to fill viewport width */
+      /* Preview responsive: root stretches, inner content stays centered via max-width */
       #root > * {
         width: 100% !important;
-        max-width: 100% !important;
         box-sizing: border-box;
       }
       ${tailwindCSS}

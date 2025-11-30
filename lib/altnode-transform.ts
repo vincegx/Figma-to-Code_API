@@ -145,7 +145,8 @@ function handleGroupInlining(
   groupNode: FigmaNode,
   cumulativeRotation: number,
   parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
-  parentBounds?: { x: number; y: number; width: number; height: number }
+  parentBounds?: { x: number; y: number; width: number; height: number },
+  parentLayoutSizing?: { horizontal?: string; vertical?: string }
 ): SimpleAltNode | null {
   if (!groupNode.children || groupNode.children.length === 0) {
     return null; // Empty GROUP, skip entirely
@@ -158,7 +159,7 @@ function handleGroupInlining(
   // WP25 FIX: Pass parent layoutMode through GROUP inlining
   // If GROUP has only 1 child, return child directly (inline the GROUP)
   if (groupNode.children.length === 1) {
-    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode, parentBounds);
+    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode, parentBounds, undefined, parentLayoutSizing);
   }
 
   // Multiple children: create container but mark as GROUP
@@ -176,12 +177,28 @@ function handleGroupInlining(
   };
 
   // WP31: If parent has no layoutMode, GROUP needs absolute positioning
-  if (!parentLayoutMode && parentBounds && groupBounds) {
+  // WP38: Also handle layoutPositioning ABSOLUTE with constraints (RIGHT/BOTTOM)
+  const isAbsolutePositioned = (groupNode as any).layoutPositioning === 'ABSOLUTE';
+  const constraints = (groupNode as any).constraints;
+
+  if ((!parentLayoutMode || isAbsolutePositioned) && parentBounds && groupBounds) {
     groupStyles.position = 'absolute';
-    groupStyles.top = `${groupBounds.y - parentBounds.y}px`;
-    groupStyles.left = `${groupBounds.x - parentBounds.x}px`;
     groupStyles.width = `${groupBounds.width}px`;
     groupStyles.height = `${groupBounds.height}px`;
+
+    // WP38: Handle RIGHT constraint
+    if (constraints?.horizontal === 'RIGHT') {
+      groupStyles.right = `${parentBounds.width - (groupBounds.x - parentBounds.x) - groupBounds.width}px`;
+    } else {
+      groupStyles.left = `${groupBounds.x - parentBounds.x}px`;
+    }
+
+    // WP38: Handle BOTTOM constraint
+    if (constraints?.vertical === 'BOTTOM') {
+      groupStyles.bottom = `${parentBounds.height - (groupBounds.y - parentBounds.y) - groupBounds.height}px`;
+    } else {
+      groupStyles.top = `${groupBounds.y - parentBounds.y}px`;
+    }
   }
 
   const container: SimpleAltNode = {
@@ -193,17 +210,52 @@ function handleGroupInlining(
     styles: groupStyles,
     children: groupNode.children
       .map(child => {
-        const altChild = transformToAltNode(child, newCumulativeRotation, parentLayoutMode, parentBounds);
+        // WP38: Pass groupBounds as parentBounds so children calculate position relative to GROUP, not grandparent
+        // This prevents double-offset (GROUP at 41,41 + child at 41,41 = child at 82,82)
+        // GROUP doesn't have layoutSizing - pass parent's sizing through
+        const altChild = transformToAltNode(child, newCumulativeRotation, undefined, groupBounds, undefined, parentLayoutSizing);
         if (altChild && groupBounds && child.absoluteBoundingBox) {
-          // WP31: Calculate margin offset from GROUP origin
           const childBounds = child.absoluteBoundingBox;
-          const marginLeft = Math.round(childBounds.x - groupBounds.x);
-          const marginTop = Math.round(childBounds.y - groupBounds.y);
+          const childConstraints = (child as any).constraints;
 
-          // Add grid-area and margins for stacking
-          altChild.styles['grid-area'] = '1 / 1';
-          if (marginLeft > 0) altChild.styles['margin-left'] = `${marginLeft}px`;
-          if (marginTop > 0) altChild.styles['margin-top'] = `${marginTop}px`;
+          // WP38: For children with RIGHT/BOTTOM constraints, use absolute positioning
+          // This allows negative values and proper responsive behavior
+          const isHorizontalRight = childConstraints?.horizontal === 'RIGHT';
+          const isVerticalBottom = childConstraints?.vertical === 'BOTTOM';
+
+          if (isHorizontalRight || isVerticalBottom) {
+            // Use absolute positioning like MCP
+            altChild.styles.position = 'absolute';
+
+            if (isHorizontalRight) {
+              const rightOffset = groupBounds.width - (childBounds.x - groupBounds.x) - childBounds.width;
+              altChild.styles.right = `${rightOffset}px`;
+            } else {
+              altChild.styles.left = `${childBounds.x - groupBounds.x}px`;
+            }
+
+            if (isVerticalBottom) {
+              const bottomOffset = groupBounds.height - (childBounds.y - groupBounds.y) - childBounds.height;
+              altChild.styles.bottom = `${bottomOffset}px`;
+            } else {
+              altChild.styles.top = `${childBounds.y - groupBounds.y}px`;
+            }
+          } else {
+            // WP31: Standard grid stacking with margins
+            const marginLeft = Math.round(childBounds.x - groupBounds.x);
+            const marginTop = Math.round(childBounds.y - groupBounds.y);
+
+            altChild.styles['grid-area'] = '1 / 1';
+            if (marginLeft > 0) altChild.styles['margin-left'] = `${marginLeft}px`;
+            if (marginTop > 0) altChild.styles['margin-top'] = `${marginTop}px`;
+
+            // Clear position styles for grid children
+            delete altChild.styles.position;
+            delete altChild.styles.top;
+            delete altChild.styles.left;
+            delete altChild.styles.right;
+            delete altChild.styles.bottom;
+          }
         }
         return altChild;
       })
@@ -611,7 +663,7 @@ function applyHighPriorityImprovements(
  * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
  * @param parentBounds - Parent's absoluteBoundingBox for constraints positioning (WP31)
  */
-function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE', parentBounds?: { x: number; y: number; width: number; height: number }): void {
+function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE', parentBounds?: { x: number; y: number; width: number; height: number }, parentLayoutSizing?: { horizontal?: string; vertical?: string }): void {
   const node = figmaNode as any;
 
   // Grid template columns/rows (COMPLEX - calculated values, not in rules)
@@ -660,43 +712,40 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
       const constraints = (node as any).constraints;
 
       // WP31: CENTER constraints use calc(50% + offset) pattern
+      // WP38: Also handle RIGHT/BOTTOM constraints for responsive positioning
       const isVerticalCenter = constraints?.vertical === 'CENTER';
       const isHorizontalCenter = constraints?.horizontal === 'CENTER';
+      const isVerticalBottom = constraints?.vertical === 'BOTTOM';
+      const isHorizontalRight = constraints?.horizontal === 'RIGHT';
 
-      if (isVerticalCenter || isHorizontalCenter) {
-        // Calculate center of parent and node
+      // Handle horizontal positioning
+      if (isHorizontalCenter) {
         const parentCenterX = parentBox.width / 2;
-        const parentCenterY = parentBox.height / 2;
         const nodeCenterX = (nodeBox.x - parentBox.x) + nodeBox.width / 2;
+        const offsetX = nodeCenterX - parentCenterX;
+        const sign = offsetX >= 0 ? '+' : '';
+        altNode.styles.left = `calc(50%${sign}${offsetX.toFixed(2)}px)`;
+        altNode.styles.translateX = '-50%';
+      } else if (isHorizontalRight) {
+        // WP38: RIGHT constraint → use right instead of left for responsive behavior
+        altNode.styles.right = `${parentBox.width - (nodeBox.x - parentBox.x) - nodeBox.width}px`;
+      } else {
+        altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
+      }
+
+      // Handle vertical positioning
+      if (isVerticalCenter) {
+        const parentCenterY = parentBox.height / 2;
         const nodeCenterY = (nodeBox.y - parentBox.y) + nodeBox.height / 2;
-
-        if (isHorizontalCenter) {
-          const offsetX = nodeCenterX - parentCenterX;
-          const sign = offsetX >= 0 ? '+' : '';
-          altNode.styles.left = `calc(50%${sign}${offsetX.toFixed(2)}px)`;
-        } else {
-          altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
-        }
-
-        if (isVerticalCenter) {
-          const offsetY = nodeCenterY - parentCenterY;
-          const sign = offsetY >= 0 ? '+' : '';
-          altNode.styles.top = `calc(50%${sign}${offsetY.toFixed(2)}px)`;
-        } else {
-          altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
-        }
-
-        // Add translate(-50%, -50%) for proper centering
-        // WP31: Use separate translateX/Y styles to avoid overwriting rotation
-        if (isHorizontalCenter) {
-          altNode.styles.translateX = '-50%';
-        }
-        if (isVerticalCenter) {
-          altNode.styles.translateY = '-50%';
-        }
+        const offsetY = nodeCenterY - parentCenterY;
+        const sign = offsetY >= 0 ? '+' : '';
+        altNode.styles.top = `calc(50%${sign}${offsetY.toFixed(2)}px)`;
+        altNode.styles.translateY = '-50%';
+      } else if (isVerticalBottom) {
+        // WP38: BOTTOM constraint → use bottom instead of top for responsive behavior
+        altNode.styles.bottom = `${parentBox.height - (nodeBox.y - parentBox.y) - nodeBox.height}px`;
       } else {
         altNode.styles.top = `${nodeBox.y - parentBox.y}px`;
-        altNode.styles.left = `${nodeBox.x - parentBox.x}px`;
       }
     }
   }
@@ -764,9 +813,13 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   // Figma Auto Layout sizing: FILL = responsive (100%), FIXED = pixel value, HUG = auto
   const layoutSizingH = (figmaNode as any).layoutSizingHorizontal;
   const layoutSizingV = (figmaNode as any).layoutSizingVertical;
+  const layoutGrow = (figmaNode as any).layoutGrow;
 
   // Width
-  if (layoutSizingH === 'FILL') {
+  // WP38: Don't set any width when layoutGrow is present - grow basis-0 handles sizing
+  if (layoutGrow) {
+    // Skip width - flex grow handles it
+  } else if (layoutSizingH === 'FILL') {
     altNode.styles.width = '100%';
   } else if (hasRotation && nodeSize) {
     altNode.styles.width = `${nodeSize.x}px`;
@@ -777,8 +830,13 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
   // Height
   // WP31: Images with scaleMode FILL need fixed height for object-fit: cover to crop correctly
   const hasImageFill = (figmaNode as any).fills?.some((f: any) => f.type === 'IMAGE' && f.scaleMode === 'FILL');
+  // WP38: When parent is HUG, h-full won't work (100% of auto = 0). Use pixel height.
+  const parentIsHugVertical = parentLayoutSizing?.vertical === 'HUG';
   if (layoutSizingV === 'FILL' && hasImageFill && figmaNode.absoluteBoundingBox) {
     // Use pixel height for images to enable proper cropping
+    altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
+  } else if (layoutSizingV === 'FILL' && parentIsHugVertical && figmaNode.absoluteBoundingBox) {
+    // Parent is HUG - use pixel height instead of 100%
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
   } else if (layoutSizingV === 'FILL') {
     altNode.styles.height = '100%';
@@ -790,13 +848,21 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
   }
 
-  // WP31: Add min-height for elements with layoutGrow=1 and FILL vertical sizing
-  // Use absoluteBoundingBox height as fallback when h-[100%] fails (parent has h-auto)
-  // Note: We only set min-height, not min-width, because elements should shrink horizontally
-  // to fit their container (responsive behavior)
+  // WP38: Add min-h-px min-w-px for elements with layoutGrow (like MCP)
+  // This helps the flex algorithm calculate sizes correctly
+  // But only when no explicit sizing (FILL already has height/width)
   const hasLayoutGrow = (figmaNode as any).layoutGrow === 1;
-  if (hasLayoutGrow && figmaNode.absoluteBoundingBox && layoutSizingV === 'FILL') {
-    altNode.styles['min-height'] = `${figmaNode.absoluteBoundingBox.height}px`;
+  if (hasLayoutGrow) {
+    const verticalSizing = (figmaNode as any).layoutSizingVertical;
+    const horizontalSizing = (figmaNode as any).layoutSizingHorizontal;
+    // Only add min-height if not already filling parent
+    if (verticalSizing !== 'FILL') {
+      altNode.styles['min-height'] = '1px';
+    }
+    // Only add min-width if not already filling parent
+    if (horizontalSizing !== 'FILL') {
+      altNode.styles['min-width'] = '1px';
+    }
   }
 }
 
@@ -903,14 +969,53 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       altNode.styles[colorProp] = rgbaValue;
     }
   } else if (firstFill.type === figmaConfig.constants.fillTypes.gradientLinear && firstFill.gradientStops) {
+    // WP38: Calculate correct angle and positions from gradientHandlePositions
+    const handles = firstFill.gradientHandlePositions;
+    let angleDeg = 180; // Default
+    let startPct = 0;
+    let endPct = 100;
+
+    if (handles && handles.length >= 2) {
+      const start = handles[0];
+      const end = handles[1];
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+
+      // CSS angle: 0deg = to top, clockwise
+      angleDeg = Math.round(Math.atan2(dx, -dy) * 180 / Math.PI);
+      if (angleDeg < 0) angleDeg += 360;
+
+      // Calculate gradient direction vector
+      const angleRad = angleDeg * Math.PI / 180;
+      const dirX = Math.sin(angleRad);
+      const dirY = -Math.cos(angleRad);
+
+      // Element corners dot products with gradient direction
+      const corners = [[0, 0], [1, 0], [0, 1], [1, 1]];
+      const dots = corners.map(([x, y]) => x * dirX + y * dirY);
+      const minDot = Math.min(...dots);
+      const maxDot = Math.max(...dots);
+      const extent = maxDot - minDot;
+
+      if (extent > 0) {
+        // Project gradient handles onto CSS gradient axis
+        const startDot = start.x * dirX + start.y * dirY;
+        const endDot = end.x * dirX + end.y * dirY;
+        startPct = ((startDot - minDot) / extent) * 100;
+        endPct = ((endDot - minDot) / extent) * 100;
+      }
+    }
+
     const stops = firstFill.gradientStops
       .map((stop: any) => {
         const { r, g, b } = stop.color;
         const a = stop.color.a ?? 1;
-        return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a}) ${Math.round(stop.position * 100)}%`;
+        // Interpolate position between startPct and endPct
+        const pct = startPct + stop.position * (endPct - startPct);
+        return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a}) ${pct.toFixed(2)}%`;
       })
       .join(', ');
-    altNode.styles[colorProp] = `linear-gradient(180deg, ${stops})`;
+    altNode.styles[colorProp] = `linear-gradient(${angleDeg}deg, ${stops})`;
   } else if (firstFill.type === figmaConfig.constants.fillTypes.image && firstFill.imageRef) {
     // Keep background-image style for CSS fallback
     altNode.styles.backgroundImage = `url(${firstFill.imageRef})`;
@@ -930,34 +1035,49 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   // Apply border/outline if strokes exist
   if (node.strokes && node.strokes.length > 0) {
     const stroke = node.strokes.find((s: any) => s.visible !== false);
-    if (stroke && stroke.color) {
+    if (stroke) {
       const weight = node.strokeWeight || 1;
-      const { r, g, b } = stroke.color;
-      const a = stroke.opacity ?? 1;
-      let color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+      let color: string | null = null;
 
-      // WP31 T224: Check for Figma variable bindings on strokes
-      // Variables can be bound at stroke level (stroke.boundVariables.color) or node level
-      const strokeBoundVars = stroke.boundVariables;
-      const nodeBoundVars = (figmaNode as any).boundVariables;
-      const varBinding = strokeBoundVars?.color || nodeBoundVars?.strokes?.[0];
-      if (varBinding?.id) {
-        const varName = resolveVariableName(varBinding.id, figmaNode);
-        if (varName) {
-          color = `var(--${varName}, ${color})`;
+      // WP38: Handle gradient strokes - use first color as fallback (CSS doesn't support gradient borders natively)
+      if (stroke.type === 'GRADIENT_LINEAR' || stroke.type === 'GRADIENT_RADIAL' || stroke.type === 'GRADIENT_ANGULAR' || stroke.type === 'GRADIENT_DIAMOND') {
+        const firstStop = stroke.gradientStops?.[0];
+        if (firstStop?.color) {
+          const { r, g, b } = firstStop.color;
+          const a = firstStop.color.a ?? 1;
+          color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+        }
+      } else if (stroke.color) {
+        // Solid color stroke
+        const { r, g, b } = stroke.color;
+        const a = stroke.opacity ?? 1;
+        color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+
+        // WP31 T224: Check for Figma variable bindings on strokes
+        // Variables can be bound at stroke level (stroke.boundVariables.color) or node level
+        const strokeBoundVars = stroke.boundVariables;
+        const nodeBoundVars = (figmaNode as any).boundVariables;
+        const varBinding = strokeBoundVars?.color || nodeBoundVars?.strokes?.[0];
+        if (varBinding?.id) {
+          const varName = resolveVariableName(varBinding.id, figmaNode);
+          if (varName) {
+            color = `var(--${varName}, ${color})`;
+          }
         }
       }
 
-      // WP31: Apply color per-side if individualStrokeWeights exists
-      if (node.individualStrokeWeights) {
-        const { top, right, bottom, left } = node.individualStrokeWeights;
-        if (top) altNode.styles['border-top-color'] = color;
-        if (right) altNode.styles['border-right-color'] = color;
-        if (bottom) altNode.styles['border-bottom-color'] = color;
-        if (left) altNode.styles['border-left-color'] = color;
-      } else {
-        // WP31 FIX: Always use border to match MCP output (not outline)
-        altNode.styles.border = `${weight}px solid ${color}`;
+      if (color) {
+        // WP31: Apply color per-side if individualStrokeWeights exists
+        if (node.individualStrokeWeights) {
+          const { top, right, bottom, left } = node.individualStrokeWeights;
+          if (top) altNode.styles['border-top-color'] = color;
+          if (right) altNode.styles['border-right-color'] = color;
+          if (bottom) altNode.styles['border-bottom-color'] = color;
+          if (left) altNode.styles['border-left-color'] = color;
+        } else {
+          // WP31 FIX: Always use border to match MCP output (not outline)
+          altNode.styles.border = `${weight}px solid ${color}`;
+        }
       }
     }
   }
@@ -1111,7 +1231,8 @@ export function transformToAltNode(
   cumulativeRotation: number = 0,
   parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
   parentBounds?: { x: number; y: number; width: number; height: number },
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  parentLayoutSizing?: { horizontal?: string; vertical?: string }
 ): SimpleAltNode | null {
   // WP31 T224: Store variables in module scope for resolveVariableName
   if (variables) {
@@ -1123,7 +1244,7 @@ export function transformToAltNode(
 
   // CRITICAL: GROUP node inlining
   if (figmaNode.type === 'GROUP' && figmaNode.children) {
-    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode, parentBounds);
+    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode, parentBounds, parentLayoutSizing);
   }
 
   // CRITICAL: Unique name generation
@@ -1155,7 +1276,7 @@ export function transformToAltNode(
   };
 
   // Normalize properties
-  normalizeLayout(figmaNode, altNode, parentLayoutMode, parentBounds);
+  normalizeLayout(figmaNode, altNode, parentLayoutMode, parentBounds, parentLayoutSizing);
   normalizeFills(figmaNode, altNode);
   normalizeStrokes(figmaNode, altNode);
   normalizeEffects(figmaNode, altNode);
@@ -1178,6 +1299,21 @@ export function transformToAltNode(
     }
   }
 
+  // WP38: Handle geometric shapes (ELLIPSE, POLYGON, STAR, REGULAR_POLYGON)
+  // These shapes need clip-path or border-radius to clip content (especially images) correctly
+  if (['ELLIPSE', 'POLYGON', 'STAR', 'REGULAR_POLYGON'].includes(figmaNode.type)) {
+    const shapeNode = figmaNode as any;
+
+    if (figmaNode.type === 'ELLIPSE') {
+      // For ellipse: use border-radius: 50% (works for circles and ellipses)
+      altNode.styles['border-radius'] = '50%';
+      altNode.styles['overflow'] = 'hidden';
+    } else if (shapeNode.fillGeometry?.[0]?.path) {
+      // For polygons/stars: use clip-path with SVG path from Figma
+      altNode.styles['clip-path'] = `path('${shapeNode.fillGeometry[0].path}')`;
+    }
+  }
+
   // WP28 T210: Extract universal fallbacks for ALL properties in config
   // This ensures every property has a CSS fallback, even if no rule matches
   // Rules will override these fallbacks with semantic classes (e.g., text-sm instead of text-[14px])
@@ -1189,11 +1325,16 @@ export function transformToAltNode(
   // Transform children recursively with updated cumulative rotation
   // WP25 FIX: Pass this node's layoutMode to children for flex vs inline-flex logic
   // WP31: Pass this node's bounds to children for constraints positioning
+  // WP38: Pass this node's layoutSizing to children for FILL inside HUG detection
   if (figmaNode.children) {
     const currentLayoutMode = (figmaNode as any).layoutMode as 'HORIZONTAL' | 'VERTICAL' | 'NONE' | undefined;
     const currentBounds = figmaNode.absoluteBoundingBox;
+    const currentLayoutSizing = {
+      horizontal: (figmaNode as any).layoutSizingHorizontal,
+      vertical: (figmaNode as any).layoutSizingVertical
+    };
     altNode.children = figmaNode.children
-      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds))
+      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds, undefined, currentLayoutSizing))
       .filter((node): node is SimpleAltNode => node !== null);
   }
 

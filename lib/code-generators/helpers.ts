@@ -164,11 +164,12 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     if (cssValue === '0px') {
       return 'border-0';
     }
-    const match = cssValue.match(/^(\d+)px\s+solid\s+(.*)/);
+    // WP38: Support decimal strokeWeight (e.g., 1.48px)
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px\s+solid\s+(.*)/);
     if (match) {
       const width = match[1];
       const color = match[2].trim();
-      
+
       // Generate Tailwind classes: border + border-color
       const borderClass = width === '1' ? 'border' : `border-[${width}px]`;
       
@@ -224,6 +225,11 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
 
   // Border radius
   if (prop === 'borderradius') {
+    // WP38: Handle percentage values (50% for circles/ellipses)
+    if (cssValue === '50%') {
+      return 'rounded-full';
+    }
+
     // WP31 FIX: Handle CSS variables in border-radius (Tailwind v3 syntax)
     if (cssValue.startsWith('var(')) {
       // Extract the variable part: var(--var-128-217, 28px) → var(--var-128-217)
@@ -248,6 +254,24 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
       };
       return standardValues[px] || `rounded-[${px}px]`;
     }
+  }
+
+  // WP38: Individual corner border-radius (asymmetric corners like MCP)
+  if (prop === 'bordertopleftradius') {
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
+    if (match) return `rounded-tl-[${match[1]}px]`;
+  }
+  if (prop === 'bordertoprightradius') {
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
+    if (match) return `rounded-tr-[${match[1]}px]`;
+  }
+  if (prop === 'borderbottomrightradius') {
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
+    if (match) return `rounded-br-[${match[1]}px]`;
+  }
+  if (prop === 'borderbottomleftradius') {
+    const match = cssValue.match(/^(\d+(?:\.\d+)?)px$/);
+    if (match) return `rounded-bl-[${match[1]}px]`;
   }
 
   // WP31: Separate translateX/translateY for CENTER constraints (MCP pattern)
@@ -776,9 +800,8 @@ function convertSizeToTailwind(value: string, prefix: string): string {
     40: '10',
     44: '11',
     48: '12',
-    52: '13',
+    // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
     56: '14',
-    60: '15',
     64: '16',
     72: '18',
     80: '20',
