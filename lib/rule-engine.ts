@@ -553,6 +553,7 @@ function extractTransformerProperties(
 
   switch (framework) {
     case 'react-tailwind':
+    case 'react-tailwind-v4':
       if (transformer.className) {
         properties.className = replacePlaceholders(transformer.className, altNode, selector);
       }
