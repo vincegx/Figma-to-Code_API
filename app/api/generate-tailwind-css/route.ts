@@ -8,27 +8,39 @@ import path from 'path';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Cache v4 compiler for performance
-let v4CompilerPromise: Promise<Awaited<ReturnType<typeof compileTailwindV4>>> | null = null;
+// WP38 FIX: Cache the Tailwind v4 base CSS content (never changes)
+// but NOT the compiler itself, because build() accumulates classes across calls
+let cachedTailwindCSSContent: string | null = null;
 
-async function getV4Compiler() {
-  if (!v4CompilerPromise) {
-    // Initialize v4 compiler with custom stylesheet loader
-    v4CompilerPromise = compileTailwindV4('@import "tailwindcss";', {
-      loadStylesheet: async (id: string, base: string) => {
-        if (id === 'tailwindcss') {
-          const cssPath = path.join(process.cwd(), 'node_modules/tailwindcss-v4/index.css');
-          return {
-            path: 'virtual:tailwindcss/index.css',
-            base,
-            content: await readFile(cssPath, 'utf-8'),
-          };
-        }
-        throw new Error(`Cannot load stylesheet: ${id}`);
-      },
-    });
+async function getTailwindCSSContent(): Promise<string> {
+  if (!cachedTailwindCSSContent) {
+    const cssPath = path.join(process.cwd(), 'node_modules/tailwindcss-v4/index.css');
+    cachedTailwindCSSContent = await readFile(cssPath, 'utf-8');
   }
-  return v4CompilerPromise;
+  return cachedTailwindCSSContent;
+}
+
+/**
+ * WP38 FIX: Create a fresh v4 compiler for each request
+ * This is necessary because compiler.build() accumulates classes across calls,
+ * which causes CSS from previous requests to pollute subsequent requests.
+ * Example: if request A uses font-[550], request B would incorrectly include that CSS too.
+ */
+async function createV4Compiler() {
+  const tailwindCSS = await getTailwindCSSContent();
+
+  return compileTailwindV4('@import "tailwindcss";', {
+    loadStylesheet: async (id: string, base: string) => {
+      if (id === 'tailwindcss') {
+        return {
+          path: 'virtual:tailwindcss/index.css',
+          base,
+          content: tailwindCSS,
+        };
+      }
+      throw new Error(`Cannot load stylesheet: ${id}`);
+    },
+  });
 }
 
 /**
@@ -79,8 +91,8 @@ export async function POST(request: NextRequest) {
     let css: string;
 
     if (version === 'v4') {
-      // Tailwind v4: Use @tailwindcss/node compile API
-      const compiler = await getV4Compiler();
+      // WP38 FIX: Create fresh compiler for each request to avoid class accumulation
+      const compiler = await createV4Compiler();
       const classes = extractClasses(code);
       css = compiler.build(classes);
     } else {

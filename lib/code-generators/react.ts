@@ -1,5 +1,5 @@
 import type { SimpleAltNode } from '../altnode-transform';
-import { toPascalCase, extractTextContent, extractComponentDataAttributes } from './helpers';
+import { toPascalCase, extractTextContent, extractComponentDataAttributes, truncateLayerName } from './helpers';
 
 /**
  * Asset file generated during export (SVG, images, etc.)
@@ -93,9 +93,10 @@ function generateJSXElement(
 
   // T178: Add data-layer attribute
   // T180: Extract component properties as data-* attributes
+  // WP38: Shorten long layer names (first 4 words)
   const componentAttrs = extractComponentDataAttributes(node);
   const allDataAttrs = {
-    'data-layer': node.name, // T178: Original Figma name
+    'data-layer': truncateLayerName(node.name), // T178: Original Figma name (shortened)
     ...componentAttrs // T180: Component properties
   };
 

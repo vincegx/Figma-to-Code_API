@@ -1448,7 +1448,7 @@
       "fontweight",
       "figma-api"
     ],
-    "enabled": true,
+    "enabled": false,
     "priority": 50,
     "selector": {
       "type": "TEXT",

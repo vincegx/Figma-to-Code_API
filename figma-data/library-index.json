@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-30T21:13:21.449Z",
+  "lastUpdated": "2025-12-01T17:15:37.520Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -153,7 +153,26 @@
         "fileName": "BGS iBanking - Sample Project (Community)",
         "nodeUrl": "https://www.figma.com/file/SXKkSjdmfiJ6omi9BqBXVE?node-id=6055:2872"
       }
+    },
+    {
+      "id": "lib-2540-377150",
+      "figmaNodeId": "2540:377150",
+      "name": "Homepage",
+      "altNode": null,
+      "thumbnail": "/api/images/2540-377150/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-01T17:15:37.509Z",
+      "lastModified": "2025-12-01T17:15:37.509Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "K7CY0ontfnoOICBZ3YfahY",
+        "fileName": "Orbe - Portfolio Template",
+        "nodeUrl": "https://www.figma.com/file/K7CY0ontfnoOICBZ3YfahY?node-id=2540:377150"
+      }
     }
   ],
-  "totalNodes": 11
+  "totalNodes": 12
 }

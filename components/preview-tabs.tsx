@@ -34,6 +34,8 @@ export default function PreviewTabs({
 
   // WP32: State for generated code (async generators)
   const [generatedCode, setGeneratedCode] = useState<string>('');
+  // WP38: State for Google Fonts URL (needed for HTML/CSS live preview)
+  const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>();
 
   // WP39: Clear code immediately when framework changes to prevent flash
   // of incorrect code format (e.g., JSX shown when switching to HTML/CSS)
@@ -54,6 +56,7 @@ export default function PreviewTabs({
     async function generateAsync() {
       const startTime = performance.now();
       let codeOutput = '';
+      let fontsUrl: string | undefined;
 
       try {
         // WP32 FIX: NEVER pass credentials in viewer mode
@@ -66,10 +69,12 @@ export default function PreviewTabs({
           case 'react-tailwind':
             result = await generateReactTailwind(currentNode, resolvedProperties, [], 'react-tailwind', figmaFileKey, figmaAccessToken, nodeId);
             codeOutput = result.code;
+            fontsUrl = result.googleFontsUrl;
             break;
           case 'react-tailwind-v4':
             result = await generateReactTailwindV4(currentNode, resolvedProperties, [], 'react-tailwind-v4', figmaFileKey, figmaAccessToken, nodeId);
             codeOutput = result.code;
+            fontsUrl = result.googleFontsUrl;
             break;
           case 'html-css':
             console.log('[PREVIEW-TABS] Calling generateHTMLTailwindCSS...');
@@ -82,6 +87,7 @@ export default function PreviewTabs({
             if (result.css) {
               codeOutput += '\n\n/* CSS */\n' + result.css;
             }
+            fontsUrl = result.googleFontsUrl;
             break;
         case 'react-inline':
           result = generateReactJSX(currentNode, resolvedProperties);
@@ -105,6 +111,7 @@ export default function PreviewTabs({
       const duration = endTime - startTime;
       console.log(`Code generation (${selectedFramework}): ${duration.toFixed(2)}ms`);
 
+      setGoogleFontsUrl(fontsUrl);
       setGeneratedCode(codeOutput);
     }
 
@@ -187,6 +194,7 @@ export default function PreviewTabs({
             code={generatedCode}
             framework={selectedFramework}
             language={language}
+            googleFontsUrl={googleFontsUrl}
           />
         </div>
       )}

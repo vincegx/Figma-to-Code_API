@@ -264,10 +264,66 @@ export function mergeTailwindClasses(
 
     if (props) {
       Object.assign(merged, props);
+    } else {
+      // WP38: Fallback for arbitrary classes not compiled by Tailwind v4
+      // Handle border-[color] and border-{t,r,b,l}-[color]
+      // Color values: var(...), rgba(...), rgb(...), hsl(...), #hex
+      const borderMatch = cls.match(/^border(-[trbl])?-\[(.+)\]$/);
+      if (borderMatch) {
+        const side = borderMatch[1]; // -t, -r, -b, -l, or undefined
+        const value = borderMatch[2];
+        // Check if value looks like a color (not a width like "1px" or "2px_0_0")
+        const isColor = /^(var\(|rgba?\(|hsla?\(|#)/.test(value);
+        if (isColor) {
+          if (side === '-t') {
+            merged['border-top-color'] = value;
+          } else if (side === '-r') {
+            merged['border-right-color'] = value;
+          } else if (side === '-b') {
+            merged['border-bottom-color'] = value;
+          } else if (side === '-l') {
+            merged['border-left-color'] = value;
+          } else {
+            merged['border-color'] = value;
+          }
+        }
+      }
     }
   }
 
   return merged;
+}
+
+/**
+ * WP38: Extract CSS variable definitions from theme CSS
+ * Returns a map of variable name → value
+ */
+function extractCSSVariables(themeCSS: string): Map<string, string> {
+  const vars = new Map<string, string>();
+  // Match --var-name: value; patterns
+  const regex = /(--[\w-]+):\s*([^;]+);/g;
+  let match;
+  while ((match = regex.exec(themeCSS)) !== null) {
+    vars.set(match[1], match[2].trim());
+  }
+  return vars;
+}
+
+/**
+ * WP38: Resolve CSS variable references to literal values
+ * Handles var(--name) and var(--name, fallback)
+ */
+function resolveCSSVariables(value: string, vars: Map<string, string>): string {
+  // Match var(--name) or var(--name, fallback)
+  return value.replace(/var\((--[\w-]+)(?:,\s*([^)]+))?\)/g, (match, varName, fallback) => {
+    const resolved = vars.get(varName);
+    if (resolved) {
+      // Recursively resolve in case the value contains more vars
+      return resolveCSSVariables(resolved, vars);
+    }
+    // WP38 FIX: Return original match (not entire value!) when variable not found
+    return fallback ? fallback.trim() : match;
+  });
 }
 
 /**
@@ -288,12 +344,20 @@ export function generateFinalCSS(
     rules.push(themeCSS);
   }
 
+  // WP38: Extract CSS variables from theme for resolution
+  const cssVars = extractCSSVariables(themeCSS);
+
   // Generate rules for each element
   for (const element of elements) {
     if (Object.keys(element.cssProperties).length === 0) continue;
 
     const propsStr = Object.entries(element.cssProperties)
-      .map(([prop, value]) => `  ${prop}: ${value};`)
+      .map(([prop, value]) => {
+        // WP38: Resolve Tailwind v4 CSS variables to literal values
+        // This ensures compatibility with iframe sandbox where @layer may not work
+        const resolvedValue = resolveCSSVariables(value, cssVars);
+        return `  ${prop}: ${resolvedValue};`;
+      })
       .join('\n');
 
     rules.push(`.${element.semanticClass} {\n${propsStr}\n}`);

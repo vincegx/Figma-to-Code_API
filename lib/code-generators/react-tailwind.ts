@@ -1,5 +1,5 @@
 import type { SimpleAltNode, FillData } from '../altnode-transform';
-import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind } from './helpers';
+import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind, truncateLayerName } from './helpers';
 import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
@@ -369,7 +369,9 @@ function normalizeArbitraryValues(classes: string[]): string[] {
     // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
     56: '14',
     64: '16',
-    72: '18',
+    // WP38 FIX: gap-18 does NOT exist in Tailwind V3 (skips from 16 to 20)
+    // Keep 72px as arbitrary value gap-[72px] for V3 compatibility
+    // 72: '18',  // REMOVED - not valid in V3
     80: '20',
     96: '24',
     112: '28',
@@ -466,7 +468,8 @@ function consolidateSemanticSpacing(classes: string[]): string[] {
     // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
     56: '14',
     64: '16',
-    72: '18',
+    // WP38 FIX: gap-18 does NOT exist in Tailwind V3 (skips from 16 to 20)
+    // 72: '18',  // REMOVED - not valid in V3
     80: '20',
     96: '24',
   };
@@ -837,9 +840,10 @@ function generateTailwindJSXElement(
     // console.log(`🔍 SVG: ${node.name} (${node.id}) - bounds: ${JSON.stringify(svgBounds)}`);
 
     // Build data attributes
+    // WP38: Truncate long layer names (TEXT nodes often use full text content)
     const componentAttrs = extractComponentDataAttributes(node);
     const allDataAttrs = {
-      'data-layer': node.name,
+      'data-layer': truncateLayerName(node.name),
       'data-node-id': node.id,
       ...componentAttrs
     };
@@ -884,9 +888,10 @@ function generateTailwindJSXElement(
   // T178: Add data-layer attribute
   // T180: Extract component properties as data-* attributes
   // WP31: Add data-node-id for node-by-node comparison with MCP reference
+  // WP38: Truncate long layer names (TEXT nodes often use full text content)
   const componentAttrs = extractComponentDataAttributes(node);
   const allDataAttrs = {
-    'data-layer': node.name, // T178: Original Figma name
+    'data-layer': truncateLayerName(node.name), // T178: Original Figma name (truncated)
     'data-node-id': node.id, // WP31: Figma node ID for comparison
     ...componentAttrs // T180: Component properties
   };

@@ -1,5 +1,5 @@
 import type { SimpleAltNode, FillData } from '../altnode-transform';
-import { toKebabCase, toPascalCase, extractTextContent, extractComponentDataAttributes, scaleModeToObjectFit } from './helpers';
+import { toKebabCase, toPascalCase, extractTextContent, extractComponentDataAttributes, scaleModeToObjectFit, truncateLayerName } from './helpers';
 import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
@@ -351,9 +351,10 @@ function generateHTMLElement(
     const altText = node.name || 'svg';
 
     // Build data attributes
+    // WP38: Shorten long layer names (first 4 words)
     const componentAttrs = extractComponentDataAttributes(node);
     const allDataAttrs = {
-      'data-layer': node.name,
+      'data-layer': truncateLayerName(node.name),
       'data-node-id': node.id,
       ...componentAttrs
     };
@@ -388,9 +389,10 @@ function generateHTMLElement(
   // T178: Add data-layer attribute
   // T180: Extract component properties as data-* attributes
   // WP31: Add data-node-id for node-by-node comparison with MCP reference
+  // WP38: Shorten long layer names (first 4 words)
   const componentAttrs = extractComponentDataAttributes(node);
   const allDataAttrs = {
-    'data-layer': node.name, // T178: Original Figma name
+    'data-layer': truncateLayerName(node.name), // T178: Original Figma name (shortened)
     'data-node-id': node.id, // WP31: Figma node ID for comparison
     ...componentAttrs // T180: Component properties
   };

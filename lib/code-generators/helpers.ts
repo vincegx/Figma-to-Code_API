@@ -1,4 +1,26 @@
 /**
+ * WP38: Shorten layer name for data-layer attribute
+ *
+ * Figma TEXT nodes often use full text content as layer name,
+ * which creates excessively long data-layer attributes.
+ * Extract first few words instead of truncating mid-word.
+ *
+ * @param name - Original Figma layer name
+ * @param maxWords - Maximum number of words (default 4)
+ * @returns Shortened name with first N words
+ */
+export function truncateLayerName(name: string, maxWords: number = 4): string {
+  if (!name) return name;
+
+  const words = name.split(/\s+/);
+  if (words.length <= maxWords) {
+    return name;
+  }
+
+  return words.slice(0, maxWords).join(' ');
+}
+
+/**
  * Convert string to PascalCase for React component names
  *
  * Examples:

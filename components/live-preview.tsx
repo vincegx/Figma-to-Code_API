@@ -65,6 +65,11 @@ function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
         padding: 0;
         font-family: system-ui, -apple-system, sans-serif;
       }
+      /* Preview responsive: root stretches like React preview */
+      body > *:first-child {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
       ${css}
       /* WP35: Selection highlight styles */
       ${HIGHLIGHT_STYLES}
