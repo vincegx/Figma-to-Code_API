@@ -321,6 +321,13 @@ const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function Liv
 
         switch (strategy) {
           case 'html':
+            // WP39: Skip rendering if code looks like React/JSX (framework mismatch)
+            // This prevents flash of JSX code when switching to HTML/CSS
+            if (code.includes('export function') || code.includes('className=')) {
+              // Wait for correct HTML code to be generated
+              setIsLoading(false);
+              return;
+            }
             content = buildHTMLDocument(code, googleFontsUrl);
             break;
           case 'react':

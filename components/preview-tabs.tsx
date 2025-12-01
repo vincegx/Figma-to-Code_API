@@ -35,6 +35,12 @@ export default function PreviewTabs({
   // WP32: State for generated code (async generators)
   const [generatedCode, setGeneratedCode] = useState<string>('');
 
+  // WP39: Clear code immediately when framework changes to prevent flash
+  // of incorrect code format (e.g., JSX shown when switching to HTML/CSS)
+  useEffect(() => {
+    setGeneratedCode('');
+  }, [selectedFramework]);
+
   // WP32: Generate code using async generators
   useEffect(() => {
     if (!targetNode) {

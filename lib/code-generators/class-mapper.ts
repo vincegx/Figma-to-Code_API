@@ -113,7 +113,6 @@ export function getClassMapper(version: TailwindVersion): ClassMapper {
       return classMapperV3;
     case 'v4':
       // Import v4 mapper dynamically to avoid circular dependency
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { classMapperV4 } = require('./class-mapper-v4');
       return classMapperV4;
     default:

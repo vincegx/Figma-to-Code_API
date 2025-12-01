@@ -1,9 +1,19 @@
 /**
- * Tailwind to CSS Compiler (Client-side)
+ * Tailwind to CSS Compiler (Universal)
  *
- * Converts Tailwind classes to pure CSS using the /api/generate-tailwind-css endpoint.
- * This allows using Tailwind v4 compiler without importing Node.js modules.
+ * Converts Tailwind classes to pure CSS.
+ * - Browser: Uses /api/generate-tailwind-css endpoint
+ * - Node.js: Uses direct PostCSS compilation (fallback)
+ *
+ * This ensures HTML/CSS generation works in both contexts.
  */
+
+// ============================================================================
+// Environment Detection
+// ============================================================================
+
+const isNode = typeof window === 'undefined';
+const isBrowser = !isNode;
 
 // ============================================================================
 // CSS Parsing Utilities
@@ -78,11 +88,106 @@ export interface CompiledElement {
 }
 
 // ============================================================================
+// Direct Compilation (Node.js fallback)
+// ============================================================================
+
+/**
+ * Compile Tailwind classes directly using PostCSS (Node.js only)
+ * This is used as fallback when API is not available
+ *
+ * Uses eval-based dynamic require to prevent Next.js from bundling
+ * these Node.js-only modules for the client.
+ *
+ * @param code - Code containing Tailwind classes (HTML or JSX)
+ * @param version - Tailwind version ('v3' or 'v4')
+ * @returns Generated CSS string
+ */
+async function compileTailwindDirect(
+  code: string,
+  version: 'v3' | 'v4' = 'v4'
+): Promise<string> {
+  try {
+    // Use eval to prevent Next.js static analysis from bundling these modules
+    // eslint-disable-next-line no-eval
+    const dynamicRequire = eval('require');
+
+    if (version === 'v4') {
+      // Tailwind v4: Use compile API directly
+      const { compile } = dynamicRequire('tailwindcss-v4');
+      const { readFileSync } = dynamicRequire('fs');
+      const path = dynamicRequire('path');
+
+      const compiler = await compile('@import "tailwindcss";', {
+        loadStylesheet: async (id: string, base: string) => {
+          if (id === 'tailwindcss') {
+            const cssPath = path.join(process.cwd(), 'node_modules/tailwindcss-v4/index.css');
+            return {
+              path: 'virtual:tailwindcss/index.css',
+              base,
+              content: readFileSync(cssPath, 'utf-8'),
+            };
+          }
+          throw new Error(`Cannot load stylesheet: ${id}`);
+        },
+      });
+
+      // Extract classes from code
+      const classes: string[] = [];
+      const patterns = [
+        /className="([^"]*)"/g,
+        /class="([^"]*)"/g,
+      ];
+      for (const pattern of patterns) {
+        let match;
+        while ((match = pattern.exec(code)) !== null) {
+          match[1].split(/\s+/).filter(Boolean).forEach(c => classes.push(c));
+        }
+      }
+
+      const css = compiler.build([...new Set(classes)]);
+      console.log('[tailwind-to-css] V4 direct compilation successful');
+      return css;
+    } else {
+      // Tailwind v3: Use PostCSS
+      const postcss = dynamicRequire('postcss');
+      const tailwindcss = dynamicRequire('tailwindcss');
+
+      const inputCSS = `
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+      `;
+
+      const tailwindConfig = {
+        content: [{ raw: code, extension: 'html' }],
+        theme: { extend: {} },
+        corePlugins: { preflight: false },
+      };
+
+      const result = await postcss([
+        tailwindcss(tailwindConfig),
+      ]).process(inputCSS, { from: undefined });
+
+      console.log('[tailwind-to-css] V3 direct compilation successful');
+      return result.css;
+    }
+  } catch (error) {
+    console.error('[tailwind-to-css] Direct compilation failed:', error);
+    return '';
+  }
+}
+
+// ============================================================================
 // API-based Compilation
 // ============================================================================
 
 /**
- * Compile Tailwind classes to CSS using the API endpoint
+ * Compile Tailwind classes to CSS
+ *
+ * Strategy:
+ * - Browser: Uses /api/generate-tailwind-css endpoint
+ * - Node.js: Uses direct PostCSS compilation (no API available)
+ * - Fallback: If API fails in browser, returns empty (can't use PostCSS in browser)
  *
  * @param code - Code containing Tailwind classes (HTML or JSX)
  * @param version - Tailwind version ('v3' or 'v4')
@@ -92,6 +197,13 @@ export async function compileTailwindViaAPI(
   code: string,
   version: 'v3' | 'v4' = 'v4'
 ): Promise<string> {
+  // Node.js: Use direct compilation (API not available)
+  if (isNode) {
+    console.log('[tailwind-to-css] Node.js detected, using direct compilation');
+    return compileTailwindDirect(code, version);
+  }
+
+  // Browser: Use API
   try {
     const response = await fetch('/api/generate-tailwind-css', {
       method: 'POST',
@@ -106,7 +218,9 @@ export async function compileTailwindViaAPI(
     const { css } = await response.json();
     return css || '';
   } catch (error) {
-    console.error('[tailwind-to-css] Compilation failed:', error);
+    console.error('[tailwind-to-css] API compilation failed:', error);
+    // In browser, we can't use direct compilation (PostCSS is Node.js only)
+    // Return empty and let caller handle gracefully
     return '';
   }
 }

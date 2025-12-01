@@ -28,16 +28,19 @@ import { toPascalCase } from './helpers';
 
 /**
  * Extract class mappings from JSX: original Tailwind classes → semantic names
+ *
+ * Captures ALL className occurrences:
+ * - With data-layer: Uses layer name as semantic class
+ * - Without data-layer: Generates semantic name from first class or uses generic name
  */
 function extractClassMappings(jsxCode: string): Map<string, { semanticClass: string; classes: string[] }> {
   const mappings = new Map<string, { semanticClass: string; classes: string[] }>();
   const usedNames = new Set<string>();
 
-  // Match data-layer and className pairs
-  const regex = /data-layer="([^"]*)"[^>]*?className="([^"]*)"/g;
-
+  // First pass: Match elements WITH data-layer (preferred names)
+  const withLayerRegex = /data-layer="([^"]*)"[^>]*?className="([^"]*)"/g;
   let match;
-  while ((match = regex.exec(jsxCode)) !== null) {
+  while ((match = withLayerRegex.exec(jsxCode)) !== null) {
     const layerName = match[1];
     const classString = match[2];
 
@@ -56,6 +59,41 @@ function extractClassMappings(jsxCode: string): Map<string, { semanticClass: str
     mappings.set(classString, {
       semanticClass,
       classes: classString.split(/\s+/).filter(Boolean),
+    });
+  }
+
+  // Second pass: Match elements WITHOUT data-layer (pseudo-elements, wrappers)
+  const allClassNameRegex = /className="([^"]*)"/g;
+  while ((match = allClassNameRegex.exec(jsxCode)) !== null) {
+    const classString = match[1];
+
+    // Skip if already mapped
+    if (mappings.has(classString)) continue;
+
+    // Generate semantic name from the classes
+    const classes = classString.split(/\s+/).filter(Boolean);
+    if (classes.length === 0) continue;
+
+    // Use first meaningful class for naming
+    const firstClass = classes[0];
+    let baseName = toPascalCase(firstClass) || 'Element';
+
+    // Clean up arbitrary value names like "W1440px" → "CustomWidth"
+    if (baseName.match(/^\d/) || baseName.includes('[')) {
+      baseName = 'StyledElement';
+    }
+
+    let semanticClass = baseName;
+    let counter = 2;
+    while (usedNames.has(semanticClass)) {
+      semanticClass = `${baseName}${counter}`;
+      counter++;
+    }
+    usedNames.add(semanticClass);
+
+    mappings.set(classString, {
+      semanticClass,
+      classes,
     });
   }
 
@@ -125,11 +163,33 @@ function jsxToHtmlWithSemanticClasses(
   html = html.replace(/className=\{[^}]+\}/g, '');
 
   // style={{ ... }} → style="..."
-  html = html.replace(/style=\{\{([^}]*)\}\}/g, (_match, styleContent) => {
-    const cssProps = styleContent
-      .split(',')
+  // Use a smarter regex that handles nested braces and parens
+  html = html.replace(/style=\{\{([\s\S]*?)\}\}/g, (_match, styleContent) => {
+    // Parse style content handling rgba(), etc.
+    // Split on commas that are NOT inside parentheses
+    const props: string[] = [];
+    let current = '';
+    let parenDepth = 0;
+
+    for (const char of styleContent) {
+      if (char === '(') parenDepth++;
+      else if (char === ')') parenDepth--;
+      else if (char === ',' && parenDepth === 0) {
+        props.push(current.trim());
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+    if (current.trim()) props.push(current.trim());
+
+    const cssProps = props
       .map((prop: string) => {
-        const [key, value] = prop.split(':').map((s: string) => s.trim());
+        // Split on first colon only (value may contain colons)
+        const colonIdx = prop.indexOf(':');
+        if (colonIdx === -1) return '';
+        const key = prop.slice(0, colonIdx).trim();
+        const value = prop.slice(colonIdx + 1).trim();
         if (!key || !value) return '';
         const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
         const cssValue = value.replace(/['"]/g, '');
