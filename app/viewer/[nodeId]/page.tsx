@@ -222,7 +222,7 @@ export default function ViewerPage() {
 
     async function generateCode() {
       try {
-        if (previewFramework === 'react-tailwind') {
+        if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
           const output = await generateReactTailwind(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
