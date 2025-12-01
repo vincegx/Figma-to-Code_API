@@ -16,6 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { FigmaNode } from '../types/figma';
 import type { LibraryNode } from '../types/library';
+import type { VersionsFile } from '../types/versioning';
 
 const FIGMA_DATA_DIR = path.join(process.cwd(), 'figma-data');
 
@@ -384,3 +385,108 @@ export async function hasSvgAssets(nodeId: string): Promise<boolean> {
     return false;
   }
 }
+
+// ============================================================================
+// WP40: Versioning Functions
+// ============================================================================
+
+/**
+ * WP40: Read versions.json from node directory
+ *
+ * @param nodeId - Figma node ID
+ * @returns VersionsFile or null if not found
+ */
+export async function readVersionsFile(nodeId: string): Promise<VersionsFile | null> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const versionsPath = path.join(FIGMA_DATA_DIR, safeNodeId, 'versions.json');
+
+  try {
+    const content = await fs.readFile(versionsPath, 'utf-8');
+    return JSON.parse(content) as VersionsFile;
+  } catch {
+    return null; // File not found
+  }
+}
+
+/**
+ * WP40: Write versions.json to node directory
+ *
+ * @param nodeId - Figma node ID
+ * @param versions - VersionsFile to write
+ */
+export async function writeVersionsFile(
+  nodeId: string,
+  versions: VersionsFile
+): Promise<void> {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  const nodeDir = path.join(FIGMA_DATA_DIR, safeNodeId);
+  const versionsPath = path.join(nodeDir, 'versions.json');
+
+  await fs.mkdir(nodeDir, { recursive: true });
+  await fs.writeFile(versionsPath, JSON.stringify(versions, null, 2), 'utf-8');
+}
+
+/**
+ * WP40: Initialize versions.json for a new node
+ *
+ * @param nodeId - Figma node ID
+ * @param figmaLastModified - ISO timestamp from Figma API
+ */
+export async function initVersionsFile(
+  nodeId: string,
+  figmaLastModified: string
+): Promise<void> {
+  const now = new Date().toISOString();
+  const versions: VersionsFile = {
+    current: {
+      figmaLastModified,
+      fetchedAt: now,
+    },
+    history: [],
+  };
+
+  await writeVersionsFile(nodeId, versions);
+}
+
+/**
+ * WP40: Get node directory path
+ *
+ * @param nodeId - Figma node ID
+ * @returns Absolute path to node directory
+ */
+export function getNodeDirPath(nodeId: string): string {
+  const safeNodeId = sanitizeNodeId(nodeId);
+  return path.join(FIGMA_DATA_DIR, safeNodeId);
+}
+
+/**
+ * WP40: Get history directory path
+ *
+ * @param nodeId - Figma node ID
+ * @returns Absolute path to history directory
+ */
+export function getHistoryDirPath(nodeId: string): string {
+  return path.join(getNodeDirPath(nodeId), 'history');
+}
+
+/**
+ * WP40: Check if history directory exists
+ *
+ * @param nodeId - Figma node ID
+ * @returns true if history directory exists
+ */
+export async function hasHistory(nodeId: string): Promise<boolean> {
+  const historyDir = getHistoryDirPath(nodeId);
+
+  try {
+    await fs.access(historyDir);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * WP40: Export sanitizeNodeId for use in other modules
+ */
+export { sanitizeNodeId };

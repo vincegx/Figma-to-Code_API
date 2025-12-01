@@ -280,6 +280,36 @@ export type {
 export { DEFAULT_DASHBOARD_CONFIG } from './dashboard';
 
 // ============================================================================
+// Versioning Types (WP40)
+// ============================================================================
+
+export type {
+  // Version Entry
+  VersionEntry,
+  VersionsFile,
+
+  // Diff Types
+  PropertyChange,
+  NodeDiff,
+  DiffSummary,
+
+  // Refetch Types
+  RefetchStep,
+  RefetchProgress,
+  RefetchResult,
+
+  // API Response Types
+  VersionsResponse,
+  VersionDataResponse,
+} from './versioning';
+
+export {
+  TRACKED_PROPERTIES,
+  IGNORED_PROPERTIES,
+  MAX_HISTORY_VERSIONS,
+} from './versioning';
+
+// ============================================================================
 // Store Types
 // ============================================================================
 

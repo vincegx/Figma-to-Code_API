@@ -15,8 +15,12 @@ export const IMPORT_STEPS = [
   { id: 'save', label: 'Save to Library' },
 ] as const;
 
+// WP40: Updated refetch steps with versioning
 export const REFETCH_STEPS = [
+  { id: 'version_check', label: 'Version Check' },
   { id: 'node', label: 'Node Data' },
+  { id: 'diff', label: 'Diff Analysis' },
+  { id: 'snapshot', label: 'History Snapshot' },
   { id: 'screenshot', label: 'Screenshot' },
   { id: 'variables', label: 'Variables' },
   { id: 'svg', label: 'SVG Assets' },

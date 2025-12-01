@@ -27,8 +27,12 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Crosshair,
+  CloudDownload,
 } from 'lucide-react';
 import { RefetchButton } from '@/components/refetch-button';
+import { RefetchDialog } from '@/components/refetch-dialog';
+import { VersionDropdown } from '@/components/version-dropdown';
+import { useRefetch } from '@/hooks/use-refetch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,6 +100,18 @@ export default function ViewerPage() {
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
+
+  // WP40: Refetch dialog and version state
+  const [refetchDialogOpen, setRefetchDialogOpen] = useState(false);
+  const [selectedVersionFolder, setSelectedVersionFolder] = useState<string | null>(null);
+  const {
+    refetch,
+    isRefetching,
+    progress,
+    result: refetchResult,
+    error: refetchError,
+    reset: resetRefetch,
+  } = useRefetch(nodeId);
 
   // AltNode is computed on-the-fly from node data API (Constitutional Principle III)
   const [altNode, setAltNode] = useState<SimpleAltNode | null>(null);
@@ -253,6 +269,51 @@ export default function ViewerPage() {
     );
   }, [selectedTreeNodeId, selectedNode?.name, selectedNode?.type, selectedNode?.originalType, viewerHighlightEnabled]);
 
+  // WP40: Handle version selection
+  const handleVersionSelect = async (folder: string | null) => {
+    setSelectedVersionFolder(folder);
+
+    if (folder === null) {
+      // Load current version
+      const response = await fetch(`/api/figma/node/${nodeId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAltNode(data.altNode || null);
+        if (data.altNode) setSelectedTreeNodeId(data.altNode.id);
+      }
+    } else {
+      // Load historical version
+      const response = await fetch(`/api/figma/node/${encodeURIComponent(nodeId)}/version/${encodeURIComponent(folder)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAltNode(data.altNode || null);
+        if (data.altNode) setSelectedTreeNodeId(data.altNode.id);
+      }
+    }
+  };
+
+  // WP40: Handle refetch complete - reload current node data
+  // Called when dialog closes after successful update (not for up_to_date)
+  const handleRefetchComplete = async () => {
+    setSelectedVersionFolder(null); // Reset to current version
+    await loadLibrary();
+    const response = await fetch(`/api/figma/node/${nodeId}`);
+    if (response.ok) {
+      const data = await response.json();
+      setAltNode(data.altNode || null);
+      // Reset selected tree node to root
+      if (data.altNode) {
+        setSelectedTreeNodeId(data.altNode.id);
+      }
+      // Update variables cache if present
+      if (data.variables) {
+        setCachedVariablesMap(data.variables);
+      }
+      // Refresh preview iframe and version dropdown
+      setIframeKey(prev => prev + 1);
+    }
+  };
+
   // Prev/Next navigation helpers
   const currentIndex = nodes.findIndex((n) => n.id === nodeId);
   const prevNode = currentIndex > 0 ? nodes[currentIndex - 1] : null;
@@ -332,8 +393,21 @@ export default function ViewerPage() {
                 <FigmaTypeIcon type={nodeType} size={16} className={nodeColors.text} />
                 {currentNode.name}
               </h1>
-              <div className="text-xs text-text-secondary">
-                {nodeType} • {new Date(currentNode.addedAt).toLocaleDateString()}
+              <div className="text-xs text-text-secondary flex items-center gap-2">
+                <span>{nodeType}</span>
+                <span>•</span>
+                {/* WP40: Version dropdown */}
+                <VersionDropdown
+                  nodeId={nodeId}
+                  selectedVersion={selectedVersionFolder}
+                  onVersionSelect={handleVersionSelect}
+                  refreshKey={iframeKey}
+                />
+                {selectedVersionFolder && (
+                  <span className="bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 text-xs px-1.5 py-0.5 rounded">
+                    Ancienne version
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -368,18 +442,15 @@ export default function ViewerPage() {
 
             <div className="w-px h-5 bg-border-primary mx-1" />
 
-            {/* Re-fetch from Figma (WP33: with SSE progress) */}
-            <RefetchButton
-              nodeId={nodeId}
-              onRefetchComplete={async () => {
-                await loadLibrary();
-                const response = await fetch(`/api/figma/node/${nodeId}`);
-                if (response.ok) {
-                  const data = await response.json();
-                  setAltNode(data.altNode || null);
-                }
-              }}
-            />
+            {/* WP40: Re-fetch from Figma with version dialog */}
+            <button
+              onClick={() => setRefetchDialogOpen(true)}
+              disabled={isRefetching}
+              title="Re-fetch from Figma"
+              className="p-1.5 rounded hover:bg-bg-hover text-text-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CloudDownload size={18} className={isRefetching ? 'animate-pulse' : ''} />
+            </button>
 
             {/* Refresh Preview (WP33: reload iframe without refetching) */}
             <button
@@ -652,6 +723,31 @@ export default function ViewerPage() {
           </>
         )}
       </ResizablePanelGroup>
+
+      {/* WP40: Refetch Dialog */}
+      <RefetchDialog
+        open={refetchDialogOpen}
+        onOpenChange={async (open) => {
+          setRefetchDialogOpen(open);
+          // WP40: When dialog closes after successful refetch, reload data
+          // Refresh for any status that indicates data was fetched (not just 'updated')
+          if (!open && refetchResult && refetchResult.status !== 'up_to_date' && refetchResult.status !== 'error') {
+            await handleRefetchComplete();
+          }
+        }}
+        nodeId={nodeId}
+        nodeName={currentNode.name}
+        lastSyncDate={currentNode.lastModified}
+        onRefetch={async () => {
+          await refetch();
+          // Don't close dialog automatically - let user see the result first
+        }}
+        isRefetching={isRefetching}
+        progress={progress}
+        result={refetchResult}
+        error={refetchError}
+        onReset={resetRefetch}
+      />
     </div>
   );
 }
