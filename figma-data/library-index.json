@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-01T17:15:37.520Z",
+  "lastUpdated": "2025-12-01T22:04:46.414Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -66,8 +66,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2237/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T21:07:47.473Z",
-      "lastModified": "2025-11-30T21:07:47.473Z",
+      "addedAt": "2025-12-01T21:01:55.256Z",
+      "lastModified": "2025-12-01T21:01:55.256Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -85,8 +85,8 @@
       "altNode": null,
       "thumbnail": "/api/images/465-14116/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T21:11:34.355Z",
-      "lastModified": "2025-11-30T21:11:34.355Z",
+      "addedAt": "2025-12-01T21:10:33.597Z",
+      "lastModified": "2025-12-01T21:10:33.597Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -104,8 +104,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2146/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T21:12:15.045Z",
-      "lastModified": "2025-11-30T21:12:15.045Z",
+      "addedAt": "2025-12-01T20:11:12.199Z",
+      "lastModified": "2025-12-01T20:11:12.199Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -172,7 +172,45 @@
         "fileName": "Orbe - Portfolio Template",
         "nodeUrl": "https://www.figma.com/file/K7CY0ontfnoOICBZ3YfahY?node-id=2540:377150"
       }
+    },
+    {
+      "id": "lib-493-2811",
+      "figmaNodeId": "493:2811",
+      "name": "Home - long",
+      "altNode": null,
+      "thumbnail": "/api/images/493-2811/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-01T21:09:10.153Z",
+      "lastModified": "2025-12-01T21:09:10.153Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
+        "fileName": "Sans titre",
+        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
+      }
+    },
+    {
+      "id": "lib-465-16388",
+      "figmaNodeId": "465:16388",
+      "name": "hero responsive - hide",
+      "altNode": null,
+      "thumbnail": "/api/images/465-16388/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-01T21:32:42.380Z",
+      "lastModified": "2025-12-01T21:32:42.380Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
+        "fileName": "Sans titre",
+        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:16388"
+      }
     }
   ],
-  "totalNodes": 12
+  "totalNodes": 11
 }

@@ -149,8 +149,8 @@ export function InformationPanel({
         <PropertyBlock title="Hierarchy" defaultOpen={true}>
           {figmaNode?.parent && (
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-gray-500">Parent</span>
-              <span className="text-[11px] text-gray-200">
+              <span className="text-[13px] text-gray-500">Parent</span>
+              <span className="text-[13px] text-gray-200">
                 {figmaNode.parent.name}
               </span>
             </div>
@@ -158,17 +158,17 @@ export function InformationPanel({
           {node.children && node.children.length > 0 && (
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-gray-500">Children</span>
-                <span className="text-[11px] text-gray-200">{node.children.length}</span>
+                <span className="text-[13px] text-gray-500">Children</span>
+                <span className="text-[13px] text-gray-200">{node.children.length}</span>
               </div>
               <div className="space-y-0.5 pt-1">
                 {node.children.slice(0, 5).map((child: any, idx: number) => (
-                  <div key={idx} className="text-[10px] text-gray-400 pl-2">
+                  <div key={idx} className="text-[12px] text-gray-400 pl-2">
                     · {child.name}
                   </div>
                 ))}
                 {node.children.length > 5 && (
-                  <div className="text-[10px] text-gray-500 pl-2">
+                  <div className="text-[12px] text-gray-500 pl-2">
                     +{node.children.length - 5} more
                   </div>
                 )}

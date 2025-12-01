@@ -245,6 +245,7 @@ export default function NodesLibraryPage() {
               node={node}
               isSelected={selectedNodeIds.has(node.id)}
               onToggleSelect={() => toggleSelection(node.id)}
+              onDelete={deleteNode}
             />
           ))}
         </div>

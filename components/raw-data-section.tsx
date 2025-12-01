@@ -36,7 +36,7 @@ export function RawDataSection({ node }: RawDataSectionProps) {
             isExpanded && "rotate-90"
           )}
         />
-        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Raw Figma Data
         </span>
       </button>

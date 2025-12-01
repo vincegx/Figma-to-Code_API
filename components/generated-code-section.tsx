@@ -209,7 +209,7 @@ export function GeneratedCodeSection({
   return (
     <div className="mt-3 bg-gray-100 dark:bg-gray-800/40 rounded-md border border-gray-200 dark:border-gray-700/50">
       <div className="flex items-center justify-between px-2.5 py-2 border-b border-gray-200 dark:border-gray-700/50">
-        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Generated Code
         </span>
         <Select value={framework} onValueChange={(v: string) => onFrameworkChange(v as FrameworkType)}>
@@ -229,8 +229,8 @@ export function GeneratedCodeSection({
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'component' | 'styles')}>
         <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700/50 rounded-none bg-transparent h-auto p-0">
-          <TabsTrigger value="component" className="flex-1 text-[11px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:bg-gray-200/50 dark:data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Component</TabsTrigger>
-          <TabsTrigger value="styles" className="flex-1 text-[11px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:bg-gray-200/50 dark:data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Styles</TabsTrigger>
+          <TabsTrigger value="component" className="flex-1 text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:bg-gray-200/50 dark:data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Component</TabsTrigger>
+          <TabsTrigger value="styles" className="flex-1 text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:bg-gray-200/50 dark:data-[state=active]:bg-gray-700/30 rounded-none bg-transparent px-3 py-1.5">Styles</TabsTrigger>
         </TabsList>
 
         <TabsContent value="component" className="mt-0 p-2">

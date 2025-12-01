@@ -30,7 +30,7 @@ export function PropertyBlock({
             isOpen && "rotate-90"
           )}
         />
-        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           {title}
         </span>
       </button>
@@ -50,17 +50,23 @@ interface PropertyItemProps {
 }
 
 export function PropertyItem({ label, value, inline = true }: PropertyItemProps) {
+  const isBoolean = typeof value === 'boolean';
   const displayValue = value === null || value === undefined
     ? '—'
-    : typeof value === 'boolean'
-    ? (value ? '✓' : '✗')
+    : isBoolean
+    ? (value ? 'Yes' : 'No')
     : value;
 
   if (inline) {
     return (
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] text-gray-500">{label}</span>
-        <span className="text-[11px] text-gray-700 dark:text-gray-200">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[13px] text-gray-500">{label}</span>
+        <span className={cn(
+          "text-[13px]",
+          isBoolean && value ? "text-green-600 dark:text-green-400" :
+          isBoolean && !value ? "text-gray-400 dark:text-gray-500" :
+          "text-gray-700 dark:text-gray-200"
+        )}>
           {displayValue}
         </span>
       </div>
@@ -69,8 +75,13 @@ export function PropertyItem({ label, value, inline = true }: PropertyItemProps)
 
   return (
     <div className="space-y-0.5">
-      <div className="text-[11px] text-gray-500">{label}</div>
-      <div className="text-[11px] text-gray-700 dark:text-gray-200 pl-2">
+      <div className="text-[13px] text-gray-500">{label}</div>
+      <div className={cn(
+        "text-[13px] pl-2",
+        isBoolean && value ? "text-green-600 dark:text-green-400" :
+        isBoolean && !value ? "text-gray-400 dark:text-gray-500" :
+        "text-gray-700 dark:text-gray-200"
+      )}>
         {displayValue}
       </div>
     </div>

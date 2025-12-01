@@ -688,13 +688,13 @@ export default function ViewerPage() {
                 <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-transparent h-auto p-0">
                   <TabsTrigger
                     value="information"
-                    className="text-xs text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                    className="text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
                   >
                     Information
                   </TabsTrigger>
                   <TabsTrigger
                     value="rules"
-                    className="text-xs text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
+                    className="text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
                   >
                     Rules
                   </TabsTrigger>

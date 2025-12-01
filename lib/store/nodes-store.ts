@@ -33,7 +33,7 @@ export interface NodesState {
   // Actions
   loadLibrary: () => Promise<void>;
   importNode: (node: LibraryNode) => void;
-  deleteNode: (nodeId: string) => void;
+  deleteNode: (nodeId: string) => Promise<void>;
   selectNode: (nodeId: string | null) => void;
   setViewMode: (mode: 'grid' | 'list') => void;
   setSearchTerm: (term: string) => void;
@@ -87,12 +87,30 @@ export const useNodesStore = create<NodesState>()(
           }));
         },
 
-        deleteNode: (nodeId: string) => {
-          set((state) => ({
-            nodes: state.nodes.filter((node) => node.id !== nodeId),
-            selectedNodeId:
-              state.selectedNodeId === nodeId ? null : state.selectedNodeId,
-          }));
+        deleteNode: async (nodeId: string) => {
+          try {
+            // Call API to delete from filesystem and library index
+            const response = await fetch('/api/figma/library', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nodeId }),
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to delete node');
+            }
+
+            // Update local state only after successful API call
+            set((state) => ({
+              nodes: state.nodes.filter((node) => node.id !== nodeId),
+              selectedNodeId:
+                state.selectedNodeId === nodeId ? null : state.selectedNodeId,
+            }));
+          } catch (error) {
+            console.error('Failed to delete node:', error);
+            throw error; // Re-throw so UI can handle it
+          }
         },
 
         selectNode: (nodeId: string | null) => {
