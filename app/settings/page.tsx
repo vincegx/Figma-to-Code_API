@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 // Settings stored in localStorage
 interface AppSettings {
   // Export Preferences (T117)
-  defaultFramework: 'react-jsx' | 'react-tailwind' | 'html-css';
+  defaultFramework: 'react-jsx' | 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
   defaultLanguage: 'typescript' | 'javascript';
   formatOnExport: boolean;
 
@@ -366,7 +366,8 @@ export default function SettingsPage() {
                 className="w-full px-3 py-2 rounded-md border border-border-primary bg-bg-card text-text-primary"
               >
                 <option value="react-jsx">React JSX</option>
-                <option value="react-tailwind">React + Tailwind</option>
+                <option value="react-tailwind">React + Tailwind v3</option>
+                <option value="react-tailwind-v4">React + Tailwind v4</option>
                 <option value="html-css">HTML/CSS</option>
               </select>
             </FormField>

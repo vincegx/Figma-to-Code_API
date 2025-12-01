@@ -29,6 +29,7 @@ function getRenderingStrategy(framework: FrameworkType): 'html' | 'react' | 'non
     case 'html-css':
       return 'html';
     case 'react-tailwind':
+    case 'react-tailwind-v4':
     case 'react-inline':
       return 'react';
     case 'swift-ui':
@@ -63,12 +64,6 @@ function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
         margin: 0;
         padding: 0;
         font-family: system-ui, -apple-system, sans-serif;
-      }
-      /* Preview responsive: force root to fill viewport width */
-      body > * {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box;
       }
       ${css}
       /* WP35: Selection highlight styles */
@@ -270,11 +265,14 @@ const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function Liv
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: sourceCode, framework: fw }),
         }),
-        fw === 'react-tailwind'
+        (fw === 'react-tailwind' || fw === 'react-tailwind-v4')
           ? fetch('/api/generate-tailwind-css', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code: sourceCode }),
+              body: JSON.stringify({
+                code: sourceCode,
+                version: fw === 'react-tailwind-v4' ? 'v4' : 'v3',
+              }),
             })
           : Promise.resolve(null),
       ]);

@@ -1,34 +1,16 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-30T01:24:44.500Z",
+  "lastUpdated": "2025-11-30T21:13:21.449Z",
   "nodes": [
-    {
-      "id": "lib-124-21142",
-      "figmaNodeId": "124:21142",
-      "name": "Home",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-29T13:47:13.332Z",
-      "lastModified": "2025-11-29T13:47:13.332Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=124:21142"
-      },
-      "thumbnail": "/api/images/124-21142/screenshot.png"
-    },
     {
       "id": "lib-425-4344",
       "figmaNodeId": "425:4344",
-      "name": "Homepage",
+      "name": "altC",
       "altNode": null,
+      "thumbnail": "/api/images/425-4344/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T12:24:13.914Z",
-      "lastModified": "2025-11-29T12:24:13.914Z",
+      "addedAt": "2025-11-30T21:10:54.926Z",
+      "lastModified": "2025-11-30T21:10:54.926Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -37,17 +19,17 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:4344"
-      },
-      "thumbnail": "/api/images/425-4344/screenshot.png"
+      }
     },
     {
       "id": "lib-425-4777",
       "figmaNodeId": "425:4777",
       "name": "welcome",
       "altNode": null,
+      "thumbnail": "/api/images/425-4777/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T11:51:41.824Z",
-      "lastModified": "2025-11-29T11:51:41.824Z",
+      "addedAt": "2025-11-30T21:12:53.523Z",
+      "lastModified": "2025-11-30T21:12:53.523Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -56,8 +38,7 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:4777"
-      },
-      "thumbnail": "/api/images/425-4777/screenshot.png"
+      }
     },
     {
       "id": "lib-425-2086",
@@ -66,8 +47,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2086/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T23:13:25.805Z",
-      "lastModified": "2025-11-29T23:13:25.805Z",
+      "addedAt": "2025-11-30T21:13:21.443Z",
+      "lastModified": "2025-11-30T21:13:21.443Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -83,9 +64,10 @@
       "figmaNodeId": "425:2237",
       "name": "Home",
       "altNode": null,
+      "thumbnail": "/api/images/425-2237/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T03:47:27.620Z",
-      "lastModified": "2025-11-29T03:47:27.620Z",
+      "addedAt": "2025-11-30T21:07:47.473Z",
+      "lastModified": "2025-11-30T21:07:47.473Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -94,17 +76,17 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2237"
-      },
-      "thumbnail": "/api/images/425-2237/screenshot.png"
+      }
     },
     {
       "id": "lib-465-14116",
       "figmaNodeId": "465:14116",
       "name": "hero responsive",
       "altNode": null,
+      "thumbnail": "/api/images/465-14116/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T03:58:31.679Z",
-      "lastModified": "2025-11-29T03:58:31.679Z",
+      "addedAt": "2025-11-30T21:11:34.355Z",
+      "lastModified": "2025-11-30T21:11:34.355Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -113,36 +95,17 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:14116"
-      },
-      "thumbnail": "/api/images/465-14116/screenshot.png"
-    },
-    {
-      "id": "lib-465-16388",
-      "figmaNodeId": "465:16388",
-      "name": "hero responsive - hide",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-29T02:24:59.338Z",
-      "lastModified": "2025-11-29T02:24:59.338Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:16388"
-      },
-      "thumbnail": "/api/images/465-16388/screenshot.png"
+      }
     },
     {
       "id": "lib-425-2146",
       "figmaNodeId": "425:2146",
       "name": "Hero Header",
       "altNode": null,
+      "thumbnail": "/api/images/425-2146/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-29T03:57:47.108Z",
-      "lastModified": "2025-11-29T03:57:47.108Z",
+      "addedAt": "2025-11-30T21:12:15.045Z",
+      "lastModified": "2025-11-30T21:12:15.045Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -151,27 +114,7 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2146"
-      },
-      "thumbnail": "/api/images/425-2146/screenshot.png"
-    },
-    {
-      "id": "lib-493-2811",
-      "figmaNodeId": "493:2811",
-      "name": "Home - long",
-      "altNode": null,
-      "tags": [],
-      "addedAt": "2025-11-29T20:29:28.164Z",
-      "lastModified": "2025-11-29T20:29:28.164Z",
-      "usage": {
-        "viewCount": 0,
-        "exportCount": 0
-      },
-      "metadata": {
-        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
-        "fileName": "Sans titre",
-        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
-      },
-      "thumbnail": "/api/images/493-2811/screenshot.png"
+      }
     },
     {
       "id": "lib-6055-2436",
@@ -180,8 +123,8 @@
       "altNode": null,
       "thumbnail": "/api/images/6055-2436/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T01:18:50.747Z",
-      "lastModified": "2025-11-30T01:18:50.747Z",
+      "addedAt": "2025-11-30T21:06:19.913Z",
+      "lastModified": "2025-11-30T21:06:19.913Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -199,8 +142,8 @@
       "altNode": null,
       "thumbnail": "/api/images/6055-2872/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T01:24:44.489Z",
-      "lastModified": "2025-11-30T01:24:44.489Z",
+      "addedAt": "2025-11-30T21:07:06.805Z",
+      "lastModified": "2025-11-30T21:07:06.805Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0

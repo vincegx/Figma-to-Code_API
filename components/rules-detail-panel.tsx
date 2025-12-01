@@ -17,7 +17,8 @@ interface RulesDetailPanelProps {
 }
 
 const FRAMEWORK_LABELS: Record<FrameworkType, string> = {
-  'react-tailwind': 'React+TW',
+  'react-tailwind': 'React+TW3',
+  'react-tailwind-v4': 'React+TW4',
   'html-css': 'HTML/CSS',
   'react-inline': 'React',
   'swift-ui': 'Swift',

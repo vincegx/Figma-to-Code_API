@@ -10,7 +10,8 @@ interface RuleEditorProps {
 }
 
 const FRAMEWORK_LABELS: Record<FrameworkType, string> = {
-  'react-tailwind': 'React + Tailwind',
+  'react-tailwind': 'React + Tailwind v3',
+  'react-tailwind-v4': 'React + Tailwind v4',
   'html-css': 'HTML + CSS',
   'react-inline': 'React Inline',
   'swift-ui': 'SwiftUI',

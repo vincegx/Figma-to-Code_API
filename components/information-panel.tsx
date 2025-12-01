@@ -1,12 +1,10 @@
 'use client';
 
 import type { SimpleAltNode } from '@/lib/altnode-transform';
-import type { MultiFrameworkRule } from '@/lib/types/rules';
+import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { PropertyBlock, PropertyItem } from './property-block';
 import { GeneratedCodeSection } from './generated-code-section';
 import { RawDataSection } from './raw-data-section';
-
-type FrameworkType = 'react-tailwind' | 'html-css' | 'react-inline' | 'swift-ui' | 'android-xml';
 
 interface InformationPanelProps {
   node: SimpleAltNode | null;
