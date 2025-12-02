@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Library, BookOpen, Settings, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { QuotaIndicator } from './quota/quota-indicator';
 
 interface NavItem {
   href: string;
@@ -45,9 +46,14 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-1">
-            {navItems.map((item) => {
+          {/* Right side: Quota + Nav */}
+          <div className="flex items-center gap-4">
+            {/* API Quota Indicator (WP41) */}
+            <QuotaIndicator />
+
+            {/* Navigation Links */}
+            <div className="flex items-center gap-1">
+              {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
 
@@ -67,6 +73,7 @@ export function Navigation() {
                 </Link>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@
  */
 
 import type { FigmaNode, FigmaNodeResponse } from './types/figma';
+import { trackApiCallByEndpoint } from './api-quota-tracker';
 
 /**
  * Fetch a specific node from a Figma file
@@ -50,6 +51,9 @@ export async function fetchNode(
   if (!nodeData) {
     throw new Error(`Node ${nodeId} not found in file ${fileKey}`);
   }
+
+  // WP41: Track API call for quota monitoring
+  await trackApiCallByEndpoint('fetchNode');
 
   return nodeData as FigmaNode;
 }
@@ -123,6 +127,9 @@ export async function fetchScreenshot(
   if (!imageResponse.ok) {
     throw new Error(`Screenshot download failed: ${imageResponse.status}`);
   }
+
+  // WP41: Track API call for quota monitoring (Tier 1 - images)
+  await trackApiCallByEndpoint('fetchScreenshot');
 
   const arrayBuffer = await imageResponse.arrayBuffer();
   return Buffer.from(arrayBuffer);
@@ -263,6 +270,9 @@ export async function fetchSVGBatch(
       })
     );
 
+    // WP41: Track API call for quota monitoring (Tier 1 - images)
+    await trackApiCallByEndpoint('fetchSVGBatch');
+
     console.log(`✅ Fetched ${Object.keys(result).length} SVGs from Figma API`);
     return result;
   } catch (error) {
@@ -307,6 +317,9 @@ export async function fetchFileMetadata(fileKey: string): Promise<{
     lastModified: string;
     version: string;
   };
+
+  // WP41: Track API call for quota monitoring (Tier 2 - data)
+  await trackApiCallByEndpoint('fetchFileMetadata');
 
   return {
     name: data.name,
