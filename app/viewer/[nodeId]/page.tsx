@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Resizable } from 're-resizable';
 import { useNodesStore, useUIStore } from '@/lib/store';
@@ -157,7 +157,9 @@ export default function ViewerPage() {
 
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const nodeId = params.nodeId as string;
+  const startFullscreen = searchParams.get('fullscreen') === 'true';
 
   const nodes = useNodesStore((state) => state.nodes);
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
@@ -205,7 +207,7 @@ export default function ViewerPage() {
   const [copiedRawData, setCopiedRawData] = useState(false); // WP42: Copy feedback for Raw Data
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
-  const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false); // WP42: Fullscreen mode for Canvas Preview
+  const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(startFullscreen); // WP42/WP45: Fullscreen mode for Canvas Preview (supports ?fullscreen=true URL param)
 
   // WP40: Refetch dialog and version state
   const [refetchDialogOpen, setRefetchDialogOpen] = useState(false);

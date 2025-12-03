@@ -1,18 +1,25 @@
 'use client';
 
 /**
- * Node Library Page (WP42 Redesign V2)
+ * Node Library Page (WP45 - Filters, Sort, Pagination & UX Improvements)
  *
  * Features:
  * - NodeID column with # prefix
  * - Statistics column with 4 icons (cube, layers, zap, file)
  * - Kebab menu for actions
  * - Grid view with placeholder icons and stats
+ * - Filter by type and date
+ * - Sort by date, name, nodes count
+ * - Pagination with per page selector
+ * - Hover gradient on grid cards
+ * - Fully clickable list rows
+ * - Open Preview fullscreen
  */
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNodesStore } from '@/lib/store';
-import { Search, Grid, List, Filter, SortAsc, Trash2, MoreVertical, Eye, Download, Box, Layers, Zap, FileText, BarChart3 } from 'lucide-react';
+import { Search, Grid, List, Trash2, MoreVertical, Eye, Maximize2, Box, Layers, Zap, FileText, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -24,12 +31,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmDialog } from '@/components/delete-confirm-dialog';
+import { FilterPopover, type FilterState } from '@/components/library/filter-popover';
+import { SortSelect, type SortOption } from '@/components/library/sort-select';
+import { LibraryPagination } from '@/components/library/library-pagination';
+import { PerPageSelect } from '@/components/library/per-page-select';
 
 export default function NodesLibraryPage() {
+  const router = useRouter();
   const nodes = useNodesStore((state) => state.nodes);
   const viewMode = useNodesStore((state) => state.viewMode);
   const searchTerm = useNodesStore((state) => state.searchTerm);
-  const filters = useNodesStore((state) => state.filters);
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
   const setViewMode = useNodesStore((state) => state.setViewMode);
   const setSearchTerm = useNodesStore((state) => state.setSearchTerm);
@@ -38,27 +49,65 @@ export default function NodesLibraryPage() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [deleteDialogNode, setDeleteDialogNode] = useState<{ id: string; name: string } | null>(null);
 
+  // Filter, Sort, Pagination state
+  const [filters, setFilters] = useState<FilterState>({ types: [], dateRange: 'all' });
+  const [sortBy, setSortBy] = useState<SortOption>('date-desc');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+
   useEffect(() => {
     loadLibrary();
   }, [loadLibrary]);
 
+  // Reset page when filters/sort change
+  useEffect(() => {
+    setPage(1);
+  }, [filters, sortBy, searchTerm]);
+
   // Filter nodes
   const filteredNodes = nodes.filter((node) => {
+    // Search filter
     if (searchTerm && !node.name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
-    if (filters.type && filters.type.length > 0) {
-      if (!node.altNode?.type || !filters.type.includes(node.altNode.type)) {
+    // Type filter
+    if (filters.types.length > 0) {
+      const nodeType = node.altNode?.type;
+      if (!nodeType || !filters.types.includes(nodeType)) {
+        return false;
+      }
+    }
+    // Date filter
+    if (filters.dateRange !== 'all') {
+      const days = { '7d': 7, '30d': 30, '90d': 90 }[filters.dateRange];
+      const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+      if (new Date(node.addedAt).getTime() < cutoff) {
         return false;
       }
     }
     return true;
   });
 
-  // Sort by date (most recent first)
-  const sortedNodes = [...filteredNodes].sort(
-    (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
-  );
+  // Sort nodes
+  const sortedNodes = [...filteredNodes].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+      case 'date-asc':
+        return new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime();
+      case 'name-asc':
+        return a.name.localeCompare(b.name);
+      case 'name-desc':
+        return b.name.localeCompare(a.name);
+      case 'nodes-desc':
+        return (b.transformStats?.totalNodes || 0) - (a.transformStats?.totalNodes || 0);
+      default:
+        return 0;
+    }
+  });
+
+  // Paginate nodes
+  const paginatedNodes = sortedNodes.slice((page - 1) * perPage, page * perPage);
 
   // Toggle selection
   const toggleSelection = (nodeId: string) => {
@@ -71,9 +120,18 @@ export default function NodesLibraryPage() {
     setSelectedNodeIds(newSelection);
   };
 
-  // Get statistics for a node (use seeded random for consistent values)
+  // Get statistics for a node
   const getNodeStats = (node: typeof nodes[0]) => {
-    // Use node ID to generate consistent pseudo-random values
+    // Use transformStats if available (WP43), otherwise use seeded random
+    if (node.transformStats) {
+      return {
+        elements: node.transformStats.totalNodes,
+        layers: node.transformStats.maxDepth,
+        rules: node.transformStats.semanticCount,
+        exports: node.usage.exportCount || 0,
+      };
+    }
+    // Fallback: Use node ID to generate consistent pseudo-random values
     const seed = node.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return {
       elements: (seed % 20) + 5,
@@ -97,6 +155,18 @@ export default function NodesLibraryPage() {
     setDeleteDialogNode(null);
   };
 
+  const handleFilterApply = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  const handleFilterReset = () => {
+    setFilters({ types: [], dateRange: 'all' });
+  };
+
+  const handleOpenPreview = (nodeId: string) => {
+    router.push(`/viewer/${nodeId}?fullscreen=true`);
+  };
+
   return (
     <div className="container mx-auto px-6 py-8">
       {/* Header */}
@@ -106,7 +176,7 @@ export default function NodesLibraryPage() {
           <h1 className="text-3xl font-bold text-text-primary">Node Library</h1>
         </div>
         <p className="text-text-muted text-sm">
-          {sortedNodes.length} nodes in library
+          {filteredNodes.length} nodes {filteredNodes.length !== nodes.length && `(filtered from ${nodes.length})`}
         </p>
       </div>
 
@@ -155,16 +225,21 @@ export default function NodesLibraryPage() {
             </button>
           </div>
 
-          {/* Filter & Sort */}
+          {/* Filter, Sort & Per Page */}
           <div className="flex gap-2">
-            <button className="px-4 py-2 bg-bg-secondary text-text-secondary rounded-lg hover:bg-bg-hover flex items-center gap-2 border border-border-primary">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
-            <button className="px-4 py-2 bg-bg-secondary text-text-secondary rounded-lg hover:bg-bg-hover flex items-center gap-2 border border-border-primary">
-              <SortAsc className="w-4 h-4" />
-              Sort
-            </button>
+            <FilterPopover
+              filters={filters}
+              onApply={handleFilterApply}
+              onReset={handleFilterReset}
+            />
+            <SortSelect value={sortBy} onChange={setSortBy} />
+            <PerPageSelect
+              value={perPage}
+              onChange={(newPerPage) => {
+                setPerPage(newPerPage);
+                setPage(1);
+              }}
+            />
           </div>
         </div>
       </div>
@@ -174,11 +249,11 @@ export default function NodesLibraryPage() {
         <div className="text-center py-16 bg-bg-card rounded-xl border border-border-primary">
           <Box className="w-16 h-16 mx-auto mb-4 text-text-muted" />
           <p className="text-text-muted mb-4">
-            {searchTerm || filters.type?.length
+            {searchTerm || filters.types.length > 0 || filters.dateRange !== 'all'
               ? 'No nodes match your filters'
               : 'No nodes in library yet'}
           </p>
-          {!searchTerm && !filters.type?.length && (
+          {!searchTerm && filters.types.length === 0 && filters.dateRange === 'all' && (
             <Link
               href="/"
               className="inline-flex px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-hover"
@@ -190,16 +265,19 @@ export default function NodesLibraryPage() {
       ) : viewMode === 'grid' ? (
         /* Grid View - 5 columns */
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {sortedNodes.map((node) => {
+          {paginatedNodes.map((node) => {
             const stats = getNodeStats(node);
             return (
               <div
                 key={node.id}
-                className="bg-bg-card rounded-xl border border-border-primary overflow-hidden hover:border-border-secondary transition-all"
+                className="group bg-bg-card rounded-xl border border-border-primary overflow-hidden hover:border-border-secondary transition-all"
               >
-                {/* Preview Image */}
+                {/* Preview Image with Hover Gradient */}
                 <Link href={`/viewer/${node.id}`} className="block">
                   <div className="aspect-[4/3] bg-bg-secondary flex items-start justify-center relative">
+                    {/* Hover Gradient Overlay (T395) */}
+                    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none rounded-t-xl" />
+
                     {node.thumbnail ? (
                       <Image
                         src={node.thumbnail}
@@ -212,8 +290,8 @@ export default function NodesLibraryPage() {
                       <Box className="w-12 h-12 text-text-muted" />
                     )}
 
-                    {/* Kebab Menu - Always Visible */}
-                    <div className="absolute top-2 right-2">
+                    {/* Kebab Menu - z-index above gradient */}
+                    <div className="absolute top-2 right-2 z-20">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
                           <button className="p-1.5 bg-bg-card/90 backdrop-blur-sm rounded-lg hover:bg-bg-card">
@@ -227,8 +305,8 @@ export default function NodesLibraryPage() {
                               View node
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="w-4 h-4 mr-2" />
+                          <DropdownMenuItem onClick={() => handleOpenPreview(node.id)}>
+                            <Maximize2 className="w-4 h-4 mr-2" />
                             Open preview
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -280,7 +358,7 @@ export default function NodesLibraryPage() {
           })}
         </div>
       ) : (
-        /* List View */
+        /* List View with Clickable Rows (T396) */
         <div className="bg-bg-card rounded-xl border border-border-primary overflow-hidden">
           <table className="w-full">
             <thead className="bg-bg-secondary border-b border-border-primary">
@@ -288,12 +366,12 @@ export default function NodesLibraryPage() {
                 <th className="px-4 py-3 text-left w-12">
                   <input
                     type="checkbox"
-                    checked={selectedNodeIds.size === sortedNodes.length && sortedNodes.length > 0}
+                    checked={selectedNodeIds.size === paginatedNodes.length && paginatedNodes.length > 0}
                     onChange={() => {
-                      if (selectedNodeIds.size === sortedNodes.length) {
+                      if (selectedNodeIds.size === paginatedNodes.length) {
                         setSelectedNodeIds(new Set());
                       } else {
-                        setSelectedNodeIds(new Set(sortedNodes.map((n) => n.id)));
+                        setSelectedNodeIds(new Set(paginatedNodes.map((n) => n.id)));
                       }
                     }}
                     className="rounded border-border-primary"
@@ -308,11 +386,16 @@ export default function NodesLibraryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-primary">
-              {sortedNodes.map((node) => {
+              {paginatedNodes.map((node) => {
                 const stats = getNodeStats(node);
                 return (
-                  <tr key={node.id} className="hover:bg-bg-hover transition-colors">
-                    <td className="px-4 py-3">
+                  <tr
+                    key={node.id}
+                    onClick={() => router.push(`/viewer/${node.id}`)}
+                    className="cursor-pointer hover:bg-bg-hover transition-colors"
+                  >
+                    {/* Checkbox - stop propagation */}
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={selectedNodeIds.has(node.id)}
@@ -338,12 +421,9 @@ export default function NodesLibraryPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/viewer/${node.id}`}
-                        className="font-medium text-text-primary hover:text-accent-primary"
-                      >
+                      <span className="font-medium text-text-primary hover:text-accent-primary">
                         {node.name}
-                      </Link>
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-text-muted">
                       {getShortNodeId(node.id)}
@@ -371,7 +451,8 @@ export default function NodesLibraryPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    {/* Actions - stop propagation */}
+                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="p-1.5 hover:bg-bg-secondary rounded-lg transition-colors">
@@ -385,8 +466,8 @@ export default function NodesLibraryPage() {
                               View node
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="w-4 h-4 mr-2" />
+                          <DropdownMenuItem onClick={() => handleOpenPreview(node.id)}>
+                            <Maximize2 className="w-4 h-4 mr-2" />
                             Open preview
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -406,6 +487,16 @@ export default function NodesLibraryPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Pagination */}
+      {sortedNodes.length > 0 && (
+        <LibraryPagination
+          total={sortedNodes.length}
+          page={page}
+          perPage={perPage}
+          onPageChange={setPage}
+        />
       )}
 
       {/* Delete Confirmation Dialog */}
