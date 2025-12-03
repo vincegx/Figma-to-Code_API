@@ -359,5 +359,20 @@ function formatValueForCss(type: VariableType, value: any): string {
     }
   }
 
+  // Handle variant/component variables (complex objects)
+  if (type === 'other' && typeof value === 'object' && value !== null) {
+    // Try to extract a meaningful value from variant objects
+    if (value.value !== undefined) {
+      return String(value.value);
+    }
+    // For complex objects like Device/Type variants, extract first value
+    const keys = Object.keys(value);
+    if (keys.length > 0 && value[keys[0]]?.value !== undefined) {
+      return String(value[keys[0]].value);
+    }
+    // Skip complex objects that can't be converted to CSS
+    return 'unset';
+  }
+
   return String(value);
 }

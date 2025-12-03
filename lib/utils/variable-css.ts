@@ -109,5 +109,23 @@ function formatValueForCss(type: VariableType, value: string | number | object):
     }
   }
 
+  // Handle variant/component variables (complex objects)
+  if (type === 'other' && typeof value === 'object' && value !== null) {
+    // Try to extract a meaningful value from variant objects
+    if ('value' in value) {
+      return String((value as { value: unknown }).value);
+    }
+    // For complex objects like Device/Type variants, extract first value
+    const keys = Object.keys(value);
+    if (keys.length > 0) {
+      const first = (value as Record<string, { value?: unknown }>)[keys[0]];
+      if (first?.value !== undefined) {
+        return String(first.value);
+      }
+    }
+    // Skip complex objects that can't be converted to CSS
+    return 'unset';
+  }
+
   return String(value);
 }
