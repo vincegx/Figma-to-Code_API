@@ -276,6 +276,38 @@
       {
         "ts": 1764789245005,
         "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764793483701,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764793488303,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764793694404,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764793704784,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764794198174,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764794202261,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764794380613,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764794384905,
+        "endpoint": "fetchSVGBatch"
       }
     ],
     "tier2": [
@@ -465,6 +497,42 @@
       },
       {
         "ts": 1764789226328,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764793443528,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764793475921,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764793477697,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764793678279,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764793680150,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764794191356,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764794192719,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764794373637,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764794375378,
         "endpoint": "fetchNode"
       }
     ]

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-03T19:14:07.109Z",
+  "lastUpdated": "2025-12-03T20:39:46.443Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -193,8 +193,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2146/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-03T19:00:36.770Z",
-      "lastModified": "2025-12-03T19:00:36.770Z",
+      "addedAt": "2025-12-03T20:39:46.436Z",
+      "lastModified": "2025-12-03T20:39:46.436Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -224,7 +224,7 @@
         "semanticCount": 2368,
         "arbitraryCount": 96,
         "variablesUsed": 245,
-        "computedAt": "2025-12-03T19:00:32.874Z"
+        "computedAt": "2025-12-03T20:39:42.363Z"
       }
     },
     {
@@ -291,8 +291,8 @@
       "altNode": null,
       "thumbnail": "/api/images/493-2811/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T21:09:10.153Z",
-      "lastModified": "2025-12-01T21:09:10.153Z",
+      "addedAt": "2025-12-03T20:28:28.042Z",
+      "lastModified": "2025-12-03T20:28:28.042Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -301,6 +301,28 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=493:2811"
+      },
+      "transformStats": {
+        "totalNodes": 190,
+        "maxDepth": 8,
+        "nodesByType": {
+          "FRAME": 17,
+          "INSTANCE": 67,
+          "VECTOR": 51,
+          "TEXT": 37,
+          "GROUP": 1,
+          "RECTANGLE": 17
+        },
+        "autoLayoutCount": 58,
+        "absolutePositionedCount": 0,
+        "groupsInlined": 1,
+        "imagesCount": 6,
+        "iconsCount": 51,
+        "gradientsCount": 1,
+        "semanticCount": 1596,
+        "arbitraryCount": 116,
+        "variablesUsed": 333,
+        "computedAt": "2025-12-03T20:28:20.580Z"
       }
     },
     {
