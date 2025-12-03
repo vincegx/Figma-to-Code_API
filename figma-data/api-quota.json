@@ -156,6 +156,30 @@
       {
         "ts": 1764733123830,
         "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764771768662,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764771773810,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764771855208,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764771867183,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764785192705,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764785198019,
+        "endpoint": "fetchSVGBatch"
       }
     ],
     "tier2": [
@@ -214,6 +238,34 @@
       {
         "ts": 1764764828942,
         "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764771760347,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764771762429,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764771812410,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764771832935,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764771835019,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764785185445,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764785187073,
+        "endpoint": "fetchNode"
       }
     ]
   }

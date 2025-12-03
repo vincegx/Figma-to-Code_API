@@ -15,7 +15,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { FigmaNode } from '../types/figma';
-import type { LibraryNode } from '../types/library';
+import type { LibraryNode, TransformStats } from '../types/library';
 import type { VersionsFile } from '../types/versioning';
 
 const FIGMA_DATA_DIR = path.join(process.cwd(), 'figma-data');
@@ -44,6 +44,7 @@ function sanitizeNodeId(nodeId: string): string {
  * @param fileKey - Figma file key
  * @param screenshot - Screenshot image buffer
  * @param fileName - Human-readable file name
+ * @param transformStats - WP43: Optional transformation stats
  * @returns LibraryNode metadata for index
  */
 export async function saveNodeData(
@@ -51,7 +52,8 @@ export async function saveNodeData(
   nodeData: FigmaNode,
   fileKey: string,
   screenshot: Buffer,
-  fileName: string
+  fileName: string,
+  transformStats?: TransformStats
 ): Promise<LibraryNode> {
   const safeNodeId = sanitizeNodeId(nodeId);
   const nodeDirPath = path.join(FIGMA_DATA_DIR, safeNodeId);
@@ -88,6 +90,8 @@ export async function saveNodeData(
       fileName,
       nodeUrl: `https://www.figma.com/file/${fileKey}?node-id=${nodeId}`,
     },
+    // WP43: Include transform stats if provided
+    transformStats,
   };
 
   // Save metadata.json

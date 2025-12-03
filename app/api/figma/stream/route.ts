@@ -25,7 +25,9 @@ import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
 import { diffFigmaNodes, detectNewImages, createDiffSummary, hasChanges } from '@/lib/utils/figma-diff';
 import { createHistorySnapshot, updateCurrentVersion } from '@/lib/utils/history-manager';
+import { computeTransformStats } from '@/lib/transform-stats';
 import type { NodeDiff, DiffSummary } from '@/lib/types/versioning';
+import type { TransformStats } from '@/lib/types/library';
 
 // Step definitions for import and refetch
 const IMPORT_STEPS = ['parse', 'metadata', 'node', 'screenshot', 'variables', 'svg', 'images', 'save'] as const;
@@ -208,6 +210,13 @@ async function handleImport(url: string, sendProgress: ProgressCallback) {
   sendProgress('svg', 'start', 'Downloading SVG assets...');
   resetNameCounters();
   const altNode = transformToAltNode(nodeData);
+
+  // WP43: Compute transform stats from altNode
+  let transformStats: TransformStats | undefined;
+  if (altNode) {
+    transformStats = computeTransformStats(altNode);
+  }
+
   const svgContainers = altNode ? extractSvgContainers(altNode) : [];
   let svgAssets: Record<string, string> = {};
 
@@ -259,7 +268,8 @@ async function handleImport(url: string, sendProgress: ProgressCallback) {
   // Step 8: Save & Index
   sendProgress('save', 'start', 'Saving to library...');
   try {
-    const libraryNode = await saveNodeData(nodeId, nodeData, fileKey, screenshot ?? Buffer.from(''), fileName);
+    // WP43: Pass transformStats to saveNodeData
+    const libraryNode = await saveNodeData(nodeId, nodeData, fileKey, screenshot ?? Buffer.from(''), fileName, transformStats);
 
     if (Object.keys(svgAssets).length > 0) {
       await saveSvgAssets(nodeId, svgAssets);
@@ -437,6 +447,13 @@ async function handleRefetch(nodeId: string, sendProgress: ProgressCallback) {
   sendProgress('svg', 'start', 'Downloading SVG assets...');
   resetNameCounters();
   const altNode = transformToAltNode(nodeData);
+
+  // WP43: Compute transform stats from altNode
+  let transformStats: TransformStats | undefined;
+  if (altNode) {
+    transformStats = computeTransformStats(altNode);
+  }
+
   const svgContainers = altNode ? extractSvgContainers(altNode) : [];
   let svgAssets: Record<string, string> = {};
 
@@ -491,12 +508,14 @@ async function handleRefetch(nodeId: string, sendProgress: ProgressCallback) {
   // Step 9: Save new data & Update index
   sendProgress('save', 'start', 'Saving to library...');
   try {
+    // WP43: Pass transformStats to saveNodeData
     const updatedMetadata = await saveNodeData(
       figmaNodeId,
       nodeData,
       fileKey,
       screenshot ?? Buffer.from(''),
-      currentMetadata.metadata.fileName
+      currentMetadata.metadata.fileName,
+      transformStats
     );
 
     if (Object.keys(svgAssets).length > 0) {

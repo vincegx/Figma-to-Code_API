@@ -25,6 +25,7 @@ import { addNode } from '@/lib/utils/library-index';
 import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadFigmaImages } from '@/lib/utils/image-fetcher';
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
+import { computeTransformStats } from '@/lib/transform-stats';
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,6 +82,10 @@ export async function POST(request: NextRequest) {
     // This ensures SVGs are available locally without API calls during viewing
     resetNameCounters();
     const altNode = transformToAltNode(nodeData);
+
+    // WP43: Compute transform stats from altNode
+    const transformStats = altNode ? computeTransformStats(altNode) : undefined;
+
     const svgContainers = altNode ? extractSvgContainers(altNode) : [];
 
     let svgAssets: Record<string, string> = {};
@@ -104,12 +109,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Save to filesystem
+    // WP43: Pass transformStats to saveNodeData
     const libraryNode = await saveNodeData(
       nodeId,
       nodeData,
       fileKey,
       screenshot,
-      fileMetadata.name
+      fileMetadata.name,
+      transformStats
     );
 
     // WP32: Save SVG assets if any

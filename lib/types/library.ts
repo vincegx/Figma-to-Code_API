@@ -10,6 +10,41 @@ import type { GeneratedCode } from './code-generation';
 import type { RuleMatch } from './rules';
 
 // ============================================================================
+// Transform Stats Types (WP43)
+// ============================================================================
+
+/**
+ * WP43: Statistics computed from AltNode transformation
+ *
+ * Captures metrics about the Figma→AltNode transformation for dashboard display.
+ * Computed once at import/refetch time and stored in LibraryNode.
+ */
+export interface TransformStats {
+  // Structure metrics
+  readonly totalNodes: number;
+  readonly maxDepth: number;
+  readonly nodesByType: Record<string, number>;
+
+  // Layout metrics
+  readonly autoLayoutCount: number;
+  readonly absolutePositionedCount: number;
+  readonly groupsInlined: number;
+
+  // Asset metrics
+  readonly imagesCount: number;
+  readonly iconsCount: number;
+  readonly gradientsCount: number;
+
+  // Quality metrics (semantic vs arbitrary Tailwind classes)
+  readonly semanticCount: number;
+  readonly arbitraryCount: number;
+  readonly variablesUsed: number;
+
+  // Timestamp
+  readonly computedAt: string;
+}
+
+// ============================================================================
 // Library Entry Types
 // ============================================================================
 
@@ -34,6 +69,8 @@ export interface LibraryNode {
     readonly fileName: string;
     readonly nodeUrl: string;
   };
+  /** WP43: Stats computed from AltNode transformation */
+  readonly transformStats?: TransformStats;
 }
 
 // ============================================================================
