@@ -64,11 +64,11 @@ function extractShortId(fullId: string): string {
 }
 
 /**
- * Generate CSS-safe variable name from ID
- * "125:11" → "var-125-11"
+ * Generate CSS-safe variable name from ID and type
+ * "125:11" + "spacing" → "var-125-11-spacing"
  */
-function generateCssName(shortId: string): string {
-  return `var-${shortId.replace(/:/g, '-')}`;
+function generateCssName(shortId: string, type: VariableType): string {
+  return `var-${shortId.replace(/:/g, '-')}-${type}`;
 }
 
 /**
@@ -178,7 +178,7 @@ export function formatExtractedVariablesForStorage(
 
   for (const [shortId, data] of Object.entries(extracted)) {
     formatted[shortId] = {
-      name: generateCssName(shortId),
+      name: generateCssName(shortId, data.type),
       realName: null,
       type: data.type,
       value: data.value,
@@ -232,7 +232,7 @@ export async function mergeExtractedVariables(
     } else {
       // New variable
       existing.variables[shortId] = {
-        name: generateCssName(shortId),
+        name: generateCssName(shortId, data.type),
         realName: null,
         type: data.type,
         value: data.value,
