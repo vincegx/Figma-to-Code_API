@@ -611,13 +611,8 @@ function RulesPageContent() {
                       <Copy className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <pre className="text-xs font-mono p-3 rounded-lg bg-bg-secondary overflow-auto max-h-48">
-                    <code>
-                      <span className="text-text-muted">{'{'}</span>{'\n'}
-                      {'  '}<span className="text-emerald-400">{'"type"'}</span><span className="text-text-muted"> : </span><span className="text-amber-400">{'"TEXT"'}</span><span className="text-text-muted">,</span>{'\n'}
-                      {'  '}<span className="text-emerald-400">{'"textAlignHorizontal"'}</span><span className="text-text-muted"> : </span><span className="text-cyan-400">{'"JUSTIFIED"'}</span>{'\n'}
-                      <span className="text-text-muted">{'}'}</span>
-                    </code>
+                  <pre className="text-xs font-mono p-3 rounded-lg bg-bg-secondary overflow-auto max-h-48 text-text-secondary">
+                    {JSON.stringify(selectedRule.selector, null, 2)}
                   </pre>
                 </div>
 
@@ -646,12 +641,10 @@ function RulesPageContent() {
                     })}
                   </div>
                   {/* Code preview */}
-                  <pre className="text-xs font-mono p-3 rounded-lg bg-bg-secondary overflow-auto">
-                    <code>
-                      <span className="text-text-muted">{'{'}</span>{'\n'}
-                      {'  '}<span className="text-emerald-400">{'"className"'}</span><span className="text-text-muted"> : </span><span className="text-cyan-400">{'"text-justify"'}</span>{'\n'}
-                      <span className="text-text-muted">{'}'}</span>
-                    </code>
+                  <pre className="text-xs font-mono p-3 rounded-lg bg-bg-secondary overflow-auto max-h-48 text-text-secondary">
+                    {selectedRule.transformers[selectedFramework]
+                      ? JSON.stringify(selectedRule.transformers[selectedFramework], null, 2)
+                      : 'No transformer for this framework'}
                   </pre>
                 </div>
               </div>
