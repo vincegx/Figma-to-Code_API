@@ -244,7 +244,7 @@ export function RefetchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-bg-card border border-border-primary">
+      <DialogContent className="sm:max-w-md bg-bg-card border border-border-primary" onInteractOutside={(e) => e.preventDefault()}>
         {/* Screen reader description - always present */}
         <DialogDescription className="sr-only">
           Synchroniser le composant {nodeName} depuis Figma

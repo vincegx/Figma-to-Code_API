@@ -12,12 +12,41 @@
 export function truncateLayerName(name: string, maxWords: number = 4): string {
   if (!name) return name;
 
-  const words = name.split(/\s+/);
-  if (words.length <= maxWords) {
-    return name;
+  // First format the name to clean it up
+  const formatted = formatLayerName(name);
+
+  // Then truncate if needed (split by dash for kebab-case)
+  const parts = formatted.split('-');
+  if (parts.length <= maxWords) {
+    return formatted;
   }
 
-  return words.slice(0, maxWords).join(' ');
+  return parts.slice(0, maxWords).join('-');
+}
+
+/**
+ * Format layer name for data-layer attribute
+ *
+ * Cleans up Figma layer names to be more readable:
+ * - _Default icon & shape → default-icon-shape
+ * - Button/Primary → button-primary
+ * - #Header 01 → header-01
+ *
+ * @param name - Original Figma layer name
+ * @returns Formatted kebab-case name
+ */
+export function formatLayerName(name: string): string {
+  if (!name) return name;
+
+  return name
+    .replace(/^[_#]+/, '')              // Remove leading _ or #
+    .replace(/[&]/g, 'and')             // Replace & with 'and'
+    .replace(/[\/\\]/g, '-')            // Replace / and \ with -
+    .replace(/[^a-zA-Z0-9\s-]/g, '')    // Remove other special chars
+    .replace(/\s+/g, '-')               // Replace spaces with -
+    .replace(/-+/g, '-')                // Collapse multiple dashes
+    .replace(/^-|-$/g, '')              // Remove leading/trailing dashes
+    .toLowerCase();                      // Convert to lowercase
 }
 
 /**
