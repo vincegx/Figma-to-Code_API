@@ -313,13 +313,17 @@ export default function ViewerPage() {
 
   // Fetch node data with AltNode transformation on-the-fly
   // WP32 PERF: Set altNode AND selectedTreeNodeId together to avoid cascade
+  // WP42: Added iframeKey dependency to re-fetch after refetch completes
   useEffect(() => {
     async function fetchNodeWithAltNode() {
       if (!nodeId) return;
 
       setIsLoadingAltNode(true);
       try {
-        const response = await fetch(`/api/figma/node/${nodeId}`);
+        // Add cache-buster to force fresh data after refetch
+        const response = await fetch(`/api/figma/node/${nodeId}?t=${Date.now()}`, {
+          cache: 'no-store',
+        });
         if (response.ok) {
           const data = await response.json();
           const node = data.altNode || null;
@@ -343,7 +347,7 @@ export default function ViewerPage() {
     }
 
     fetchNodeWithAltNode();
-  }, [nodeId]);
+  }, [nodeId, iframeKey]);
 
   // Generate code directly in ViewerPage (independent of right panel visibility)
   // WP35: Always use altNode (root) for code generation - selection only affects highlight
@@ -376,7 +380,7 @@ export default function ViewerPage() {
     }
 
     generateCode();
-  }, [altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, rootResolvedProperties]);
+  }, [altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, rootResolvedProperties, iframeKey]);
 
   // WP35: Send highlight message to iframe when selection changes
   useEffect(() => {
@@ -417,24 +421,12 @@ export default function ViewerPage() {
 
   // WP40: Handle refetch complete - reload current node data
   // Called when dialog closes after successful update (not for up_to_date)
+  // WP42: Simplified - iframeKey change triggers useEffect to re-fetch data
   const handleRefetchComplete = async () => {
     setSelectedVersionFolder(null); // Reset to current version
     await loadLibrary();
-    const response = await fetch(`/api/figma/node/${nodeId}`);
-    if (response.ok) {
-      const data = await response.json();
-      setAltNode(data.altNode || null);
-      // Reset selected tree node to root
-      if (data.altNode) {
-        setSelectedTreeNodeId(data.altNode.id);
-      }
-      // Update variables cache if present
-      if (data.variables) {
-        setCachedVariablesMap(data.variables);
-      }
-      // Refresh preview iframe and version dropdown
-      setIframeKey(prev => prev + 1);
-    }
+    // Increment iframeKey to trigger data re-fetch and preview refresh
+    setIframeKey(prev => prev + 1);
   };
 
   // Prev/Next navigation helpers

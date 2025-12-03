@@ -97,8 +97,8 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   if (property === 'characters') {
     return {
       label: 'Texte',
-      oldDisplay: <span className="text-gray-600">&quot;{String(oldValue).slice(0, 20)}&quot;</span>,
-      newDisplay: <span className="text-gray-900 dark:text-gray-100">&quot;{String(newValue).slice(0, 20)}&quot;</span>,
+      oldDisplay: <span className="text-text-muted">&quot;{String(oldValue).slice(0, 20)}&quot;</span>,
+      newDisplay: <span className="text-text-primary">&quot;{String(newValue).slice(0, 20)}&quot;</span>,
     };
   }
 
@@ -106,8 +106,8 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   if (['width', 'height'].includes(property)) {
     return {
       label: property === 'width' ? 'Largeur' : 'Hauteur',
-      oldDisplay: <span>{Math.round(Number(oldValue))}px</span>,
-      newDisplay: <span className="font-medium">{Math.round(Number(newValue))}px</span>,
+      oldDisplay: <span className="text-text-muted">{Math.round(Number(oldValue))}px</span>,
+      newDisplay: <span className="text-text-primary font-medium">{Math.round(Number(newValue))}px</span>,
     };
   }
 
@@ -115,8 +115,8 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   if (property === 'visible') {
     return {
       label: 'Visibilité',
-      oldDisplay: <span>{oldValue ? 'Visible' : 'Masqué'}</span>,
-      newDisplay: <span className="font-medium">{newValue ? 'Visible' : 'Masqué'}</span>,
+      oldDisplay: <span className="text-text-muted">{oldValue ? 'Visible' : 'Masqué'}</span>,
+      newDisplay: <span className="text-text-primary font-medium">{newValue ? 'Visible' : 'Masqué'}</span>,
     };
   }
 
@@ -124,8 +124,8 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   if (property === 'opacity') {
     return {
       label: 'Opacité',
-      oldDisplay: <span>{Math.round(Number(oldValue) * 100)}%</span>,
-      newDisplay: <span className="font-medium">{Math.round(Number(newValue) * 100)}%</span>,
+      oldDisplay: <span className="text-text-muted">{Math.round(Number(oldValue) * 100)}%</span>,
+      newDisplay: <span className="text-text-primary font-medium">{Math.round(Number(newValue) * 100)}%</span>,
     };
   }
 
@@ -136,8 +136,8 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
 
   return {
     label: property,
-    oldDisplay: <span className="text-gray-500">{String(oldValue).slice(0, 15)}</span>,
-    newDisplay: <span>{String(newValue).slice(0, 15)}</span>,
+    oldDisplay: <span className="text-text-muted">{String(oldValue).slice(0, 15)}</span>,
+    newDisplay: <span className="text-text-primary">{String(newValue).slice(0, 15)}</span>,
   };
 }
 
@@ -146,10 +146,10 @@ function ColorBadge({ color }: { color: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600"
+        className="w-4 h-4 rounded border border-border-primary"
         style={{ backgroundColor: color }}
       />
-      <span className="font-mono text-xs">{color}</span>
+      <span className="font-mono text-xs text-text-primary">{color}</span>
     </span>
   );
 }
@@ -244,14 +244,14 @@ export function RefetchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-bg-card border border-border-primary">
         {/* Confirmation State */}
         {dialogState === 'confirmation' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <CloudDownload className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <DialogTitle className="flex items-center gap-3 text-text-primary">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <CloudDownload className="w-4 h-4 text-blue-400" />
                 </div>
                 Synchroniser depuis Figma
               </DialogTitle>
@@ -260,26 +260,26 @@ export function RefetchDialog({
             <div className="py-4 space-y-3">
               {/* Node info */}
               {nodeName && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-                  <Frame className="w-4 h-4 text-gray-500" />
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{nodeName}</span>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border border-border-primary">
+                  <Frame className="w-4 h-4 text-text-muted" />
+                  <span className="font-medium text-text-primary">{nodeName}</span>
                 </div>
               )}
 
               {/* Last sync info */}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-text-muted">
                 Dernière synchronisation : {formatDate(lastSyncDate)}
               </div>
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={handleClose}>
+              <button onClick={handleClose} className="h-8 px-4 rounded-lg text-sm font-medium border border-border-primary text-text-secondary hover:bg-bg-hover transition-colors">
                 Annuler
-              </Button>
-              <Button onClick={handleConfirm} className="bg-blue-600 hover:bg-blue-700">
-                <RefreshCw className="w-4 h-4 mr-2" />
+              </button>
+              <button onClick={handleConfirm} className="h-8 px-4 flex items-center gap-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
+                <RefreshCw className="w-4 h-4" />
                 Synchroniser
-              </Button>
+              </button>
             </div>
           </>
         )}
@@ -288,8 +288,10 @@ export function RefetchDialog({
         {dialogState === 'progress' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-blue-500 animate-spin" />
+              <DialogTitle className="flex items-center gap-3 text-text-primary">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+                </div>
                 Synchronisation Figma
               </DialogTitle>
             </DialogHeader>
@@ -305,11 +307,11 @@ export function RefetchDialog({
                     key={step.id}
                     className={cn(
                       'flex items-center gap-2 text-sm',
-                      status === 'completed' && 'text-green-600',
-                      status === 'in-progress' && 'text-blue-600 font-medium',
-                      status === 'error' && 'text-red-600',
-                      status === 'skipped' && 'text-gray-400',
-                      status === 'pending' && 'text-gray-400'
+                      status === 'completed' && 'text-emerald-400',
+                      status === 'in-progress' && 'text-blue-400 font-medium',
+                      status === 'error' && 'text-red-400',
+                      status === 'skipped' && 'text-text-muted',
+                      status === 'pending' && 'text-text-muted'
                     )}
                   >
                     {status === 'completed' && <Check className="w-4 h-4" />}
@@ -319,7 +321,7 @@ export function RefetchDialog({
                     {status === 'error' && <span className="w-4 h-4 text-center">✗</span>}
                     <span>{step.label}</span>
                     {isActive && progress.message && (
-                      <span className="text-xs text-gray-500 ml-auto">
+                      <span className="text-xs text-text-muted ml-auto">
                         {progress.message}
                       </span>
                     )}
@@ -329,7 +331,7 @@ export function RefetchDialog({
 
               <div className="pt-2">
                 <Progress value={progressPercent} className="h-2" />
-                <div className="text-xs text-center text-gray-500 mt-1">
+                <div className="text-xs text-center text-text-muted mt-1">
                   {Math.round(progressPercent)}%
                 </div>
               </div>
@@ -341,20 +343,26 @@ export function RefetchDialog({
         {dialogState === 'result' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-3 text-text-primary">
                 {error ? (
                   <>
-                    <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">✕</span>
+                    <div className="w-9 h-9 rounded-xl bg-red-500/20 flex items-center justify-center">
+                      <span className="text-red-400 text-sm font-bold">✕</span>
+                    </div>
                     Erreur
                   </>
                 ) : result?.status === 'up_to_date' ? (
                   <>
-                    <CheckCircle2 className="w-5 h-5 text-green-500 fill-green-500" />
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    </div>
                     Déjà à jour
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-5 h-5 text-green-500 fill-green-500" />
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    </div>
                     Synchronisation terminée
                   </>
                 )}
@@ -363,9 +371,9 @@ export function RefetchDialog({
 
             <div className="py-4">
               {error ? (
-                <p className="text-red-600 text-sm">{error}</p>
+                <p className="text-red-400 text-sm">{error}</p>
               ) : result?.status === 'up_to_date' ? (
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-text-muted text-sm">
                   Aucun changement détecté depuis la dernière synchronisation.
                 </p>
               ) : (
@@ -374,9 +382,9 @@ export function RefetchDialog({
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={handleClose}>
+              <button onClick={handleClose} className="h-8 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
                 {result?.status === 'up_to_date' ? 'OK' : 'Fermer'}
-              </Button>
+              </button>
             </div>
           </>
         )}
@@ -394,7 +402,7 @@ function ResultContent({
   result: RefetchResult | null;
 }) {
   if (!result) {
-    return <p className="text-gray-600 text-sm">Mise à jour effectuée.</p>;
+    return <p className="text-text-muted text-sm">Mise à jour effectuée.</p>;
   }
 
   // Filter noisy diffs for display
@@ -411,7 +419,7 @@ function ResultContent({
   const totalChanges = summary.modified + summary.added + summary.removed;
 
   if (totalChanges === 0 && summary.images === 0) {
-    return <p className="text-gray-600 dark:text-gray-400 text-sm">Mise à jour effectuée (modifications mineures).</p>;
+    return <p className="text-text-muted text-sm">Mise à jour effectuée (modifications mineures).</p>;
   }
 
   return (
@@ -419,25 +427,25 @@ function ResultContent({
       {/* Summary badges */}
       <div className="flex flex-wrap gap-2">
         {summary.modified > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
             <Pencil className="w-3 h-3" />
             {summary.modified} modifié{summary.modified > 1 ? 's' : ''}
           </span>
         )}
         {summary.added > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
             <Plus className="w-3 h-3" />
             {summary.added} ajouté{summary.added > 1 ? 's' : ''}
           </span>
         )}
         {summary.removed > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400">
             <Minus className="w-3 h-3" />
             {summary.removed} supprimé{summary.removed > 1 ? 's' : ''}
           </span>
         )}
         {summary.images > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400">
             <ImageIcon className="w-3 h-3" />
             {summary.images} image{summary.images > 1 ? 's' : ''}
           </span>
@@ -461,25 +469,25 @@ function DiffDetails({ diffs }: { diffs: NodeDiff[] }) {
           key={index}
           className={cn(
             'rounded-lg border p-3 text-sm',
-            diff.type === 'added' && 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20',
-            diff.type === 'removed' && 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20',
-            diff.type === 'modified' && 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
+            diff.type === 'added' && 'border-emerald-500/30 bg-emerald-500/10',
+            diff.type === 'removed' && 'border-red-500/30 bg-red-500/10',
+            diff.type === 'modified' && 'border-border-primary bg-bg-secondary'
           )}
         >
           {/* Node header */}
           <div className="flex items-center gap-2 mb-2">
             <span className={cn(
               'flex items-center justify-center w-5 h-5 rounded',
-              diff.type === 'added' && 'text-green-600',
-              diff.type === 'removed' && 'text-red-600',
-              diff.type === 'modified' && 'text-amber-600'
+              diff.type === 'added' && 'text-emerald-400',
+              diff.type === 'removed' && 'text-red-400',
+              diff.type === 'modified' && 'text-amber-400'
             )}>
               {diff.type === 'added' && <Plus className="w-4 h-4" />}
               {diff.type === 'removed' && <Minus className="w-4 h-4" />}
               {diff.type === 'modified' && <Pencil className="w-4 h-4" />}
             </span>
-            <span className="font-medium text-gray-900 dark:text-gray-100">{diff.nodeName}</span>
-            <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium text-text-primary">{diff.nodeName}</span>
+            <span className="flex items-center gap-1 text-xs text-text-muted">
               {getNodeTypeIcon(diff.nodeType)}
               {diff.nodeType}
             </span>
@@ -493,10 +501,10 @@ function DiffDetails({ diffs }: { diffs: NodeDiff[] }) {
                 if (!formatted) return null;
                 return (
                   <div key={i} className="flex items-center gap-2 text-xs">
-                    <span className="text-gray-500 dark:text-gray-400 min-w-[60px]">{formatted.label}</span>
-                    <span className="text-gray-400">{formatted.oldDisplay}</span>
-                    <span className="text-gray-400">→</span>
-                    <span>{formatted.newDisplay}</span>
+                    <span className="text-text-muted min-w-[60px]">{formatted.label}</span>
+                    <span className="text-text-muted">{formatted.oldDisplay}</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="text-text-primary">{formatted.newDisplay}</span>
                   </div>
                 );
               })}
