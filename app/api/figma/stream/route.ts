@@ -26,6 +26,7 @@ import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/
 import { diffFigmaNodes, detectNewImages, createDiffSummary, hasChanges } from '@/lib/utils/figma-diff';
 import { createHistorySnapshot, updateCurrentVersion } from '@/lib/utils/history-manager';
 import { computeTransformStats } from '@/lib/transform-stats';
+import { recordDailyStats } from '@/lib/stats-history-service';
 import type { NodeDiff, DiffSummary } from '@/lib/types/versioning';
 import type { TransformStats } from '@/lib/types/library';
 
@@ -276,6 +277,11 @@ async function handleImport(url: string, sendProgress: ProgressCallback) {
     }
 
     await addNode(libraryNode);
+
+    // WP44: Record stats history for import
+    if (transformStats) {
+      await recordDailyStats(transformStats, 1);
+    }
 
     // WP40: Initialize versions.json for new node
     await initVersionsFile(nodeId, figmaLastModified);
@@ -535,6 +541,11 @@ async function handleRefetch(nodeId: string, sendProgress: ProgressCallback) {
     };
 
     await addNode(mergedMetadata);
+
+    // WP44: Record stats history for refetch
+    if (transformStats) {
+      await recordDailyStats(transformStats, 0);
+    }
 
     // WP40: Return diff info in result
     sendProgress('save', 'complete', 'Node updated in library', {

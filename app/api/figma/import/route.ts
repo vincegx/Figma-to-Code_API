@@ -26,6 +26,7 @@ import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadF
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
 import { computeTransformStats } from '@/lib/transform-stats';
+import { recordDailyStats } from '@/lib/stats-history-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -150,6 +151,12 @@ export async function POST(request: NextRequest) {
 
     // Update library index
     await addNode(libraryNode);
+
+    // WP44: Record daily stats for history
+    if (transformStats) {
+      await recordDailyStats(transformStats, 1);
+      console.log('📊 Recorded transform stats to history');
+    }
 
     return NextResponse.json({
       success: true,

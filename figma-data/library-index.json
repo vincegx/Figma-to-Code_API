@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-03T18:06:39.170Z",
+  "lastUpdated": "2025-12-03T19:14:07.109Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -51,8 +51,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-4777/screenshot.png",
       "tags": [],
-      "addedAt": "2025-11-30T21:12:53.523Z",
-      "lastModified": "2025-11-30T21:12:53.523Z",
+      "addedAt": "2025-12-03T18:53:11.579Z",
+      "lastModified": "2025-12-03T18:53:11.579Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -61,6 +61,28 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:4777"
+      },
+      "transformStats": {
+        "totalNodes": 47,
+        "maxDepth": 6,
+        "nodesByType": {
+          "FRAME": 12,
+          "RECTANGLE": 5,
+          "VECTOR": 23,
+          "GROUP": 2,
+          "INSTANCE": 2,
+          "TEXT": 3
+        },
+        "autoLayoutCount": 11,
+        "absolutePositionedCount": 1,
+        "groupsInlined": 2,
+        "imagesCount": 1,
+        "iconsCount": 23,
+        "gradientsCount": 0,
+        "semanticCount": 380,
+        "arbitraryCount": 1,
+        "variablesUsed": 1,
+        "computedAt": "2025-12-03T18:53:01.394Z"
       }
     },
     {
@@ -70,8 +92,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2086/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-03T18:06:39.166Z",
-      "lastModified": "2025-12-03T18:06:39.166Z",
+      "addedAt": "2025-12-03T18:45:17.587Z",
+      "lastModified": "2025-12-03T18:45:17.587Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -102,7 +124,7 @@
         "semanticCount": 446,
         "arbitraryCount": 0,
         "variablesUsed": 0,
-        "computedAt": "2025-12-03T18:06:35.479Z"
+        "computedAt": "2025-12-03T18:45:12.956Z"
       }
     },
     {
@@ -171,8 +193,8 @@
       "altNode": null,
       "thumbnail": "/api/images/425-2146/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T20:11:12.199Z",
-      "lastModified": "2025-12-01T20:11:12.199Z",
+      "addedAt": "2025-12-03T19:00:36.770Z",
+      "lastModified": "2025-12-03T19:00:36.770Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -181,6 +203,28 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=425:2146"
+      },
+      "transformStats": {
+        "totalNodes": 260,
+        "maxDepth": 12,
+        "nodesByType": {
+          "FRAME": 64,
+          "INSTANCE": 93,
+          "RECTANGLE": 3,
+          "VECTOR": 59,
+          "TEXT": 40,
+          "GROUP": 1
+        },
+        "autoLayoutCount": 112,
+        "absolutePositionedCount": 2,
+        "groupsInlined": 1,
+        "imagesCount": 1,
+        "iconsCount": 59,
+        "gradientsCount": 1,
+        "semanticCount": 2368,
+        "arbitraryCount": 96,
+        "variablesUsed": 245,
+        "computedAt": "2025-12-03T19:00:32.874Z"
       }
     },
     {
@@ -285,8 +329,8 @@
       "altNode": null,
       "thumbnail": "/api/images/509-2821/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-03T03:38:43.834Z",
-      "lastModified": "2025-12-03T03:38:43.834Z",
+      "addedAt": "2025-12-03T18:44:42.733Z",
+      "lastModified": "2025-12-03T18:44:42.733Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -295,8 +339,111 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=509:2821"
+      },
+      "transformStats": {
+        "totalNodes": 34,
+        "maxDepth": 8,
+        "nodesByType": {
+          "FRAME": 7,
+          "TEXT": 8,
+          "VECTOR": 9,
+          "INSTANCE": 10
+        },
+        "autoLayoutCount": 12,
+        "absolutePositionedCount": 0,
+        "groupsInlined": 0,
+        "imagesCount": 0,
+        "iconsCount": 9,
+        "gradientsCount": 0,
+        "semanticCount": 311,
+        "arbitraryCount": 2,
+        "variablesUsed": 2,
+        "computedAt": "2025-12-03T18:44:40.557Z"
+      }
+    },
+    {
+      "id": "lib-2465-308511",
+      "figmaNodeId": "2465:308511",
+      "name": "Homepage",
+      "altNode": null,
+      "thumbnail": "/api/images/2465-308511/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-03T19:11:25.406Z",
+      "lastModified": "2025-12-03T19:11:25.406Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "q28rWKDafp3qwx4I1uX1pz",
+        "fileName": "Blnk - Portfolio Template",
+        "nodeUrl": "https://www.figma.com/file/q28rWKDafp3qwx4I1uX1pz?node-id=2465:308511"
+      },
+      "transformStats": {
+        "totalNodes": 661,
+        "maxDepth": 13,
+        "nodesByType": {
+          "FRAME": 135,
+          "INSTANCE": 164,
+          "BOOLEAN_OPERATION": 62,
+          "VECTOR": 227,
+          "RECTANGLE": 6,
+          "TEXT": 67
+        },
+        "autoLayoutCount": 175,
+        "absolutePositionedCount": 0,
+        "groupsInlined": 0,
+        "imagesCount": 17,
+        "iconsCount": 289,
+        "gradientsCount": 0,
+        "semanticCount": 6708,
+        "arbitraryCount": 0,
+        "variablesUsed": 0,
+        "computedAt": "2025-12-03T19:11:19.813Z"
+      }
+    },
+    {
+      "id": "lib-367-1346",
+      "figmaNodeId": "367:1346",
+      "name": "Home",
+      "altNode": null,
+      "thumbnail": "/api/images/367-1346/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-03T19:14:07.098Z",
+      "lastModified": "2025-12-03T19:14:07.098Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "ytCharFT2B2K7jS0Kxea3C",
+        "fileName": "Agency Website",
+        "nodeUrl": "https://www.figma.com/file/ytCharFT2B2K7jS0Kxea3C?node-id=367:1346"
+      },
+      "transformStats": {
+        "totalNodes": 203,
+        "maxDepth": 10,
+        "nodesByType": {
+          "FRAME": 78,
+          "TEXT": 39,
+          "VECTOR": 32,
+          "GROUP": 13,
+          "LINE": 16,
+          "RECTANGLE": 17,
+          "INSTANCE": 8
+        },
+        "autoLayoutCount": 64,
+        "absolutePositionedCount": 1,
+        "groupsInlined": 13,
+        "imagesCount": 12,
+        "iconsCount": 32,
+        "gradientsCount": 0,
+        "semanticCount": 1586,
+        "arbitraryCount": 0,
+        "variablesUsed": 0,
+        "computedAt": "2025-12-03T19:14:00.925Z"
       }
     }
   ],
-  "totalNodes": 12
+  "totalNodes": 14
 }

@@ -16,6 +16,8 @@ import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
 import { extractSvgContainers, generateSvgFilename, extractImageNodes, downloadFigmaImages } from '@/lib/utils/image-fetcher';
 import { extractVariablesFromNode, formatExtractedVariablesForStorage } from '@/lib/utils/variable-extractor';
 import { setCachedVariablesMap } from '@/lib/utils/variable-css';
+import { computeTransformStats } from '@/lib/transform-stats';
+import { recordDailyStats } from '@/lib/stats-history-service';
 
 interface RouteParams {
   params: {
@@ -213,6 +215,19 @@ export async function POST(
 
     // Update library index
     await addNode(mergedMetadata);
+
+    // WP44: Compute and record transform stats for history
+    console.log('📊 WP44: altNode exists?', !!altNode);
+    if (altNode) {
+      const transformStats = computeTransformStats(altNode);
+      console.log('📊 WP44: transformStats:', transformStats ? 'OK' : 'undefined');
+      try {
+        await recordDailyStats(transformStats, 0);
+        console.log('📊 WP44: recordDailyStats completed');
+      } catch (err) {
+        console.error('📊 WP44: recordDailyStats ERROR:', err);
+      }
+    }
 
     return NextResponse.json({
       success: true,

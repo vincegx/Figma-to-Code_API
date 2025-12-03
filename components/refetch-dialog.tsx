@@ -245,6 +245,11 @@ export function RefetchDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-bg-card border border-border-primary">
+        {/* Screen reader description - always present */}
+        <DialogDescription className="sr-only">
+          Synchroniser le composant {nodeName} depuis Figma
+        </DialogDescription>
+
         {/* Confirmation State */}
         {dialogState === 'confirmation' && (
           <>

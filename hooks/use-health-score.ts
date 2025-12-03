@@ -1,12 +1,13 @@
 /**
- * Hook: useHealthScore
+ * Hook: useHealthScore (WP44 Refactor)
  *
  * Calculates a composite health score (0-100) based on:
- * - MultiFramework rules coverage (official + community + custom)
- * - Nodes imported
- * - Nodes with code generated (viewCount/exportCount)
+ * - Rules loaded: 0-30 points
+ * - Nodes imported: 0-20 points
+ * - Semantic conversion rate: 0-25 points
+ * - Auto-layout (responsive) coverage: 0-25 points
  *
- * Reflects actual Figma→Code conversion setup quality.
+ * Returns breakdown for tooltip display.
  */
 
 import { useMemo, useEffect, useState } from 'react';
@@ -27,6 +28,14 @@ export interface HealthScoreDetails {
   totalRules: number;
 }
 
+/** WP44: Score breakdown for tooltip */
+export interface ScoreBreakdown {
+  rules: { points: number; max: 30 };
+  nodes: { points: number; max: 20 };
+  semantic: { points: number; max: 25; percent: number };
+  responsive: { points: number; max: 25; percent: number };
+}
+
 export interface HealthScoreResult {
   /** Final health score (0-100) */
   score: number;
@@ -34,6 +43,8 @@ export interface HealthScoreResult {
   level: 'excellent' | 'good' | 'needs-improvement' | 'poor';
   /** Detailed breakdown */
   details: HealthScoreDetails;
+  /** WP44: Score breakdown for tooltip */
+  breakdown: ScoreBreakdown;
   /** Improvement suggestions */
   suggestions: string[];
 }
@@ -81,29 +92,39 @@ export function useHealthScore(): HealthScoreResult {
     const customRules = rulesData.customRules.length;
     const totalRules = officialRules + communityRules + customRules;
 
-    // Calculate score based on actual system usage
-    let score = 0;
+    // WP44: Aggregate transform stats from all nodes
+    let totalNodesCount = 0;
+    let autoLayoutCount = 0;
+    let semanticCount = 0;
+    let arbitraryCount = 0;
 
-    // Rules base (0-50 points) - having rules is essential
-    if (totalRules > 0) {
-      // Base 30 for having any rules
-      score += 30;
-      // +10 for having official rules
-      if (officialRules > 0) score += 10;
-      // +10 for having community rules
-      if (communityRules > 0) score += 10;
-    }
+    nodes.forEach((node) => {
+      if (node.transformStats) {
+        totalNodesCount += node.transformStats.totalNodes;
+        autoLayoutCount += node.transformStats.autoLayoutCount;
+        semanticCount += node.transformStats.semanticCount;
+        arbitraryCount += node.transformStats.arbitraryCount;
+      }
+    });
 
-    // Nodes imported (0-25 points)
-    if (nodesCount > 0) {
-      score += Math.min(25, 5 + nodesCount * 2);
-    }
+    // WP44: New scoring calculation
+    // Rules loaded: 0-30 points
+    const rulesScore = Math.min(30, totalRules > 0 ? 30 : 0);
 
-    // Nodes viewed/generated (0-25 points) - usage indicator
-    if (nodesCount > 0 && nodesViewed > 0) {
-      const viewRatio = nodesViewed / nodesCount;
-      score += Math.round(viewRatio * 25);
-    }
+    // Nodes imported: 0-20 points
+    const nodesScore = Math.min(20, nodesCount > 0 ? 10 + Math.min(10, nodesCount) : 0);
+
+    // Semantic conversion: 0-25 points (semanticCount / total %)
+    const totalStyleCount = semanticCount + arbitraryCount;
+    const semanticPercent = totalStyleCount > 0 ? semanticCount / totalStyleCount : 0;
+    const semanticScore = Math.round(semanticPercent * 25);
+
+    // Auto-layout coverage (responsive): 0-25 points (autoLayoutCount / totalNodes %)
+    const responsivePercent = totalNodesCount > 0 ? autoLayoutCount / totalNodesCount : 0;
+    const responsiveScore = Math.round(responsivePercent * 25);
+
+    // Calculate final score
+    let score = rulesScore + nodesScore + semanticScore + responsiveScore;
 
     // Clamp score
     score = Math.max(0, Math.min(100, Math.round(score)));
@@ -126,9 +147,20 @@ export function useHealthScore(): HealthScoreResult {
     if (nodesCount > 0 && nodesViewed === 0) {
       suggestions.push('View nodes to generate code');
     }
-    if (customRules === 0 && totalRules > 0) {
-      suggestions.push('Create custom rules for your design system');
+    if (semanticPercent < 0.5 && totalStyleCount > 0) {
+      suggestions.push('Increase semantic class usage for better code quality');
     }
+    if (responsivePercent < 0.5 && totalNodesCount > 0) {
+      suggestions.push('Use more auto-layout in your Figma designs');
+    }
+
+    // WP44: Build breakdown for tooltip
+    const breakdown: ScoreBreakdown = {
+      rules: { points: rulesScore, max: 30 },
+      nodes: { points: nodesScore, max: 20 },
+      semantic: { points: semanticScore, max: 25, percent: Math.round(semanticPercent * 100) },
+      responsive: { points: responsiveScore, max: 25, percent: Math.round(responsivePercent * 100) },
+    };
 
     return {
       score,
@@ -141,6 +173,7 @@ export function useHealthScore(): HealthScoreResult {
         customRules,
         totalRules,
       },
+      breakdown,
       suggestions,
     };
   }, [nodes, rulesData]);

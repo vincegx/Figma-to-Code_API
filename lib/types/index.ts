@@ -280,6 +280,17 @@ export type {
 export { DEFAULT_DASHBOARD_CONFIG } from './dashboard';
 
 // ============================================================================
+// Stats History Types (WP44)
+// ============================================================================
+
+export type {
+  DailyStats,
+  StatsHistory,
+} from './stats-history';
+
+export { EMPTY_DAILY_STATS, DEFAULT_STATS_HISTORY } from './stats-history';
+
+// ============================================================================
 // Versioning Types (WP40)
 // ============================================================================
 

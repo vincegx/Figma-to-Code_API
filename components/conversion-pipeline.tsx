@@ -1,16 +1,16 @@
 'use client';
 
 /**
- * ConversionPipeline - Progress Visualization (WP42 Redesign V2)
+ * ConversionPipeline - Progress Visualization (WP42 Redesign V2, WP44 Updates)
  *
  * Shows the Figma → Code conversion process with:
  * - "Active" badge with lightning icon
  * - 3 numbered progress bars with distinct colors
- * - Mini-stats with sparklines at bottom
+ * - Mini-stats with sparklines from historical data (WP44)
  */
 
 import { useNodesStore } from '@/lib/store';
-import { useConversionRate } from '@/hooks/use-conversion-rate';
+import { useStatsHistory } from '@/hooks/use-stats-history';
 import { cn } from '@/lib/utils';
 import { Zap } from 'lucide-react';
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
@@ -100,16 +100,52 @@ function MiniStat({ value, label, sparklineData, color }: MiniStatProps) {
 
 export function ConversionPipeline() {
   const nodes = useNodesStore((s) => s.nodes);
-  const { rate, semantic, total } = useConversionRate();
+  const { totals, getSparklineData } = useStatsHistory(7);
 
   const totalNodes = nodes.length;
-  const matchedPercentage = rate;
-  const semanticPercentage = Math.round(matchedPercentage * 0.88);
 
-  // Generate sample sparkline data
-  const nodesSparkline = useMemo(() => [8, 10, 9, 12, 11, 12, totalNodes || 12], [totalNodes]);
-  const deprecationSparkline = useMemo(() => [2, 1, 3, 2, 1, 0, 0], []);
-  const semanticSparkline = useMemo(() => [20, 25, 30, 35, 38, 40, semanticPercentage || 40], [semanticPercentage]);
+  // WP44: Calculate from transformStats stored in library-index
+  const aggregatedStats = useMemo(() => {
+    let semantic = 0;
+    let arbitrary = 0;
+    nodes.forEach((node) => {
+      if (node.transformStats) {
+        semantic += node.transformStats.semanticCount || 0;
+        arbitrary += node.transformStats.arbitraryCount || 0;
+      }
+    });
+    return { semantic, arbitrary, total: semantic + arbitrary };
+  }, [nodes]);
+
+  // Use library stats, fallback to stats-history totals
+  const semanticCount = aggregatedStats.semantic || totals?.semanticCount || 0;
+  const arbitraryCount = aggregatedStats.arbitrary || totals?.arbitraryCount || 0;
+  const totalProps = semanticCount + arbitraryCount;
+
+  const matchedPercentage = totalProps > 0 ? Math.round((semanticCount / totalProps) * 100) : 0;
+  const semanticPercentage = matchedPercentage;
+
+  // WP44: Calculate real values from totals
+  const groupsInlined = totals?.groupsInlined || 0;
+  const variablesUsed = totals?.variablesUsed || 0;
+  const assetsCount = (totals?.imagesCount || 0) + (totals?.iconsCount || 0) + (totals?.gradientsCount || 0);
+
+  // WP44: Sparklines from historical data (last 7 days)
+  const groupsSparkline = useMemo(
+    () => getSparklineData('groupsInlined'),
+    [getSparklineData]
+  );
+  const variablesSparkline = useMemo(
+    () => getSparklineData('variablesUsed'),
+    [getSparklineData]
+  );
+  const assetsSparkline = useMemo(() => {
+    // Combine images + icons + gradients for assets sparkline
+    const images = getSparklineData('imagesCount');
+    const icons = getSparklineData('iconsCount');
+    const gradients = getSparklineData('gradientsCount');
+    return images.map((v, i) => v + icons[i] + gradients[i]);
+  }, [getSparklineData]);
 
   return (
     <div className="p-5 rounded-xl bg-bg-card border border-border-primary h-full flex flex-col">
@@ -153,24 +189,24 @@ export function ConversionPipeline() {
         />
       </div>
 
-      {/* Mini Stats with Sparklines */}
+      {/* Mini Stats with Sparklines (WP44: Real historical data) */}
       <div className="flex gap-4 mt-6 pt-4 border-t border-border-primary">
         <MiniStat
-          value={totalNodes}
-          label="Nodes imported"
-          sparklineData={nodesSparkline}
+          value={groupsInlined}
+          label="Groups inlined"
+          sparklineData={groupsSparkline}
           color="#22d3ee"
         />
         <MiniStat
-          value="0%"
-          label="Deprecation rejected"
-          sparklineData={deprecationSparkline}
+          value={variablesUsed}
+          label="Figma variables"
+          sparklineData={variablesSparkline}
           color="#fbbf24"
         />
         <MiniStat
-          value={`${semanticPercentage}%`}
-          label="Semantic classes"
-          sparklineData={semanticSparkline}
+          value={assetsCount}
+          label="Assets detected"
+          sparklineData={assetsSparkline}
           color="#34d399"
         />
       </div>

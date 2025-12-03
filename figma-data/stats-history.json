@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "retentionDays": 90,
+  "dailyStats": [
+    {
+      "date": "2025-12-03",
+      "nodesImported": 2,
+      "totalNodes": 1124,
+      "maxDepth": 13,
+      "nodesByType": {
+        "FRAME": 277,
+        "INSTANCE": 265,
+        "RECTANGLE": 26,
+        "VECTOR": 318,
+        "TEXT": 146,
+        "GROUP": 14,
+        "BOOLEAN_OPERATION": 62,
+        "LINE": 16
+      },
+      "autoLayoutCount": 351,
+      "absolutePositionedCount": 3,
+      "groupsInlined": 14,
+      "imagesCount": 30,
+      "iconsCount": 380,
+      "gradientsCount": 1,
+      "semanticCount": 10662,
+      "arbitraryCount": 96,
+      "variablesUsed": 245
+    }
+  ]
+}

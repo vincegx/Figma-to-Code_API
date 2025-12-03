@@ -180,6 +180,102 @@
       {
         "ts": 1764785198019,
         "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764786809799,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764786813157,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787078264,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787081774,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787447173,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787450698,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787480048,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787482728,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787511455,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787515717,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787579202,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787584538,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787840373,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787849923,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764787980606,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764787989495,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764788015818,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764788020325,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764788430474,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764788435254,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764789077977,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764789082824,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764789236164,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764789245005,
+        "endpoint": "fetchSVGBatch"
       }
     ],
     "tier2": [
@@ -265,6 +361,110 @@
       },
       {
         "ts": 1764785187073,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764786803073,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764786804561,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787072811,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787074313,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787094938,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787442113,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787443227,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787475339,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787476803,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787503943,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787505749,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787571422,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787572931,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787832057,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787834026,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764787973861,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764787975107,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764788007559,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764788009021,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764788374428,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764788422389,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764788423801,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764789065899,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764789067576,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764789225518,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764789226328,
         "endpoint": "fetchNode"
       }
     ]
