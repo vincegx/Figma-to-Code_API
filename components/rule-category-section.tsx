@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
-import { RuleCard } from './rule-card';
 
 interface RuleCategorySectionProps {
   category: string;
@@ -30,6 +29,13 @@ const categoryLabels: Record<string, string> = {
   other: 'Other',
 };
 
+// Priority badge colors based on value
+function getPriorityColor(priority: number): string {
+  if (priority >= 75) return 'bg-pink-500 text-white';
+  if (priority >= 50) return 'bg-emerald-500 text-white';
+  return 'bg-blue-500 text-white';
+}
+
 export function RuleCategorySection({
   category,
   rules,
@@ -37,54 +43,70 @@ export function RuleCategorySection({
 }: RuleCategorySectionProps) {
   const [isOpen, setIsOpen] = useState(!defaultCollapsed);
 
-  const activeRules = rules.filter((r) => !r.isOverridden).length;
   const overriddenRules = rules.filter((r) => r.isOverridden).length;
-  const priorityRange =
-    rules.length > 0
-      ? `${Math.min(...rules.map((r) => r.rule.priority))}-${Math.max(...rules.map((r) => r.rule.priority))}`
-      : '';
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800/40 rounded-md border border-gray-200 dark:border-gray-700/50 mx-3 mb-2">
+    <div className="mb-2">
+      {/* Category Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-2 py-2 px-2.5 hover:bg-gray-200/50 dark:hover:bg-gray-700/30 transition-colors text-left rounded-t-md"
+        className="w-full flex items-center gap-2 py-1.5 px-1 hover:bg-bg-hover transition-colors text-left rounded"
       >
         <ChevronRight
           className={cn(
-            'w-3.5 h-3.5 transition-transform text-gray-400 dark:text-gray-500',
+            'w-3 h-3 transition-transform text-text-muted',
             isOpen && 'rotate-90'
           )}
         />
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wide">
+        <span className="text-xs font-medium text-text-primary">
           {categoryLabels[category] || category}
         </span>
-        <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">
+        <span className="px-1.5 py-0.5 bg-bg-secondary text-text-muted rounded text-xs">
           {rules.length}
         </span>
         {overriddenRules > 0 && (
-          <span
-            className="text-xs text-orange-500"
-            title={`${overriddenRules} overridden`}
-          >
-            ⚠️ {overriddenRules}
-          </span>
+          <AlertTriangle className="w-3 h-3 text-amber-500" />
         )}
-        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400 font-mono">
-          {priorityRange}
-        </span>
+        <span className="text-xs text-text-muted">{overriddenRules}</span>
       </button>
 
+      {/* Rules List */}
       {isOpen && (
-        <div className="px-2.5 pb-2.5 pt-1 space-y-1.5">
-          {rules.map(({ rule, order, isOverridden, contributedProperties }) => (
-            <RuleCard
+        <div className="ml-4 mt-1 space-y-1">
+          {rules.map(({ rule, order, isOverridden }) => (
+            <div
               key={rule.id}
-              rule={rule}
-              order={order}
-              isOverridden={isOverridden}
-              contributedProperties={contributedProperties}
-            />
+              className={cn(
+                'flex items-center gap-2 py-1.5 px-2 rounded text-xs',
+                isOverridden && 'opacity-50'
+              )}
+            >
+              {/* Order */}
+              <span className="text-text-muted font-mono">#{order}</span>
+
+              {/* Type dot */}
+              <span className={cn(
+                'w-1.5 h-1.5 rounded-full',
+                rule.type === 'official' ? 'bg-blue-500' :
+                rule.type === 'community' ? 'bg-purple-500' : 'bg-emerald-500'
+              )} />
+
+              {/* Name */}
+              <span className="flex-1 text-text-primary truncate">{rule.name}</span>
+
+              {/* Warning if overridden */}
+              {isOverridden && (
+                <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0" />
+              )}
+
+              {/* Priority badge */}
+              <span className={cn(
+                'px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0',
+                getPriorityColor(rule.priority)
+              )}>
+                {rule.priority}
+              </span>
+            </div>
           ))}
         </div>
       )}

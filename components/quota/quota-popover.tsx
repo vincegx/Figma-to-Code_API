@@ -1,13 +1,8 @@
 /**
- * Quota Popover (WP41 T358)
+ * Quota Popover (WP41 T358 + WP42 Polish)
  *
  * Detailed popover with tier breakdown, endpoint stats, and 7-day chart.
- * Sections:
- * 1. Requests This Minute (2 progress bars)
- * 2. Endpoint Breakdown
- * 3. Today's Usage
- * 4. Last 7 Days (chart)
- * 5. Info Footer
+ * Updated with new dark mode design system colors.
  */
 
 'use client';
@@ -18,8 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { useQuotaStore } from '@/lib/store/quota-store';
 import {
   BarChart,
@@ -30,185 +23,192 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { Info } from 'lucide-react';
+import { Info, Zap, Database } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface QuotaPopoverProps {
   children: ReactNode;
+  side?: 'top' | 'right' | 'bottom' | 'left';
 }
 
-export function QuotaPopover({ children }: QuotaPopoverProps) {
-  // Use store directly - no interval here, indicator handles refresh
+export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
   const tier1LastMinute = useQuotaStore((s) => s.tier1LastMinute);
   const tier2LastMinute = useQuotaStore((s) => s.tier2LastMinute);
   const todayTotal = useQuotaStore((s) => s.todayTotal);
   const weeklyData = useQuotaStore((s) => s.weeklyData);
   const endpointBreakdown = useQuotaStore((s) => s.endpointBreakdown);
 
-  // Calculate tier percentages
   const tier1Percent = Math.round((tier1LastMinute / 15) * 100);
   const tier2Percent = Math.round((tier2LastMinute / 50) * 100);
 
-  // Format date for chart (show day name)
   const formattedWeeklyData = weeklyData.map((d) => {
     const date = new Date(d.date);
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    return {
-      ...d,
-      dayName,
-    };
+    return { ...d, dayName };
   });
 
-  // Check if there's any data
   const hasData = weeklyData.some((d) => d.tier1 > 0 || d.tier2 > 0);
+
+  const getStatusColor = (percent: number) => {
+    if (percent >= 80) return 'text-red-400';
+    if (percent >= 60) return 'text-amber-400';
+    return 'text-emerald-400';
+  };
+
+  const getProgressColor = (percent: number) => {
+    if (percent >= 80) return 'bg-red-500';
+    if (percent >= 60) return 'bg-amber-500';
+    return 'bg-emerald-500';
+  };
 
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-lg" align="end">
+      <PopoverContent
+        className="w-80 p-0 bg-bg-card border border-border-primary rounded-xl shadow-2xl"
+        align={side === 'right' ? 'start' : 'end'}
+        side={side}
+        sideOffset={8}
+      >
         <div className="p-4 space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-text-primary">API Quota</h3>
-            <span className="text-xs text-text-muted">Figma Rate Limits</span>
+            <h3 className="text-sm font-semibold text-text-primary">API Quota</h3>
+            <span className="text-xs text-text-muted px-2 py-0.5 rounded bg-bg-secondary">Figma Limits</span>
           </div>
 
-          <Separator />
-
           {/* Requests This Minute */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-text-secondary">
-              Requests This Minute
+          <div className="p-3 rounded-lg bg-bg-secondary space-y-3">
+            <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Requests / Minute
             </h4>
 
             {/* Tier 1 */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-text-muted">
+                <span className="flex items-center gap-1.5 text-text-secondary">
+                  <Zap className="w-3 h-3 text-cyan-400" />
                   Tier 1 (Images)
                 </span>
-                <span className={tier1Percent >= 80 ? 'text-status-error-text' : tier1Percent >= 60 ? 'text-status-warning-text' : 'text-text-secondary'}>
+                <span className={cn('font-mono font-medium', getStatusColor(tier1Percent))}>
                   {tier1LastMinute}/15
                 </span>
               </div>
-              <Progress
-                value={tier1Percent}
-                className="h-2"
-              />
+              <div className="h-1.5 bg-bg-primary rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all', getProgressColor(tier1Percent))}
+                  style={{ width: `${Math.min(tier1Percent, 100)}%` }}
+                />
+              </div>
             </div>
 
             {/* Tier 2 */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-text-muted">
+                <span className="flex items-center gap-1.5 text-text-secondary">
+                  <Database className="w-3 h-3 text-blue-400" />
                   Tier 2 (Data)
                 </span>
-                <span className={tier2Percent >= 80 ? 'text-status-error-text' : tier2Percent >= 60 ? 'text-status-warning-text' : 'text-text-secondary'}>
+                <span className={cn('font-mono font-medium', getStatusColor(tier2Percent))}>
                   {tier2LastMinute}/50
                 </span>
               </div>
-              <Progress
-                value={tier2Percent}
-                className="h-2"
-              />
+              <div className="h-1.5 bg-bg-primary rounded-full overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all', getProgressColor(tier2Percent))}
+                  style={{ width: `${Math.min(tier2Percent, 100)}%` }}
+                />
+              </div>
             </div>
           </div>
-
-          <Separator />
 
           {/* Endpoint Breakdown */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-text-secondary">
-              Endpoint Breakdown (Today)
+            <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Endpoints (Today)
             </h4>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className="text-text-muted">fetchScreenshot</span>
-                <span className="text-text-primary">{endpointBreakdown.fetchScreenshot}</span>
+                <span className="text-text-muted">Screenshot</span>
+                <span className="text-text-primary font-mono">{endpointBreakdown.fetchScreenshot}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">fetchSVGBatch</span>
-                <span className="text-text-primary">{endpointBreakdown.fetchSVGBatch}</span>
+                <span className="text-text-muted">SVG Batch</span>
+                <span className="text-text-primary font-mono">{endpointBreakdown.fetchSVGBatch}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">fetchNode</span>
-                <span className="text-text-primary">{endpointBreakdown.fetchNode}</span>
+                <span className="text-text-muted">Node</span>
+                <span className="text-text-primary font-mono">{endpointBreakdown.fetchNode}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">fetchFileMetadata</span>
-                <span className="text-text-primary">{endpointBreakdown.fetchFileMetadata}</span>
+                <span className="text-text-muted">Metadata</span>
+                <span className="text-text-primary font-mono">{endpointBreakdown.fetchFileMetadata}</span>
               </div>
             </div>
           </div>
-
-          <Separator />
 
           {/* Today's Usage */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-secondary">Today&apos;s Total</span>
-            <div className="text-text-primary">
-              <span className="text-accent-primary">{todayTotal.tier1}</span>
+          <div className="flex items-center justify-between p-3 rounded-lg bg-bg-secondary">
+            <span className="text-xs text-text-muted">Today&apos;s Total</span>
+            <div className="text-xs font-mono">
+              <span className="text-cyan-400">{todayTotal.tier1}</span>
               <span className="text-text-muted mx-1">+</span>
-              <span className="text-blue-500">{todayTotal.tier2}</span>
-              <span className="text-text-muted ml-1">= {todayTotal.tier1 + todayTotal.tier2}</span>
+              <span className="text-blue-400">{todayTotal.tier2}</span>
+              <span className="text-text-muted ml-1">= </span>
+              <span className="text-text-primary font-medium">{todayTotal.tier1 + todayTotal.tier2}</span>
             </div>
           </div>
-
-          <Separator />
 
           {/* 7-Day Chart */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-text-secondary">
+            <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider">
               Last 7 Days
             </h4>
             {hasData ? (
-              <div className="h-32">
+              <div className="h-28 -mx-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={formattedWeeklyData} barGap={2}>
                     <XAxis
                       dataKey="dayName"
-                      tick={{ fontSize: 10 }}
+                      tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis hide />
                     <Tooltip
-                      cursor={{ fill: 'rgba(0,0,0,0.1)' }}
+                      cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                       contentStyle={{
-                        backgroundColor: '#27272a',
-                        border: '1px solid #3f3f46',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        color: '#fafafa',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.4)',
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-primary)',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        color: 'var(--text-primary)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
                       }}
-                      labelStyle={{ color: '#d4d4d8', marginBottom: '4px' }}
-                      itemStyle={{ color: '#fafafa', padding: '2px 0' }}
-                      wrapperStyle={{ outline: 'none' }}
+                      labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px' }}
+                      itemStyle={{ color: 'var(--text-primary)', padding: '2px 0' }}
                     />
                     <Legend
                       formatter={(value) => (value === 'tier1' ? 'Images' : 'Data')}
                       wrapperStyle={{ fontSize: '10px' }}
                     />
-                    <Bar dataKey="tier1" fill="var(--accent-primary)" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="tier2" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="tier1" fill="#22d3ee" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="tier2" fill="#3b82f6" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-32 flex items-center justify-center text-text-muted text-sm">
+              <div className="h-28 flex items-center justify-center text-text-muted text-xs">
                 No API calls yet
               </div>
             )}
           </div>
 
-          <Separator />
-
           {/* Info Footer */}
-          <div className="flex items-start gap-2 text-xs text-text-muted">
-            <Info className="h-3 w-3 mt-0.5 shrink-0" />
-            <p>
-              Tier 1: 15 req/min (images). Tier 2: 50 req/min (data).
-              Data retained for 7 days.
+          <div className="flex items-start gap-2 pt-2 border-t border-border-primary">
+            <Info className="h-3 w-3 mt-0.5 shrink-0 text-text-muted" />
+            <p className="text-xs text-text-muted leading-relaxed">
+              Tier 1: 15/min (images) • Tier 2: 50/min (data)
             </p>
           </div>
         </div>

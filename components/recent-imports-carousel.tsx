@@ -1,19 +1,19 @@
 'use client';
 
 /**
- * RecentImportsCarousel - Horizontal Scroll Component
+ * RecentImportsCarousel - Horizontal Scroll Component (WP42 Redesign V2)
  *
  * Displays recent imports in a horizontal carousel with:
- * - Thumbnail previews
- * - Node name and type
- * - "Add more" CTA
- * - Quick action buttons
+ * - Dark solid cards (no thumbnails)
+ * - Status badges (green/amber dot)
+ * - Node count display
+ * - Subtitle "Latest Figma files you've converted"
  */
 
 import { useNodesStore } from '@/lib/store';
-import { Plus, ArrowRight, Package } from 'lucide-react';
-import Image from 'next/image';
+import { Plus, ArrowUpRight, Package } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 export function RecentImportsCarousel() {
@@ -27,18 +27,27 @@ export function RecentImportsCarousel() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Determine status (green = viewed, amber = processing, etc.)
+  const getStatusColor = (node: typeof nodes[0]) => {
+    // Simple logic: if it has altNode, it's processed
+    return node.altNode ? 'bg-emerald-400' : 'bg-amber-400';
+  };
+
   return (
-    <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
+    <div className="p-5 rounded-xl bg-bg-card border border-border-primary">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-text-primary">Recent Imports</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-text-primary">Recent Imports</h3>
+          <p className="text-xs text-text-muted mt-0.5">Latest Figma files you&apos;ve converted</p>
+        </div>
         {nodes.length > 0 && (
           <Link
             href="/nodes"
-            className="text-sm text-accent-primary hover:underline flex items-center gap-1 font-medium"
+            className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-1 font-medium transition-colors"
           >
             View all {nodes.length}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowUpRight className="w-4 h-4" />
           </Link>
         )}
       </div>
@@ -65,37 +74,45 @@ export function RecentImportsCarousel() {
               <Link
                 key={node.id}
                 href={`/viewer/${node.id}`}
-                className="flex-shrink-0 w-36 group"
+                className="flex-shrink-0 w-56 group"
               >
-                {/* Thumbnail */}
+                {/* Card with Thumbnail */}
                 <div
                   className={cn(
-                    'aspect-square rounded-lg bg-bg-secondary border border-border-primary overflow-hidden mb-2',
-                    'group-hover:border-accent-primary group-hover:shadow-md',
+                    'relative h-32 rounded-lg bg-bg-secondary border border-border-primary overflow-hidden mb-3',
+                    'group-hover:border-border-secondary group-hover:bg-bg-hover',
                     'transition-all duration-200'
                   )}
                 >
+                  {/* Thumbnail Image */}
                   {node.thumbnail ? (
                     <Image
                       src={node.thumbnail}
                       alt={node.name}
-                      width={144}
-                      height={144}
-                      className="object-cover w-full h-full"
+                      fill
+                      className="object-cover"
+                      sizes="224px"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="w-10 h-10 text-text-muted" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Package className="w-8 h-8 text-text-muted" />
                     </div>
                   )}
+                  {/* Status Badge */}
+                  <div className="absolute top-3 right-3">
+                    <span className={cn(
+                      'w-3 h-3 rounded-full block',
+                      getStatusColor(node)
+                    )} />
+                  </div>
                 </div>
 
-                {/* Name & Type */}
-                <p className="text-sm font-medium text-text-primary truncate group-hover:text-accent-primary transition-colors">
+                {/* Name & Date */}
+                <p className="text-xs font-medium text-text-primary truncate group-hover:text-accent-primary transition-colors">
                   {node.name}
                 </p>
-                <p className="text-xs text-text-muted truncate">
-                  {node.altNode?.type || 'Node'}
+                <p className="text-xs text-text-muted">
+                  {node.addedAt ? new Date(node.addedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                 </p>
               </Link>
             ))}
@@ -104,11 +121,11 @@ export function RecentImportsCarousel() {
             <button
               onClick={scrollToTop}
               className={cn(
-                'flex-shrink-0 w-36 aspect-square rounded-lg',
+                'flex-shrink-0 w-56 h-32 rounded-lg',
                 'border-2 border-dashed border-border-primary',
-                'hover:border-accent-primary hover:bg-accent-primary/5',
+                'hover:border-border-secondary hover:bg-bg-hover',
                 'flex flex-col items-center justify-center gap-2',
-                'text-text-muted hover:text-accent-primary',
+                'text-text-muted hover:text-text-secondary',
                 'transition-all duration-200'
               )}
             >

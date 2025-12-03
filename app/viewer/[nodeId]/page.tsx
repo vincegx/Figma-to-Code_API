@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Resizable } from 're-resizable';
 import { useNodesStore, useUIStore } from '@/lib/store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,19 @@ import {
   PanelRightOpen,
   Crosshair,
   CloudDownload,
+  Clock,
+  Home,
+  Eye,
+  Smartphone,
+  Tablet,
+  Copy,
+  Check,
+  Maximize2,
+  X,
 } from 'lucide-react';
+import { useApiQuota } from '@/hooks/use-api-quota';
+import { QuotaIndicator } from '@/components/quota/quota-indicator';
+import { Highlight, themes } from 'prism-react-renderer';
 import { RefetchButton } from '@/components/refetch-button';
 import { RefetchDialog } from '@/components/refetch-dialog';
 import { VersionDropdown } from '@/components/version-dropdown';
@@ -48,13 +61,97 @@ import LivePreview, { type LivePreviewHandle } from '@/components/live-preview';
 import { FigmaTypeIcon } from '@/components/figma-type-icon';
 import { getNodeColors } from '@/lib/utils/node-colors';
 import { cn } from '@/lib/utils';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+// ResizablePanelGroup removed - using re-resizable uniformly
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
 import { setCachedVariablesMap } from '@/lib/utils/variable-css';
+
+// Hierarchy Block Component - local state, doesn't affect Figma Tree
+function HierarchyBlock({ node }: { node: SimpleAltNode | null }) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const children = node?.children || [];
+  const childCount = children.length;
+
+  const renderNode = (child: SimpleAltNode, depth: number = 0) => {
+    const hasChildren = child.children && child.children.length > 0;
+    const isExpanded = expandedIds.has(child.id);
+
+    return (
+      <div key={child.id}>
+        <div
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded text-xs cursor-pointer transition-colors",
+            "hover:bg-bg-hover"
+          )}
+          style={{ paddingLeft: `${12 + depth * 12}px` }}
+          onClick={() => hasChildren && toggleExpand(child.id)}
+        >
+          {hasChildren ? (
+            <ChevronRight
+              className={cn(
+                "w-3 h-3 text-text-muted transition-transform",
+                isExpanded && "rotate-90"
+              )}
+            />
+          ) : (
+            <span className="w-3 h-3" />
+          )}
+          <span className="text-text-primary">{child.name}</span>
+          {hasChildren && (
+            <span className="text-text-muted ml-auto">{child.children!.length}</span>
+          )}
+        </div>
+        {isExpanded && child.children && (
+          <div>
+            {child.children.slice(0, 10).map(subChild => renderNode(subChild, depth + 1))}
+            {child.children.length > 10 && (
+              <div className="text-xs text-text-muted px-3 py-1" style={{ paddingLeft: `${24 + depth * 12}px` }}>
+                +{child.children.length - 10} more...
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-bg-card rounded-xl border border-border-primary p-4">
+      <span className="text-sm font-medium text-text-primary mb-4 block">Hierarchy</span>
+      <div className="flex items-center justify-between mb-3 text-xs">
+        <span className="text-text-muted">Children</span>
+        <span className="text-text-primary">{childCount} nodes</span>
+      </div>
+      <div className="space-y-1 h-[140px] overflow-auto">
+        {children.slice(0, 10).map(child => renderNode(child))}
+        {children.length > 10 && (
+          <div className="text-xs text-text-muted px-3 py-1">
+            +{children.length - 10} more...
+          </div>
+        )}
+        {children.length === 0 && (
+          <div className="text-xs text-text-muted">No children</div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function ViewerPage() {
 
@@ -65,6 +162,9 @@ export default function ViewerPage() {
   const nodes = useNodesStore((state) => state.nodes);
   const loadLibrary = useNodesStore((state) => state.loadLibrary);
   const selectNode = useNodesStore((state) => state.selectNode);
+
+  // API Quota for header badge
+  const { criticalPercent, status: apiStatus } = useApiQuota();
 
   // UI Store for panel collapse and responsive mode
   const {
@@ -98,8 +198,12 @@ export default function ViewerPage() {
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
   const [generatedCode, setGeneratedCode] = useState<string>('');
+  const [generatedCss, setGeneratedCss] = useState<string>(''); // WP42: CSS for Styles tab
+  const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component'); // WP42: Active tab state
+  const [copiedCode, setCopiedCode] = useState(false); // WP42: Copy feedback
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
+  const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false); // WP42: Fullscreen mode for Canvas Preview
 
   // WP40: Refetch dialog and version state
   const [refetchDialogOpen, setRefetchDialogOpen] = useState(false);
@@ -153,6 +257,21 @@ export default function ViewerPage() {
     if (!altNode || multiFrameworkRules.length === 0) return {};
     return evaluateMultiFrameworkRules(altNode, multiFrameworkRules, previewFramework).properties;
   }, [altNode, multiFrameworkRules, previewFramework]);
+
+  // Display node (selected or root) - must be before early returns
+  const displayNode = selectedNode || altNode;
+
+  // Helper: count applied rules - must be before early returns
+  const appliedRulesCount = useMemo(() => {
+    if (!displayNode || multiFrameworkRules.length === 0) return 0;
+    return multiFrameworkRules.filter((rule) => {
+      if (!rule.transformers[previewFramework]) return false;
+      // Cast selector to access optional nodeTypes field from API
+      const selector = rule.selector as typeof rule.selector & { nodeTypes?: string[] };
+      const nodeTypes = selector.nodeTypes || [];
+      return nodeTypes.length === 0 || nodeTypes.includes(displayNode.type || '');
+    }).length;
+  }, [displayNode, multiFrameworkRules, previewFramework]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
@@ -241,10 +360,14 @@ export default function ViewerPage() {
         if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
           const output = await generateReactTailwind(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
+          setGeneratedCss('/* Tailwind classes are inline - no separate styles needed */'); // WP42
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
           const output = await generateHTMLTailwindCSS(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
-          setGeneratedCode(output.code + (output.css ? '\n\n/* CSS */\n' + output.css : ''));
+          // WP42: Combine HTML + CSS with marker for LivePreview (buildHTMLDocument splits on /* CSS */)
+          const combinedCode = `<!-- HTML -->\n${output.code}\n\n/* CSS */\n${output.css || ''}`;
+          setGeneratedCode(combinedCode);
+          setGeneratedCss(output.css || '/* No styles generated */'); // WP42: Separate CSS for Styles tab
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         }
       } catch (error) {
@@ -352,379 +475,521 @@ export default function ViewerPage() {
   const nodeType = currentNode.altNode?.type || 'FRAME';
   const nodeColors = getNodeColors(nodeType);
 
+  // Helper: format date
+  const formatDateTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Helper: count children
+  const countChildren = (node: SimpleAltNode | null): number => {
+    if (!node?.children) return 0;
+    return node.children.length;
+  };
+
+  // Helper: get hierarchy nodes
+  const getHierarchyNodes = (node: SimpleAltNode | null): { name: string; id: string }[] => {
+    if (!node?.children) return [];
+    return node.children.slice(0, 5).map((child) => ({ name: child.name || 'unnamed', id: child.id }));
+  };
+
+  const codeLines = generatedCode.split('\n').length;
+
   return (
-    <div className="h-screen flex flex-col bg-bg-primary">
-      {/* Breadcrumb Row */}
-      <div className="px-4 py-1.5 border-b border-border-primary bg-bg-card/50">
-        <Breadcrumbs
-          items={[
-            { label: 'Library', href: '/nodes' },
-            { label: currentNode.name, figmaType: nodeType },
-          ]}
-          className="text-xs"
-        />
-      </div>
-
-      {/* Node Info Header */}
-      <div className="border-b border-border-primary px-4 py-3 bg-bg-card">
-        <div className="flex items-center justify-between">
-          {/* Left: Thumbnail + Name */}
-          <div className="flex items-center gap-3">
-            {/* Thumbnail */}
-            <div className="w-10 h-10 bg-bg-secondary rounded overflow-hidden">
-              {currentNode.thumbnail ? (
-                <Image
-                  src={currentNode.thumbnail}
-                  alt={currentNode.name}
-                  width={40}
-                  height={40}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-text-muted text-xl">
-                  📦
-                </div>
-              )}
-            </div>
-
-            {/* Name and metadata */}
-            <div>
-              <h1 className="text-base font-semibold text-text-primary flex items-center gap-2">
-                <FigmaTypeIcon type={nodeType} size={16} className={nodeColors.text} />
-                {currentNode.name}
-              </h1>
-              <div className="text-xs text-text-secondary flex items-center gap-2">
-                <span>{nodeType}</span>
-                <span>•</span>
-                {/* WP40: Version dropdown */}
-                <VersionDropdown
-                  nodeId={nodeId}
-                  selectedVersion={selectedVersionFolder}
-                  onVersionSelect={handleVersionSelect}
-                  refreshKey={iframeKey}
-                />
-                {selectedVersionFolder && (
-                  <span className="bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 text-xs px-1.5 py-0.5 rounded">
-                    Ancienne version
-                  </span>
-                )}
-              </div>
-            </div>
+    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
+      {/* ========== HEADER ========== */}
+      <header className="flex-shrink-0 flex justify-between px-5 py-3">
+        {/* BLOC GAUCHE: Titre + Date + Breadcrumb */}
+        <div>
+          <div className="flex items-center gap-4 mb-1">
+            <h1 className="text-2xl font-semibold text-text-primary">{currentNode.name}</h1>
+            <VersionDropdown
+              nodeId={nodeId}
+              selectedVersion={selectedVersionFolder}
+              onVersionSelect={handleVersionSelect}
+              refreshKey={iframeKey}
+            />
+            {selectedVersionFolder && (
+              <span className="bg-amber-500/20 text-amber-400 text-xs px-1.5 py-0.5 rounded">
+                Ancienne version
+              </span>
+            )}
           </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Link href="/" className="text-text-muted hover:text-text-primary"><Home className="w-4 h-4" /></Link>
+            <ChevronRight className="w-4 h-4 text-text-muted" />
+            <Link href="/nodes" className="text-text-muted hover:text-text-primary">Code render</Link>
+            <ChevronRight className="w-4 h-4 text-text-muted" />
+            <span className="text-text-primary">{displayNode?.name || currentNode.name}</span>
+          </div>
+        </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1">
-            {/* Prev/Next navigation */}
-            <button
-              onClick={() => {
-                if (prevNode) {
-                  router.push(`/viewer/${prevNode.id}`);
-                }
-              }}
-              disabled={!prevNode}
-              className="p-1.5 rounded hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-secondary"
-              title="Previous node"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={() => {
-                if (nextNode) {
-                  router.push(`/viewer/${nextNode.id}`);
-                }
-              }}
-              disabled={!nextNode}
-              className="p-1.5 rounded hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-secondary"
-              title="Next node"
-            >
-              <ChevronRight size={18} />
-            </button>
+        {/* BLOC DROIT: API Badge + Actions */}
+        <div className="flex items-center gap-4">
+          {/* API Badge avec Popover */}
+          <QuotaIndicator />
 
-            <div className="w-px h-5 bg-border-primary mx-1" />
-
-            {/* WP40: Re-fetch from Figma with version dialog */}
+          {/* Actions */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setRefetchDialogOpen(true)}
               disabled={isRefetching}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
               title="Re-fetch from Figma"
-              className="p-1.5 rounded hover:bg-bg-hover text-text-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CloudDownload size={18} className={isRefetching ? 'animate-pulse' : ''} />
+              <CloudDownload className="w-4 h-4" />
             </button>
-
-            {/* Refresh Preview (WP33: reload iframe without refetching) */}
             <button
-              onClick={() => setIframeKey(prev => prev + 1)}
-              className="p-1.5 rounded hover:bg-bg-hover text-text-secondary"
+              onClick={() => setIframeKey((k) => k + 1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors"
               title="Refresh preview"
             >
-              <RefreshCw size={18} />
+              <RefreshCw className="w-4 h-4" />
             </button>
-
-            {/* Export dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1.5 rounded hover:bg-bg-hover text-text-secondary"
-                  title="Export"
-                >
-                  <Download size={18} />
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors" title="Export">
+                  <Download className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(generatedCode);
-                      console.log('Code copied to clipboard');
-                    } catch (error) {
-                      console.error('Failed to copy:', error);
-                      alert('Failed to copy to clipboard');
-                    }
-                  }}
-                >
+              <DropdownMenuContent align="end" className="bg-bg-card border border-border-primary">
+                <DropdownMenuItem onClick={async () => { await navigator.clipboard.writeText(generatedCode); }}>
                   Copy to Clipboard
                 </DropdownMenuItem>
-                <DropdownMenuItem
+                <DropdownMenuItem onClick={() => {
+                  const blob = new Blob([generatedCode], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${currentNode.name}.tsx`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}>
+                  Download Code File
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <button
+              onClick={() => prevNode && router.push(`/viewer/${prevNode.id}`)}
+              disabled={!prevNode}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+              title="Previous node"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => nextNode && router.push(`/viewer/${nextNode.id}`)}
+              disabled={!nextNode}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+              title="Next node"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <Select value={previewFramework} onValueChange={(v) => setPreviewFramework(v as FrameworkType)}>
+              <SelectTrigger className="h-8 w-[160px] bg-[#1e293b] border-[#334155] text-xs text-text-muted hover:bg-[#334155]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-bg-card border border-border-primary">
+                <SelectItem value="react-tailwind" className="text-xs">React + Tailwind</SelectItem>
+                <SelectItem value="react-tailwind-v4" className="text-xs">React + Tailwind v4</SelectItem>
+                <SelectItem value="html-css" className="text-xs">HTML + CSS</SelectItem>
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => router.push(`/rules?nodeId=${nodeId}`)}
+              className="h-8 px-4 flex items-center gap-2 rounded-lg bg-[#2B7FFF] hover:bg-[#1a6fe8] text-white text-sm font-medium transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Edit Rules
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ========== MAIN CONTENT (scrollable) ========== */}
+      <main className="flex-1 overflow-auto p-4">
+
+        {/* ========== ROW 1: Figma Tree + Canvas Preview (resizable height) ========== */}
+        <Resizable
+          defaultSize={{ width: '100%', height: 600 }}
+          minHeight={350}
+          enable={{ bottom: true }}
+          handleStyles={{
+            bottom: {
+              height: '20px',
+              cursor: 'ns-resize',
+              bottom: '0px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }
+          }}
+          handleComponent={{
+            bottom: (
+              <div className="w-16 h-1 bg-border-primary rounded-full hover:bg-cyan-500 transition-colors" />
+            )
+          }}
+        >
+          <div className="flex h-[calc(100%-20px)]">
+            {/* Block: Figma Tree (resizable width) */}
+            {!viewerLeftPanelCollapsed ? (
+              <Resizable
+                defaultSize={{ width: 320, height: '100%' }}
+                minWidth={240}
+                maxWidth={520}
+                enable={{ right: true }}
+                handleStyles={{
+                  right: {
+                    width: '20px',
+                    cursor: 'ew-resize',
+                    right: '0px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }
+                }}
+                handleComponent={{
+                  right: (
+                    <div className="h-16 w-1 bg-border-primary rounded-full hover:bg-cyan-500 transition-colors" />
+                  )
+                }}
+                className="flex-shrink-0"
+              >
+                {/* Card avec marge droite pour laisser place au handle */}
+                <div className="h-full mr-5 bg-bg-card rounded-xl border border-border-primary flex flex-col overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-primary">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-text-primary">Figma Tree</span>
+                      <button
+                        onClick={() => setViewerHighlightEnabled(!viewerHighlightEnabled)}
+                        className={cn(
+                          'flex items-center gap-1 px-2 py-0.5 text-xs rounded',
+                          viewerHighlightEnabled ? 'bg-cyan-500/20 text-cyan-400' : 'bg-bg-secondary text-text-muted hover:bg-bg-hover'
+                        )}
+                      >
+                        <Eye className="w-3 h-3" />
+                        Inspect
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setViewerLeftPanelCollapsed(true)}
+                      className="w-6 h-6 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                      title="Collapse panel"
+                    >
+                      <PanelLeftClose className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <FigmaTreeView
+                      altNode={altNode}
+                      selectedNodeId={selectedTreeNodeId}
+                      onNodeClick={(id) => setSelectedTreeNodeId(id)}
+                    />
+                  </div>
+                </div>
+              </Resizable>
+            ) : (
+              <div className="w-10 flex-shrink-0 mr-4 bg-bg-card rounded-lg border border-border-primary flex flex-col items-center py-2">
+                <button
+                  onClick={() => setViewerLeftPanelCollapsed(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                  title="Expand panel"
+                >
+                  <PanelLeftOpen className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Block: Canvas Preview (takes remaining space) */}
+            <div className="flex-1 bg-bg-card rounded-xl border border-border-primary flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-primary">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-text-primary">Canvas Preview</span>
+                  <span className="text-xs text-text-muted tabular-nums">{viewerViewportWidth} × {viewerViewportHeight}</span>
+                  {/* Device icons for responsive mode */}
+                  <div className="flex items-center gap-0.5 p-0.5 bg-[#1e293b] rounded">
+                    <button
+                      onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(375, 667); }}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      title="Mobile (375×667)"
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(768, 1024); }}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      title="Tablet (768×1024)"
+                    >
+                      <Tablet className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setViewerResponsiveMode(false)}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      title="Desktop (Full width)"
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
+                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                    title={viewerResponsiveMode ? "Exit responsive mode" : "Enter responsive mode (resize preview)"}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewerGridVisible(!viewerGridVisible)}
+                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                    title="Toggle grid"
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsCanvasFullscreen(true)}
+                    className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                    title="Fullscreen"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 relative bg-[#0f172a]">
+                <ResizablePreviewViewport>
+                  {viewerGridVisible && (
+                    <div
+                      className="absolute inset-0 pointer-events-none z-10"
+                      style={{
+                        backgroundImage: `
+                          repeating-linear-gradient(0deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${viewerGridSpacing}px),
+                          repeating-linear-gradient(90deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${viewerGridSpacing}px)
+                        `,
+                      }}
+                    />
+                  )}
+                  <LivePreview
+                    ref={livePreviewRef}
+                    key={iframeKey}
+                    code={generatedCode}
+                    framework={previewFramework}
+                    language={previewFramework === 'html-css' ? 'html' : 'tsx'}
+                    googleFontsUrl={googleFontsUrl}
+                  />
+                </ResizablePreviewViewport>
+              </div>
+            </div>
+          </div>
+        </Resizable>
+
+        {/* ========== ROW 2 & 3: Info panels ========== */}
+        <div className="grid grid-cols-2 gap-4 items-stretch">
+          {/* Block: Generated Code */}
+          <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-text-primary">Generated Code</span>
+                <button
+                  onClick={() => setCodeActiveTab('component')}
+                  className={cn(
+                    'px-2 py-0.5 text-xs rounded transition-colors',
+                    codeActiveTab === 'component' ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover'
+                  )}
+                >
+                  Component
+                </button>
+                <button
+                  onClick={() => setCodeActiveTab('styles')}
+                  className={cn(
+                    'px-2 py-0.5 text-xs rounded transition-colors',
+                    codeActiveTab === 'styles' ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover'
+                  )}
+                >
+                  Styles
+                </button>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={async () => {
+                    const textToCopy = codeActiveTab === 'component' ? generatedCode : generatedCss;
+                    await navigator.clipboard.writeText(textToCopy);
+                    setCopiedCode(true);
+                    setTimeout(() => setCopiedCode(false), 2000);
+                  }}
+                  className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                  title="Copy to clipboard"
+                >
+                  {copiedCode ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+                <button
                   onClick={() => {
-                    const blob = new Blob([generatedCode], { type: 'text/plain' });
+                    const textToDownload = codeActiveTab === 'component' ? generatedCode : generatedCss;
+                    const extension = codeActiveTab === 'component'
+                      ? (previewFramework === 'html-css' ? 'html' : 'tsx')
+                      : 'css';
+                    const blob = new Blob([textToDownload], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${currentNode.name}.tsx`;
+                    a.download = `${currentNode.name}.${extension}`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
+                  className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                  title="Download file"
                 >
-                  Download Code File
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <Download className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {/* Code area - limited height to match right column */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <Highlight
+                theme={themes.nightOwl}
+                code={codeActiveTab === 'component' ? generatedCode : generatedCss}
+                language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
+              >
+                {({ style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[380px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token })} />
+                        ))}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+            {/* Footer - always at bottom */}
+            <div className="flex items-center gap-2 mt-3 text-xs text-text-muted flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>No errors</span>
+              <span>•</span>
+              <span>{(codeActiveTab === 'component' ? generatedCode : generatedCss).split('\n').length} lines</span>
+            </div>
+          </div>
 
-            <div className="w-px h-5 bg-border-primary mx-1" />
+          {/* Block: Node Info + Hierarchy + Layout */}
+          <div className="flex flex-col gap-4">
+            {/* Node Info */}
+            <div className="bg-bg-card rounded-xl border border-border-primary p-4">
+              <span className="text-sm font-medium text-text-primary mb-4 block">Node Info</span>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                <div><span className="text-text-muted text-xs block mb-1">Name</span><span className="text-text-primary text-sm">{displayNode?.name}</span></div>
+                <div><span className="text-text-muted text-xs block mb-1">Type</span><span className="flex gap-1"><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">div</span><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">{displayNode?.type || 'FRAME'}</span></span></div>
+                <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.id}</span></div>
+                <div><span className="text-text-muted text-xs block mb-1">Children</span><span className="text-text-primary text-sm">{countChildren(displayNode)} nodes</span></div>
+                <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Status</span><span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400 text-sm">Visible</span><span className="text-text-muted text-sm">• Not Locked</span></span></div>
+              </div>
+            </div>
 
-            {/* "Edit Rules" button */}
-            <button
-              onClick={() => (window.location.href = `/rules?nodeId=${nodeId}`)}
-              className="px-3 py-1.5 bg-accent-primary text-white text-sm rounded hover:bg-accent-hover flex items-center gap-1.5"
-            >
-              <Settings size={14} />
-              Edit Rules
-            </button>
+            {/* Hierarchy + Layout side by side */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Hierarchy */}
+              <HierarchyBlock node={displayNode} />
+
+
+              {/* Layout */}
+              <div className="bg-bg-card rounded-xl border border-border-primary p-4">
+                <span className="text-sm font-medium text-text-primary mb-4 block">Layout</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-8">
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">Width</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.width || 0)}px</span></div>
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">Height</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.height || 0)}px</span></div>
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">X</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.x || 0)}px</span></div>
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">Y</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.y || 0)}px</span></div>
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">Mode</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.layoutMode || 'NONE'}</span></div>
+                  <div className="flex justify-between text-xs"><span className="text-text-muted">Gap</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.itemSpacing || 0}px</span></div>
+                  <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Padding</span><span className="text-text-primary font-mono tracking-wider">{(displayNode?.originalNode as any)?.paddingTop || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingRight || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingBottom || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingLeft || 0}</span></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Responsive Mode Toolbar */}
-      <div className="flex gap-2 items-center border-b border-border-primary px-4 py-4">
-        {/* Toggle Responsive Mode */}
-        <Button
-          variant={viewerResponsiveMode ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
-        >
-          <Monitor className="w-4 h-4 mr-1" />
-          Responsive Mode
-        </Button>
-
-        {/* Options visible only if responsive mode active */}
-        {viewerResponsiveMode && (
-          <>
-            {/* Toggle Grid */}
-            <Button
-              variant={viewerGridVisible ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewerGridVisible(!viewerGridVisible)}
-            >
-              <Grid3x3 className="w-4 h-4 mr-1" />
-              Grid
-            </Button>
-
-            {/* Grid Spacing */}
-            {viewerGridVisible && (
-              <Select
-                value={viewerGridSpacing.toString()}
-                onValueChange={(v: string) => setViewerGridSpacing(Number(v) as 8 | 16 | 24)}
-              >
-                <SelectTrigger className="w-20 h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="8">8px</SelectItem>
-                  <SelectItem value="16">16px</SelectItem>
-                  <SelectItem value="24">24px</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-
-          </>
-        )}
-
-        {/* WP35: Toggle Selection Highlight */}
-        <Button
-          variant={viewerHighlightEnabled ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setViewerHighlightEnabled(!viewerHighlightEnabled)}
-          title={viewerHighlightEnabled ? 'Disable selection highlight' : 'Enable selection highlight'}
-        >
-          <Crosshair className="w-4 h-4" />
-        </Button>
-
-        {/* Framework Selector */}
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400">Framework:</span>
-          <Select value={previewFramework} onValueChange={(v: string) => setPreviewFramework(v as FrameworkType)}>
-            <SelectTrigger className="w-36 h-7 text-xs bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="react-tailwind">React + Tailwind v3</SelectItem>
-              <SelectItem value="react-tailwind-v4">React + Tailwind v4</SelectItem>
-              <SelectItem value="html-css">HTML + CSS</SelectItem>
-              <SelectItem value="react-inline">React Inline</SelectItem>
-              <SelectItem value="swift-ui">SwiftUI</SelectItem>
-              <SelectItem value="android-xml">Android XML</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Three-Panel Elastic Layout with Resizable */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        {/* Left Panel - Tree View (Collapsable & Resizable) */}
-        {!viewerLeftPanelCollapsed && (
-          <>
-            <ResizablePanel
-              defaultSize={20}
-              minSize={15}
-              maxSize={30}
-              className="border-r border-border-primary bg-bg-primary relative"
-            >
-              <div className="h-full overflow-auto pt-10">
-                <FigmaTreeView
-                  altNode={altNode}
-                  selectedNodeId={selectedTreeNodeId}
-                  onNodeClick={(id) => setSelectedTreeNodeId(id)}
-                />
+        {/* ========== ROW 3: Appearance/Constraints + Raw Data + Rules ========== */}
+        <div className="grid grid-cols-3 gap-4 mt-4 pb-6 items-stretch">
+          {/* Column 1: Appearance + Constraints */}
+          <div className="flex flex-col gap-4">
+            {/* Appearance */}
+            <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
+              <span className="text-sm font-medium text-text-primary mb-4 block">Appearance</span>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                <div className="flex justify-between text-xs"><span className="text-text-muted">Fills</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.fills?.length || 0} fill(s)</span></div>
+                <div className="flex justify-between text-xs"><span className="text-text-muted">Opacity</span><span className="text-text-primary">{Math.round(((displayNode?.originalNode as any)?.opacity ?? 1) * 100)}%</span></div>
+                <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Blend Mode</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.blendMode || 'PASS_THROUGH'}</span></div>
               </div>
+            </div>
 
-              {/* Collapse Button */}
-              <button
-                onClick={() => setViewerLeftPanelCollapsed(true)}
-                className="absolute top-2 right-2 z-[60] p-1.5 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
-                title="Collapse tree"
+            {/* Constraints */}
+            <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
+              <span className="text-sm font-medium text-text-primary mb-4 block">Constraints</span>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                <div className="flex justify-between text-xs"><span className="text-text-muted">Horizontal</span><span className="text-text-primary">{displayNode?.originalNode?.constraints?.horizontal || 'LEFT'}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-text-muted">Vertical</span><span className="text-text-primary">{displayNode?.originalNode?.constraints?.vertical || 'TOP'}</span></div>
+                <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Clipping</span><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400">Yes</span></span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Raw Figma Data */}
+          <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
+              <span className="text-sm font-medium text-text-primary">Raw figma data</span>
+              <div className="flex items-center gap-1">
+                <button onClick={async () => { await navigator.clipboard.writeText(JSON.stringify(displayNode, null, 2)); }} className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"><Copy className="w-4 h-4" /></button>
+                <button className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"><Download className="w-4 h-4" /></button>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <Highlight
+                theme={themes.nightOwl}
+                code={JSON.stringify(displayNode, null, 2)?.slice(0, 2000) || '{}'}
+                language="json"
               >
-                <PanelLeftClose size={14} />
-              </button>
-            </ResizablePanel>
+                {({ style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className="text-xs rounded-lg p-3 overflow-auto h-44 font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token })} />
+                        ))}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+            <div className="flex items-center gap-2 mt-2 text-xs text-text-muted flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>No errors</span>
+              <span>•</span>
+              <span>{JSON.stringify(displayNode, null, 2)?.split('\n').length || 0} lines</span>
+            </div>
+          </div>
 
-            <ResizableHandle className="bg-border-primary" />
-          </>
-        )}
-
-        {/* Expand Left Button (when collapsed) */}
-        {viewerLeftPanelCollapsed && (
-          <button
-            onClick={() => setViewerLeftPanelCollapsed(false)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
-            title="Expand tree"
-          >
-            <PanelLeftOpen size={16} />
-          </button>
-        )}
-
-        {/* Center Panel - Live Preview (Elastic) */}
-        <ResizablePanel className="relative bg-bg-canvas">
-          <ResizablePreviewViewport>
-            <LivePreview
-              ref={livePreviewRef}
-              key={iframeKey} // WP33: Force re-render when refresh button clicked
-              code={generatedCode}
-              framework={previewFramework}
-              language={previewFramework === 'html-css' ? 'html' : 'tsx'}
-              googleFontsUrl={googleFontsUrl}
+          {/* Column 3: Rules */}
+          <div className="bg-bg-card rounded-xl border border-border-primary p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-text-primary">Rules</span>
+              <span className="text-xs text-text-muted">Applied rules <span className="text-text-primary">{appliedRulesCount}/{multiFrameworkRules.length}</span></span>
+            </div>
+            <RulesPanel
+              node={selectedNode}
+              selectedFramework={previewFramework}
+              allRules={multiFrameworkRules}
             />
-          </ResizablePreviewViewport>
-        </ResizablePanel>
+          </div>
+        </div>
+      </main>
 
-        {/* Expand Right Button (when collapsed) */}
-        {viewerRightPanelCollapsed && (
-          <button
-            onClick={() => setViewerRightPanelCollapsed(false)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-50 p-2 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
-            title="Expand info"
-          >
-            <PanelRightOpen size={16} />
-          </button>
-        )}
-
-        {/* Right Panel - Information/Rules Tabs (Collapsable & Resizable) */}
-        {!viewerRightPanelCollapsed && (
-          <>
-            <ResizableHandle className="bg-border-primary" />
-
-            <ResizablePanel
-              defaultSize={20}
-              minSize={15}
-              maxSize={30}
-              className="border-l border-border-primary bg-bg-primary relative"
-            >
-              {/* Collapse Button */}
-              <button
-                onClick={() => setViewerRightPanelCollapsed(true)}
-                className="absolute top-2 left-2 z-[60] p-1.5 rounded bg-bg-secondary border border-border-primary hover:bg-bg-hover shadow-lg text-text-primary"
-                title="Collapse info"
-              >
-                <PanelRightClose size={14} />
-              </button>
-
-              <Tabs
-                value={rightPanelTab}
-                onValueChange={(v) => setRightPanelTab(v as 'information' | 'rules')}
-                className="flex-1 flex flex-col overflow-hidden h-full pt-12"
-              >
-                <TabsList className="w-full justify-start border-b border-gray-200 dark:border-gray-700 rounded-none bg-transparent h-auto p-0">
-                  <TabsTrigger
-                    value="information"
-                    className="text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
-                  >
-                    Information
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="rules"
-                    className="text-[13px] text-gray-500 dark:text-gray-400 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none bg-transparent px-3 py-2"
-                  >
-                    Rules
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="information" className="flex-1 overflow-auto m-0">
-                  <InformationPanel
-                    node={selectedNode}
-                    framework={previewFramework}
-                    onFrameworkChange={setPreviewFramework}
-                    resolvedProperties={resolvedProperties}
-                    allRules={multiFrameworkRules}
-                    nodeId={nodeId}
-                  />
-                </TabsContent>
-
-                <TabsContent value="rules" className="flex-1 overflow-auto m-0">
-                  <RulesPanel
-                    node={selectedNode}
-                    selectedFramework={previewFramework}
-                    allRules={multiFrameworkRules}
-                  />
-                </TabsContent>
-              </Tabs>
-            </ResizablePanel>
-          </>
-        )}
-      </ResizablePanelGroup>
-
-      {/* WP40: Refetch Dialog */}
+      {/* ========== DIALOGS ========== */}
       <RefetchDialog
         open={refetchDialogOpen}
         onOpenChange={async (open) => {
@@ -748,6 +1013,89 @@ export default function ViewerPage() {
         error={refetchError}
         onReset={resetRefetch}
       />
+
+      {/* ========== FULLSCREEN CANVAS PREVIEW ========== */}
+      {isCanvasFullscreen && (
+        <div className="fixed inset-0 z-50 bg-bg-primary flex flex-col">
+          {/* Fullscreen Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-primary bg-bg-card">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-text-primary">Canvas Preview</span>
+              <span className="text-xs text-text-muted tabular-nums">{viewerViewportWidth} × {viewerViewportHeight}</span>
+              {/* Device icons for responsive mode */}
+              <div className="flex items-center gap-0.5 p-0.5 bg-[#1e293b] rounded">
+                <button
+                  onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(375, 667); }}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  title="Mobile (375×667)"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(768, 1024); }}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  title="Tablet (768×1024)"
+                >
+                  <Tablet className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewerResponsiveMode(false)}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  title="Desktop (Full width)"
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
+                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                title={viewerResponsiveMode ? "Exit responsive mode" : "Enter responsive mode (resize preview)"}
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewerGridVisible(!viewerGridVisible)}
+                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                title="Toggle grid"
+              >
+                <Grid3x3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsCanvasFullscreen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
+                title="Exit fullscreen"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          {/* Fullscreen Content */}
+          <div className="flex-1 relative bg-[#0f172a]">
+            <ResizablePreviewViewport>
+              {viewerGridVisible && (
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{
+                    backgroundImage: `
+                      repeating-linear-gradient(0deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${viewerGridSpacing}px),
+                      repeating-linear-gradient(90deg, rgb(148 163 184 / 0.1) 0px, transparent 1px, transparent ${viewerGridSpacing}px)
+                    `,
+                  }}
+                />
+              )}
+              <LivePreview
+                key={`fullscreen-${iframeKey}`}
+                code={generatedCode}
+                framework={previewFramework}
+                language={previewFramework === 'html-css' ? 'html' : 'tsx'}
+                googleFontsUrl={googleFontsUrl}
+              />
+            </ResizablePreviewViewport>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

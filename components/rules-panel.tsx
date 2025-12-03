@@ -40,7 +40,7 @@ export function RulesPanel({
 
   if (!node) {
     return (
-      <div className="flex items-center justify-center h-full text-sm text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-center h-32 text-xs text-text-muted">
         Select a node to view applied rules
       </div>
     );
@@ -48,14 +48,8 @@ export function RulesPanel({
 
   if (applicableRules.length === 0) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-border-primary">
-          <span className="text-sm font-medium text-text-primary">Applied Rules</span>
-        </div>
-        <div className="flex-1 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          No rules match this element
-        </div>
+      <div className="flex items-center justify-center h-32 text-xs text-text-muted">
+        No rules match this element
       </div>
     );
   }
@@ -83,35 +77,16 @@ export function RulesPanel({
     }))
     .sort((a, b) => b.rules.length - a.rules.length);
 
-  const totalRules = applicableRules.length;
-  const activeRules = sortedRulesByCategory.reduce(
-    (acc, cat) => acc + cat.rules.filter((r) => !r.isOverridden).length,
-    0
-  );
-
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border-primary">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-text-primary">Applied Rules</span>
-          <span className="px-1.5 py-0.5 bg-accent-primary text-white text-xs rounded">
-            {activeRules}/{totalRules}
-          </span>
-        </div>
-      </div>
-
-      {/* Category Sections */}
-      <div className="flex-1 overflow-y-auto py-2">
-        {sortedRulesByCategory.map(({ category, rules }) => (
-          <RuleCategorySection
-            key={category}
-            category={category}
-            rules={rules}
-            defaultCollapsed={false}
-          />
-        ))}
-      </div>
+    <div className="max-h-[200px] overflow-auto">
+      {sortedRulesByCategory.map(({ category, rules }) => (
+        <RuleCategorySection
+          key={category}
+          category={category}
+          rules={rules}
+          defaultCollapsed={false}
+        />
+      ))}
     </div>
   );
 }

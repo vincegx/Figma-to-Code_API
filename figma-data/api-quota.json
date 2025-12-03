@@ -1,0 +1,132 @@
+{
+  "2025-12-01": {
+    "tier1": [
+      {
+        "ts": 1764632212144,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764632216684,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764632268371,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764632273209,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764632302502,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764632304268,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764632420704,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764632422652,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764632454568,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764632459560,
+        "endpoint": "fetchSVGBatch"
+      }
+    ],
+    "tier2": [
+      {
+        "ts": 1764632204504,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764632206361,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764632260806,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764632262623,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764632300063,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764632301169,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764632419461,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764632419741,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764632452356,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764632453569,
+        "endpoint": "fetchNode"
+      }
+    ]
+  },
+  "2025-12-02": {
+    "tier1": [
+      {
+        "ts": 1764672048308,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764672051191,
+        "endpoint": "fetchSVGBatch"
+      }
+    ],
+    "tier2": [
+      {
+        "ts": 1764672043253,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764672044613,
+        "endpoint": "fetchNode"
+      }
+    ]
+  },
+  "2025-12-03": {
+    "tier1": [
+      {
+        "ts": 1764723139951,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764723143177,
+        "endpoint": "fetchSVGBatch"
+      }
+    ],
+    "tier2": [
+      {
+        "ts": 1764723134937,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764723136574,
+        "endpoint": "fetchNode"
+      }
+    ]
+  }
+}

@@ -31,7 +31,12 @@ const STATUS_CONFIG = {
   },
 };
 
-export function QuotaIndicator() {
+interface QuotaIndicatorProps {
+  compact?: boolean; // Hide progress bar and percentage
+  popoverSide?: 'top' | 'right' | 'bottom' | 'left'; // Popover position
+}
+
+export function QuotaIndicator({ compact = false, popoverSide = 'bottom' }: QuotaIndicatorProps) {
   const { criticalPercent, status, isLoading, error } = useApiQuota();
 
   const config = STATUS_CONFIG[status];
@@ -50,7 +55,7 @@ export function QuotaIndicator() {
   // Show error state
   if (error && criticalPercent === 0) {
     return (
-      <QuotaPopover>
+      <QuotaPopover side={popoverSide}>
         <button
           className={cn(
             'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors',
@@ -66,7 +71,7 @@ export function QuotaIndicator() {
   }
 
   return (
-    <QuotaPopover>
+    <QuotaPopover side={popoverSide}>
       <button
         className={cn(
           'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors',
@@ -82,23 +87,27 @@ export function QuotaIndicator() {
           API
         </span>
 
-        {/* Progress bar (hidden on small screens) */}
-        <div className="hidden md:block w-16">
-          <Progress
-            value={criticalPercent}
-            className="h-1.5"
-          />
-        </div>
+        {/* Progress bar (hidden on small screens or compact mode) */}
+        {!compact && (
+          <div className="hidden md:block w-16">
+            <Progress
+              value={criticalPercent}
+              className="h-1.5"
+            />
+          </div>
+        )}
 
-        {/* Percentage (hidden on small screens) */}
-        <span
-          className={cn(
-            'hidden lg:block text-xs font-medium',
-            config.color
-          )}
-        >
-          {criticalPercent}%
-        </span>
+        {/* Percentage (hidden on small screens or compact mode) */}
+        {!compact && (
+          <span
+            className={cn(
+              'hidden lg:block text-xs font-medium',
+              config.color
+            )}
+          >
+            {criticalPercent}%
+          </span>
+        )}
       </button>
     </QuotaPopover>
   );

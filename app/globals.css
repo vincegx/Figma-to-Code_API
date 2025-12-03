@@ -104,23 +104,23 @@
    ============================================ */
 
 [data-theme="dark"] {
-  /* Dark Theme Base Colors */
-  --color-0: #0f172a;
-  --color-1: #1e293b;
-  --color-2: #334155;
-  --color-3: #475569;
-  --color-4: #64748b;
-  --color-5: #94a3b8;
+  /* Dark Theme Base Colors - Redesign V2 (deeper dark) */
+  --color-0: #0a0a0f;
+  --color-1: #0f172a;
+  --color-2: #1e293b;
+  --color-3: #334155;
+  --color-4: #475569;
+  --color-5: #64748b;
 
   --color-black: #f8fafc;
-  --color-white: #0f172a;
+  --color-white: #0a0a0f;
 
-  /* Semantic Background Colors */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e3a5f;
-  --bg-hover: #334155;
-  --bg-canvas: #374151;
+  /* Semantic Background Colors - Redesign V2 */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f172a;
+  --bg-card: #111827;
+  --bg-hover: #1f2937;
+  --bg-canvas: #1f2937;
   --bg-overlay-light: rgba(255, 255, 255, 0.05);
   --bg-overlay-medium: rgba(255, 255, 255, 0.1);
   --bg-overlay-dark: rgba(0, 0, 0, 0.5);
@@ -131,9 +131,9 @@
   --text-muted: #94a3b8;
   --text-inverse: #0f172a;
 
-  /* Semantic Border Colors */
-  --border-primary: #253548;
-  --border-secondary: #1f2d3d;
+  /* Semantic Border Colors - Redesign V2 */
+  --border-primary: #1f2937;
+  --border-secondary: #253548;
   --border-light: #2a3f55;
   --border-subtle: #1a2636;
 
@@ -290,4 +290,38 @@ body {
 /* Tabular numbers for metrics */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  :root {
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark,
+  [data-theme="dark"] {
+    /* Sidebar variables for dark mode - Redesign V2 */
+    --sidebar-background: 220 20% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

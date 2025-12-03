@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-01T22:04:46.414Z",
+  "lastUpdated": "2025-12-03T00:52:23.185Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -85,8 +85,8 @@
       "altNode": null,
       "thumbnail": "/api/images/465-14116/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T21:10:33.597Z",
-      "lastModified": "2025-12-01T21:10:33.597Z",
+      "addedAt": "2025-12-01T23:37:55.342Z",
+      "lastModified": "2025-12-01T23:37:55.342Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -161,8 +161,8 @@
       "altNode": null,
       "thumbnail": "/api/images/2540-377150/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T17:15:37.509Z",
-      "lastModified": "2025-12-01T17:15:37.509Z",
+      "addedAt": "2025-12-01T23:41:03.141Z",
+      "lastModified": "2025-12-01T23:41:03.141Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -199,8 +199,8 @@
       "altNode": null,
       "thumbnail": "/api/images/465-16388/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T21:32:42.380Z",
-      "lastModified": "2025-12-01T21:32:42.380Z",
+      "addedAt": "2025-12-01T23:36:59.233Z",
+      "lastModified": "2025-12-01T23:36:59.233Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -210,7 +210,26 @@
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:16388"
       }
+    },
+    {
+      "id": "lib-509-2821",
+      "figmaNodeId": "509:2821",
+      "name": "Homepage - Landing",
+      "altNode": null,
+      "thumbnail": "/api/images/509-2821/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-03T00:52:23.180Z",
+      "lastModified": "2025-12-03T00:52:23.180Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
+        "fileName": "Sans titre",
+        "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=509:2821"
+      }
     }
   ],
-  "totalNodes": 11
+  "totalNodes": 12
 }

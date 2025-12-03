@@ -1,12 +1,19 @@
 'use client';
 
+/**
+ * CustomRuleModal - Create/Edit Rule Modal (WP42 Redesign V2)
+ *
+ * Dark mode styling matching the Rules page design
+ */
+
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { X, Plus, Check, ChevronDown } from 'lucide-react';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { SelectorEditor } from './selector-editor';
 import { TransformerEditor } from './transformer-editor';
 import { RulePreview } from './rule-preview';
+import { cn } from '@/lib/utils';
 
 interface CustomRuleModalProps {
   open: boolean;
@@ -29,12 +36,12 @@ const CATEGORIES = [
   'custom',
 ] as const;
 
-const FRAMEWORKS: FrameworkType[] = [
-  'react-tailwind',
-  'html-css',
-  'react-inline',
-  'swift-ui',
-  'android-xml',
+const FRAMEWORKS: { value: FrameworkType; label: string }[] = [
+  { value: 'react-tailwind', label: 'React + Tailwind' },
+  { value: 'html-css', label: 'HTML/CSS' },
+  { value: 'react-inline', label: 'React Inline' },
+  { value: 'swift-ui', label: 'Swift UI' },
+  { value: 'android-xml', label: 'Android XML' },
 ];
 
 export function CustomRuleModal({
@@ -57,6 +64,7 @@ export function CustomRuleModal({
   const [selectedFramework, setSelectedFramework] = useState<FrameworkType>('react-tailwind');
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
 
   // Initialize form with existing rule data (for edit mode)
   useEffect(() => {
@@ -70,7 +78,6 @@ export function CustomRuleModal({
       setSelector({ ...existingRule.selector });
       setTransformers({ ...existingRule.transformers });
     } else {
-      // Reset for create mode
       resetForm();
     }
   }, [existingRule, mode, open]);
@@ -144,29 +151,27 @@ export function CustomRuleModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-card rounded-lg border border-border-primary shadow-xl z-50 w-[90vw] max-w-5xl max-h-[90vh] overflow-auto">
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-primary rounded-xl border border-border-primary shadow-2xl z-50 w-[90vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 bg-bg-card border-b border-border-primary p-6 flex items-center justify-between z-10">
-            <Dialog.Title className="text-2xl font-bold text-text-primary">
-              {mode === 'create' ? '+ New Custom Rule' : 'Edit Custom Rule'}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary bg-bg-card">
+            <Dialog.Title className="text-lg font-semibold text-text-primary">
+              {mode === 'create' ? 'New Rule' : 'Edit Rule'}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="text-text-muted hover:text-text-secondary">
-                <X size={24} />
+              <button className="p-1.5 rounded hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </Dialog.Close>
           </div>
 
           {/* Body */}
-          <div className="p-6 space-y-6">
+          <div className="flex-1 overflow-auto p-6 space-y-6">
             {/* Errors */}
             {errors.length > 0 && (
-              <div className="bg-status-error-bg border border-status-error-border rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-status-error-text mb-2">
-                  Validation Errors:
-                </h4>
-                <ul className="text-sm text-status-error-text list-disc list-inside">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <p className="text-xs font-medium text-red-400 mb-1">Validation Errors:</p>
+                <ul className="text-xs text-red-400 list-disc list-inside space-y-0.5">
                   {errors.map((err, i) => (
                     <li key={i}>{err}</li>
                   ))}
@@ -175,178 +180,206 @@ export function CustomRuleModal({
             )}
 
             {/* Basic Info Section */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-text-primary">
-                Basic Info
+            <div className="p-4 rounded-xl bg-bg-card border border-border-primary">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
+                BASIC INFO
               </h3>
               <div className="grid grid-cols-2 gap-4">
+                {/* Rule ID */}
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Rule ID *
-                  </label>
+                  <label className="block text-xs text-text-muted mb-1.5">Rule ID *</label>
                   <input
                     type="text"
                     value={id}
                     onChange={(e) => setId(e.target.value)}
                     disabled={mode === 'edit'}
                     placeholder="custom-my-rule"
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-3 py-2 text-sm bg-bg-secondary border border-border-primary rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-border-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
+
+                {/* Rule Name */}
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Rule Name *
-                  </label>
+                  <label className="block text-xs text-text-muted mb-1.5">Rule Name *</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="My Custom Rule"
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
+                    className="w-full px-3 py-2 text-sm bg-bg-secondary border border-border-primary rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-border-secondary"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Category *
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as typeof CATEGORIES[number])}
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
+
+                {/* Category */}
+                <div className="relative">
+                  <label className="block text-xs text-text-muted mb-1.5">Category *</label>
+                  <button
+                    type="button"
+                    onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm bg-bg-secondary border border-border-primary rounded-lg text-text-primary hover:bg-bg-hover"
                   >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                    <span className="capitalize">{category}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+                  </button>
+                  {categoryDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-card border border-border-primary rounded-lg shadow-lg z-20 py-1 max-h-48 overflow-auto">
+                      {CATEGORIES.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => { setCategory(cat); setCategoryDropdownOpen(false); }}
+                          className="w-full px-3 py-1.5 text-sm text-left text-text-secondary hover:bg-bg-hover capitalize"
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Priority */}
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Priority (min: 100)
-                  </label>
+                  <label className="block text-xs text-text-muted mb-1.5">Priority (min: 100)</label>
                   <input
                     type="number"
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
                     min={100}
-                    className="w-full px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
+                    className="w-full px-3 py-2 text-sm bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-border-secondary"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
-                  Tags
-                </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddTag();
-                      }
-                    }}
-                    placeholder="Add tag..."
-                    className="flex-1 px-3 py-2 border border-border-primary rounded-lg bg-bg-primary text-text-primary"
-                  />
+
+                {/* Tags */}
+                <div className="col-span-2">
+                  <label className="block text-xs text-text-muted mb-1.5">Tags</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddTag();
+                        }
+                      }}
+                      placeholder="Add tag..."
+                      className="flex-1 px-3 py-2 text-sm bg-bg-secondary border border-border-primary rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-border-secondary"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTag}
+                      className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map(tag => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-full text-xs"
+                        >
+                          #{tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="hover:text-cyan-200"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Enabled */}
+                <div className="col-span-2">
+                  <label className="block text-xs text-text-muted mb-1.5">Status</label>
                   <button
                     type="button"
-                    onClick={handleAddTag}
-                    className="px-4 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover"
+                    onClick={() => setEnabled(!enabled)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+                      enabled
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-bg-secondary text-text-muted border border-border-primary'
+                    )}
                   >
-                    Add
+                    {enabled && <Check className="w-3 h-3" />}
+                    {enabled ? 'Enabled' : 'Disabled'}
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 bg-bg-secondary text-text-secondary rounded-full text-sm flex items-center gap-2"
-                    >
-                      {tag}
-                      <button
-                        onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-status-error-text"
-                      >
-                        <X size={14} />
-                      </button>
-                    </span>
-                  ))}
-                </div>
               </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={enabled}
-                    onChange={(e) => setEnabled(e.target.checked)}
-                    className="rounded"
-                  />
-                  Enabled
-                </label>
-              </div>
-            </section>
+            </div>
 
             {/* Selector Section */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-text-primary">
-                Selector *
+            <div className="p-4 rounded-xl bg-bg-card border border-border-primary">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
+                SELECTOR *
               </h3>
               <SelectorEditor
                 selector={selector}
                 onChange={setSelector}
               />
-            </section>
+            </div>
 
             {/* Transformers Section */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-text-primary">
-                Transformers *
+            <div className="p-4 rounded-xl bg-bg-card border border-border-primary">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
+                TRANSFORMERS *
               </h3>
-              <div className="border border-border-primary rounded-lg overflow-hidden">
-                {/* Framework Tabs */}
-                <div className="flex border-b border-border-primary bg-bg-secondary">
-                  {FRAMEWORKS.map(fw => (
+
+              {/* Framework Tabs */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {FRAMEWORKS.map(fw => {
+                  const isActive = selectedFramework === fw.value;
+                  const hasTransformer = !!transformers[fw.value];
+                  return (
                     <button
-                      key={fw}
-                      onClick={() => setSelectedFramework(fw)}
-                      className={`px-4 py-2 text-sm font-medium transition-colors ${
-                        selectedFramework === fw
-                          ? 'bg-bg-card text-accent-primary border-b-2 border-accent-primary'
-                          : 'text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      {fw}
-                      {transformers[fw] && (
-                        <span className="ml-1 text-status-success-text">✓</span>
+                      key={fw.value}
+                      type="button"
+                      onClick={() => setSelectedFramework(fw.value)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border',
+                        isActive
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : hasTransformer
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                            : 'bg-bg-secondary text-text-muted border-border-primary hover:bg-bg-hover'
                       )}
+                    >
+                      {hasTransformer && !isActive && <Check className="w-3 h-3" />}
+                      {fw.label}
                     </button>
-                  ))}
-                </div>
-                {/* Transformer Editor */}
-                <div className="p-4 bg-bg-card">
-                  <TransformerEditor
-                    framework={selectedFramework}
-                    transformer={transformers[selectedFramework]}
-                    onChange={(newTransformer) => {
-                      if (newTransformer && Object.keys(newTransformer).length > 0) {
-                        setTransformers({ ...transformers, [selectedFramework]: newTransformer });
-                      } else {
-                        const newTransformers = { ...transformers };
-                        delete newTransformers[selectedFramework];
-                        setTransformers(newTransformers);
-                      }
-                    }}
-                  />
-                </div>
+                  );
+                })}
               </div>
-            </section>
+
+              {/* Transformer Editor */}
+              <div className="p-3 rounded-lg bg-bg-secondary">
+                <TransformerEditor
+                  framework={selectedFramework}
+                  transformer={transformers[selectedFramework]}
+                  onChange={(newTransformer) => {
+                    if (newTransformer && Object.keys(newTransformer).length > 0) {
+                      setTransformers({ ...transformers, [selectedFramework]: newTransformer });
+                    } else {
+                      const newTransformers = { ...transformers };
+                      delete newTransformers[selectedFramework];
+                      setTransformers(newTransformers);
+                    }
+                  }}
+                />
+              </div>
+            </div>
 
             {/* Preview Section */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-semibold text-text-primary">
-                Preview
+            <div className="p-4 rounded-xl bg-bg-card border border-border-primary">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
+                PREVIEW
               </h3>
               <RulePreview
                 rule={{
@@ -361,23 +394,25 @@ export function CustomRuleModal({
                   transformers,
                 }}
               />
-            </section>
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-bg-card border-t border-border-primary p-6 flex items-center justify-end gap-4 z-10">
+          <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border-primary bg-bg-card">
             <Dialog.Close asChild>
               <button
-                className="px-6 py-2 border border-border-primary text-text-secondary rounded-lg hover:bg-bg-hover"
+                type="button"
+                className="px-4 py-2 text-xs font-medium text-text-secondary border border-border-primary rounded-lg hover:bg-bg-hover transition-colors"
                 disabled={isSaving}
               >
                 Cancel
               </button>
             </Dialog.Close>
             <button
+              type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2 bg-accent-primary text-text-inverse rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? 'Saving...' : mode === 'create' ? 'Create Rule' : 'Update Rule'}
             </button>

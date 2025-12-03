@@ -121,42 +121,42 @@ export function VersionDropdown({
           size="sm"
           disabled={isLoading || error !== null}
           className={cn(
-            'h-auto py-1 px-2 text-xs font-normal',
-            isViewingHistory && 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300',
+            'h-auto py-1 px-2 text-sm font-normal text-text-muted hover:text-text-primary',
+            isViewingHistory && 'bg-amber-500/20 text-amber-400',
             className
           )}
         >
-          <Clock className="w-3 h-3 mr-1" />
+          <Clock className="w-4 h-4 mr-1.5" />
           {getDisplayText()}
           {hasHistory && <ChevronDown className="w-3 h-3 ml-1" />}
         </Button>
       </DropdownMenuTrigger>
 
       {hasHistory && (
-        <DropdownMenuContent align="start" className="w-56 z-[100] bg-white dark:bg-gray-900 shadow-lg border">
-          <DropdownMenuLabel className="flex items-center gap-2 text-xs">
+        <DropdownMenuContent align="start" className="w-56 z-[100] bg-bg-card border border-border-primary shadow-lg">
+          <DropdownMenuLabel className="flex items-center gap-2 text-xs text-text-muted">
             <History className="w-3 h-3" />
             Historique des versions
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-border-primary" />
 
           {/* Current version */}
           <DropdownMenuItem
             onClick={() => onVersionSelect(null)}
             className={cn(
               'cursor-pointer',
-              selectedVersion === null && 'bg-blue-50 dark:bg-blue-900'
+              selectedVersion === null && 'bg-cyan-500/10'
             )}
           >
             <div className="flex items-center justify-between w-full">
-              <span>{formatDate(versions!.current.figmaLastModified)}</span>
-              <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded">
+              <span className="text-text-primary">{formatDate(versions!.current.figmaLastModified)}</span>
+              <span className="text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">
                 actuel
               </span>
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-border-primary" />
 
           {/* Historical versions */}
           {versions!.history.map((version) => (
@@ -165,13 +165,13 @@ export function VersionDropdown({
               onClick={() => onVersionSelect(version.folder)}
               className={cn(
                 'cursor-pointer',
-                selectedVersion === version.folder && 'bg-amber-50 dark:bg-amber-900'
+                selectedVersion === version.folder && 'bg-amber-500/10'
               )}
             >
               <div className="flex items-center justify-between w-full text-sm">
-                <span>{formatDate(version.figmaLastModified)}</span>
+                <span className="text-text-primary">{formatDate(version.figmaLastModified)}</span>
                 {selectedVersion === version.folder && (
-                  <span className="text-xs text-amber-600 dark:text-amber-400">
+                  <span className="text-xs text-amber-400">
                     consulté
                   </span>
                 )}

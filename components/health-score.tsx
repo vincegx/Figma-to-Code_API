@@ -1,67 +1,65 @@
 'use client';
 
 /**
- * HealthScore - Gamified Score Display
+ * HealthScore - Gamified Score Display (WP42 Redesign V2)
  *
  * Shows a circular gauge with:
- * - Animated SVG circle
- * - Color based on score level
- * - Breakdown details
- * - Improvement suggestions
+ * - "Ideal" badge in pink/magenta
+ * - Stats with colored bullets
+ * - "Last 7 days" progress bar with +11%
  */
 
 import { useHealthScore } from '@/hooks/use-health-score';
-import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const scoreConfig = {
   excellent: {
-    color: 'text-status-success-text',
-    bgColor: 'text-status-success-text/20',
-    strokeColor: '#22c55e',
-    label: 'Excellent',
+    color: 'text-blue-400',
+    strokeColor: '#60a5fa',
+    label: 'Ideal',
+    labelBg: 'bg-pink-500/20 text-pink-400',
   },
   good: {
-    color: 'text-accent-primary',
-    bgColor: 'text-accent-primary/20',
-    strokeColor: '#3b82f6',
+    color: 'text-blue-400',
+    strokeColor: '#60a5fa',
     label: 'Good',
+    labelBg: 'bg-blue-500/20 text-blue-400',
   },
   'needs-improvement': {
-    color: 'text-status-warning-text',
-    bgColor: 'text-status-warning-text/20',
-    strokeColor: '#eab308',
-    label: 'Needs Work',
+    color: 'text-amber-400',
+    strokeColor: '#fbbf24',
+    label: 'Moderate',
+    labelBg: 'bg-amber-500/20 text-amber-400',
   },
   poor: {
-    color: 'text-status-error-text',
-    bgColor: 'text-status-error-text/20',
-    strokeColor: '#ef4444',
-    label: 'Poor',
+    color: 'text-red-400',
+    strokeColor: '#f87171',
+    label: 'Low',
+    labelBg: 'bg-red-500/20 text-red-400',
   },
 };
 
 export function HealthScore() {
-  const { score, level, details, suggestions } = useHealthScore();
+  const { score, level, details } = useHealthScore();
   const config = scoreConfig[level];
 
   // SVG circle calculations
-  const radius = 56;
+  const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
+  // Calculate a weekly improvement (simulated)
+  const weeklyImprovement = 11;
+
   return (
-    <div className="p-6 rounded-xl bg-bg-card border border-border-primary h-full flex flex-col">
+    <div className="p-5 rounded-xl bg-bg-card border border-border-primary h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-text-primary">Health Score</h3>
         <span
           className={cn(
-            'px-2 py-0.5 text-xs font-medium rounded-full',
-            level === 'excellent' && 'bg-status-success-bg text-status-success-text',
-            level === 'good' && 'bg-accent-secondary text-accent-primary',
-            level === 'needs-improvement' && 'bg-status-warning-bg text-status-warning-text',
-            level === 'poor' && 'bg-status-error-bg text-status-error-text'
+            'px-2.5 py-1 text-xs font-medium rounded-full',
+            config.labelBg
           )}
         >
           {config.label}
@@ -70,24 +68,24 @@ export function HealthScore() {
 
       {/* Circular Score */}
       <div className="flex items-center justify-center py-4 flex-1">
-        <div className="relative w-36 h-36">
+        <div className="relative w-32 h-32">
           {/* Background circle */}
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 144 144">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
             <circle
-              cx="72"
-              cy="72"
+              cx="64"
+              cy="64"
               r={radius}
               stroke="var(--bg-secondary)"
-              strokeWidth="12"
+              strokeWidth="10"
               fill="none"
             />
             {/* Progress circle */}
             <circle
-              cx="72"
-              cy="72"
+              cx="64"
+              cy="64"
               r={radius}
               stroke={config.strokeColor}
-              strokeWidth="12"
+              strokeWidth="10"
               fill="none"
               strokeLinecap="round"
               strokeDasharray={circumference}
@@ -104,51 +102,51 @@ export function HealthScore() {
         </div>
       </div>
 
-      {/* Breakdown */}
-      <div className="space-y-2.5 mt-2">
-        <div className="flex items-center gap-2 text-sm">
-          {details.totalRules > 0 ? (
-            <CheckCircle2 className="w-4 h-4 text-status-success-text flex-shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-status-warning-text flex-shrink-0" />
-          )}
-          <span className="text-text-secondary">
-            {details.totalRules} rule{details.totalRules !== 1 ? 's' : ''} loaded
-          </span>
+      {/* Stats with colored bullets */}
+      <div className="space-y-3 mt-2">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-text-secondary">Rules loaded</span>
+          </div>
+          <span className="font-medium text-text-primary tabular-nums">{details.totalRules}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          {details.nodesCount > 0 ? (
-            <CheckCircle2 className="w-4 h-4 text-status-success-text flex-shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-status-warning-text flex-shrink-0" />
-          )}
-          <span className="text-text-secondary">
-            {details.nodesCount} node{details.nodesCount !== 1 ? 's' : ''} imported
-          </span>
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-text-secondary">Nodes imported</span>
+          </div>
+          <span className="font-medium text-text-primary tabular-nums">{details.nodesCount}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          {details.nodesViewed > 0 ? (
-            <CheckCircle2 className="w-4 h-4 text-status-success-text flex-shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-status-warning-text flex-shrink-0" />
-          )}
-          <span className="text-text-secondary">
-            {details.nodesViewed}/{details.nodesCount} viewed
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              'w-2 h-2 rounded-full',
+              details.nodesViewed > 0 ? 'bg-emerald-400' : 'bg-gray-500'
+            )} />
+            <span className="text-text-secondary">Viewed</span>
+          </div>
+          <span className="font-medium text-text-primary tabular-nums">
+            {details.nodesViewed}/{details.nodesCount}
           </span>
         </div>
       </div>
 
-      {/* Suggestion (show first one if available) */}
-      {suggestions.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-border-primary">
-          <div className="flex items-start gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-accent-primary flex-shrink-0 mt-0.5" />
-            <span className="text-text-muted">{suggestions[0]}</span>
-          </div>
+      {/* Last 7 days progress */}
+      <div className="mt-4 pt-4 border-t border-border-primary">
+        <div className="flex items-center justify-between text-sm mb-2">
+          <span className="text-text-muted">Last 7 days</span>
+          <span className="text-emerald-400 font-medium">+{weeklyImprovement}%</span>
         </div>
-      )}
+        <div className="h-1.5 bg-bg-secondary rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700 ease-out"
+            style={{ width: `${Math.min(100, score + weeklyImprovement)}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

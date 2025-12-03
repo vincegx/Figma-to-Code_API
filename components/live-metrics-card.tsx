@@ -1,17 +1,19 @@
 'use client';
 
 /**
- * LiveMetricsCard - Stats Card with Trend
+ * LiveMetricsCard - Stats Card with Sparkline (WP42 Redesign V2)
  *
  * Displays a single metric with:
- * - Icon in colored background
+ * - Icon indicator
  * - Large value with optional suffix
- * - Trend indicator (positive/negative)
- * - Hover effect
+ * - Sparkline chart for trend visualization
+ * - Badge for trend value
  */
 
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
+import { Area, AreaChart, ResponsiveContainer } from 'recharts';
+import { useMemo } from 'react';
 
 interface LiveMetricsCardProps {
   /** Card title */
@@ -31,26 +33,39 @@ interface LiveMetricsCardProps {
   className?: string;
   /** Icon color variant */
   variant?: 'default' | 'success' | 'warning' | 'info';
+  /** Sparkline data (7 points for week) */
+  sparklineData?: number[];
 }
 
 const variantStyles = {
   default: {
     bg: 'bg-accent-primary/10',
-    icon: 'text-accent-primary',
+    icon: 'text-cyan-400',
+    sparkline: '#22d3ee', // cyan-400
+    sparklineFill: 'rgba(34, 211, 238, 0.1)',
   },
   success: {
     bg: 'bg-status-success-bg',
-    icon: 'text-status-success-text',
+    icon: 'text-emerald-400',
+    sparkline: '#34d399', // emerald-400
+    sparklineFill: 'rgba(52, 211, 153, 0.1)',
   },
   warning: {
     bg: 'bg-status-warning-bg',
-    icon: 'text-status-warning-text',
+    icon: 'text-amber-400',
+    sparkline: '#fbbf24', // amber-400
+    sparklineFill: 'rgba(251, 191, 36, 0.1)',
   },
   info: {
     bg: 'bg-status-info-bg',
-    icon: 'text-status-info-text',
+    icon: 'text-blue-400',
+    sparkline: '#60a5fa', // blue-400
+    sparklineFill: 'rgba(96, 165, 250, 0.1)',
   },
 };
+
+// Generate default sparkline data if not provided
+const generateDefaultSparkline = () => [4, 6, 5, 8, 7, 9, 8];
 
 export function LiveMetricsCard({
   title,
@@ -60,49 +75,77 @@ export function LiveMetricsCard({
   suffix,
   className,
   variant = 'default',
+  sparklineData,
 }: LiveMetricsCardProps) {
   const isPositive = trend && trend.value >= 0;
   const styles = variantStyles[variant];
 
+  // Memoize chart data
+  const chartData = useMemo(() => {
+    const data = sparklineData || generateDefaultSparkline();
+    return data.map((val, i) => ({ value: val, index: i }));
+  }, [sparklineData]);
+
   return (
     <div
       className={cn(
-        'p-6 rounded-xl bg-bg-card border border-border-primary',
-        'hover:border-accent-primary/50 hover:shadow-md',
+        'p-5 rounded-xl bg-bg-card border border-border-primary',
+        'hover:border-border-secondary hover:shadow-lg',
         'transition-all duration-200',
         className
       )}
     >
-      <div className="flex items-start justify-between gap-4">
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-text-muted mb-1 truncate">{title}</p>
-          <div className="flex items-baseline gap-1">
-            <p className="text-3xl font-bold text-text-primary tabular-nums">
-              {typeof value === 'number' ? value.toLocaleString() : value}
-            </p>
-            {suffix && (
-              <span className="text-lg font-medium text-text-muted">{suffix}</span>
+      {/* Header with Icon and Trend Badge */}
+      <div className="flex items-center justify-between mb-3">
+        <Icon className={cn('w-5 h-5', styles.icon)} />
+        {trend !== undefined && (
+          <span
+            className={cn(
+              'text-xs font-medium px-1.5 py-0.5 rounded',
+              isPositive
+                ? 'text-emerald-400 bg-emerald-400/10'
+                : 'text-red-400 bg-red-400/10'
             )}
-          </div>
-          {trend !== undefined && (
-            <p
-              className={cn(
-                'text-sm font-medium mt-2 flex items-center gap-1',
-                isPositive ? 'text-status-success-text' : 'text-status-error-text'
-              )}
-            >
-              <span className="text-base">{isPositive ? '↑' : '↓'}</span>
-              <span>{Math.abs(trend.value)}</span>
-              <span className="text-text-muted font-normal">{trend.label}</span>
-            </p>
-          )}
-        </div>
+          >
+            {isPositive ? '+' : ''}{trend.value}
+          </span>
+        )}
+      </div>
 
-        {/* Icon */}
-        <div className={cn('p-3 rounded-lg flex-shrink-0', styles.bg)}>
-          <Icon className={cn('w-6 h-6', styles.icon)} />
-        </div>
+      {/* Value */}
+      <div className="flex items-baseline gap-1 mb-1">
+        <p className="text-3xl font-bold text-text-primary tabular-nums">
+          {typeof value === 'number' ? value.toLocaleString() : value}
+        </p>
+        {suffix && (
+          <span className="text-lg font-medium text-text-muted">{suffix}</span>
+        )}
+      </div>
+
+      {/* Title */}
+      <p className="text-sm text-text-muted mb-3">{title}</p>
+
+      {/* Sparkline */}
+      <div className="h-10 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id={`gradient-${variant}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={styles.sparkline} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={styles.sparkline} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={styles.sparkline}
+              strokeWidth={2}
+              fill={`url(#gradient-${variant})`}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

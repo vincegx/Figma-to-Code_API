@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: ['selector', '[data-theme="dark"]'],
+  darkMode: ['selector', '[data-theme="dark"]'] as unknown as 'media' | 'class',
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +12,37 @@ const config: Config = {
   		colors: {
   			background: 'var(--background)',
   			foreground: 'var(--foreground)',
+  			border: 'var(--border-primary)',
+  			input: 'var(--border-primary)',
+  			ring: 'var(--accent-primary)',
+  			primary: {
+  				DEFAULT: 'var(--accent-primary)',
+  				foreground: 'var(--text-inverse)'
+  			},
+  			secondary: {
+  				DEFAULT: 'var(--bg-secondary)',
+  				foreground: 'var(--text-secondary)'
+  			},
+  			muted: {
+  				DEFAULT: 'var(--bg-secondary)',
+  				foreground: 'var(--text-muted)'
+  			},
+  			accent: {
+  				DEFAULT: 'var(--accent-secondary)',
+  				foreground: 'var(--accent-primary)'
+  			},
+  			destructive: {
+  				DEFAULT: 'var(--status-error-text)',
+  				foreground: 'var(--text-inverse)'
+  			},
+  			card: {
+  				DEFAULT: 'var(--bg-card)',
+  				foreground: 'var(--text-primary)'
+  			},
+  			popover: {
+  				DEFAULT: 'var(--bg-card)',
+  				foreground: 'var(--text-primary)'
+  			},
   			'color-0': 'var(--color-0)',
   			'color-1': 'var(--color-1)',
   			'color-2': 'var(--color-2)',
@@ -65,6 +96,16 @@ const config: Config = {
   				hover: 'var(--button-secondary-hover)',
   				text: 'var(--button-secondary-text)',
   				border: 'var(--button-secondary-border)'
+  			},
+  			sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar-background))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				primary: 'hsl(var(--sidebar-primary))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+  				border: 'hsl(var(--sidebar-border))',
+  				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
   		boxShadow: {

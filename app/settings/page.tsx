@@ -1,10 +1,24 @@
 'use client';
 
+/**
+ * Settings Page (WP42 Redesign V2)
+ *
+ * Layout:
+ *   [Figma API - Full width]
+ *   [Export Preferences | Rule Editor]
+ *   [Cache Management | Appearance]
+ *
+ * Features:
+ * - Colored icons (orange, blue, violet, rose)
+ * - Toggle switches iOS style
+ * - Settings icon in header
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUIStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import {
   Eye,
   EyeOff,
@@ -17,22 +31,15 @@ import {
   Moon,
   Monitor,
   Settings,
-  Database,
-  Palette,
   Code,
-  Key,
   CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Settings stored in localStorage
 interface AppSettings {
-  // Export Preferences (T117)
   defaultFramework: 'react-jsx' | 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
   defaultLanguage: 'typescript' | 'javascript';
   formatOnExport: boolean;
-
-  // Rule Editor (T118)
   autoSave: boolean;
   defaultPriority: number;
 }
@@ -45,95 +52,36 @@ const defaultSettings: AppSettings = {
   defaultPriority: 100,
 };
 
-// Section component for consistent styling
-function SettingsSection({
-  icon: Icon,
-  title,
-  description,
-  children,
-}: {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent-secondary rounded-lg">
-            <Icon className="h-5 w-5 text-accent-primary" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">{children}</CardContent>
-    </Card>
-  );
-}
-
-// Label + Form field wrapper
-function FormField({
-  label,
-  description,
-  children,
-}: {
-  label: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-text-secondary">
-        {label}
-      </label>
-      {description && (
-        <p className="text-xs text-text-muted">{description}</p>
-      )}
-      {children}
-    </div>
-  );
-}
-
 export default function SettingsPage() {
-  // Figma API (T115-T116)
+  // Figma API
   const [figmaToken, setFigmaToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [testingConnection, setTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'success' | 'error' | null>(null);
 
-  // App Settings (T117-T118)
+  // App Settings
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
-  // Cache Management (T119-T120)
+  // Cache Management
   const [cacheStats, setCacheStats] = useState<{ size: string; nodeCount: number } | null>(null);
   const [loadingCache, setLoadingCache] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
 
-  // Theme (T121-T122)
+  // Theme
   const theme = useUIStore((state) => state.theme);
   const setTheme = useUIStore((state) => state.setTheme);
 
-  // Auto-save toast notification (Review Feedback)
+  // Toast notification
   const [showSavedToast, setShowSavedToast] = useState(false);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMount = useRef(true);
 
-  // Show "Settings saved" toast with auto-dismiss
   const showSaveNotification = useCallback(() => {
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setShowSavedToast(true);
-    toastTimeoutRef.current = setTimeout(() => {
-      setShowSavedToast(false);
-    }, 2000);
+    toastTimeoutRef.current = setTimeout(() => setShowSavedToast(false), 2000);
   }, []);
 
-  // Load cache stats from API
   const loadCacheStats = useCallback(async () => {
     setLoadingCache(true);
     try {
@@ -152,31 +100,19 @@ export default function SettingsPage() {
     }
   }, []);
 
-  // Load settings from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem('app-settings');
     if (stored) {
       try {
-        const parsed = JSON.parse(stored);
-        setSettings({ ...defaultSettings, ...parsed });
-      } catch {
-        // Ignore parse errors
-      }
+        setSettings({ ...defaultSettings, ...JSON.parse(stored) });
+      } catch { /* ignore */ }
     }
-
-    // Load Figma token from localStorage (client-side only)
     const token = localStorage.getItem('figma-token');
-    if (token) {
-      setFigmaToken(token);
-    }
-
-    // Load cache stats
+    if (token) setFigmaToken(token);
     loadCacheStats();
   }, [loadCacheStats]);
 
-  // Save settings to localStorage whenever they change + show toast
   useEffect(() => {
-    // Skip toast on initial mount (loading from localStorage)
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
@@ -185,7 +121,6 @@ export default function SettingsPage() {
     showSaveNotification();
   }, [settings, showSaveNotification]);
 
-  // Format bytes to human-readable
   function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -194,31 +129,22 @@ export default function SettingsPage() {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   }
 
-  // Test Figma connection (T116) - Uses proxy to avoid CORS
   async function testConnection() {
     if (!figmaToken.trim()) {
       setConnectionStatus('error');
       return;
     }
-
     setTestingConnection(true);
     setConnectionStatus(null);
-
     try {
-      // Use proxy API route to avoid CORS issues
       const response = await fetch('/api/figma/test-connection', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: figmaToken }),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setConnectionStatus('success');
-        // Save valid token
         localStorage.setItem('figma-token', figmaToken);
       } else {
         setConnectionStatus('error');
@@ -230,33 +156,21 @@ export default function SettingsPage() {
     }
   }
 
-  // Save token (without testing)
   function saveToken() {
     localStorage.setItem('figma-token', figmaToken);
     showSaveNotification();
   }
 
-  // Clear all cache (T120)
   async function clearCache() {
-    if (!confirm('Are you sure you want to clear all cached data? This will remove all imported nodes.')) {
-      return;
-    }
-
+    if (!confirm('Are you sure you want to clear all cached data?')) return;
     setClearingCache(true);
     try {
-      const response = await fetch('/api/figma/library', {
-        method: 'DELETE',
-      });
-
+      const response = await fetch('/api/figma/library', { method: 'DELETE' });
       if (response.ok) {
         setCacheStats({ size: '0 B', nodeCount: 0 });
-        alert('Cache cleared successfully');
-      } else {
-        alert('Failed to clear cache');
       }
     } catch (error) {
       console.error('Failed to clear cache:', error);
-      alert('Failed to clear cache');
     } finally {
       setClearingCache(false);
     }
@@ -264,256 +178,264 @@ export default function SettingsPage() {
 
   return (
     <>
-      {/* Auto-save toast notification */}
+      {/* Toast */}
       {showSavedToast && (
-        <div className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-4 right-4 z-50 bg-emerald-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <CheckCircle2 size={18} />
           <span className="font-medium">Settings saved</span>
         </div>
       )}
-      <div className="container max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
-          <Settings className="h-8 w-8" />
-          Settings
-        </h1>
-        <p className="text-text-secondary mt-2">
-          Configure your Figma Rules Builder preferences
-        </p>
-      </div>
 
-      <div className="space-y-6">
-        {/* Section 1: Figma API (T115-T116) */}
-        <SettingsSection
-          icon={Key}
-          title="Figma API"
-          description="Configure your Figma access token for importing designs"
-        >
-          <FormField
-            label="Access Token"
-            description="Get your token from Figma Settings → Account → Personal Access Tokens"
-          >
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  type={showToken ? 'text' : 'password'}
-                  value={figmaToken}
-                  onChange={(e) => {
-                    setFigmaToken(e.target.value);
-                    setConnectionStatus(null);
-                  }}
-                  placeholder="figd_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowToken(!showToken)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
-                >
-                  {showToken ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <Button onClick={saveToken} variant="outline">
-                Save
-              </Button>
-              <Button onClick={testConnection} disabled={testingConnection}>
-                {testingConnection ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Test'
-                )}
-              </Button>
-            </div>
-          </FormField>
-
-          {connectionStatus && (
-            <div
-              className={cn(
-                'flex items-center gap-2 text-sm p-3 rounded-lg',
-                connectionStatus === 'success'
-                  ? 'bg-status-success-bg text-status-success-text'
-                  : 'bg-status-error-bg text-status-error-text'
-              )}
-            >
-              {connectionStatus === 'success' ? (
-                <>
-                  <Check size={16} />
-                  Connection successful! Token saved.
-                </>
-              ) : (
-                <>
-                  <X size={16} />
-                  Connection failed. Check your token and try again.
-                </>
-              )}
-            </div>
-          )}
-        </SettingsSection>
-
-        {/* Section 2: Export Preferences (T117) */}
-        <SettingsSection
-          icon={Code}
-          title="Export Preferences"
-          description="Default settings for code generation"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Default Framework">
-              <select
-                value={settings.defaultFramework}
-                onChange={(e) =>
-                  setSettings({ ...settings, defaultFramework: e.target.value as AppSettings['defaultFramework'] })
-                }
-                className="w-full px-3 py-2 rounded-md border border-border-primary bg-bg-card text-text-primary"
-              >
-                <option value="react-jsx">React JSX</option>
-                <option value="react-tailwind">React + Tailwind v3</option>
-                <option value="react-tailwind-v4">React + Tailwind v4</option>
-                <option value="html-css">HTML/CSS</option>
-              </select>
-            </FormField>
-
-            <FormField label="Default Language">
-              <select
-                value={settings.defaultLanguage}
-                onChange={(e) =>
-                  setSettings({ ...settings, defaultLanguage: e.target.value as AppSettings['defaultLanguage'] })
-                }
-                className="w-full px-3 py-2 rounded-md border border-border-primary bg-bg-card text-text-primary"
-              >
-                <option value="typescript">TypeScript</option>
-                <option value="javascript">JavaScript</option>
-              </select>
-            </FormField>
-          </div>
-
-          <FormField label="Format on Export">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.formatOnExport}
-                onChange={(e) => setSettings({ ...settings, formatOnExport: e.target.checked })}
-                className="w-4 h-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary"
-              />
-              <span className="text-sm text-text-secondary">
-                Automatically format generated code
-              </span>
-            </label>
-          </FormField>
-        </SettingsSection>
-
-        {/* Section 3: Rule Editor (T118) */}
-        <SettingsSection
-          icon={Settings}
-          title="Rule Editor"
-          description="Configure rule creation and editing behavior"
-        >
-          <FormField label="Auto-save">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.autoSave}
-                onChange={(e) => setSettings({ ...settings, autoSave: e.target.checked })}
-                className="w-4 h-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary"
-              />
-              <span className="text-sm text-text-secondary">
-                Automatically save rules while editing
-              </span>
-            </label>
-          </FormField>
-
-          <FormField
-            label="Default Priority"
-            description="Priority assigned to newly created rules (1-1000)"
-          >
-            <Input
-              type="number"
-              min={1}
-              max={1000}
-              value={settings.defaultPriority}
-              onChange={(e) =>
-                setSettings({ ...settings, defaultPriority: parseInt(e.target.value) || 100 })
-              }
-              className="w-32"
-            />
-          </FormField>
-        </SettingsSection>
-
-        {/* Section 4: Cache Management (T119-T120) */}
-        <SettingsSection
-          icon={Database}
-          title="Cache Management"
-          description="Manage locally cached Figma data"
-        >
-          <div className="flex items-center justify-between p-4 bg-bg-secondary rounded-lg">
+      <div className="min-h-screen bg-bg-primary">
+        <div className="container mx-auto px-6 py-8 max-w-5xl">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-8">
+            <Settings className="w-8 h-8 text-text-primary" />
             <div>
-              <p className="text-sm font-medium text-text-primary">
-                Cache Statistics
+              <h1 className="text-3xl font-bold text-text-primary">Settings</h1>
+              <p className="text-text-muted text-sm">Configure your Figma Rules Builder preferences</p>
+            </div>
+          </div>
+
+          {/* SECTION 1: Figma API (Full Width) */}
+          <div className="p-6 rounded-xl bg-bg-card border border-border-primary mb-6">
+            {/* Header with colored icon */}
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                <Code className="w-5 h-5 text-orange-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-text-primary">Figma API</h2>
+                <p className="text-sm text-text-muted">Configure your Figma access token for importing designs</p>
+              </div>
+            </div>
+
+            {/* Token input */}
+            <div className="space-y-2">
+              <label className="text-sm text-text-muted">Access Token</label>
+              <p className="text-xs text-text-muted mb-2">
+                Get your token from Figma Settings → Account → Personal Access Tokens
               </p>
-              {loadingCache ? (
-                <p className="text-sm text-text-muted">Loading...</p>
-              ) : cacheStats ? (
-                <p className="text-sm text-text-muted">
-                  {cacheStats.nodeCount} nodes • {cacheStats.size}
-                </p>
-              ) : (
-                <p className="text-sm text-text-muted">No data cached</p>
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Input
+                    type={showToken ? 'text' : 'password'}
+                    value={figmaToken}
+                    onChange={(e) => {
+                      setFigmaToken(e.target.value);
+                      setConnectionStatus(null);
+                    }}
+                    placeholder="figd_aBcDeFgHiJkLmNoPqRsTuVwXyZ123456789"
+                    className="pr-10 bg-bg-secondary border-border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowToken(!showToken)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
+                  >
+                    {showToken ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <Button onClick={saveToken} variant="outline">
+                  Save
+                </Button>
+                <Button onClick={testConnection} disabled={testingConnection} className="bg-blue-500 hover:bg-blue-600">
+                  {testingConnection ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Test'}
+                </Button>
+              </div>
+              {connectionStatus && (
+                <div className={cn(
+                  'flex items-center gap-2 text-sm p-2 rounded-lg mt-2',
+                  connectionStatus === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                )}>
+                  {connectionStatus === 'success' ? <Check size={16} /> : <X size={16} />}
+                  {connectionStatus === 'success' ? 'Connection successful! Token saved.' : 'Connection failed. Check your token.'}
+                </div>
               )}
             </div>
-            <Button variant="outline" onClick={loadCacheStats} disabled={loadingCache}>
-              <RefreshCw className={cn('h-4 w-4 mr-2', loadingCache && 'animate-spin')} />
-              Refresh
-            </Button>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={clearCache}
-              disabled={clearingCache}
-              className="text-status-error-text hover:bg-status-error-bg"
-            >
-              {clearingCache ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
-              )}
-              Clear All Cache
-            </Button>
-          </div>
-        </SettingsSection>
+          {/* ROW 2: Export Preferences | Rule Editor */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Export Preferences */}
+            <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <Code className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-text-primary">Export Preferences</h2>
+                  <p className="text-sm text-text-muted">Default settings for code generation</p>
+                </div>
+              </div>
 
-        {/* Section 5: Appearance (T121-T122) */}
-        <SettingsSection
-          icon={Palette}
-          title="Appearance"
-          description="Customize the look and feel of the application"
-        >
-          <FormField label="Theme">
-            <div className="flex gap-2">
-              {[
-                { value: 'light', label: 'Light', icon: Sun },
-                { value: 'dark', label: 'Dark', icon: Moon },
-                { value: 'system', label: 'System', icon: Monitor },
-              ].map(({ value, label, icon: Icon }) => (
-                <button
-                  key={value}
-                  onClick={() => setTheme(value as 'light' | 'dark' | 'system')}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                    theme === value
-                      ? 'bg-accent-secondary border-accent-primary text-accent-primary'
-                      : 'border-border-primary hover:bg-bg-hover'
-                  )}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-text-muted mb-1.5 block">Default Framework</label>
+                  <select
+                    value={settings.defaultFramework}
+                    onChange={(e) => setSettings({ ...settings, defaultFramework: e.target.value as AppSettings['defaultFramework'] })}
+                    className="w-full px-3 py-2.5 text-sm rounded-lg border border-border-primary bg-bg-secondary text-text-primary"
+                  >
+                    <option value="react-jsx">React JSX</option>
+                    <option value="react-tailwind">React + Tailwind v3</option>
+                    <option value="react-tailwind-v4">React + Tailwind v4</option>
+                    <option value="html-css">HTML/CSS</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm text-text-muted mb-1.5 block">Default Language</label>
+                  <select
+                    value={settings.defaultLanguage}
+                    onChange={(e) => setSettings({ ...settings, defaultLanguage: e.target.value as AppSettings['defaultLanguage'] })}
+                    className="w-full px-3 py-2.5 text-sm rounded-lg border border-border-primary bg-bg-secondary text-text-primary"
+                  >
+                    <option value="typescript">TypeScript</option>
+                    <option value="javascript">JavaScript</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">Format on Export</p>
+                    <p className="text-xs text-text-muted">Automatically format generated code</p>
+                  </div>
+                  <Switch
+                    checked={settings.formatOnExport}
+                    onCheckedChange={(checked) => setSettings({ ...settings, formatOnExport: checked })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Rule Editor */}
+            <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                  <Settings className="w-5 h-5 text-violet-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-text-primary">Rule Editor</h2>
+                  <p className="text-sm text-text-muted">Configure rule creation and editing behavior</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">Auto-save</p>
+                    <p className="text-xs text-text-muted">Automatically save rules while editing</p>
+                  </div>
+                  <Switch
+                    checked={settings.autoSave}
+                    onCheckedChange={(checked) => setSettings({ ...settings, autoSave: checked })}
+                  />
+                </div>
+                <div className="pt-2">
+                  <label className="text-sm text-text-muted mb-1 block">Default Priority</label>
+                  <p className="text-xs text-text-muted mb-2">Priority assigned to newly created rules (1-1000)</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={1000}
+                    value={settings.defaultPriority}
+                    onChange={(e) => setSettings({ ...settings, defaultPriority: parseInt(e.target.value) || 100 })}
+                    className="bg-bg-secondary border-border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ROW 3: Cache Management | Appearance */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Cache Management */}
+            <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-text-primary">Cache Management</h2>
+                  <p className="text-sm text-text-muted">Manage locally cached Figma data</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">Cache Statistics</p>
+                    {loadingCache ? (
+                      <p className="text-xs text-text-muted">Loading...</p>
+                    ) : cacheStats ? (
+                      <p className="text-xs text-text-muted">{cacheStats.nodeCount} nodes • {cacheStats.size}</p>
+                    ) : (
+                      <p className="text-xs text-text-muted">No data</p>
+                    )}
+                  </div>
+                  <Button variant="outline" size="sm" onClick={loadCacheStats} disabled={loadingCache}>
+                    <RefreshCw className={cn('h-4 w-4 mr-1', loadingCache && 'animate-spin')} />
+                    Refresh
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={clearCache}
+                  disabled={clearingCache}
+                  className="w-full bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
                 >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </button>
-              ))}
+                  {clearingCache ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                  Clear All Cache
+                </Button>
+              </div>
             </div>
-          </FormField>
-        </SettingsSection>
+
+            {/* Appearance */}
+            <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a7 7 0 0 0 0 14 7 7 0 0 0 0-14z" fill="currentColor" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-text-primary">Appearance</h2>
+                  <p className="text-sm text-text-muted">Customize the look and feel of the application</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm text-text-muted mb-3 block">Theme</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'light', label: 'Light', icon: Sun },
+                    { value: 'dark', label: 'Dark', icon: Moon },
+                    { value: 'system', label: 'System', icon: Monitor },
+                  ].map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      onClick={() => setTheme(value as 'light' | 'dark' | 'system')}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-4 rounded-lg border transition-all',
+                        theme === value
+                          ? 'bg-blue-500 border-blue-500 text-white'
+                          : 'bg-bg-secondary border-border-primary text-text-secondary hover:border-border-secondary'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-sm font-medium">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     </>
   );
 }
