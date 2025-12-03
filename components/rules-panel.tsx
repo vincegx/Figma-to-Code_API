@@ -78,7 +78,7 @@ export function RulesPanel({
     .sort((a, b) => b.rules.length - a.rules.length);
 
   return (
-    <div className="max-h-[200px] overflow-auto">
+    <div className="max-h-[290px] overflow-auto">
       {sortedRulesByCategory.map(({ category, rules }) => (
         <RuleCategorySection
           key={category}

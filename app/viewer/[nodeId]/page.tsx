@@ -197,10 +197,12 @@ export default function ViewerPage() {
 
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
-  const [generatedCode, setGeneratedCode] = useState<string>('');
-  const [generatedCss, setGeneratedCss] = useState<string>(''); // WP42: CSS for Styles tab
+  const [generatedCode, setGeneratedCode] = useState<string>(''); // WP42: Code for LivePreview (always root node)
+  const [displayCode, setDisplayCode] = useState<string>(''); // WP42: Code for Generated Code block (selected node)
+  const [displayCss, setDisplayCss] = useState<string>(''); // WP42: CSS for Styles tab (selected node)
   const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component'); // WP42: Active tab state
   const [copiedCode, setCopiedCode] = useState(false); // WP42: Copy feedback
+  const [copiedRawData, setCopiedRawData] = useState(false); // WP42: Copy feedback for Raw Data
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false); // WP42: Fullscreen mode for Canvas Preview
@@ -364,14 +366,12 @@ export default function ViewerPage() {
         if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
           const output = await generateReactTailwind(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
-          setGeneratedCss('/* Tailwind classes are inline - no separate styles needed */'); // WP42
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
           const output = await generateHTMLTailwindCSS(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           // WP42: Combine HTML + CSS with marker for LivePreview (buildHTMLDocument splits on /* CSS */)
           const combinedCode = `<!-- HTML -->\n${output.code}\n\n/* CSS */\n${output.css || ''}`;
           setGeneratedCode(combinedCode);
-          setGeneratedCss(output.css || '/* No styles generated */'); // WP42: Separate CSS for Styles tab
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         }
       } catch (error) {
@@ -381,6 +381,38 @@ export default function ViewerPage() {
 
     generateCode();
   }, [altNode?.id, multiFrameworkRules.length, previewFramework, nodeId, rootResolvedProperties, iframeKey]);
+
+  // WP42: Generate code for selected node (or root if none selected) - for Generated Code block
+  useEffect(() => {
+    const targetNode = selectedNode || altNode;
+    if (!targetNode || multiFrameworkRules.length === 0) {
+      setDisplayCode('');
+      setDisplayCss('');
+      return;
+    }
+
+    async function generateDisplayCode() {
+      try {
+        // Evaluate rules for the target node (selected or root)
+        const targetProps = evaluateMultiFrameworkRules(targetNode!, multiFrameworkRules, previewFramework).properties;
+
+        if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
+          const output = await generateReactTailwind(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setDisplayCode(output.code);
+          setDisplayCss('/* Tailwind classes are inline - no separate styles needed */');
+        } else if (previewFramework === 'html-css') {
+          const output = await generateHTMLTailwindCSS(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          // For display, show only HTML in Component tab (CSS in Styles tab)
+          setDisplayCode(output.code);
+          setDisplayCss(output.css || '/* No styles generated */');
+        }
+      } catch (error) {
+        console.error('Display code generation error:', error);
+      }
+    }
+
+    generateDisplayCode();
+  }, [selectedNode, altNode, multiFrameworkRules, previewFramework, nodeId]);
 
   // WP35: Send highlight message to iframe when selection changes
   useEffect(() => {
@@ -806,7 +838,7 @@ export default function ViewerPage() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={async () => {
-                    const textToCopy = codeActiveTab === 'component' ? generatedCode : generatedCss;
+                    const textToCopy = codeActiveTab === 'component' ? displayCode : displayCss;
                     await navigator.clipboard.writeText(textToCopy);
                     setCopiedCode(true);
                     setTimeout(() => setCopiedCode(false), 2000);
@@ -818,7 +850,7 @@ export default function ViewerPage() {
                 </button>
                 <button
                   onClick={() => {
-                    const textToDownload = codeActiveTab === 'component' ? generatedCode : generatedCss;
+                    const textToDownload = codeActiveTab === 'component' ? displayCode : displayCss;
                     const extension = codeActiveTab === 'component'
                       ? (previewFramework === 'html-css' ? 'html' : 'tsx')
                       : 'css';
@@ -826,7 +858,7 @@ export default function ViewerPage() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${currentNode.name}.${extension}`;
+                    a.download = `${displayNode?.name || currentNode.name}.${extension}`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -843,11 +875,11 @@ export default function ViewerPage() {
             <div className="flex-1 min-h-0 overflow-hidden">
               <Highlight
                 theme={themes.nightOwl}
-                code={codeActiveTab === 'component' ? generatedCode : generatedCss}
+                code={codeActiveTab === 'component' ? displayCode : displayCss}
                 language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[380px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[420px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -864,7 +896,7 @@ export default function ViewerPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>No errors</span>
               <span>•</span>
-              <span>{(codeActiveTab === 'component' ? generatedCode : generatedCss).split('\n').length} lines</span>
+              <span>{(codeActiveTab === 'component' ? displayCode : displayCss).split('\n').length} lines</span>
             </div>
           </div>
 
@@ -891,14 +923,14 @@ export default function ViewerPage() {
               {/* Layout */}
               <div className="bg-bg-card rounded-xl border border-border-primary p-4">
                 <span className="text-sm font-medium text-text-primary mb-4 block">Layout</span>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-8">
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">Width</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.width || 0)}px</span></div>
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">Height</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.height || 0)}px</span></div>
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">X</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.x || 0)}px</span></div>
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">Y</span><span className="text-text-primary">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.y || 0)}px</span></div>
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">Mode</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.layoutMode || 'NONE'}</span></div>
-                  <div className="flex justify-between text-xs"><span className="text-text-muted">Gap</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.itemSpacing || 0}px</span></div>
-                  <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Padding</span><span className="text-text-primary font-mono tracking-wider">{(displayNode?.originalNode as any)?.paddingTop || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingRight || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingBottom || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingLeft || 0}</span></div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div><span className="text-text-muted text-xs block mb-1">Width</span><span className="text-text-primary text-sm">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.width || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Height</span><span className="text-text-primary text-sm">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.height || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">X</span><span className="text-text-primary text-sm">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.x || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Y</span><span className="text-text-primary text-sm">{Math.round(displayNode?.originalNode?.absoluteBoundingBox?.y || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Mode</span><span className="text-text-primary text-sm">{((displayNode?.originalNode as any)?.layoutMode || 'NONE').charAt(0) + ((displayNode?.originalNode as any)?.layoutMode || 'NONE').slice(1).toLowerCase()}</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Gap</span><span className="text-text-primary text-sm">{(displayNode?.originalNode as any)?.itemSpacing || 0}px</span></div>
+                  <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Padding</span><span className="text-text-primary text-sm font-mono tracking-wider">{(displayNode?.originalNode as any)?.paddingTop || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingRight || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingBottom || 0} &nbsp; {(displayNode?.originalNode as any)?.paddingLeft || 0}</span></div>
                 </div>
               </div>
             </div>
@@ -912,20 +944,22 @@ export default function ViewerPage() {
             {/* Appearance */}
             <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
               <span className="text-sm font-medium text-text-primary mb-4 block">Appearance</span>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-                <div className="flex justify-between text-xs"><span className="text-text-muted">Fills</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.fills?.length || 0} fill(s)</span></div>
-                <div className="flex justify-between text-xs"><span className="text-text-muted">Opacity</span><span className="text-text-primary">{Math.round(((displayNode?.originalNode as any)?.opacity ?? 1) * 100)}%</span></div>
-                <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Blend Mode</span><span className="text-text-primary">{(displayNode?.originalNode as any)?.blendMode || 'PASS_THROUGH'}</span></div>
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-x-8">
+                  <div><span className="text-text-muted text-xs block mb-1">Fills</span><span className="text-text-primary text-sm">{(displayNode?.originalNode as any)?.fills?.length || 0} fill(s)</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Blend Mode</span><span className="text-text-primary text-sm">{((displayNode?.originalNode as any)?.blendMode || 'PASS_THROUGH').split('_').map((w: string) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}</span></div>
+                </div>
+                <div><span className="text-text-muted text-xs block mb-1">Opacity</span><span className="text-text-primary text-sm">{Math.round(((displayNode?.originalNode as any)?.opacity ?? 1) * 100)}%</span></div>
               </div>
             </div>
 
             {/* Constraints */}
             <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
               <span className="text-sm font-medium text-text-primary mb-4 block">Constraints</span>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-                <div className="flex justify-between text-xs"><span className="text-text-muted">Horizontal</span><span className="text-text-primary">{displayNode?.originalNode?.constraints?.horizontal || 'LEFT'}</span></div>
-                <div className="flex justify-between text-xs"><span className="text-text-muted">Vertical</span><span className="text-text-primary">{displayNode?.originalNode?.constraints?.vertical || 'TOP'}</span></div>
-                <div className="flex justify-between text-xs col-span-2"><span className="text-text-muted">Clipping</span><span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400">Yes</span></span></div>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div><span className="text-text-muted text-xs block mb-1">Horizontal</span><span className="text-text-primary text-sm">{(displayNode?.originalNode?.constraints?.horizontal || 'LEFT').charAt(0) + (displayNode?.originalNode?.constraints?.horizontal || 'LEFT').slice(1).toLowerCase()}</span></div>
+                <div><span className="text-text-muted text-xs block mb-1">Vertical</span><span className="text-text-primary text-sm">{(displayNode?.originalNode?.constraints?.vertical || 'TOP').charAt(0) + (displayNode?.originalNode?.constraints?.vertical || 'TOP').slice(1).toLowerCase()}</span></div>
+                <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Clipping</span><span className="flex items-center gap-1 text-sm">{(displayNode?.originalNode as any)?.clipsContent ? (<><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400">Yes</span></>) : (<><span className="w-2 h-2 rounded-full bg-text-muted" /><span className="text-text-muted">No</span></>)}</span></div>
               </div>
             </div>
           </div>
@@ -935,8 +969,19 @@ export default function ViewerPage() {
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <span className="text-sm font-medium text-text-primary">Raw figma data</span>
               <div className="flex items-center gap-1">
-                <button onClick={async () => { await navigator.clipboard.writeText(JSON.stringify(displayNode, null, 2)); }} className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"><Copy className="w-4 h-4" /></button>
-                <button className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"><Download className="w-4 h-4" /></button>
+                <button onClick={async () => { await navigator.clipboard.writeText(JSON.stringify(displayNode, null, 2) || '{}'); setCopiedRawData(true); setTimeout(() => setCopiedRawData(false), 2000); }} className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover" title="Copy to clipboard">{copiedRawData ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}</button>
+                <button onClick={() => {
+                  const jsonData = JSON.stringify(displayNode, null, 2) || '{}';
+                  const blob = new Blob([jsonData], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${displayNode?.name || 'figma-data'}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }} className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover" title="Download JSON"><Download className="w-4 h-4" /></button>
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden">
@@ -946,7 +991,7 @@ export default function ViewerPage() {
                 language="json"
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-3 overflow-auto h-44 font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                  <pre className="text-xs rounded-lg p-3 overflow-auto h-64 font-mono leading-5" style={{ ...style, background: 'transparent' }}>
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
