@@ -116,6 +116,46 @@
       {
         "ts": 1764723143177,
         "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764732682778,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764732689656,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764732718519,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764732721933,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764732818876,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764732822864,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764732970408,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764732973649,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1764733120159,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764733123830,
+        "endpoint": "fetchSVGBatch"
       }
     ],
     "tier2": [
@@ -126,6 +166,54 @@
       {
         "ts": 1764723136574,
         "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764732675059,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764732676512,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764732713700,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764732714978,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764732790569,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764732813705,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764732814953,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764732965718,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764732966946,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764733085053,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764733086867,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1764764828942,
+        "endpoint": "fetchFileMetadata"
       }
     ]
   }
