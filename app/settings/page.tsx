@@ -107,8 +107,6 @@ export default function SettingsPage() {
         setSettings({ ...defaultSettings, ...JSON.parse(stored) });
       } catch { /* ignore */ }
     }
-    const token = localStorage.getItem('figma-token');
-    if (token) setFigmaToken(token);
     loadCacheStats();
   }, [loadCacheStats]);
 
@@ -145,7 +143,6 @@ export default function SettingsPage() {
       const data = await response.json();
       if (data.success) {
         setConnectionStatus('success');
-        localStorage.setItem('figma-token', figmaToken);
       } else {
         setConnectionStatus('error');
       }
@@ -154,11 +151,6 @@ export default function SettingsPage() {
     } finally {
       setTestingConnection(false);
     }
-  }
-
-  function saveToken() {
-    localStorage.setItem('figma-token', figmaToken);
-    showSaveNotification();
   }
 
   async function clearCache() {
@@ -206,7 +198,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-text-primary">Figma API</h2>
-                <p className="text-sm text-text-muted">Configure your Figma access token for importing designs</p>
+                <p className="text-sm text-text-muted">Test your Figma access token connection</p>
               </div>
             </div>
 
@@ -236,10 +228,7 @@ export default function SettingsPage() {
                     {showToken ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                <Button onClick={saveToken} variant="outline">
-                  Save
-                </Button>
-                <Button onClick={testConnection} disabled={testingConnection} className="bg-accent-primary hover:bg-accent-hover">
+                <Button onClick={testConnection} disabled={testingConnection} className="bg-accent-primary hover:bg-accent-hover text-white">
                   {testingConnection ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Test'}
                 </Button>
               </div>
@@ -249,7 +238,7 @@ export default function SettingsPage() {
                   connectionStatus === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
                 )}>
                   {connectionStatus === 'success' ? <Check size={16} /> : <X size={16} />}
-                  {connectionStatus === 'success' ? 'Connection successful! Token saved.' : 'Connection failed. Check your token.'}
+                  {connectionStatus === 'success' ? 'Connection successful!' : 'Connection failed. Check your token.'}
                 </div>
               )}
             </div>
