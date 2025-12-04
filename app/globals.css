@@ -8,7 +8,7 @@
 
 :root {
   /* Light Theme (Default) */
-  --color-0: #5f7470;
+  --color-0: #4dd5ef;
   --color-1: #5f7470;
   --color-2: #889696;
   --color-3: #b8bdb5;
@@ -21,7 +21,7 @@
 
   /* Semantic Background Colors */
   --bg-primary: #F5F5F7;
-  --bg-secondary: #f0f7fc;
+  --bg-secondary: #f0f0f5;
   --bg-card: #ffffff;
   --bg-hover: #dbeafe;
   --bg-canvas: #e5e7eb;
@@ -29,22 +29,27 @@
   --bg-overlay-medium: rgba(255, 255, 255, 0.7);
   --bg-overlay-dark: rgba(0, 0, 0, 0.2);
 
-  /* Semantic Text Colors */
+  /* Semantic Text Colors */  
   --text-primary: #1f2937;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
   --text-inverse: #ffffff;
 
   /* Semantic Border Colors */
-  --border-primary: #d1d5db;
+  --border-primary: #E6E6F0;
   --border-secondary: #e5e7eb;
   --border-light: rgba(255, 255, 255, 0.2);
   --border-subtle: #f3f4f6;
 
   /* Accent Colors */
-  --accent-primary: #3b82f6;
+  --accent-primary: #6666A3;
   --accent-secondary: #eff6ff;
-  --accent-hover: #2563eb;
+  --accent-hover: #3D3D66;
+
+  /* Toggle/Tab Active Colors (cyan) */
+  --toggle-active-bg: #4D4D80;
+  --toggle-active-text: #FFF;
+  --toggle-active-border: rgba(128, 128, 179, 0.5);
 
   /* Status Colors */
   --status-success-bg: #dcfce7;
@@ -62,6 +67,24 @@
   --status-info-bg: #dbeafe;
   --status-info-text: #1e40af;
   --status-info-border: #93c5fd;
+
+  /* Quota Indicator Colors */
+  --quota-ok-bg: #E6E6F0;
+  --quota-ok-text: #54548C;
+  --quota-ok-border: #BFBFD9;
+  --quota-warning-bg: #fffbeb;
+  --quota-warning-text: #d97706;
+  --quota-warning-border: #fcd34d;
+  --quota-critical-bg: #fef2f2;
+  --quota-critical-text: #dc2626;
+  --quota-critical-border: #fca5a5;
+
+  /* Graph/Dashboard Colors */
+  --graph-1: #6666a3;
+  --graph-2: #34d399;
+  --graph-3: #fbbf24;
+  --graph-4: #f87171;
+  --graph-5: #a78bfa;
 
   /* Interactive Elements */
   --button-primary-bg: var(--color-4);
@@ -138,9 +161,14 @@
   --border-subtle: #1a2636;
 
   /* Accent Colors */
-  --accent-primary: #3b82f6;
+  --accent-primary: #3772FF;
   --accent-secondary: rgba(59, 130, 246, 0.15);
   --accent-hover: #2563eb;
+
+  /* Toggle/Tab Active Colors (cyan) */
+  --toggle-active-bg: rgba(6, 182, 212, 0.2);
+  --toggle-active-text: #22d3ee;
+  --toggle-active-border: rgba(6, 182, 212, 0.3);
 
   /* Status Colors (adjusted for dark) */
   --status-success-bg: rgba(34, 197, 94, 0.15);
@@ -158,6 +186,24 @@
   --status-info-bg: rgba(59, 130, 246, 0.15);
   --status-info-text: #60a5fa;
   --status-info-border: rgba(59, 130, 246, 0.3);
+
+  /* Quota Indicator Colors */
+  --quota-ok-bg: rgba(16, 185, 129, 0.1);
+  --quota-ok-text: #34d399;
+  --quota-ok-border: rgba(16, 185, 129, 0.3);
+  --quota-warning-bg: rgba(245, 158, 11, 0.1);
+  --quota-warning-text: #fbbf24;
+  --quota-warning-border: rgba(245, 158, 11, 0.3);
+  --quota-critical-bg: rgba(239, 68, 68, 0.1);
+  --quota-critical-text: #f87171;
+  --quota-critical-border: rgba(239, 68, 68, 0.3);
+
+  /* Graph/Dashboard Colors */
+  --graph-1: #3772FF;
+  --graph-2: #34d399;
+  --graph-3: #fbbf24;
+  --graph-4: #f87171;
+  --graph-5: #a78bfa;
 
   /* Interactive Elements */
   --button-primary-bg: #3b82f6;

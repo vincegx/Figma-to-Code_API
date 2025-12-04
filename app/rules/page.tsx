@@ -80,8 +80,10 @@ function RulesPageContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showEnabledOnly, setShowEnabledOnly] = useState(true);
 
-  // Selection
-  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
+  // Selection - WP38 Fix #25: Initialize from URL query param if present
+  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(
+    searchParams.get('ruleId')
+  );
 
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -498,7 +500,7 @@ function RulesPageContent() {
                   </button>
                   <button
                     onClick={handleCreateRule}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent-primary hover:bg-accent-hover text-white text-xs font-medium"
                   >
                     <Plus className="w-3 h-3" />
                     New Rule
@@ -559,7 +561,7 @@ function RulesPageContent() {
                         selectedRule.tags.map((tag, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-toggle-active-bg text-toggle-active-text border border-toggle-active-border"
                           >
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
@@ -570,14 +572,14 @@ function RulesPageContent() {
                         ))
                       ) : (
                         <>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-toggle-active-bg text-toggle-active-text border border-toggle-active-border">
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
                               <line x1="7" y1="7" x2="7.01" y2="7" />
                             </svg>
                             #{selectedRule.category || 'rule'}
                           </span>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-toggle-active-bg text-toggle-active-text border border-toggle-active-border">
                             <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
                               <line x1="7" y1="7" x2="7.01" y2="7" />
@@ -663,7 +665,7 @@ function RulesPageContent() {
                         className={cn(
                           'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border',
                           isActive
-                            ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+                            ? 'bg-toggle-active-bg text-toggle-active-text border-toggle-active-border'
                             : 'bg-bg-secondary text-text-muted border-border-primary'
                         )}
                       >

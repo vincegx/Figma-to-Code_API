@@ -156,7 +156,7 @@ export function ConversionPipeline() {
           <p className="text-xs text-text-muted mt-0.5">Real-time processing stages</p>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-bg-secondary border border-border-primary text-xs text-text-secondary">
-          <Zap className="w-3 h-3 text-amber-400" />
+          <Zap className="w-3 h-3 text-graph-3" />
           Active
         </div>
       </div>
@@ -168,24 +168,24 @@ export function ConversionPipeline() {
           label="Nodes imported"
           value={totalNodes}
           max={totalNodes || 1}
-          color="bg-cyan-500"
-          bgColor="bg-cyan-500/20 text-cyan-400"
+          color="bg-graph-1"
+          bgColor="bg-graph-1/20 text-graph-1"
         />
         <NumberedProgressBar
           step={2}
           label="Properties matched"
           value={matchedPercentage}
           max={100}
-          color="bg-gradient-to-r from-amber-500 to-emerald-500"
-          bgColor="bg-amber-500/20 text-amber-400"
+          color="bg-graph-3"
+          bgColor="bg-graph-3/20 text-graph-3"
         />
         <NumberedProgressBar
           step={3}
           label="Semantic classes"
           value={semanticPercentage}
           max={100}
-          color="bg-emerald-500"
-          bgColor="bg-emerald-500/20 text-emerald-400"
+          color="bg-graph-2"
+          bgColor="bg-graph-2/20 text-graph-2"
         />
       </div>
 
@@ -195,19 +195,19 @@ export function ConversionPipeline() {
           value={groupsInlined}
           label="Groups inlined"
           sparklineData={groupsSparkline}
-          color="#22d3ee"
+          color="var(--graph-1)"
         />
         <MiniStat
           value={variablesUsed}
           label="Figma variables"
           sparklineData={variablesSparkline}
-          color="#fbbf24"
+          color="var(--graph-3)"
         />
         <MiniStat
           value={assetsCount}
           label="Assets detected"
           sparklineData={assetsSparkline}
-          color="#34d399"
+          color="var(--graph-2)"
         />
       </div>
     </div>

@@ -16,18 +16,18 @@ import { QuotaPopover } from './quota-popover';
 const STATUS_CONFIG = {
   ok: {
     icon: CheckCircle,
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800',
+    color: 'text-quota-ok-text',
+    bgColor: 'bg-quota-ok-bg border border-quota-ok-border',
   },
   warning: {
     icon: AlertTriangle,
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800',
+    color: 'text-quota-warning-text',
+    bgColor: 'bg-quota-warning-bg border border-quota-warning-border',
   },
   critical: {
     icon: XCircle,
-    color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800',
+    color: 'text-quota-critical-text',
+    bgColor: 'bg-quota-critical-bg border border-quota-critical-border',
   },
 };
 

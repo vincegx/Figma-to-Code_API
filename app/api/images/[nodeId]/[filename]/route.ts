@@ -48,10 +48,12 @@ export async function GET(
   else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
 
   // Return file
+  // WP38 Fix #23: Add CORS header for mask-image in iframe srcDoc
   return new NextResponse(new Uint8Array(fileBuffer), {
     headers: {
       'Content-Type': contentType,
       'Cache-Control': 'public, max-age=31536000, immutable',
+      'Access-Control-Allow-Origin': '*',
     },
   });
 }

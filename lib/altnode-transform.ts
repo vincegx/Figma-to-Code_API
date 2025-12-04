@@ -62,6 +62,11 @@ export interface SimpleAltNode {
   // Store negative spacing so children can apply margin instead
   negativeItemSpacing?: number;
   layoutDirection?: 'row' | 'column';
+
+  // WP38 Fix #23: Figma mask pattern support
+  // When a GROUP has isMask: true on first child, masked children get this imageRef
+  // The generator resolves the URL and applies CSS mask-image
+  maskImageRef?: string;
 }
 
 // WP32: Fill data structure for multi-layer rendering
@@ -201,6 +206,22 @@ function handleGroupInlining(
     }
   }
 
+  // WP38 Fix #23: Detect Figma mask pattern (isMask: true on first child)
+  // Pattern: First child with isMask + IMAGE fill acts as alpha mask for subsequent children
+  // Solution: Store maskImageRef on children, generator applies CSS mask-image with resolved URL
+  const maskChild = groupNode.children[0];
+  const hasMaskPattern = (maskChild as any)?.isMask === true;
+  let maskImageRef: string | null = null;
+
+  if (hasMaskPattern) {
+    // Extract imageRef from mask element's IMAGE fill
+    const maskFills = (maskChild as any)?.fills || [];
+    const imageFill = maskFills.find((f: any) => f.type === 'IMAGE' && f.imageRef);
+    if (imageFill?.imageRef) {
+      maskImageRef = imageFill.imageRef;
+    }
+  }
+
   const container: SimpleAltNode = {
     id: groupNode.id,
     name: groupNode.name,
@@ -209,11 +230,25 @@ function handleGroupInlining(
     originalType: groupNode.type, // T177: Preserve original type
     styles: groupStyles,
     children: groupNode.children
+      .filter((child, index) => {
+        // WP38 Fix #23: Skip the mask element itself (it's invisible in Figma output)
+        if (hasMaskPattern && index === 0 && (child as any).isMask) {
+          return false;
+        }
+        return true;
+      })
       .map(child => {
         // WP38: Pass groupBounds as parentBounds so children calculate position relative to GROUP, not grandparent
         // This prevents double-offset (GROUP at 41,41 + child at 41,41 = child at 82,82)
         // GROUP doesn't have layoutSizing - pass parent's sizing through
         const altChild = transformToAltNode(child, newCumulativeRotation, undefined, groupBounds, undefined, parentLayoutSizing);
+
+        // WP38 Fix #23: Store maskImageRef on masked elements (children after mask)
+        // The generator will resolve the URL and apply CSS mask-image styles
+        if (altChild && hasMaskPattern && maskImageRef) {
+          altChild.maskImageRef = maskImageRef;
+        }
+
         if (altChild && groupBounds && child.absoluteBoundingBox) {
           const childBounds = child.absoluteBoundingBox;
           const childConstraints = (child as any).constraints;

@@ -161,6 +161,15 @@ export function extractImageNodes(altNode: any): ImageNode[] {
       });
     }
 
+    // WP38 Fix #23: Also extract maskImageRef for Figma mask pattern
+    if (node.maskImageRef && !seenRefs.has(node.maskImageRef)) {
+      seenRefs.add(node.maskImageRef);
+      imageNodes.push({
+        nodeId: node.id,
+        imageRef: node.maskImageRef
+      });
+    }
+
     if (node.children) {
       node.children.forEach(traverse);
     }

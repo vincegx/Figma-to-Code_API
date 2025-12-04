@@ -78,7 +78,7 @@ export function AppSidebar() {
                       'w-10 h-10 p-0 flex items-center justify-center rounded-lg',
                       'transition-colors',
                       active
-                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                        ? 'bg-accent-primary text-white hover:bg-accent-hover'
                         : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
                     )}
                   >
@@ -106,7 +106,7 @@ export function AppSidebar() {
                 'w-10 h-10 p-0 flex items-center justify-center rounded-lg',
                 'transition-colors',
                 pathname === '/settings'
-                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  ? 'bg-accent-primary text-white hover:bg-accent-hover'
                   : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
               )}
             >

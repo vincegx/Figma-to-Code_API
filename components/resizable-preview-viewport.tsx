@@ -40,7 +40,7 @@ export function ResizablePreviewViewport({ children }: ResizablePreviewViewportP
   const maxHeight = Math.max(300, availableHeight - 40);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-[#0a0a0f] flex items-center justify-center">
+    <div ref={containerRef} className="w-full h-full bg-bg-primary flex items-center justify-center">
       <Resizable
         size={{ width: viewerViewportWidth, height: viewerViewportHeight }}
         onResizeStop={(_e, _direction, _ref, d) => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ChevronRight, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MultiFrameworkRule } from '@/lib/types/rules';
@@ -74,10 +75,11 @@ export function RuleCategorySection({
       {isOpen && (
         <div className="ml-4 mt-1 space-y-1">
           {rules.map(({ rule, order, isOverridden }) => (
-            <div
+            <Link
               key={rule.id}
+              href={`/rules?ruleId=${encodeURIComponent(rule.id)}`}
               className={cn(
-                'flex items-center gap-2 py-1.5 px-2 rounded text-xs',
+                'flex items-center gap-2 py-1.5 px-2 rounded text-xs cursor-pointer hover:bg-bg-hover transition-colors',
                 isOverridden && 'opacity-50'
               )}
             >
@@ -106,7 +108,7 @@ export function RuleCategorySection({
               )}>
                 {rule.priority}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}

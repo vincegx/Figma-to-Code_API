@@ -281,7 +281,7 @@ export function RefetchDialog({
               <button onClick={handleClose} className="h-8 px-4 rounded-lg text-sm font-medium border border-border-primary text-text-secondary hover:bg-bg-hover transition-colors">
                 Annuler
               </button>
-              <button onClick={handleConfirm} className="h-8 px-4 flex items-center gap-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
+              <button onClick={handleConfirm} className="h-8 px-4 flex items-center gap-2 rounded-lg bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium transition-colors">
                 <RefreshCw className="w-4 h-4" />
                 Synchroniser
               </button>
@@ -387,7 +387,7 @@ export function RefetchDialog({
             </div>
 
             <div className="flex justify-end">
-              <button onClick={handleClose} className="h-8 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
+              <button onClick={handleClose} className="h-8 px-4 rounded-lg bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium transition-colors">
                 {result?.status === 'up_to_date' ? 'OK' : 'Fermer'}
               </button>
             </div>

@@ -1089,15 +1089,32 @@ function generateTailwindJSXElement(
     } else {
       // Single non-image fill (solid/gradient) - render as div with background
       const fill = node.fillsData[0];
-      let bgStyle = '';
+      const styleProps: string[] = [];
       if (fill.type === 'SOLID') {
-        bgStyle = `backgroundColor: "${fillDataToColorCSS(fill)}"`;
+        styleProps.push(`backgroundColor: "${fillDataToColorCSS(fill)}"`);
       } else if (fill.type.startsWith('GRADIENT')) {
-        bgStyle = `backgroundImage: "${fillDataToGradientCSS(fill)}"`;
+        styleProps.push(`backgroundImage: "${fillDataToGradientCSS(fill)}"`);
       }
 
+      // WP38 Fix #23: Apply mask-image for Figma mask pattern
+      if (node.maskImageRef) {
+        const maskUrl = imageUrls[node.maskImageRef] || '';
+        if (maskUrl) {
+          styleProps.push(`WebkitMaskImage: "url('${maskUrl}')"`);
+          styleProps.push(`maskImage: "url('${maskUrl}')"`);
+          styleProps.push(`WebkitMaskSize: "contain"`);
+          styleProps.push(`maskSize: "contain"`);
+          styleProps.push(`WebkitMaskRepeat: "no-repeat"`);
+          styleProps.push(`maskRepeat: "no-repeat"`);
+          styleProps.push(`WebkitMaskPosition: "center"`);
+          styleProps.push(`maskPosition: "center"`);
+        }
+      }
+
+      const styleString = styleProps.join(', ');
+
       if (hasChildren) {
-        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${bgStyle} }}>\n`;
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${styleString} }}>\n`;
         // WP31: Prepare negative spacing for children
         const childNegativeSpacing = node.negativeItemSpacing && node.layoutDirection
           ? { value: node.negativeItemSpacing, direction: node.layoutDirection }
@@ -1112,7 +1129,7 @@ function generateTailwindJSXElement(
         }
         jsxString += `${indent}</${htmlTag}>`;
       } else {
-        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${bgStyle} }} />`;
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''} style={{ ${styleString} }} />`;
       }
     }
   } else if (shouldRenderAsImgTag(node)) {

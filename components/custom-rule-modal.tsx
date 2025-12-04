@@ -269,7 +269,7 @@ export function CustomRuleModal({
                     <button
                       type="button"
                       onClick={handleAddTag}
-                      className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
+                      className="px-3 py-2 bg-accent-primary hover:bg-accent-hover text-white text-sm rounded-lg transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -345,7 +345,7 @@ export function CustomRuleModal({
                       className={cn(
                         'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border',
                         isActive
-                          ? 'bg-blue-500 text-white border-blue-500'
+                          ? 'bg-accent-primary text-white border-accent-primary'
                           : hasTransformer
                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                             : 'bg-bg-secondary text-text-muted border-border-primary hover:bg-bg-hover'
@@ -412,7 +412,7 @@ export function CustomRuleModal({
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-2 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-xs font-medium bg-accent-primary hover:bg-accent-hover text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? 'Saving...' : mode === 'create' ? 'Create Rule' : 'Update Rule'}
             </button>

@@ -239,7 +239,7 @@ export default function SettingsPage() {
                 <Button onClick={saveToken} variant="outline">
                   Save
                 </Button>
-                <Button onClick={testConnection} disabled={testingConnection} className="bg-blue-500 hover:bg-blue-600">
+                <Button onClick={testConnection} disabled={testingConnection} className="bg-accent-primary hover:bg-accent-hover">
                   {testingConnection ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Test'}
                 </Button>
               </div>
@@ -422,7 +422,7 @@ export default function SettingsPage() {
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-lg border transition-all',
                         theme === value
-                          ? 'bg-blue-500 border-blue-500 text-white'
+                          ? 'bg-accent-primary border-accent-primary text-white'
                           : 'bg-bg-secondary border-border-primary text-text-secondary hover:border-border-secondary'
                       )}
                     >

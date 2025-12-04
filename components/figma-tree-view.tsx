@@ -173,7 +173,7 @@ function TreeNode({
         className={cn(
           'flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors',
           isSelected
-            ? cn('bg-blue-100 dark:bg-white/10', colors.text)
+            ? cn('bg-accent-secondary', colors.text)
             : 'hover:bg-bg-hover',
           !node.visible && 'opacity-50' // T156: Dim hidden nodes
         )}

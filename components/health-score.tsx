@@ -22,28 +22,28 @@ import {
 
 const scoreConfig = {
   excellent: {
-    color: 'text-blue-400',
-    strokeColor: '#60a5fa',
+    color: 'text-graph-1',
+    strokeColor: 'var(--graph-1)',
     label: 'Ideal',
-    labelBg: 'bg-pink-500/20 text-pink-400',
+    labelBg: 'bg-graph-5/20 text-graph-5',
   },
   good: {
-    color: 'text-blue-400',
-    strokeColor: '#60a5fa',
+    color: 'text-graph-1',
+    strokeColor: 'var(--graph-1)',
     label: 'Good',
-    labelBg: 'bg-blue-500/20 text-blue-400',
+    labelBg: 'bg-graph-1/20 text-graph-1',
   },
   'needs-improvement': {
-    color: 'text-amber-400',
-    strokeColor: '#fbbf24',
+    color: 'text-graph-3',
+    strokeColor: 'var(--graph-3)',
     label: 'Moderate',
-    labelBg: 'bg-amber-500/20 text-amber-400',
+    labelBg: 'bg-graph-3/20 text-graph-3',
   },
   poor: {
-    color: 'text-red-400',
-    strokeColor: '#f87171',
+    color: 'text-graph-4',
+    strokeColor: 'var(--graph-4)',
     label: 'Low',
-    labelBg: 'bg-red-500/20 text-red-400',
+    labelBg: 'bg-graph-4/20 text-graph-4',
   },
 };
 
@@ -62,8 +62,8 @@ export function HealthScore() {
   const weeklyChangeColor = weeklyChangeDisplay === null
     ? 'text-text-muted'
     : weeklyChangeDisplay >= 0
-      ? 'text-emerald-400'
-      : 'text-red-400';
+      ? 'text-graph-2'
+      : 'text-graph-4';
   const weeklyChangeText = weeklyChangeDisplay === null
     ? '—'
     : `${weeklyChangeDisplay >= 0 ? '+' : ''}${weeklyChangeDisplay}%`;
@@ -171,7 +171,7 @@ export function HealthScore() {
             <div className="flex items-center gap-2">
               <span className={cn(
                 'w-2 h-2 rounded-full',
-                details.totalRules > 0 ? 'bg-emerald-400' : 'bg-gray-500'
+                details.totalRules > 0 ? 'bg-graph-2' : 'bg-text-muted'
               )} />
               <span className="text-text-secondary">Rules loaded</span>
             </div>
@@ -182,7 +182,7 @@ export function HealthScore() {
             <div className="flex items-center gap-2">
               <span className={cn(
                 'w-2 h-2 rounded-full',
-                breakdown.semantic.percent >= 50 ? 'bg-emerald-400' : 'bg-amber-400'
+                breakdown.semantic.percent >= 50 ? 'bg-graph-2' : 'bg-graph-3'
               )} />
               <span className="text-text-secondary">Semantic score</span>
             </div>
@@ -195,7 +195,7 @@ export function HealthScore() {
             <div className="flex items-center gap-2">
               <span className={cn(
                 'w-2 h-2 rounded-full',
-                breakdown.responsive.percent >= 50 ? 'bg-emerald-400' : 'bg-amber-400'
+                breakdown.responsive.percent >= 50 ? 'bg-graph-2' : 'bg-graph-3'
               )} />
               <span className="text-text-secondary">Responsive</span>
             </div>
@@ -215,7 +215,7 @@ export function HealthScore() {
           </div>
           <div className="h-1.5 bg-bg-secondary rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-graph-2 transition-all duration-700 ease-out"
               style={{ width: `${score}%` }}
             />
           </div>

@@ -66,6 +66,7 @@ import type { SimpleAltNode } from '@/lib/altnode-transform';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
+import { generateReactTailwindV4 } from '@/lib/code-generators/react-tailwind-v4';
 import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
 import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 
@@ -189,6 +190,10 @@ export default function ViewerPage() {
 
   // WP35: Ref for LivePreview to send highlight messages
   const livePreviewRef = useRef<LivePreviewHandle>(null);
+
+  // WP38 Fix #27: Theme-aware code highlighting (using Zustand store)
+  const currentTheme = useUIStore((state) => state.theme);
+  const codeTheme = currentTheme === 'light' ? themes.github : themes.nightOwl;
 
   // Multi-framework rules state
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
@@ -365,8 +370,12 @@ export default function ViewerPage() {
 
     async function generateCode() {
       try {
-        if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
+        if (previewFramework === 'react-tailwind') {
           const output = await generateReactTailwind(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setGeneratedCode(output.code);
+          setGoogleFontsUrl(output.googleFontsUrl); // WP31
+        } else if (previewFramework === 'react-tailwind-v4') {
+          const output = await generateReactTailwindV4(rootNode, rootResolvedProperties, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setGeneratedCode(output.code);
           setGoogleFontsUrl(output.googleFontsUrl); // WP31
         } else if (previewFramework === 'html-css') {
@@ -398,10 +407,14 @@ export default function ViewerPage() {
         // Evaluate rules for the target node (selected or root)
         const targetProps = evaluateMultiFrameworkRules(targetNode!, multiFrameworkRules, previewFramework).properties;
 
-        if (previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') {
+        if (previewFramework === 'react-tailwind') {
           const output = await generateReactTailwind(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           setDisplayCode(output.code);
           setDisplayCss('/* Tailwind classes are inline - no separate styles needed */');
+        } else if (previewFramework === 'react-tailwind-v4') {
+          const output = await generateReactTailwindV4(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          setDisplayCode(output.code);
+          setDisplayCss('/* Tailwind v4 classes are inline - no separate styles needed */');
         } else if (previewFramework === 'html-css') {
           const output = await generateHTMLTailwindCSS(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
           // For display, show only HTML in Component tab (CSS in Styles tab)
@@ -560,21 +573,21 @@ export default function ViewerPage() {
             <button
               onClick={() => setRefetchDialogOpen(true)}
               disabled={isRefetching}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
               title="Re-fetch from Figma"
             >
               <CloudDownload className="w-4 h-4" />
             </button>
             <button
               onClick={() => setIframeKey((k) => k + 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
               title="Refresh preview"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary transition-colors" title="Export">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors" title="Export">
                   <Download className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -600,7 +613,7 @@ export default function ViewerPage() {
             <button
               onClick={() => prevNode && router.push(`/viewer/${prevNode.id}`)}
               disabled={!prevNode}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
               title="Previous node"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -608,13 +621,13 @@ export default function ViewerPage() {
             <button
               onClick={() => nextNode && router.push(`/viewer/${nextNode.id}`)}
               disabled={!nextNode}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1e293b] hover:bg-[#334155] text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
               title="Next node"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
             <Select value={previewFramework} onValueChange={(v) => setPreviewFramework(v as FrameworkType)}>
-              <SelectTrigger className="h-8 w-[160px] bg-[#1e293b] border-[#334155] text-xs text-text-muted hover:bg-[#334155]">
+              <SelectTrigger className="h-8 w-[160px] bg-bg-secondary border-border-primary text-xs text-text-muted hover:bg-bg-hover">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-bg-card border border-border-primary">
@@ -625,7 +638,7 @@ export default function ViewerPage() {
             </Select>
             <button
               onClick={() => router.push(`/rules?nodeId=${nodeId}`)}
-              className="h-8 px-4 flex items-center gap-2 rounded-lg bg-[#2B7FFF] hover:bg-[#1a6fe8] text-white text-sm font-medium transition-colors"
+              className="h-8 px-4 flex items-center gap-2 rounded-lg bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium transition-colors"
             >
               <Settings className="w-4 h-4" />
               Edit Rules
@@ -692,7 +705,7 @@ export default function ViewerPage() {
                         onClick={() => setViewerHighlightEnabled(!viewerHighlightEnabled)}
                         className={cn(
                           'flex items-center gap-1 px-2 py-0.5 text-xs rounded',
-                          viewerHighlightEnabled ? 'bg-cyan-500/20 text-cyan-400' : 'bg-bg-secondary text-text-muted hover:bg-bg-hover'
+                          viewerHighlightEnabled ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover'
                         )}
                       >
                         <Eye className="w-3 h-3" />
@@ -735,24 +748,24 @@ export default function ViewerPage() {
                   <span className="text-sm font-medium text-text-primary">Canvas Preview</span>
                   <span className="text-xs text-text-muted tabular-nums">{viewerViewportWidth} × {viewerViewportHeight}</span>
                   {/* Device icons for responsive mode */}
-                  <div className="flex items-center gap-0.5 p-0.5 bg-[#1e293b] rounded">
+                  <div className="flex items-center gap-0.5 p-0.5 bg-bg-secondary rounded">
                     <button
                       onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(375, 667); }}
-                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                       title="Mobile (375×667)"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(768, 1024); }}
-                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                       title="Tablet (768×1024)"
                     >
                       <Tablet className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setViewerResponsiveMode(false)}
-                      className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                      className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                       title="Desktop (Full width)"
                     >
                       <Monitor className="w-3.5 h-3.5" />
@@ -762,14 +775,14 @@ export default function ViewerPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
-                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover')}
                     title={viewerResponsiveMode ? "Exit responsive mode" : "Enter responsive mode (resize preview)"}
                   >
                     <Copy className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewerGridVisible(!viewerGridVisible)}
-                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                    className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover')}
                     title="Toggle grid"
                   >
                     <Grid3x3 className="w-4 h-4" />
@@ -783,7 +796,7 @@ export default function ViewerPage() {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 relative bg-[#0f172a]">
+              <div className="flex-1 relative bg-bg-secondary">
                 <ResizablePreviewViewport>
                   {viewerGridVisible && (
                     <div
@@ -822,7 +835,7 @@ export default function ViewerPage() {
                   onClick={() => setCodeActiveTab('component')}
                   className={cn(
                     'px-2 py-0.5 text-xs rounded transition-colors',
-                    codeActiveTab === 'component' ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover'
+                    codeActiveTab === 'component' ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover'
                   )}
                 >
                   Component
@@ -831,7 +844,7 @@ export default function ViewerPage() {
                   onClick={() => setCodeActiveTab('styles')}
                   className={cn(
                     'px-2 py-0.5 text-xs rounded transition-colors',
-                    codeActiveTab === 'styles' ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover'
+                    codeActiveTab === 'styles' ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover'
                   )}
                 >
                   Styles
@@ -876,7 +889,7 @@ export default function ViewerPage() {
             {/* Code area - limited height to match right column */}
             <div className="flex-1 min-h-0 overflow-hidden">
               <Highlight
-                theme={themes.nightOwl}
+                theme={codeTheme}
                 code={codeActiveTab === 'component' ? displayCode : displayCss}
                 language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
               >
@@ -988,7 +1001,7 @@ export default function ViewerPage() {
             </div>
             <div className="flex-1 min-h-0 overflow-hidden">
               <Highlight
-                theme={themes.nightOwl}
+                theme={codeTheme}
                 code={JSON.stringify(displayNode, null, 2)?.slice(0, 2000) || '{}'}
                 language="json"
               >
@@ -1062,24 +1075,24 @@ export default function ViewerPage() {
               <span className="text-sm font-medium text-text-primary">Canvas Preview</span>
               <span className="text-xs text-text-muted tabular-nums">{viewerViewportWidth} × {viewerViewportHeight}</span>
               {/* Device icons for responsive mode */}
-              <div className="flex items-center gap-0.5 p-0.5 bg-[#1e293b] rounded">
+              <div className="flex items-center gap-0.5 p-0.5 bg-bg-secondary rounded">
                 <button
                   onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(375, 667); }}
-                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 375 ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                   title="Mobile (375×667)"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => { setViewerResponsiveMode(true); setViewerViewportSize(768, 1024); }}
-                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', viewerResponsiveMode && viewerViewportWidth === 768 ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                   title="Tablet (768×1024)"
                 >
                   <Tablet className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setViewerResponsiveMode(false)}
-                  className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-[#334155] text-text-primary' : 'text-text-muted hover:text-text-primary')}
+                  className={cn('w-6 h-6 flex items-center justify-center rounded', !viewerResponsiveMode ? 'bg-bg-hover text-text-primary' : 'text-text-muted hover:text-text-primary')}
                   title="Desktop (Full width)"
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -1089,14 +1102,14 @@ export default function ViewerPage() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setViewerResponsiveMode(!viewerResponsiveMode)}
-                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerResponsiveMode ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover')}
                 title={viewerResponsiveMode ? "Exit responsive mode" : "Enter responsive mode (resize preview)"}
               >
                 <Copy className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewerGridVisible(!viewerGridVisible)}
-                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-cyan-500/20 text-cyan-400' : 'text-text-muted hover:bg-bg-hover')}
+                className={cn('w-7 h-7 flex items-center justify-center rounded', viewerGridVisible ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover')}
                 title="Toggle grid"
               >
                 <Grid3x3 className="w-4 h-4" />
@@ -1111,7 +1124,7 @@ export default function ViewerPage() {
             </div>
           </div>
           {/* Fullscreen Content */}
-          <div className="flex-1 relative bg-[#0f172a]">
+          <div className="flex-1 relative bg-bg-secondary">
             <ResizablePreviewViewport>
               {viewerGridVisible && (
                 <div

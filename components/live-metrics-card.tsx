@@ -39,27 +39,27 @@ interface LiveMetricsCardProps {
 
 const variantStyles = {
   default: {
-    bg: 'bg-accent-primary/10',
-    icon: 'text-cyan-400',
-    sparkline: '#22d3ee', // cyan-400
-    sparklineFill: 'rgba(34, 211, 238, 0.1)',
+    bg: 'bg-graph-1/10',
+    icon: 'text-graph-1',
+    sparkline: 'var(--graph-1)',
+    sparklineFill: 'rgba(96, 165, 250, 0.1)',
   },
   success: {
-    bg: 'bg-status-success-bg',
-    icon: 'text-emerald-400',
-    sparkline: '#34d399', // emerald-400
+    bg: 'bg-graph-2/10',
+    icon: 'text-graph-2',
+    sparkline: 'var(--graph-2)',
     sparklineFill: 'rgba(52, 211, 153, 0.1)',
   },
   warning: {
-    bg: 'bg-status-warning-bg',
-    icon: 'text-amber-400',
-    sparkline: '#fbbf24', // amber-400
+    bg: 'bg-graph-3/10',
+    icon: 'text-graph-3',
+    sparkline: 'var(--graph-3)',
     sparklineFill: 'rgba(251, 191, 36, 0.1)',
   },
   info: {
-    bg: 'bg-status-info-bg',
-    icon: 'text-blue-400',
-    sparkline: '#60a5fa', // blue-400
+    bg: 'bg-graph-1/10',
+    icon: 'text-graph-1',
+    sparkline: 'var(--graph-1)',
     sparklineFill: 'rgba(96, 165, 250, 0.1)',
   },
 };
@@ -103,8 +103,8 @@ export function LiveMetricsCard({
             className={cn(
               'text-xs font-medium px-1.5 py-0.5 rounded',
               isPositive
-                ? 'text-emerald-400 bg-emerald-400/10'
-                : 'text-red-400 bg-red-400/10'
+                ? 'text-graph-2 bg-graph-2/10'
+                : 'text-graph-4 bg-graph-4/10'
             )}
           >
             {isPositive ? '+' : ''}{trend.value}

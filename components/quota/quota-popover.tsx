@@ -50,15 +50,15 @@ export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
   const hasData = weeklyData.some((d) => d.tier1 > 0 || d.tier2 > 0);
 
   const getStatusColor = (percent: number) => {
-    if (percent >= 80) return 'text-red-400';
-    if (percent >= 60) return 'text-amber-400';
-    return 'text-emerald-400';
+    if (percent >= 80) return 'text-quota-critical-text';
+    if (percent >= 60) return 'text-quota-warning-text';
+    return 'text-quota-ok-text';
   };
 
   const getProgressColor = (percent: number) => {
-    if (percent >= 80) return 'bg-red-500';
-    if (percent >= 60) return 'bg-amber-500';
-    return 'bg-emerald-500';
+    if (percent >= 80) return 'bg-quota-critical-text';
+    if (percent >= 60) return 'bg-quota-warning-text';
+    return 'bg-quota-ok-text';
   };
 
   return (
@@ -87,7 +87,7 @@ export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-1.5 text-text-secondary">
-                  <Zap className="w-3 h-3 text-cyan-400" />
+                  <Zap className="w-3 h-3 text-graph-1" />
                   Tier 1 (Images)
                 </span>
                 <span className={cn('font-mono font-medium', getStatusColor(tier1Percent))}>
@@ -106,7 +106,7 @@ export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-1.5 text-text-secondary">
-                  <Database className="w-3 h-3 text-blue-400" />
+                  <Database className="w-3 h-3 text-graph-5" />
                   Tier 2 (Data)
                 </span>
                 <span className={cn('font-mono font-medium', getStatusColor(tier2Percent))}>
@@ -151,9 +151,9 @@ export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
           <div className="flex items-center justify-between p-3 rounded-lg bg-bg-secondary">
             <span className="text-xs text-text-muted">Today&apos;s Total</span>
             <div className="text-xs font-mono">
-              <span className="text-cyan-400">{todayTotal.tier1}</span>
+              <span className="text-graph-1">{todayTotal.tier1}</span>
               <span className="text-text-muted mx-1">+</span>
-              <span className="text-blue-400">{todayTotal.tier2}</span>
+              <span className="text-graph-5">{todayTotal.tier2}</span>
               <span className="text-text-muted ml-1">= </span>
               <span className="text-text-primary font-medium">{todayTotal.tier1 + todayTotal.tier2}</span>
             </div>
@@ -192,8 +192,8 @@ export function QuotaPopover({ children, side = 'bottom' }: QuotaPopoverProps) {
                       formatter={(value) => (value === 'tier1' ? 'Images' : 'Data')}
                       wrapperStyle={{ fontSize: '10px' }}
                     />
-                    <Bar dataKey="tier1" fill="#22d3ee" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="tier2" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="tier1" fill="var(--graph-1)" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="tier2" fill="var(--graph-5)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

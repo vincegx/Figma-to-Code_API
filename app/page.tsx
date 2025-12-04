@@ -69,13 +69,13 @@ function MetricsCard({
   const maxVal = Math.max(...data, 1);
 
   const getChartColor = () => {
-    if (title.includes('Semantic')) return '#22d3ee'; // cyan
-    if (title.includes('Responsive')) return '#10b981'; // emerald
-    return '#22d3ee'; // cyan default
+    if (title.includes('Semantic')) return 'var(--graph-1)';
+    if (title.includes('Responsive')) return 'var(--graph-2)';
+    return 'var(--graph-1)';
   };
 
-  // Asset bar colors (images=blue, icons=cyan, gradients=emerald)
-  const barColors = ['#3b82f6', '#22d3ee', '#10b981'];
+  // Asset bar colors (images, icons, gradients)
+  const barColors = ['var(--graph-1)', 'var(--graph-3)', 'var(--graph-2)'];
 
   return (
     <div className="p-5 rounded-xl bg-bg-card border border-border-primary relative h-full flex flex-col">
@@ -86,7 +86,7 @@ function MetricsCard({
           <span
             className={cn(
               'text-xs font-medium',
-              badge.positive ? 'text-cyan-400' : 'text-red-400'
+              badge.positive ? 'text-graph-1' : 'text-graph-4'
             )}
           >
             {badge.positive ? '+' : ''}{badge.value}
@@ -117,7 +117,7 @@ function MetricsCard({
         <div className="h-10 relative group flex items-end">
           <div className="flex h-3 w-full rounded-full overflow-hidden bg-bg-secondary">
             <div
-              className="bg-cyan-400 transition-all"
+              className="bg-graph-1 transition-all"
               style={{ width: `${data[0]}%` }}
             />
             <div
@@ -131,7 +131,7 @@ function MetricsCard({
               {tooltipData.map((t, i) => (
                 <div key={i} className="flex justify-between gap-4">
                   <span className="text-text-muted">{t.label}:</span>
-                  <span className={i === 0 ? 'text-cyan-400' : 'text-gray-400'}>{t.value}</span>
+                  <span className={i === 0 ? 'text-graph-1' : 'text-text-muted'}>{t.value}</span>
                 </div>
               ))}
             </div>
@@ -167,7 +167,7 @@ function MetricsCard({
         <div className="h-10 relative group flex items-end">
           <div className="h-3 w-full bg-bg-secondary rounded-full overflow-hidden">
             <div
-              className="h-full bg-emerald-500 transition-all rounded-full"
+              className="h-full bg-graph-2 transition-all rounded-full"
               style={{ width: `${data[0]}%` }}
             />
           </div>
@@ -177,7 +177,7 @@ function MetricsCard({
               {tooltipData.map((t, i) => (
                 <div key={i}>
                   <span className="text-text-muted">{t.label}: </span>
-                  <span className="text-emerald-400">{t.value}</span>
+                  <span className="text-graph-2">{t.value}</span>
                 </div>
               ))}
             </div>
@@ -219,7 +219,7 @@ function MetricsCard({
               {tooltipData.map((t, i) => (
                 <div key={i} className="flex justify-between gap-3">
                   <span className="text-text-muted">{t.label}:</span>
-                  <span className="text-cyan-400">{t.value}</span>
+                  <span className="text-graph-1">{t.value}</span>
                 </div>
               ))}
             </div>
@@ -316,7 +316,7 @@ export default function HomePage() {
                 'transition-colors',
                 isRunning
                   ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white',
+                  : 'bg-accent-primary hover:bg-accent-hover text-white',
                 'disabled:opacity-50 disabled:cursor-not-allowed'
               )}
             >
