@@ -210,6 +210,7 @@ export default function ViewerPage() {
   const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component'); // WP42: Active tab state
   const [copiedCode, setCopiedCode] = useState(false); // WP42: Copy feedback
   const [copiedRawData, setCopiedRawData] = useState(false); // WP42: Copy feedback for Raw Data
+  const [rawDataLimit, setRawDataLimit] = useState(2000); // WP38: Expandable raw data limit
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(startFullscreen); // WP42/WP45: Fullscreen mode for Canvas Preview (supports ?fullscreen=true URL param)
@@ -269,6 +270,11 @@ export default function ViewerPage() {
 
   // Display node (selected or root) - must be before early returns
   const displayNode = selectedNode || altNode;
+
+  // Reset raw data limit when selected node changes
+  useEffect(() => {
+    setRawDataLimit(2000);
+  }, [selectedTreeNodeId]);
 
   // Helper: count applied rules - must be before early returns
   const appliedRulesCount = useMemo(() => {
@@ -1002,7 +1008,14 @@ export default function ViewerPage() {
             <div className="flex-1 min-h-0 overflow-hidden">
               <Highlight
                 theme={codeTheme}
-                code={JSON.stringify(displayNode, null, 2)?.slice(0, 2000) || '{}'}
+                code={(() => {
+                  const fullJson = JSON.stringify(displayNode, null, 2) || '{}';
+                  if (rawDataLimit >= fullJson.length) return fullJson;
+                  // Couper sur une fin de ligne pour éviter de couper au milieu d'un path SVG
+                  const sliced = fullJson.slice(0, rawDataLimit);
+                  const lastNewline = sliced.lastIndexOf('\n');
+                  return lastNewline > 0 ? sliced.slice(0, lastNewline) + '\n  // ... more data' : sliced;
+                })()}
                 language="json"
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
@@ -1018,11 +1031,25 @@ export default function ViewerPage() {
                 )}
               </Highlight>
             </div>
-            <div className="flex items-center gap-2 mt-2 text-xs text-text-muted flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>No errors</span>
-              <span>•</span>
-              <span>{JSON.stringify(displayNode, null, 2)?.split('\n').length || 0} lines</span>
+            <div className="flex items-center justify-between mt-2 flex-shrink-0">
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <span className="w-2 h-2 rounded-full bg-graph-2" />
+                <span>No errors</span>
+                <span>•</span>
+                <span>{JSON.stringify(displayNode, null, 2)?.split('\n').length || 0} lines</span>
+              </div>
+              {(() => {
+                const jsonLength = JSON.stringify(displayNode, null, 2)?.length || 0;
+                const hasMore = jsonLength > rawDataLimit;
+                return hasMore ? (
+                  <button
+                    onClick={() => setRawDataLimit(prev => prev + 10000)}
+                    className="text-xs text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    + more ({Math.round((rawDataLimit / jsonLength) * 100)}%)
+                  </button>
+                ) : null;
+              })()}
             </div>
           </div>
 
