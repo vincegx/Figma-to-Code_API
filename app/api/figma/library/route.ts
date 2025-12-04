@@ -90,35 +90,57 @@ export async function GET(request: NextRequest) {
 
 /**
  * DELETE /api/figma/library
- * Delete a node from the library
+ * Delete a node or all nodes from the library
  *
  * Request body:
  * {
- *   "nodeId": "lib-123-456"
+ *   "nodeId": "lib-123-456"  // Delete specific node
  * }
+ * OR empty body / { "clearAll": true } to delete all nodes
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json() as { nodeId?: string };
-    const { nodeId } = body;
-
-    if (!nodeId) {
-      return NextResponse.json(
-        { success: false, error: 'Missing nodeId parameter' },
-        { status: 400 }
-      );
+    let body: { nodeId?: string; clearAll?: boolean } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Empty body = clear all
     }
 
-    const { removeNode } = await import('@/lib/utils/library-index');
+    const { nodeId, clearAll } = body;
+    const { removeNode, getAllNodes, clearLibraryIndex } = await import('@/lib/utils/library-index');
     const { deleteNodeData } = await import('@/lib/utils/file-storage');
 
-    // Extract Figma node ID from library node ID (format: "lib-{figmaNodeId}")
+    // Clear all nodes if no nodeId provided or clearAll is true
+    if (!nodeId || clearAll) {
+      const allNodes = await getAllNodes();
+      let deletedCount = 0;
+
+      for (const node of allNodes) {
+        try {
+          // Extract Figma node ID from library node ID
+          const figmaNodeId = node.id.replace('lib-', '').replace(/-/g, ':');
+          await deleteNodeData(figmaNodeId);
+          await removeNode(node.id);
+          deletedCount++;
+        } catch (err) {
+          console.error(`Failed to delete node ${node.id}:`, err);
+        }
+      }
+
+      // Clear the library index
+      await clearLibraryIndex();
+
+      return NextResponse.json({
+        success: true,
+        deletedCount,
+        message: `Cleared ${deletedCount} nodes from cache`,
+      });
+    }
+
+    // Delete single node
     const figmaNodeId = nodeId.replace('lib-', '').replace(/-/g, ':');
-
-    // Delete from filesystem
     await deleteNodeData(figmaNodeId);
-
-    // Remove from library index
     await removeNode(nodeId);
 
     return NextResponse.json({

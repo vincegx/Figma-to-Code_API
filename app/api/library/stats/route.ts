@@ -107,9 +107,23 @@ export async function GET() {
       });
     }
 
-    // Calculate storage used (rough estimate based on node count)
-    const estimatedStoragePerNode = 50 * 1024; // ~50KB per node (JSON + thumbnail)
-    const storageUsed = nodes.length * estimatedStoragePerNode;
+    // Calculate actual storage used by scanning figma-data directory
+    let storageUsed = 0;
+    try {
+      const entries = await fs.readdir(figmaDataPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const dirPath = path.join(figmaDataPath, entry.name);
+          const files = await fs.readdir(dirPath);
+          for (const file of files) {
+            try {
+              const fileStat = await fs.stat(path.join(dirPath, file));
+              storageUsed += fileStat.size;
+            } catch { /* skip inaccessible files */ }
+          }
+        }
+      }
+    } catch { /* figma-data doesn't exist yet */ }
 
     const stats: DashboardStats = {
       overview: {

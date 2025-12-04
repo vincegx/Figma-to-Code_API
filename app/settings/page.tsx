@@ -6,12 +6,13 @@
  * Layout:
  *   [Figma API - Full width]
  *   [Export Preferences | Rule Editor]
- *   [Cache Management | Appearance]
+ *   [Figma Export Data | Appearance]
  *
  * Features:
  * - Colored icons (orange, blue, violet, rose)
  * - Toggle switches iOS style
  * - Settings icon in header
+ * - Secure delete confirmation modal for Figma data
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -33,6 +34,7 @@ import {
   Settings,
   Code,
   CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -62,10 +64,12 @@ export default function SettingsPage() {
   // App Settings
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
 
-  // Cache Management
+  // Figma Export Data Management
   const [cacheStats, setCacheStats] = useState<{ size: string; nodeCount: number } | null>(null);
   const [loadingCache, setLoadingCache] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   // Theme
   const theme = useUIStore((state) => state.theme);
@@ -89,8 +93,8 @@ export default function SettingsPage() {
       if (response.ok) {
         const stats = await response.json();
         setCacheStats({
-          size: formatBytes(stats.cacheSize || 0),
-          nodeCount: stats.totalNodes || 0,
+          size: formatBytes(stats.overview?.storageUsed || stats.cacheSize || 0),
+          nodeCount: stats.overview?.totalNodes || stats.totalNodes || 0,
         });
       }
     } catch (error) {
@@ -153,19 +157,31 @@ export default function SettingsPage() {
     }
   }
 
-  async function clearCache() {
-    if (!confirm('Are you sure you want to clear all cached data?')) return;
+  async function deleteAllFigmaData() {
+    if (deleteConfirmText !== 'DELETE') return;
     setClearingCache(true);
     try {
       const response = await fetch('/api/figma/library', { method: 'DELETE' });
       if (response.ok) {
         setCacheStats({ size: '0 B', nodeCount: 0 });
+        setShowDeleteModal(false);
+        setDeleteConfirmText('');
       }
     } catch (error) {
-      console.error('Failed to clear cache:', error);
+      console.error('Failed to delete Figma data:', error);
     } finally {
       setClearingCache(false);
     }
+  }
+
+  function openDeleteModal() {
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  }
+
+  function closeDeleteModal() {
+    setShowDeleteModal(false);
+    setDeleteConfirmText('');
   }
 
   return (
@@ -175,6 +191,79 @@ export default function SettingsPage() {
         <div className="fixed bottom-4 right-4 z-50 bg-emerald-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <CheckCircle2 size={18} />
           <span className="font-medium">Settings saved</span>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeDeleteModal}
+          />
+          {/* Modal */}
+          <div className="relative bg-bg-card border border-border-primary rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-text-primary">Delete all Figma data?</h3>
+            </div>
+
+            {/* Warning content */}
+            <div className="mb-6 space-y-3">
+              <p className="text-sm text-text-secondary">
+                This action is <span className="text-red-400 font-semibold">irreversible</span>. You will permanently lose:
+              </p>
+              <ul className="text-sm text-text-muted space-y-1 ml-4">
+                <li>• <span className="text-text-secondary font-medium">{cacheStats?.nodeCount || 0} exported designs</span></li>
+                <li>• <span className="text-text-secondary font-medium">{cacheStats?.size || '0 B'} of data</span></li>
+                <li>• All metadata, versions, and screenshots</li>
+              </ul>
+              <p className="text-sm text-text-muted pt-2">
+                You will need to re-import from Figma to recover this data.
+              </p>
+            </div>
+
+            {/* Confirmation input */}
+            <div className="mb-6">
+              <label className="block text-sm text-text-secondary mb-2">
+                Type <span className="font-mono bg-bg-secondary px-1.5 py-0.5 rounded text-red-400">DELETE</span> to confirm:
+              </label>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="font-mono"
+                autoFocus
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={closeDeleteModal}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={deleteAllFigmaData}
+                disabled={deleteConfirmText !== 'DELETE' || clearingCache}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {clearingCache ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-2" />
+                )}
+                Delete All
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -335,9 +424,9 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ROW 3: Cache Management | Appearance */}
+          {/* ROW 3: Figma Export Data | Appearance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Cache Management */}
+            {/* Figma Export Data */}
             <div className="p-6 rounded-xl bg-bg-card border border-border-primary">
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
@@ -348,19 +437,19 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-text-primary">Cache Management</h2>
-                  <p className="text-sm text-text-muted">Manage locally cached Figma data</p>
+                  <h2 className="text-lg font-semibold text-text-primary">Figma Export Data</h2>
+                  <p className="text-sm text-text-muted">Manage your exported Figma designs</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg">
                   <div>
-                    <p className="text-sm font-medium text-text-primary">Cache Statistics</p>
+                    <p className="text-sm font-medium text-text-primary">Storage Statistics</p>
                     {loadingCache ? (
                       <p className="text-xs text-text-muted">Loading...</p>
                     ) : cacheStats ? (
-                      <p className="text-xs text-text-muted">{cacheStats.nodeCount} nodes • {cacheStats.size}</p>
+                      <p className="text-xs text-text-muted">{cacheStats.nodeCount} designs • {cacheStats.size}</p>
                     ) : (
                       <p className="text-xs text-text-muted">No data</p>
                     )}
@@ -372,12 +461,12 @@ export default function SettingsPage() {
                 </div>
                 <Button
                   variant="outline"
-                  onClick={clearCache}
-                  disabled={clearingCache}
-                  className="w-full bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+                  onClick={openDeleteModal}
+                  disabled={clearingCache || !cacheStats?.nodeCount}
+                  className="w-full bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50"
                 >
-                  {clearingCache ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
-                  Clear All Cache
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete All Data
                 </Button>
               </div>
             </div>

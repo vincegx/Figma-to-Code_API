@@ -199,6 +199,23 @@ export async function removeNode(nodeId: string): Promise<void> {
 }
 
 /**
+ * Clear entire library index
+ *
+ * Resets the library index to empty state.
+ */
+export async function clearLibraryIndex(): Promise<void> {
+  const emptyIndex: LibraryIndex = {
+    version: '1.0.0',
+    totalNodes: 0,
+    categories: new Map(),
+    tags: new Map(),
+    nodeMap: new Map(),
+    lastUpdated: new Date().toISOString(),
+  };
+  await saveLibraryIndex(emptyIndex);
+}
+
+/**
  * Get a specific node from the library index
  *
  * @param nodeId - Library node ID or Figma node ID (with : or -)
