@@ -29,7 +29,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MergeCreationModal } from '@/components/merge/merge-creation-modal';
 import { DeleteMergeDialog } from '@/components/merge/delete-merge-dialog';
-import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { MergeListItem, MergeStatus } from '@/lib/types/merge';
 
 // ============================================================================
@@ -240,9 +239,6 @@ export default function MergesPage() {
 
   return (
     <div className="container mx-auto px-6 py-8">
-      {/* Breadcrumbs */}
-      <Breadcrumbs items={[{ label: 'Merges' }]} className="mb-4" />
-
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
