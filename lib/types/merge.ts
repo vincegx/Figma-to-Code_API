@@ -278,6 +278,16 @@ export interface MergeListItem {
 }
 
 /**
+ * Source node input for creating a merge
+ */
+export interface SourceNodeInput {
+  readonly breakpoint: Breakpoint;
+  readonly nodeId: string;
+  /** Custom width in pixels (optional, defaults: mobile=375, tablet=768, desktop=1280) */
+  readonly width?: number;
+}
+
+/**
  * Request body for creating a new merge
  */
 export interface CreateMergeRequest {
@@ -286,9 +296,9 @@ export interface CreateMergeRequest {
 
   /** Source node assignments (one per breakpoint) */
   readonly sourceNodes: readonly [
-    { readonly breakpoint: 'mobile'; readonly nodeId: string },
-    { readonly breakpoint: 'tablet'; readonly nodeId: string },
-    { readonly breakpoint: 'desktop'; readonly nodeId: string }
+    SourceNodeInput & { readonly breakpoint: 'mobile' },
+    SourceNodeInput & { readonly breakpoint: 'tablet' },
+    SourceNodeInput & { readonly breakpoint: 'desktop' }
   ];
 }
 

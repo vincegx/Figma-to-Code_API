@@ -496,12 +496,14 @@ export async function createMerge(request: CreateMergeRequest): Promise<Merge> {
   const sourceNodes: Merge['sourceNodes'] = await Promise.all(
     request.sourceNodes.map(async (input) => {
       const nodeData = await loadLibraryNode(input.nodeId);
+      // Use provided width or default based on breakpoint
+      const defaultWidths = { mobile: 375, tablet: 768, desktop: 1280 };
       return {
         breakpoint: input.breakpoint,
         nodeId: input.nodeId,
         nodeName: nodeData?.name ?? input.nodeId,
         thumbnail: nodeData?.thumbnail,
-        width: input.breakpoint === 'mobile' ? 375 : input.breakpoint === 'tablet' ? 768 : 1280,
+        width: input.width ?? defaultWidths[input.breakpoint],
         snapshotAt: now,
       };
     })
