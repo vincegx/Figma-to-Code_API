@@ -38,13 +38,8 @@ export {
   type StyleSet,
 } from './tailwind-responsive';
 
-// Merge Engine - orchestrates the full merge process
-export {
-  executeMerge,
-  createMerge,
-  reexecuteMerge,
-  type MergeInput,
-} from './merge-engine';
+// Note: merge-engine is server-only (uses merge-store which uses fs)
+// Import directly from '@/lib/merge/merge-engine' in API routes only
 
 // Responsive Code Generator - generates framework-specific code
 export {
