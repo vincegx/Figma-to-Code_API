@@ -558,5 +558,27 @@
         "endpoint": "fetchNode"
       }
     ]
+  },
+  "2025-12-05": {
+    "tier1": [
+      {
+        "ts": 1764943099937,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1764943108989,
+        "endpoint": "fetchSVGBatch"
+      }
+    ],
+    "tier2": [
+      {
+        "ts": 1764943093383,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1764943094794,
+        "endpoint": "fetchNode"
+      }
+    ]
   }
 }

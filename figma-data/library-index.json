@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-04T20:54:40.837Z",
+  "lastUpdated": "2025-12-05T13:58:30.616Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -465,7 +465,49 @@
         "variablesUsed": 0,
         "computedAt": "2025-12-03T19:14:00.925Z"
       }
+    },
+    {
+      "id": "lib-6055-2654",
+      "figmaNodeId": "6055:2654",
+      "name": "BGS Homepage - 960px",
+      "altNode": null,
+      "thumbnail": "/api/images/6055-2654/screenshot.png",
+      "tags": [],
+      "addedAt": "2025-12-05T13:58:30.608Z",
+      "lastModified": "2025-12-05T13:58:30.608Z",
+      "usage": {
+        "viewCount": 0,
+        "exportCount": 0
+      },
+      "metadata": {
+        "fileKey": "SXKkSjdmfiJ6omi9BqBXVE",
+        "fileName": "BGS iBanking - Sample Project (Community)",
+        "nodeUrl": "https://www.figma.com/file/SXKkSjdmfiJ6omi9BqBXVE?node-id=6055:2654"
+      },
+      "transformStats": {
+        "totalNodes": 361,
+        "maxDepth": 13,
+        "nodesByType": {
+          "FRAME": 101,
+          "INSTANCE": 30,
+          "RECTANGLE": 17,
+          "TEXT": 78,
+          "VECTOR": 79,
+          "GROUP": 35,
+          "ELLIPSE": 21
+        },
+        "autoLayoutCount": 96,
+        "absolutePositionedCount": 4,
+        "groupsInlined": 35,
+        "imagesCount": 9,
+        "iconsCount": 80,
+        "gradientsCount": 2,
+        "semanticCount": 3592,
+        "arbitraryCount": 203,
+        "variablesUsed": 203,
+        "computedAt": "2025-12-05T13:58:21.740Z"
+      }
     }
   ],
-  "totalNodes": 14
+  "totalNodes": 15
 }
