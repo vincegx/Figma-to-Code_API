@@ -28,6 +28,7 @@ import {
 import { MergeCard } from '@/components/merge/merge-card';
 import { MergeCreationModal } from '@/components/merge/merge-creation-modal';
 import { DeleteMergeDialog } from '@/components/merge/delete-merge-dialog';
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { MergeListItem, Merge, MergeStatus } from '@/lib/types/merge';
 
 // ============================================================================
@@ -219,6 +220,12 @@ export default function MergesPage() {
 
   return (
     <div className="container py-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[{ label: 'Merges' }]}
+        className="mb-4"
+      />
+
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

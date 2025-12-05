@@ -12,7 +12,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Link2, Settings, Layers } from 'lucide-react';
+import { Home, FileText, Link2, Settings, Layers, Combine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
@@ -35,6 +35,7 @@ interface NavItem {
 const mainNavItems: NavItem[] = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/nodes', label: 'Library', icon: FileText },
+  { href: '/merges', label: 'Merges', icon: Combine },
   { href: '/rules', label: 'Rules', icon: Link2 },
 ];
 
@@ -46,6 +47,10 @@ export function AppSidebar() {
       return pathname === '/';
     }
     if (href === '/nodes' && pathname.startsWith('/viewer')) {
+      return true;
+    }
+    // /merge/[id] should highlight Merges nav item
+    if (href === '/merges' && pathname.startsWith('/merge')) {
       return true;
     }
     return pathname.startsWith(href);

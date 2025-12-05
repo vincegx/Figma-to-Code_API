@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { BreakpointToggle } from '@/components/merge/breakpoint-toggle';
 import { MergePreview } from '@/components/merge/merge-preview';
 import { MergeExportPanel } from '@/components/merge/merge-export-panel';
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { Merge, Breakpoint, FrameworkType } from '@/lib/types/merge';
 
 // ============================================================================
@@ -134,11 +135,13 @@ export default function MergeViewerPage({ params }: PageProps) {
     <div className="flex h-screen flex-col">
       {/* Header */}
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
-          </Button>
+        <div className="flex flex-col gap-1">
+          <Breadcrumbs
+            items={[
+              { label: 'Merges', href: '/merges' },
+              { label: merge.name },
+            ]}
+          />
           <h1 className="text-xl font-semibold">{merge.name}</h1>
         </div>
         <BreakpointToggle value={breakpoint} onChange={setBreakpoint} />
