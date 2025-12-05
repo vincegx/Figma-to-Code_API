@@ -17,6 +17,7 @@ import { migrateV3ToV4 } from './class-mapper-v4';
 import type { SimpleAltNode } from '../altnode-transform';
 import type { GeneratedCodeOutput } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
+import type { GenerateOptions } from '../types/code-generator';
 
 /**
  * Migrate className strings from v3 to v4 syntax
@@ -58,6 +59,7 @@ function migrateClassAttribute(code: string): string {
  * @param figmaFileKey - Figma file key for image fetching
  * @param figmaAccessToken - Figma API token for image fetching
  * @param nodeId - Optional node ID for targeted generation
+ * @param options - WP47: Generation options (withProps)
  * @returns Generated code output with v4 Tailwind classes
  */
 export async function generateReactTailwindV4(
@@ -67,9 +69,10 @@ export async function generateReactTailwindV4(
   framework: FrameworkType = 'react-tailwind-v4',
   figmaFileKey?: string,
   figmaAccessToken?: string,
-  nodeId?: string
+  nodeId?: string,
+  options?: GenerateOptions
 ): Promise<GeneratedCodeOutput> {
-  // 1. Generate v3 code using the existing generator
+  // 1. Generate v3 code using the existing generator (WP47: pass options)
   const v3Result = await generateReactTailwind(
     altNode,
     resolvedProperties,
@@ -77,7 +80,8 @@ export async function generateReactTailwindV4(
     'react-tailwind', // Use v3 generator
     figmaFileKey,
     figmaAccessToken,
-    nodeId
+    nodeId,
+    options
   );
 
   // 2. Migrate className attributes from v3 to v4

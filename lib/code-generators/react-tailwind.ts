@@ -1,11 +1,178 @@
 import type { SimpleAltNode, FillData } from '../altnode-transform';
-import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind, truncateLayerName } from './helpers';
+import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind, truncateLayerName, toCamelCase, uniquePropName } from './helpers';
 import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
+import type { CollectedProp, GenerateOptions } from '../types/code-generator';
 import { evaluateMultiFrameworkRules } from '../rule-engine';
 import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
 import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename, SvgExportNode } from '../utils/image-fetcher';
 import { generateCssVariableDefinitions } from '../utils/variable-css';
+
+/**
+ * WP47: Collect all text and image props from the node tree
+ * Traverses the AltNode tree and collects TEXT nodes and IMAGE fills
+ *
+ * @param node - Root AltNode to traverse
+ * @param imageUrls - Map of imageRef → URL for images
+ * @param propNames - Set to track used prop names (for uniqueness)
+ * @returns Array of collected props
+ */
+function collectProps(
+  node: SimpleAltNode,
+  imageUrls: Record<string, string>,
+  propNames: Set<string>
+): CollectedProp[] {
+  const props: CollectedProp[] = [];
+
+  function traverse(n: SimpleAltNode) {
+    // Skip hidden nodes
+    if (n.visible === false) return;
+
+    // Collect TEXT nodes (skip very short texts like initials "D", "C", "T")
+    if (n.originalType === 'TEXT') {
+      const textContent = (n.originalNode as any)?.characters || '';
+      const trimmed = textContent.trim();
+      if (trimmed && trimmed.length > 2) {
+        const propName = uniquePropName(n.name, propNames);
+        props.push({
+          name: propName,
+          type: 'text',
+          defaultValue: textContent,
+          layerName: n.name,
+          nodeId: n.id,
+        });
+      }
+    }
+
+    // Collect IMAGE fills - only simple images (no children, single fill)
+    // Skip backgrounds/layered images which are rendered differently
+    const hasChildren = 'children' in n && n.children && n.children.length > 0;
+    if (!hasChildren) {
+      if (n.fillsData && n.fillsData.length === 1) {
+        const imageFill = n.fillsData.find((f: FillData) => f.type === 'IMAGE');
+        if (imageFill && imageFill.imageRef) {
+          const imageUrl = imageUrls[imageFill.imageRef] || '';
+          if (imageUrl) {
+            const propName = uniquePropName(n.name, propNames);
+            props.push({
+              name: propName,
+              type: 'image',
+              defaultValue: imageUrl,
+              layerName: n.name,
+              nodeId: n.id,
+            });
+          }
+        }
+      }
+      // Also check imageData for backward compatibility (only if no multi-fills)
+      else if (n.imageData?.imageRef && (!n.fillsData || n.fillsData.length <= 1)) {
+        const imageUrl = imageUrls[n.imageData.imageRef] || '';
+        if (imageUrl) {
+          const propName = uniquePropName(n.name, propNames);
+          props.push({
+            name: propName,
+            type: 'image',
+            defaultValue: imageUrl,
+            layerName: n.name,
+            nodeId: n.id,
+          });
+        }
+      }
+    }
+
+    // Recursively traverse children
+    if ('children' in n && n.children) {
+      for (const child of n.children) {
+        traverse(child);
+      }
+    }
+  }
+
+  traverse(node);
+  return props;
+}
+
+/**
+ * WP47: Generate TypeScript Props interface
+ * Groups props by type (text, then images) for better readability
+ *
+ * @param componentName - PascalCase component name
+ * @param props - Array of collected props
+ * @returns TypeScript interface string
+ */
+function generatePropsInterface(componentName: string, props: CollectedProp[]): string {
+  if (props.length === 0) return '';
+
+  const textProps = props.filter(p => p.type === 'text');
+  const imageProps = props.filter(p => p.type === 'image');
+
+  const lines: string[] = [];
+
+  if (textProps.length > 0) {
+    lines.push('  // Text content');
+    textProps.forEach(p => lines.push(`  ${p.name}?: string;`));
+  }
+
+  if (imageProps.length > 0) {
+    if (textProps.length > 0) lines.push('');
+    lines.push('  // Images');
+    imageProps.forEach(p => lines.push(`  ${p.name}?: string;`));
+  }
+
+  return `interface ${componentName}Props {\n${lines.join('\n')}\n}\n\n`;
+}
+
+/**
+ * WP47: Generate props destructuring with default values
+ * Groups props by type (text, then images) for consistency with interface
+ *
+ * @param componentName - PascalCase component name
+ * @param props - Array of collected props
+ * @returns Destructuring string for function parameters
+ */
+function generatePropsDestructuring(componentName: string, props: CollectedProp[]): string {
+  if (props.length === 0) return '';
+
+  const escapeValue = (value: string) => value
+    .replace(/\u2028/g, '\\n')  // Line Separator → \n
+    .replace(/\u2029/g, '\\n')  // Paragraph Separator → \n
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n');
+
+  const textProps = props.filter(p => p.type === 'text');
+  const imageProps = props.filter(p => p.type === 'image');
+
+  const lines: string[] = [];
+
+  if (textProps.length > 0) {
+    lines.push('  // Text content');
+    textProps.forEach(p => lines.push(`  ${p.name} = "${escapeValue(p.defaultValue)}",`));
+  }
+
+  if (imageProps.length > 0) {
+    if (textProps.length > 0) lines.push('');
+    lines.push('  // Images');
+    imageProps.forEach(p => lines.push(`  ${p.name} = "${escapeValue(p.defaultValue)}",`));
+  }
+
+  return `{\n${lines.join('\n')}\n}: ${componentName}Props`;
+}
+
+/**
+ * WP47: Create a map for JSX generation using nodeId as key (unique)
+ * This allows generateTailwindJSXElement to look up if a node should use a prop
+ *
+ * @param props - Array of collected props
+ * @returns Map of nodeId → { propName, type }
+ */
+function createPropLookup(props: CollectedProp[]): Map<string, { propName: string; type: 'text' | 'image' }> {
+  const lookup = new Map<string, { propName: string; type: 'text' | 'image' }>();
+  for (const p of props) {
+    lookup.set(p.nodeId, { propName: p.name, type: p.type });
+  }
+  return lookup;
+}
 
 /**
  * WP31: Extract font families and their weights from node tree
@@ -648,7 +815,8 @@ export async function generateReactTailwind(
   framework: FrameworkType = 'react-tailwind',
   figmaFileKey?: string,
   figmaAccessToken?: string,
-  nodeId?: string
+  nodeId?: string,
+  options?: GenerateOptions
 ): Promise<GeneratedCodeOutput> {
   const componentName = toPascalCase(altNode.name);
 
@@ -759,7 +927,31 @@ export async function generateReactTailwind(
 
   // WP32: Pass appropriate map based on mode
   const svgMap = isViewerMode ? svgDataUrls : svgVarNames;
-  const jsx = generateTailwindJSXElement(altNode, cleanedProps, 0, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap);
+
+  // WP47: Collect props if withProps is enabled
+  const propNames = new Set<string>();
+  const collectedProps = options?.withProps
+    ? collectProps(altNode, imageUrls, propNames)
+    : [];
+  const propLookup = options?.withProps
+    ? createPropLookup(collectedProps)
+    : new Map();
+
+  // Generate JSX (with prop lookup for withProps mode)
+  const jsx = generateTailwindJSXElement(
+    altNode,
+    cleanedProps,
+    0,
+    allRules,
+    framework,
+    imageUrls,
+    svgMap,
+    isViewerMode,
+    svgBoundsMap,
+    undefined,
+    false,
+    propLookup
+  );
 
   // WP31: Generate CSS variable definitions for React-Tailwind
   // console.log('[REACT-TAILWIND] Calling generateCssVariableDefinitions...');
@@ -771,14 +963,27 @@ export async function generateReactTailwind(
     ? `      <style dangerouslySetInnerHTML={{ __html: \`${cssVariables}\` }} />\n`
     : '';
 
-  // Build code with imports (export mode only)
+  // WP47: Build code with props interface if enabled
   const importSection = svgImports ? `${svgImports}\n\n` : '';
-  const code = `${importSection}export function ${componentName}() {
+
+  let code: string;
+  if (options?.withProps && collectedProps.length > 0) {
+    const propsInterface = generatePropsInterface(componentName, collectedProps);
+    const propsDestructuring = generatePropsDestructuring(componentName, collectedProps);
+    code = `${importSection}${propsInterface}export function ${componentName}(${propsDestructuring}) {
   return (
     <>
 ${styleTag}${jsx}    </>
   );
 }`;
+  } else {
+    code = `${importSection}export function ${componentName}() {
+  return (
+    <>
+${styleTag}${jsx}    </>
+  );
+}`;
+  }
 
   return {
     code,
@@ -808,6 +1013,7 @@ ${styleTag}${jsx}    </>
  * @param svgBoundsMap - WP32: Map of nodeId → { width, height } for SVG nodes
  * @param parentNegativeSpacing - WP31: Negative itemSpacing from parent (for margin)
  * @param isLastChild - WP31: Whether this is the last child (no margin needed)
+ * @param propLookup - WP47: Map of layerName → propName for props mode
  * @returns JSX string with Tailwind classes
  */
 function generateTailwindJSXElement(
@@ -821,7 +1027,8 @@ function generateTailwindJSXElement(
   isViewerMode: boolean = false,  // WP32: true = data URLs inline, false = import variables
   svgBoundsMap: Map<string, { width: number; height: number }> = new Map(),
   parentNegativeSpacing?: { value: number; direction: 'row' | 'column' },  // WP31: From parent
-  isLastChild: boolean = false  // WP31: Last child doesn't need margin
+  isLastChild: boolean = false,  // WP31: Last child doesn't need margin
+  propLookup: Map<string, { propName: string; type: 'text' | 'image' }> = new Map()  // WP47: Props lookup
 ): string {
   // WP32: Skip hidden nodes - they should not be rendered in generated code
   if (node.visible === false) {
@@ -999,8 +1206,18 @@ function generateTailwindJSXElement(
   if (node.originalType === 'TEXT') {
     // T185: Use extractTextContent to preserve line breaks
     const content = extractTextContent(node);
+
+    // WP47: Check if this text node should use a prop (lookup by nodeId)
+    const textProp = propLookup.get(node.id);
+    const usesProp = textProp && textProp.type === 'text';
+
     if (content) {
-      jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>${content}</${htmlTag}>`;
+      if (usesProp) {
+        // Use prop reference instead of hardcoded content
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>{${textProp.propName}}</${htmlTag}>`;
+      } else {
+        jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}>${content}</${htmlTag}>`;
+      }
     } else {
       jsxString += `${indent}<${htmlTag} ${dataAttrString}${hasClasses ? ` className="${tailwindClasses}"` : ''}></${htmlTag}>`;
     }
@@ -1072,7 +1289,7 @@ function generateTailwindJSXElement(
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
           const isLast = i === childrenArray.length - 1;
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
         }
       }
 
@@ -1085,7 +1302,16 @@ function generateTailwindJSXElement(
       const altText = node.name || 'image';
       const objectFitClass = scaleModeToTailwind(imageFill?.scaleMode);
       const imgClasses = hasClasses ? `${tailwindClasses} ${objectFitClass}` : objectFitClass;
-      jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
+
+      // WP47: Check if this image node should use a prop (lookup by nodeId)
+      const imageProp = propLookup.get(node.id);
+      const usesImageProp = imageProp && imageProp.type === 'image';
+
+      if (usesImageProp) {
+        jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src={${imageProp.propName}} />`;
+      } else {
+        jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
+      }
     } else {
       // Single non-image fill (solid/gradient) - render as div with background
       const fill = node.fillsData[0];
@@ -1125,7 +1351,7 @@ function generateTailwindJSXElement(
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
           const isLast = i === childrenArray.length - 1;
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
         }
         jsxString += `${indent}</${htmlTag}>`;
       } else {
@@ -1138,7 +1364,16 @@ function generateTailwindJSXElement(
     const altText = node.name || 'image';
     const objectFitClass = scaleModeToTailwind(node.imageData?.scaleMode);
     const imgClasses = hasClasses ? `${tailwindClasses} ${objectFitClass}` : objectFitClass;
-    jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
+
+    // WP47: Check if this image node should use a prop (lookup by nodeId)
+    const imageProp = propLookup.get(node.id);
+    const usesImageProp = imageProp && imageProp.type === 'image';
+
+    if (usesImageProp) {
+      jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src={${imageProp.propName}} />`;
+    } else {
+      jsxString += `${indent}<img ${dataAttrString} className="${imgClasses}" alt="${altText}" src="${imageUrl}" />`;
+    }
   } else {
     // Non-TEXT, Non-VECTOR, Non-IMAGE nodes: check for children
     const hasChildren = 'children' in node && node.children.length > 0;
@@ -1158,7 +1393,7 @@ function generateTailwindJSXElement(
         const childProps = cleanResolvedProperties(childResult.properties);
         const isLast = i === childrenArray.length - 1;
 
-        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast);
+        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
       }
 
       jsxString += `${indent}</${htmlTag}>`;

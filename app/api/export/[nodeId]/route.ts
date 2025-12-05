@@ -143,11 +143,12 @@ export async function GET(
     const { properties: resolvedProperties } = evaluateMultiFrameworkRules(altNode, rules, framework);
 
     // Generate code
+    // WP47: Export ZIP generates code with props by default for React frameworks
     let codeOutput;
     if (framework === 'react-tailwind') {
-      codeOutput = await generateReactTailwind(altNode, resolvedProperties, rules, framework, undefined, undefined, nodeId);
+      codeOutput = await generateReactTailwind(altNode, resolvedProperties, rules, framework, undefined, undefined, nodeId, { withProps: true });
     } else if (framework === 'react-tailwind-v4') {
-      codeOutput = await generateReactTailwindV4(altNode, resolvedProperties, rules, framework, undefined, undefined, nodeId);
+      codeOutput = await generateReactTailwindV4(altNode, resolvedProperties, rules, framework, undefined, undefined, nodeId, { withProps: true });
     } else {
       codeOutput = await generateHTMLTailwindCSS(altNode, resolvedProperties, rules, framework, undefined, undefined, nodeId);
     }

@@ -1135,3 +1135,62 @@ export function scaleModeToTailwind(scaleMode?: string): string {
       return 'object-cover';
   }
 }
+
+/**
+ * WP47: Convert layer name to camelCase prop name
+ *
+ * Examples:
+ *   "Hero Image" → "heroImage"
+ *   "CTA Button" → "ctaButton"
+ *   "title-text" → "titleText"
+ *   "" → "prop"
+ *
+ * @param str - Original Figma layer name
+ * @returns camelCase prop name
+ */
+export function toCamelCase(str: string): string {
+  if (!str || !str.trim()) return 'prop';
+
+  return str
+    .replace(/[^a-zA-Z0-9\s-_]/g, '') // Remove special chars except spaces, hyphens, underscores
+    .trim()
+    .split(/[\s-_]+/) // Split on spaces, hyphens, underscores
+    .filter(Boolean) // Remove empty strings
+    .map((word, i) =>
+      i === 0
+        ? word.toLowerCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join('') || 'prop';
+}
+
+/**
+ * WP47: Generate unique prop name with suffix if duplicate
+ *
+ * Examples:
+ *   uniquePropName("title", new Set()) → "title"
+ *   uniquePropName("title", new Set(["title"])) → "title2"
+ *   uniquePropName("title", new Set(["title", "title2"])) → "title3"
+ *
+ * @param name - Original layer name
+ * @param existing - Set of already-used prop names
+ * @returns Unique prop name (adds to existing set)
+ */
+export function uniquePropName(name: string, existing: Set<string>): string {
+  let propName = toCamelCase(name);
+
+  // Ensure valid JavaScript identifier (can't start with number)
+  if (/^\d/.test(propName)) {
+    propName = 'prop' + propName;
+  }
+
+  if (!existing.has(propName)) {
+    existing.add(propName);
+    return propName;
+  }
+
+  let i = 2;
+  while (existing.has(`${propName}${i}`)) i++;
+  existing.add(`${propName}${i}`);
+  return `${propName}${i}`;
+}

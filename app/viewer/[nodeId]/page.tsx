@@ -247,6 +247,7 @@ export default function ViewerPage() {
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
   const [iframeKey, setIframeKey] = useState<number>(0); // WP33: Key for iframe refresh
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(startFullscreen); // WP42/WP45: Fullscreen mode for Canvas Preview (supports ?fullscreen=true URL param)
+  const [withProps, setWithProps] = useState(false); // WP47: Generate React components with props interface
 
   // WP40: Refetch dialog and version state
   const [refetchDialogOpen, setRefetchDialogOpen] = useState(false);
@@ -447,11 +448,13 @@ export default function ViewerPage() {
         const targetProps = evaluateMultiFrameworkRules(targetNode!, multiFrameworkRules, previewFramework).properties;
 
         if (previewFramework === 'react-tailwind') {
-          const output = await generateReactTailwind(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          // WP47: Pass withProps option for React frameworks
+          const output = await generateReactTailwind(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId, { withProps });
           setDisplayCode(output.code);
           setDisplayCss('/* Tailwind classes are inline - no separate styles needed */');
         } else if (previewFramework === 'react-tailwind-v4') {
-          const output = await generateReactTailwindV4(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId);
+          // WP47: Pass withProps option for React frameworks
+          const output = await generateReactTailwindV4(targetNode!, targetProps, multiFrameworkRules, previewFramework, undefined, undefined, nodeId, { withProps });
           setDisplayCode(output.code);
           setDisplayCss('/* Tailwind v4 classes are inline - no separate styles needed */');
         } else if (previewFramework === 'html-css') {
@@ -466,7 +469,7 @@ export default function ViewerPage() {
     }
 
     generateDisplayCode();
-  }, [selectedNode, altNode, multiFrameworkRules, previewFramework, nodeId]);
+  }, [selectedNode, altNode, multiFrameworkRules, previewFramework, nodeId, withProps]);
 
   // WP35: Send highlight message to iframe when selection changes
   useEffect(() => {
@@ -918,6 +921,18 @@ export default function ViewerPage() {
                 >
                   Styles
                 </button>
+                {/* WP47: Props checkbox - only visible for React frameworks */}
+                {(previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') && (
+                  <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer ml-2">
+                    <input
+                      type="checkbox"
+                      checked={withProps}
+                      onChange={(e) => setWithProps(e.target.checked)}
+                      className="h-3 w-3 rounded border-gray-600 accent-accent"
+                    />
+                    Props
+                  </label>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <button
