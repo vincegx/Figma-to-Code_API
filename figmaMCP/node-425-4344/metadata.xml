@@ -1,8 +1,0 @@
-<frame id="425:4344" name="Homepage" x="41300" y="-1525" width="1440" height="7270">
-  <instance id="425:4345" name="Header" x="0" y="0" width="1440" height="918" />
-  <instance id="425:4346" name="Content" x="0" y="918" width="1440" height="1086" />
-  <instance id="425:4347" name="Content" x="0" y="2004" width="1440" height="791" />
-  <instance id="425:4348" name="Portfolio Grid" x="0" y="2795" width="1440" height="3435" />
-  <instance id="425:4349" name="Logos" x="0" y="6230" width="1440" height="545" />
-  <instance id="425:4350" name="Footer" x="0" y="6775" width="1440" height="495" />
-</frame>

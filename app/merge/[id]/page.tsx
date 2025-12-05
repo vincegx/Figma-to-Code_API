@@ -9,8 +9,8 @@
  * - Warnings section
  */
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BreakpointToggle } from '@/components/merge/breakpoint-toggle';
@@ -18,14 +18,6 @@ import { MergePreview } from '@/components/merge/merge-preview';
 import { MergeExportPanel } from '@/components/merge/merge-export-panel';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { Merge, Breakpoint, FrameworkType } from '@/lib/types/merge';
-
-// ============================================================================
-// Page Props
-// ============================================================================
-
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
 
 // ============================================================================
 // Loading Skeleton
@@ -61,8 +53,9 @@ function ErrorState({ message, onBack }: { message: string; onBack: () => void }
 // Main Page Component
 // ============================================================================
 
-export default function MergeViewerPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function MergeViewerPage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
 
   const [merge, setMerge] = useState<Merge | null>(null);
