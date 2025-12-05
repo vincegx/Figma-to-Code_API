@@ -38,6 +38,7 @@ import {
   Check,
   Maximize2,
   X,
+  Package,
 } from 'lucide-react';
 import { useApiQuota } from '@/hooks/use-api-quota';
 import { QuotaIndicator } from '@/components/quota/quota-indicator';
@@ -199,8 +200,40 @@ export default function ViewerPage() {
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(true);
 
-  // Framework for preview (unified for now, can be split later if needed)
-  const [previewFramework, setPreviewFramework] = useState<FrameworkType>('react-tailwind');
+  // Framework for preview (loads from Settings defaultFramework)
+  const [previewFramework, setPreviewFramework] = useState<FrameworkType>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = localStorage.getItem('app-settings');
+        if (settings) {
+          const parsed = JSON.parse(settings);
+          // Settings uses 'react-jsx' but viewer uses FrameworkType which doesn't include it
+          // Map 'react-jsx' to 'react-tailwind' as fallback
+          const framework = parsed.defaultFramework;
+          if (framework === 'react-tailwind' || framework === 'react-tailwind-v4' || framework === 'html-css') {
+            return framework as FrameworkType;
+          }
+        }
+      } catch { /* ignore parse errors */ }
+    }
+    return 'react-tailwind';
+  });
+
+  // Language for export (loads from Settings defaultLanguage)
+  const [exportLanguage, setExportLanguage] = useState<'typescript' | 'javascript'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = localStorage.getItem('app-settings');
+        if (settings) {
+          const parsed = JSON.parse(settings);
+          if (parsed.defaultLanguage === 'javascript' || parsed.defaultLanguage === 'typescript') {
+            return parsed.defaultLanguage;
+          }
+        }
+      } catch { /* ignore parse errors */ }
+    }
+    return 'typescript';
+  });
 
   const [selectedTreeNodeId, setSelectedTreeNodeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'information' | 'rules'>('information');
@@ -599,20 +632,50 @@ export default function ViewerPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-bg-card border border-border-primary">
                 <DropdownMenuItem onClick={async () => { await navigator.clipboard.writeText(generatedCode); }}>
+                  <Copy className="h-4 w-4 mr-2" />
                   Copy to Clipboard
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
+                  const ext = previewFramework === 'html-css' ? 'html' : (exportLanguage === 'typescript' ? 'tsx' : 'jsx');
                   const blob = new Blob([generatedCode], { type: 'text/plain' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `${currentNode.name}.tsx`;
+                  a.download = `${currentNode.name}.${ext}`;
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 }}>
+                  <Download className="h-4 w-4 mr-2" />
                   Download Code File
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={async () => {
+                  const params = new URLSearchParams({
+                    framework: previewFramework,
+                    language: exportLanguage,
+                  });
+                  try {
+                    const response = await fetch(`/api/export/${nodeId}?${params}`);
+                    if (!response.ok) {
+                      console.error('Export failed:', await response.text());
+                      return;
+                    }
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentNode?.name || 'export'}-export.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  } catch (error) {
+                    console.error('Export error:', error);
+                  }
+                }}>
+                  <Package className="h-4 w-4 mr-2" />
+                  Download ZIP Package
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -54,11 +54,34 @@ export function parseCSSToMap(css: string): Map<string, Record<string, string>> 
 
 /**
  * Extract @layer theme block (CSS variables) from v4 output
+ * Uses brace counting to handle nested blocks like :root, :host { ... }
  */
 export function extractThemeLayer(css: string): string {
-  // Match @layer theme { :root { ... } }
-  const themeMatch = css.match(/@layer\s+theme\s*\{[\s\S]*?\n\s*\}/);
-  return themeMatch ? themeMatch[0] : '';
+  // Find the start of @layer theme
+  const startMatch = css.match(/@layer\s+theme\s*\{/);
+  if (!startMatch || startMatch.index === undefined) return '';
+
+  const startIndex = startMatch.index;
+  let depth = 1; // We've matched the opening brace
+  let endIndex = -1;
+
+  // Start scanning after the opening brace
+  const scanStart = startIndex + startMatch[0].length;
+
+  for (let i = scanStart; i < css.length; i++) {
+    if (css[i] === '{') {
+      depth++;
+    } else if (css[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        endIndex = i + 1; // Include the closing brace
+        break;
+      }
+    }
+  }
+
+  if (endIndex === -1) return '';
+  return css.slice(startIndex, endIndex);
 }
 
 /**
