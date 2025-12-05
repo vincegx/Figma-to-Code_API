@@ -22,6 +22,17 @@ export type { UIState } from './ui-store';
 export { quotaStore as useQuotaStore };
 export type { QuotaState } from './quota-store';
 
+// Merge store (server-side file-based, not Zustand)
+export {
+  generateMergeId,
+  listMerges,
+  getMerge,
+  saveMerge,
+  deleteMerge,
+  mergeExists,
+  getMergeCountByStatus,
+} from './merge-store';
+
 /**
  * Helper function: Get combined state from all stores
  * Useful for debugging or global state inspection

@@ -321,6 +321,50 @@ export {
 } from './versioning';
 
 // ============================================================================
+// Merge Types (002-responsive-merge-manager)
+// ============================================================================
+
+export type {
+  // Breakpoint Types
+  Breakpoint,
+
+  // Source Node Types
+  MergeSourceNode,
+
+  // Merge Core Types
+  MergeStatus,
+  Merge,
+  MergeResult,
+  FrameworkType,
+
+  // Unified Element Types
+  ElementSource,
+  UnifiedElement,
+  ResponsiveStyles,
+
+  // Warning Types
+  WarningType,
+  MergeWarning,
+
+  // Statistics Types
+  MergeStats,
+
+  // API Types
+  MergeListItem,
+  CreateMergeRequest,
+  ListMergesOptions,
+} from './merge';
+
+export {
+  BREAKPOINT_WIDTHS,
+  isMergeReady,
+  isMergeError,
+  isMergeProcessing,
+  isValidBreakpoint,
+  isValidMergeStatus,
+} from './merge';
+
+// ============================================================================
 // Store Types
 // ============================================================================
 
