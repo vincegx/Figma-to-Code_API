@@ -65,7 +65,7 @@ interface LibraryNodeData {
 // Configuration
 // ============================================================================
 
-const FIGMA_DATA_DIR = path.join(process.cwd(), '..', 'figma-data');
+const FIGMA_DATA_DIR = path.join(process.cwd(), 'figma-data');
 const MAX_RECURSION_DEPTH = 10;
 
 // ============================================================================
@@ -75,18 +75,35 @@ const MAX_RECURSION_DEPTH = 10;
 /**
  * Load a LibraryNode's AltNode data from the filesystem.
  * Returns null if the node doesn't exist.
+ *
+ * Note: Library node IDs have format "lib-XXX-YYY" but directories are "XXX-YYY"
  */
 async function loadLibraryNode(nodeId: string): Promise<LibraryNodeData | null> {
   try {
-    const nodePath = path.join(FIGMA_DATA_DIR, nodeId, 'node.json');
+    // Remove "lib-" prefix if present to get the directory name
+    const dirName = nodeId.startsWith('lib-') ? nodeId.slice(4) : nodeId;
+    const nodePath = path.join(FIGMA_DATA_DIR, dirName, 'data.json');
     const content = await fs.readFile(nodePath, 'utf-8');
     const data = JSON.parse(content);
 
+    // Also try to load metadata for the name
+    let name = data.name || nodeId;
+    try {
+      const metadataPath = path.join(FIGMA_DATA_DIR, dirName, 'metadata.json');
+      const metadataContent = await fs.readFile(metadataPath, 'utf-8');
+      const metadata = JSON.parse(metadataContent);
+      if (metadata.name) {
+        name = metadata.name;
+      }
+    } catch {
+      // metadata.json is optional
+    }
+
     return {
       id: nodeId,
-      name: data.name || nodeId,
+      name,
       altNode: data.altNode || data,
-      thumbnail: data.thumbnail,
+      thumbnail: `/api/images/${dirName}/screenshot.png`,
     };
   } catch (error) {
     console.warn(`Failed to load node ${nodeId}:`, error);
