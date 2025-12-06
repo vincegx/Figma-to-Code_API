@@ -7,6 +7,7 @@ import { evaluateMultiFrameworkRules } from '../rule-engine';
 import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
 import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename, SvgExportNode } from '../utils/image-fetcher';
 import { generateCssVariableDefinitions } from '../utils/variable-css';
+import { getVisibilityClasses } from '../merge/visibility-mapper';
 
 /**
  * WP08: Smart split for Tailwind classes that preserves arbitrary values with spaces.
@@ -1211,6 +1212,16 @@ function generateTailwindJSXElement(
 
   // WP31: Add MCP-style structural classes
   const structuralClasses: string[] = [];
+
+  // Add visibility classes for partial visibility (mobile-only, tablet-only, etc.)
+  // This ensures elements are hidden/shown at correct breakpoints
+  if (node.presence) {
+    const visibilityClasses = getVisibilityClasses(node.presence);
+    if (visibilityClasses) {
+      // Split visibility classes and add them (e.g., "hidden md:block" → ["hidden", "md:block"])
+      structuralClasses.push(...visibilityClasses.split(/\s+/).filter(Boolean));
+    }
+  }
 
   // MCP adds these utility classes systematically
   structuralClasses.push('box-border'); // Ensure box-sizing: border-box
