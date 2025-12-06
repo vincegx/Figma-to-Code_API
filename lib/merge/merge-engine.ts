@@ -419,6 +419,88 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
 }
 
 /**
+ * Generate code for a specific node in a merge.
+ * Re-executes merge to get the merged SimpleAltNode tree, finds the subtree, and generates code.
+ */
+export async function generateCodeForMergeNode(
+  merge: Merge,
+  nodeId: string,
+  framework: 'react-tailwind' | 'react-tailwind-v4' | 'html-css' = 'react-tailwind'
+): Promise<{ altNode: SimpleAltNode | null; code: string; css?: string }> {
+  // Re-execute merge to get mergedNode
+  const sourceNodesInput = merge.sourceNodes.map((node) => ({
+    breakpoint: node.breakpoint,
+    nodeId: node.nodeId,
+  })) as unknown as CreateMergeRequest['sourceNodes'];
+
+  // Find source node assignments
+  const mobileInput = sourceNodesInput.find((n) => n.breakpoint === 'mobile')!;
+  const tabletInput = sourceNodesInput.find((n) => n.breakpoint === 'tablet')!;
+  const desktopInput = sourceNodesInput.find((n) => n.breakpoint === 'desktop')!;
+
+  // Load nodes from library
+  const [mobileData, tabletData, desktopData] = await Promise.all([
+    loadLibraryNode(mobileInput.nodeId),
+    loadLibraryNode(tabletInput.nodeId),
+    loadLibraryNode(desktopInput.nodeId),
+  ]);
+
+  if (!mobileData?.simpleAltNode) {
+    return { altNode: null, code: '// Mobile source node not found' };
+  }
+
+  // Merge the 3 SimpleAltNodes
+  const { node: mergedNode } = mergeSimpleAltNodes(
+    mobileData.simpleAltNode,
+    tabletData?.simpleAltNode,
+    desktopData?.simpleAltNode
+  );
+
+  // Find the subtree by nodeId (search by Figma node ID in the merged tree)
+  function findNodeById(node: SimpleAltNode, targetId: string): SimpleAltNode | null {
+    if (node.id === targetId) return node;
+    for (const child of node.children || []) {
+      const found = findNodeById(child, targetId);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  // If nodeId matches a library ID (lib-*), use the root mergedNode
+  const isLibraryId = nodeId.startsWith('lib-');
+  let targetNode = isLibraryId ? mergedNode : findNodeById(mergedNode, nodeId);
+
+  if (!targetNode) {
+    return { altNode: null, code: `// Node ${nodeId} not found in merged tree` };
+  }
+
+  // For root node (library ID), use the merge name instead of source node name
+  if (isLibraryId) {
+    targetNode = { ...targetNode, name: merge.name };
+  }
+
+  // Load rules and generate code
+  const allRules = await loadRulesForMerge();
+  const nodeIdPrefix = mobileData?.id || 'unknown';
+
+  const output = await generateReactTailwind(
+    targetNode,
+    {},
+    allRules,
+    framework === 'html-css' ? 'react-tailwind' : framework,
+    undefined,
+    undefined,
+    nodeIdPrefix
+  );
+
+  return {
+    altNode: targetNode,
+    code: output.code,
+    css: output.css,
+  };
+}
+
+/**
  * Create a new merge from request data.
  * Generates ID, executes merge, and saves to storage.
  */

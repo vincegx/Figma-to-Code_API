@@ -198,6 +198,9 @@ export default function MergeViewerPage() {
   const [rawDataLimit, setRawDataLimit] = useState(2000);
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [displayCode, setDisplayCode] = useState<string>(''); // Code for selected node
+  const [displayCss, setDisplayCss] = useState<string>(''); // CSS for selected node
+  const [isLoadingCode, setIsLoadingCode] = useState(false);
 
   // Load merge data
   useEffect(() => {
@@ -260,6 +263,48 @@ export default function MergeViewerPage() {
   useEffect(() => {
     setRawDataLimit(2000);
   }, [selectedNodeId]);
+
+  // Generate code for selected node (like 1-node viewer)
+  useEffect(() => {
+    if (!mergeId || !selectedNode) {
+      setDisplayCode('');
+      setDisplayCss('');
+      return;
+    }
+
+    // Get the source nodeId (original Figma ID)
+    const sourceNodeId = selectedNode.sources?.mobile?.nodeId
+      || selectedNode.sources?.tablet?.nodeId
+      || selectedNode.sources?.desktop?.nodeId;
+
+    if (!sourceNodeId) {
+      setDisplayCode('// No source node ID found');
+      return;
+    }
+
+    async function fetchCode() {
+      setIsLoadingCode(true);
+      try {
+        const response = await fetch(
+          `/api/merges/${mergeId}/node/${encodeURIComponent(sourceNodeId!)}?framework=${previewFramework}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setDisplayCode(data.code || '');
+          setDisplayCss(data.css || '');
+        } else {
+          setDisplayCode('// Failed to generate code');
+        }
+      } catch (error) {
+        console.error('Failed to fetch node code:', error);
+        setDisplayCode('// Error generating code');
+      } finally {
+        setIsLoadingCode(false);
+      }
+    }
+
+    fetchCode();
+  }, [mergeId, selectedNode, previewFramework]);
 
   // Send highlight message to iframe when selection changes
   // Use source nodeId (original Figma ID) because that's what's in data-node-id attributes
@@ -595,7 +640,7 @@ export default function MergeViewerPage() {
         </Resizable>
 
         {/* ========== ROW 2: Generated Code + Node Info ========== */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-4">
           {/* Block: Generated Code */}
           <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex flex-col">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
@@ -623,7 +668,7 @@ export default function MergeViewerPage() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={async () => {
-                    await navigator.clipboard.writeText(generatedCode);
+                    await navigator.clipboard.writeText(displayCode || generatedCode);
                     setCopiedCode(true);
                     setTimeout(() => setCopiedCode(false), 2000);
                   }}
@@ -635,11 +680,11 @@ export default function MergeViewerPage() {
                 <button
                   onClick={() => {
                     const ext = previewFramework === 'html-css' ? 'html' : 'tsx';
-                    const blob = new Blob([generatedCode], { type: 'text/plain' });
+                    const blob = new Blob([displayCode || generatedCode], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${merge.name}.${ext}`;
+                    a.download = `${selectedNode?.name || merge.name}.${ext}`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -652,10 +697,15 @@ export default function MergeViewerPage() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden relative">
+              {isLoadingCode && (
+                <div className="absolute inset-0 bg-bg-primary/50 flex items-center justify-center z-10">
+                  <div className="animate-spin h-5 w-5 border-2 border-accent-primary border-t-transparent rounded-full" />
+                </div>
+              )}
               <Highlight
                 theme={codeTheme}
-                code={generatedCode}
+                code={displayCode || generatedCode}
                 language={previewFramework === 'html-css' ? 'markup' : 'tsx'}
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
@@ -675,7 +725,7 @@ export default function MergeViewerPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>No errors</span>
               <span>•</span>
-              <span>{generatedCode.split('\n').length} lines</span>
+              <span>{(displayCode || generatedCode).split('\n').length} lines</span>
             </div>
           </div>
 

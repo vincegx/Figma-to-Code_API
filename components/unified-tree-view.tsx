@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { UnifiedElement } from '@/lib/types/merge';
-import { ChevronRight, ChevronDown, Smartphone, Tablet, Monitor } from 'lucide-react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 import { FigmaTypeIcon } from './figma-type-icon';
 import { InstanceBadge } from './instance-badge';
 import { getNodeColors } from '@/lib/utils/node-colors';
@@ -214,33 +214,11 @@ function TreeNode({
           <InstanceBadge />
         )}
 
-        {/* Breakpoint presence indicators */}
-        <div className="flex items-center gap-0.5 flex-shrink-0">
-          <Smartphone
-            size={12}
-            className={cn(
-              node.presence.mobile ? 'text-green-500' : 'text-text-muted opacity-30'
-            )}
-          />
-          <Tablet
-            size={12}
-            className={cn(
-              node.presence.tablet ? 'text-blue-500' : 'text-text-muted opacity-30'
-            )}
-          />
-          <Monitor
-            size={12}
-            className={cn(
-              node.presence.desktop ? 'text-purple-500' : 'text-text-muted opacity-30'
-            )}
-          />
-        </div>
-
         {/* Metadata badges */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          {/* HTML type badge */}
+          {/* Figma type badge (lowercase) */}
           <span className="text-xs text-text-muted bg-bg-secondary px-1 rounded font-mono">
-            {node.type}
+            {node.type.charAt(0) + node.type.slice(1).toLowerCase()}
           </span>
           {/* Children count */}
           {hasChildren && (
