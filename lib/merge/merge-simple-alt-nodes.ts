@@ -811,6 +811,60 @@ export function getSourceNodeId(
 }
 
 // ============================================================================
+// Tailwind Class Utilities
+// ============================================================================
+
+/**
+ * Smart split for Tailwind classes that preserves arbitrary values with spaces.
+ * e.g., "[background:var(--color, rgba(0, 0, 0, 1))]" stays intact.
+ *
+ * Standard split(' ') would break:
+ *   "[bg:var(--c," "rgba(0," "0," "0))]" ❌
+ *
+ * Smart split keeps brackets together:
+ *   "[background:var(--color, rgba(0, 0, 0, 1))]" ✓
+ */
+function smartSplitClasses(classString: string): string[] {
+  const trimmed = classString.trim();
+  if (!trimmed) return [];
+
+  // Fast path: no brackets, use simple split
+  if (!trimmed.includes('[')) {
+    return trimmed.split(/\s+/).filter(c => c.length > 0);
+  }
+
+  // Slow path: track bracket depth
+  const classes: string[] = [];
+  let current = '';
+  let bracketDepth = 0;
+
+  for (const char of trimmed) {
+    if (char === '[') {
+      bracketDepth++;
+      current += char;
+    } else if (char === ']') {
+      bracketDepth--;
+      current += char;
+    } else if (/\s/.test(char) && bracketDepth === 0) {
+      // Space outside brackets = class boundary
+      if (current) {
+        classes.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  // Don't forget last class
+  if (current) {
+    classes.push(current);
+  }
+
+  return classes;
+}
+
+// ============================================================================
 // SimpleAltNode → UnifiedElement Conversion
 // ============================================================================
 
@@ -854,8 +908,8 @@ function buildResponsiveStyles(node: SimpleAltNode): ResponsiveStyles {
 
   const combined = [
     base,
-    tablet ? tablet.split(' ').map(c => `md:${c}`).join(' ') : '',
-    desktop ? desktop.split(' ').map(c => `lg:${c}`).join(' ') : '',
+    tablet ? smartSplitClasses(tablet).map(c => `md:${c}`).join(' ') : '',
+    desktop ? smartSplitClasses(desktop).map(c => `lg:${c}`).join(' ') : '',
   ].filter(Boolean).join(' ');
 
   return { base, tablet, desktop, combined };
