@@ -262,16 +262,25 @@ export default function MergeViewerPage() {
   }, [selectedNodeId]);
 
   // Send highlight message to iframe when selection changes
+  // Use source nodeId (original Figma ID) because that's what's in data-node-id attributes
   useEffect(() => {
     if (!livePreviewRef.current) return;
 
+    // Get the original Figma node ID from sources (mobile first, then tablet, then desktop)
+    const sourceNodeId = selectedNode?.sources?.mobile?.nodeId
+      || selectedNode?.sources?.tablet?.nodeId
+      || selectedNode?.sources?.desktop?.nodeId
+      || selectedNodeId;
+
+    const isInstance = selectedNode?.originalType === 'INSTANCE' || selectedNode?.type === 'INSTANCE';
+
     livePreviewRef.current.sendHighlight(
-      selectedNodeId,
+      sourceNodeId,
       selectedNode?.name || '',
-      false,
+      isInstance,
       viewerHighlightEnabled
     );
-  }, [selectedNodeId, selectedNode?.name, viewerHighlightEnabled]);
+  }, [selectedNodeId, selectedNode, viewerHighlightEnabled]);
 
   // Loading state
   if (isLoading) {

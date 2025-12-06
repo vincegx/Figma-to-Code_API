@@ -997,7 +997,8 @@ export function toUnifiedElement(node: SimpleAltNode): UnifiedElement {
   return {
     id: generateElementId(node.name),
     name: node.name,
-    type: node.type as FigmaNodeType,
+    // Use originalType (Figma type like FRAME, TEXT) for icons, not node.type (HTML tag like div, span)
+    type: (node.originalType || node.type) as FigmaNodeType,
     layoutMode,
     layoutWrap,
     primaryAxisAlignItems,
