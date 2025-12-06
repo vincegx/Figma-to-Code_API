@@ -15,7 +15,6 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { AltNode, AltNodeWithChildren, AltTextNode } from '../types/altnode';
 import type {
   Merge,
   MergeResult,
@@ -23,25 +22,15 @@ import type {
   MergeStats,
   MergeWarning,
   UnifiedElement,
-  ElementSource,
-  ResponsiveStyles,
-  ResponsiveAssets,
-  BreakpointAssets,
-  Breakpoint,
   CreateMergeRequest,
-  FrameworkType,
 } from '../types/merge';
 import { generateMergeId, saveMerge } from '../store/merge-store';
-import { matchElements, matchChildren, type MatchedElement } from './element-matcher';
-import { getVisibilityClasses, createPresence, hasPartialVisibility } from './visibility-mapper';
-import { generateResponsiveClasses, type StyleSet, createEmptyStyleSet } from './tailwind-responsive';
-import { generateMergedReactTailwind, generateMergedHTMLCSS } from './merged-code-generator';
+import { mergeSimpleAltNodes, toUnifiedElement } from './merge-simple-alt-nodes';
 import { transformToAltNode, resetNameCounters, type SimpleAltNode } from '../altnode-transform';
 import { setCachedVariablesMap } from '../utils/variable-css';
-import { cssPropToTailwind } from '../code-generators/helpers';
-import { mergeSimpleAltNodes } from './merge-simple-alt-nodes';
 import { generateReactTailwind } from '../code-generators/react-tailwind';
 import type { MultiFrameworkRule } from '../types/rules';
+import type { AltNode } from '../types/altnode';
 
 // ============================================================================
 // Types
@@ -76,7 +65,6 @@ interface LibraryNodeData {
 // ============================================================================
 
 const FIGMA_DATA_DIR = path.join(process.cwd(), 'figma-data');
-const MAX_RECURSION_DEPTH = 10;
 
 // WP08: Paths to rules files
 const OFFICIAL_RULES_PATH = path.join(process.cwd(), 'figma-data/rules/official-figma-rules.json');
@@ -108,52 +96,6 @@ async function loadRulesForMerge(): Promise<MultiFrameworkRule[]> {
   return allRules;
 }
 
-/**
- * WP08 FIX: Split Tailwind class string while preserving arbitrary values with spaces.
- * e.g., "flex bg-[var(--var, rgba(38, 38, 38, 1))]" should split to:
- * ["flex", "bg-[var(--var, rgba(38, 38, 38, 1))]"]
- */
-function smartSplitTailwindClasses(classString: string): string[] {
-  const trimmed = classString.trim();
-  if (!trimmed) return [];
-
-  // If no brackets, use simple split
-  if (!trimmed.includes('[')) {
-    return trimmed.split(/\s+/).filter((c) => c.length > 0);
-  }
-
-  // Handle arbitrary values with spaces inside brackets
-  const classes: string[] = [];
-  let current = '';
-  let bracketDepth = 0;
-
-  for (let i = 0; i < trimmed.length; i++) {
-    const char = trimmed[i];
-
-    if (char === '[') {
-      bracketDepth++;
-      current += char;
-    } else if (char === ']') {
-      bracketDepth--;
-      current += char;
-    } else if (/\s/.test(char) && bracketDepth === 0) {
-      // Space outside brackets - end of class
-      if (current.length > 0) {
-        classes.push(current);
-        current = '';
-      }
-    } else {
-      current += char;
-    }
-  }
-
-  // Don't forget the last class
-  if (current.length > 0) {
-    classes.push(current);
-  }
-
-  return classes;
-}
 
 // ============================================================================
 // Library Node Loading
@@ -235,306 +177,6 @@ async function loadLibraryNode(nodeId: string): Promise<LibraryNodeData | null> 
     console.warn(`Failed to load node ${nodeId}:`, error);
     return null;
   }
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Check if an AltNode has children
- */
-function hasChildren(node: AltNode): node is AltNodeWithChildren {
-  return 'children' in node && Array.isArray(node.children);
-}
-
-/**
- * Check if an AltNode is a text node
- */
-function isTextNode(node: AltNode): node is AltTextNode {
-  return node.type === 'TEXT';
-}
-
-/**
- * Generate a unique element ID from a name
- */
-function generateElementId(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-/**
- * Build a map from AltNode ID to SimpleAltNode for style extraction.
- * Recursively traverses the SimpleAltNode tree to map all nodes by their original ID.
- */
-function buildSimpleAltNodeMap(simpleNode: SimpleAltNode, map: Map<string, SimpleAltNode> = new Map()): Map<string, SimpleAltNode> {
-  // Map by the node's ID (which matches the original AltNode ID)
-  map.set(simpleNode.id, simpleNode);
-
-  // Also try to map by originalNode.id if different
-  if (simpleNode.originalNode?.id && simpleNode.originalNode.id !== simpleNode.id) {
-    map.set(simpleNode.originalNode.id, simpleNode);
-  }
-
-  // Recursively map children
-  if (simpleNode.children) {
-    for (const child of simpleNode.children) {
-      buildSimpleAltNodeMap(child, map);
-    }
-  }
-
-  return map;
-}
-
-// Global map for current merge operation (set in executeMerge)
-let currentSimpleNodeMap: Map<string, SimpleAltNode> = new Map();
-
-/**
- * Extract Tailwind classes from an AltNode using the corresponding SimpleAltNode's styles.
- *
- * WP08 FIX: Uses SimpleAltNode.styles (extracted by altnode-transform.ts) which contains
- * ALL CSS properties, then converts them to Tailwind using cssPropToTailwind.
- * This replaces the old simplified extraction that only handled layout properties.
- */
-function extractTailwindClasses(node: AltNode | undefined): string {
-  if (!node) return '';
-
-  const classes: string[] = [];
-
-  // Try to find the corresponding SimpleAltNode with full styles
-  const simpleNode = currentSimpleNodeMap.get(node.id);
-
-  if (simpleNode && simpleNode.styles) {
-    // WP08 FIX: Use the full styles from SimpleAltNode
-    for (const [cssProp, cssValue] of Object.entries(simpleNode.styles)) {
-      if (cssValue === undefined || cssValue === null || cssValue === '') continue;
-
-      const tailwindClass = cssPropToTailwind(cssProp, String(cssValue));
-      if (tailwindClass) {
-        // WP08 FIX: Use smart split to preserve arbitrary values with spaces
-        // e.g., "bg-[var(--var, rgba(38, 38, 38, 1))]" should not be split
-        classes.push(...smartSplitTailwindClasses(tailwindClass));
-      }
-    }
-  } else {
-    // Fallback to basic extraction if no SimpleAltNode found
-    // This shouldn't happen in normal operation but provides safety
-    if (node.type === 'FRAME' && 'layout' in node) {
-      const layout = (node as any).layout;
-      if (layout?.layoutMode === 'HORIZONTAL') {
-        classes.push('flex', 'flex-row');
-      } else if (layout?.layoutMode === 'VERTICAL') {
-        classes.push('flex', 'flex-col');
-      }
-    }
-
-    if (node.absoluteBoundingBox) {
-      const { width, height } = node.absoluteBoundingBox;
-      if (width > 0) classes.push(`w-[${Math.round(width)}px]`);
-      if (height > 0) classes.push(`h-[${Math.round(height)}px]`);
-    }
-  }
-
-  // Deduplicate classes
-  return [...new Set(classes)].join(' ');
-}
-
-/**
- * Extract assets (fills, images, SVG) from an AltNode using the corresponding SimpleAltNode.
- */
-function extractBreakpointAssets(node: AltNode | undefined): BreakpointAssets | undefined {
-  if (!node) return undefined;
-
-  const simpleNode = currentSimpleNodeMap.get(node.id);
-  if (!simpleNode) {
-    console.log(`[DEBUG] extractBreakpointAssets: No SimpleAltNode found for AltNode id="${node.id}" name="${node.name}"`);
-    console.log(`[DEBUG] Map has ${currentSimpleNodeMap.size} entries. Sample keys: ${[...currentSimpleNodeMap.keys()].slice(0, 5).join(', ')}`);
-    return undefined;
-  }
-
-  // Build assets object directly with optional properties
-  const fillsData = simpleNode.fillsData && simpleNode.fillsData.length > 0
-    ? simpleNode.fillsData
-    : undefined;
-
-  const imageData = simpleNode.imageData
-    ? {
-        imageRef: simpleNode.imageData.imageRef,
-        nodeId: simpleNode.imageData.nodeId,
-        scaleMode: simpleNode.imageData.scaleMode || 'FILL',
-      }
-    : undefined;
-
-  const svgData = simpleNode.svgData
-    ? {
-        fillGeometry: simpleNode.svgData.fillGeometry,
-        strokeGeometry: simpleNode.svgData.strokeGeometry,
-        fills: simpleNode.svgData.fills,
-        strokes: simpleNode.svgData.strokes,
-        strokeWeight: simpleNode.svgData.strokeWeight,
-        bounds: simpleNode.svgData.bounds,
-      }
-    : undefined;
-
-  // Return undefined if no assets found
-  if (!fillsData && !imageData && !svgData) {
-    return undefined;
-  }
-
-  return { fillsData, imageData, svgData };
-}
-
-/**
- * Build ResponsiveAssets from three breakpoints.
- * Determines if assets are uniform or differ between breakpoints.
- */
-function buildResponsiveAssets(
-  mobileAssets: BreakpointAssets | undefined,
-  tabletAssets: BreakpointAssets | undefined,
-  desktopAssets: BreakpointAssets | undefined
-): ResponsiveAssets | undefined {
-  // If no assets at all, return undefined
-  if (!mobileAssets && !tabletAssets && !desktopAssets) {
-    return undefined;
-  }
-
-  // Check if assets are uniform (same imageRef across all present breakpoints)
-  const imageRefs: string[] = [];
-  if (mobileAssets?.imageData?.imageRef) imageRefs.push(mobileAssets.imageData.imageRef);
-  if (tabletAssets?.imageData?.imageRef) imageRefs.push(tabletAssets.imageData.imageRef);
-  if (desktopAssets?.imageData?.imageRef) imageRefs.push(desktopAssets.imageData.imageRef);
-
-  const uniqueImageRefs = new Set(imageRefs);
-  const isUniform = uniqueImageRefs.size <= 1;
-
-  return {
-    mobile: mobileAssets,
-    tablet: tabletAssets,
-    desktop: desktopAssets,
-    isUniform,
-  };
-}
-
-// ============================================================================
-// Unified Element Building
-// ============================================================================
-
-/**
- * Build a UnifiedElement from a matched element.
- */
-function buildUnifiedElement(
-  matched: MatchedElement,
-  warnings: MergeWarning[],
-  depth: number = 0
-): UnifiedElement {
-  // Determine presence
-  const presence = createPresence(
-    matched.mobile !== undefined,
-    matched.tablet !== undefined,
-    matched.desktop !== undefined
-  );
-
-  // Get visibility classes
-  const visibilityClasses = getVisibilityClasses(presence);
-
-  // Get the primary node (prefer mobile, then tablet, then desktop)
-  const primaryNode = matched.mobile ?? matched.tablet ?? matched.desktop;
-  if (!primaryNode) {
-    throw new Error(`No node found for element ${matched.name}`);
-  }
-
-  // Extract styles from each breakpoint
-  const styleSet: StyleSet = {
-    mobile: extractTailwindClasses(matched.mobile),
-    tablet: extractTailwindClasses(matched.tablet),
-    desktop: extractTailwindClasses(matched.desktop),
-  };
-
-  // Generate responsive classes
-  const styles = generateResponsiveClasses(styleSet);
-
-  // Extract assets from each breakpoint
-  const mobileAssets = extractBreakpointAssets(matched.mobile);
-  const tabletAssets = extractBreakpointAssets(matched.tablet);
-  const desktopAssets = extractBreakpointAssets(matched.desktop);
-  const assets = buildResponsiveAssets(mobileAssets, tabletAssets, desktopAssets);
-
-  // Check for text content mismatches
-  let textContent: string | undefined;
-  if (isTextNode(primaryNode)) {
-    const mobileText = matched.mobile && isTextNode(matched.mobile) ? matched.mobile.characters : undefined;
-    const tabletText = matched.tablet && isTextNode(matched.tablet) ? matched.tablet.characters : undefined;
-    const desktopText = matched.desktop && isTextNode(matched.desktop) ? matched.desktop.characters : undefined;
-
-    // Use mobile text as base
-    textContent = mobileText ?? tabletText ?? desktopText;
-
-    // Check for mismatches
-    const texts = [mobileText, tabletText, desktopText].filter((t) => t !== undefined);
-    const uniqueTexts = new Set(texts);
-
-    if (uniqueTexts.size > 1) {
-      warnings.push({
-        type: 'text-content-mismatch',
-        message: `Text content differs across breakpoints for "${matched.name}"`,
-        elementName: matched.name,
-        breakpoints: ['mobile', 'tablet', 'desktop'].filter((bp) => {
-          if (bp === 'mobile') return mobileText !== undefined;
-          if (bp === 'tablet') return tabletText !== undefined;
-          return desktopText !== undefined;
-        }) as Breakpoint[],
-      });
-    }
-  }
-
-  // Build source references
-  const sources: UnifiedElement['sources'] = {
-    mobile: matched.mobile ? { nodeId: matched.mobile.id, name: matched.mobile.name } : undefined,
-    tablet: matched.tablet ? { nodeId: matched.tablet.id, name: matched.tablet.name } : undefined,
-    desktop: matched.desktop ? { nodeId: matched.desktop.id, name: matched.desktop.name } : undefined,
-  };
-
-  // Build children recursively (if within depth limit)
-  let children: UnifiedElement[] | undefined;
-
-  if (depth < MAX_RECURSION_DEPTH) {
-    const hasAnyChildren =
-      (matched.mobile && hasChildren(matched.mobile)) ||
-      (matched.tablet && hasChildren(matched.tablet)) ||
-      (matched.desktop && hasChildren(matched.desktop));
-
-    if (hasAnyChildren) {
-      const childMatch = matchChildren(matched.mobile, matched.tablet, matched.desktop);
-      warnings.push(...childMatch.warnings);
-
-      children = childMatch.elements.map((childMatched) =>
-        buildUnifiedElement(childMatched, warnings, depth + 1)
-      );
-    }
-  } else {
-    // Depth limit reached
-    warnings.push({
-      type: 'structure-mismatch',
-      message: `Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached for "${matched.name}"`,
-      elementName: matched.name,
-    });
-  }
-
-  return {
-    id: generateElementId(matched.name),
-    name: matched.name,
-    type: primaryNode.type,
-    presence,
-    visibilityClasses,
-    styles,
-    mergedTailwindClasses: styles.combined,
-    assets,
-    textContent,
-    children,
-    sources,
-  };
 }
 
 // ============================================================================
@@ -627,7 +269,13 @@ function countStyleOverrides(element: UnifiedElement): { tablet: number; desktop
 
 /**
  * Execute a merge operation.
- * Loads nodes, matches elements, generates unified tree and code.
+ * Loads nodes, merges them, generates unified tree and code.
+ *
+ * New simplified flow:
+ * 1. Load SimpleAltNodes for each breakpoint
+ * 2. Merge using mergeSimpleAltNodes (matching + style diff in one pass)
+ * 3. Convert to UnifiedElement for stats/UI
+ * 4. Generate code using generateReactTailwind
  */
 export async function executeMerge(input: MergeInput): Promise<MergeResult> {
   const startTime = performance.now();
@@ -668,35 +316,30 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
     });
   }
 
-  // Require at least one node to proceed
-  const anyNode = mobileData?.altNode ?? tabletData?.altNode ?? desktopData?.altNode;
-  if (!anyNode) {
-    throw new Error('No source nodes could be loaded');
+  // Require at least mobile node to proceed
+  if (!mobileData?.simpleAltNode) {
+    throw new Error('Mobile source node is required for merge');
   }
 
-  // WP08 FIX: Build SimpleAltNode map for style extraction
-  // This allows extractTailwindClasses to find the full styles for each AltNode
-  currentSimpleNodeMap = new Map();
-  if (mobileData?.simpleAltNode) {
-    buildSimpleAltNodeMap(mobileData.simpleAltNode, currentSimpleNodeMap);
-  }
-  if (tabletData?.simpleAltNode) {
-    buildSimpleAltNodeMap(tabletData.simpleAltNode, currentSimpleNodeMap);
-  }
-  if (desktopData?.simpleAltNode) {
-    buildSimpleAltNodeMap(desktopData.simpleAltNode, currentSimpleNodeMap);
-  }
-
-  // Match elements across breakpoints
-  const matchResult = matchElements(
-    mobileData?.altNode ?? anyNode,
-    tabletData?.altNode ?? anyNode,
-    desktopData?.altNode ?? anyNode
+  // Merge the 3 SimpleAltNodes into one with responsive styles
+  const { node: mergedNode, warnings: mergeWarnings } = mergeSimpleAltNodes(
+    mobileData.simpleAltNode,
+    tabletData?.simpleAltNode,
+    desktopData?.simpleAltNode
   );
-  warnings.push(...matchResult.warnings);
 
-  // Build unified tree from root element
-  // The root is a synthetic element containing all matched children
+  // Add merge warnings
+  for (const w of mergeWarnings) {
+    warnings.push({
+      type: 'structure-mismatch',
+      message: w,
+    });
+  }
+
+  // Convert merged node to UnifiedElement for stats and UI
+  const unifiedTree = toUnifiedElement(mergedNode);
+
+  // Wrap in root element with merge metadata
   const rootElement: UnifiedElement = {
     id: 'root',
     name: input.name,
@@ -705,9 +348,7 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
     visibilityClasses: '',
     styles: { base: '', combined: '' },
     mergedTailwindClasses: '',
-    children: matchResult.elements.map((matched) =>
-      buildUnifiedElement(matched, warnings)
-    ),
+    children: unifiedTree.children ? [...unifiedTree.children] : [unifiedTree],
     sources: {
       mobile: mobileData ? { nodeId: mobileData.id, name: mobileData.name } : undefined,
       tablet: tabletData ? { nodeId: tabletData.id, name: tabletData.name } : undefined,
@@ -719,63 +360,37 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
   // Use the first available node ID for asset URL generation
   const nodeIdPrefix = mobileData?.id || tabletData?.id || desktopData?.id || 'unknown';
 
-  // WP08: Load rules for code generation (same rules as node viewer)
+  // Load rules for code generation (same rules as node viewer)
   const allRules = await loadRulesForMerge();
 
-  // WP08: Use mergeSimpleAltNodes + generateReactTailwind for consistent output
-  // This ensures merge viewer produces identical structure to node viewer
-  let generatedCode: {
-    'react-tailwind': string;
-    'react-tailwind-v4': string;
-    'html-css': string;
+  // Generate code using the merged node
+  const reactTailwindOutput = await generateReactTailwind(
+    mergedNode,
+    {}, // resolvedProperties (rules are evaluated internally)
+    allRules,
+    'react-tailwind',
+    undefined, // figmaFileKey
+    undefined, // figmaAccessToken
+    nodeIdPrefix // nodeId for image URLs
+  );
+
+  const reactTailwindV4Output = await generateReactTailwind(
+    mergedNode,
+    {},
+    allRules,
+    'react-tailwind-v4',
+    undefined,
+    undefined,
+    nodeIdPrefix
+  );
+
+  const generatedCode = {
+    'react-tailwind': reactTailwindOutput.code,
+    'react-tailwind-v4': reactTailwindV4Output.code,
+    'html-css': '<!-- HTML/CSS generation handled by viewer -->', // Placeholder - handled by viewer pipeline
   };
-  let googleFontsUrl: string | undefined; // WP08: Google Fonts URL for fonts used in the design
 
-  if (mobileData?.simpleAltNode) {
-    // New approach: merge SimpleAltNodes and use the standard generator
-    const { node: mergedNode } = mergeSimpleAltNodes(
-      mobileData.simpleAltNode,
-      tabletData?.simpleAltNode,
-      desktopData?.simpleAltNode
-    );
-
-    // Generate code using the same generator as node viewer
-    // WP08: Pass allRules so the generator can apply rule-based transformations
-    const reactTailwindOutput = await generateReactTailwind(
-      mergedNode,
-      {}, // resolvedProperties (rules are evaluated internally)
-      allRules, // WP08: Pass rules for proper className generation
-      'react-tailwind',
-      undefined, // figmaFileKey
-      undefined, // figmaAccessToken
-      nodeIdPrefix // nodeId for image URLs
-    );
-
-    const reactTailwindV4Output = await generateReactTailwind(
-      mergedNode,
-      {},
-      allRules, // WP08: Pass rules for proper className generation
-      'react-tailwind-v4',
-      undefined,
-      undefined,
-      nodeIdPrefix
-    );
-
-    generatedCode = {
-      'react-tailwind': reactTailwindOutput.code,
-      'react-tailwind-v4': reactTailwindV4Output.code,
-      'html-css': generateMergedHTMLCSS(rootElement, nodeIdPrefix).code, // Keep old for now
-    };
-    // WP08: Extract Google Fonts URL for MergeResult
-    googleFontsUrl = reactTailwindOutput.googleFontsUrl;
-  } else {
-    // Fallback to old approach if no mobile SimpleAltNode
-    generatedCode = {
-      'react-tailwind': generateMergedReactTailwind(rootElement, nodeIdPrefix, 'react-tailwind').code,
-      'react-tailwind-v4': generateMergedReactTailwind(rootElement, nodeIdPrefix, 'react-tailwind-v4').code,
-      'html-css': generateMergedHTMLCSS(rootElement, nodeIdPrefix).code,
-    };
-  }
+  const googleFontsUrl = reactTailwindOutput.googleFontsUrl;
 
   // Compute statistics
   const endTime = performance.now();

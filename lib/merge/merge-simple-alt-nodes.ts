@@ -13,6 +13,9 @@
  */
 
 import type { SimpleAltNode, FillData } from '../altnode-transform';
+import type { UnifiedElement, ResponsiveStyles } from '../types/merge';
+import type { FigmaNodeType } from '../types/figma';
+import { getVisibilityClasses } from './visibility-mapper';
 
 // ============================================================================
 // Types
@@ -182,7 +185,10 @@ function matchChildrenByName(
 /**
  * Deep clone a SimpleAltNode (without children, we'll rebuild those)
  */
-function cloneNodeWithoutChildren(node: SimpleAltNode): SimpleAltNode {
+function cloneNodeWithoutChildren(
+  node: SimpleAltNode,
+  presence?: { mobile: boolean; tablet: boolean; desktop: boolean }
+): SimpleAltNode {
   return {
     id: node.id,
     name: node.name,
@@ -202,6 +208,7 @@ function cloneNodeWithoutChildren(node: SimpleAltNode): SimpleAltNode {
     negativeItemSpacing: node.negativeItemSpacing,
     layoutDirection: node.layoutDirection,
     maskImageRef: node.maskImageRef,
+    presence,
   };
 }
 
@@ -222,8 +229,15 @@ function mergeElement(
   const base = mobile || tablet || desktop;
   if (!base) return null;
 
-  // Clone the base node
-  const merged = cloneNodeWithoutChildren(base);
+  // Track which breakpoints contain this element
+  const presence = {
+    mobile: mobile !== undefined,
+    tablet: tablet !== undefined,
+    desktop: desktop !== undefined,
+  };
+
+  // Clone the base node with presence info
+  const merged = cloneNodeWithoutChildren(base, presence);
 
   // Get styles from each breakpoint
   const mobileStyles = mobile?.styles || {};
@@ -306,4 +320,94 @@ export function getSourceNodeId(
   desktop?: SimpleAltNode
 ): string {
   return mobile?.id || tablet?.id || desktop?.id || 'unknown';
+}
+
+// ============================================================================
+// SimpleAltNode → UnifiedElement Conversion
+// ============================================================================
+
+/**
+ * Generate a unique element ID from a name
+ */
+function generateElementId(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * Convert SimpleAltNode styles to Tailwind class string.
+ * This is a simplified version - the full conversion happens in the code generator.
+ */
+function stylesToTailwindClasses(styles: Record<string, string | number>): string {
+  // For stats/UI purposes, we just need a rough approximation
+  // The actual code generation uses the full react-tailwind.ts pipeline
+  const classes: string[] = [];
+
+  for (const [key, value] of Object.entries(styles)) {
+    if (value === undefined || value === '') continue;
+    // Just collect the CSS property names for now
+    // The real conversion is handled by the code generator
+    classes.push(`[${key}:${value}]`);
+  }
+
+  return classes.join(' ');
+}
+
+/**
+ * Build ResponsiveStyles from SimpleAltNode styles and responsiveStyles
+ */
+function buildResponsiveStyles(node: SimpleAltNode): ResponsiveStyles {
+  const base = stylesToTailwindClasses(node.styles);
+  const tablet = node.responsiveStyles?.md
+    ? stylesToTailwindClasses(node.responsiveStyles.md)
+    : undefined;
+  const desktop = node.responsiveStyles?.lg
+    ? stylesToTailwindClasses(node.responsiveStyles.lg)
+    : undefined;
+
+  const combined = [
+    base,
+    tablet ? tablet.split(' ').map(c => `md:${c}`).join(' ') : '',
+    desktop ? desktop.split(' ').map(c => `lg:${c}`).join(' ') : '',
+  ].filter(Boolean).join(' ');
+
+  return { base, tablet, desktop, combined };
+}
+
+/**
+ * Convert a merged SimpleAltNode to UnifiedElement.
+ * Used for stats calculation and UI tree view.
+ */
+export function toUnifiedElement(node: SimpleAltNode): UnifiedElement {
+  // Get presence (default to all true if not set - non-merged node)
+  const presence = node.presence ?? { mobile: true, tablet: true, desktop: true };
+
+  // Get visibility classes based on presence
+  const visibilityClasses = getVisibilityClasses(presence);
+
+  // Build responsive styles
+  const styles = buildResponsiveStyles(node);
+
+  // Recursively convert children
+  const children = node.children.length > 0
+    ? node.children.map(child => toUnifiedElement(child))
+    : undefined;
+
+  return {
+    id: generateElementId(node.name),
+    name: node.name,
+    type: node.type as FigmaNodeType,
+    presence,
+    visibilityClasses,
+    styles,
+    mergedTailwindClasses: styles.combined,
+    textContent: node.originalType === 'TEXT'
+      ? (node.originalNode as any)?.characters
+      : undefined,
+    children,
+    sources: {
+      mobile: presence.mobile ? { nodeId: node.id, name: node.name } : undefined,
+      tablet: presence.tablet ? { nodeId: node.id, name: node.name } : undefined,
+      desktop: presence.desktop ? { nodeId: node.id, name: node.name } : undefined,
+    },
+  };
 }

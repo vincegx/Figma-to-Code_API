@@ -1,21 +1,16 @@
 /**
  * Merge Module
  *
- * Exports all merge-related functionality for responsive component generation.
+ * Exports merge-related functionality for responsive component generation.
+ *
+ * Main pipeline:
+ * 1. Load SimpleAltNodes for each breakpoint (mobile, tablet, desktop)
+ * 2. Merge using mergeSimpleAltNodes (matching + style diff in one pass)
+ * 3. Convert to UnifiedElement for stats/UI with toUnifiedElement
+ * 4. Generate code using generateReactTailwind
  */
 
-// Element Matcher - matches elements across breakpoints
-export {
-  buildElementIndex,
-  getDisambiguatedNames,
-  matchElements,
-  matchChildren,
-  type ElementIndex,
-  type MatchedElement,
-  type MatchResult,
-} from './element-matcher';
-
-// Visibility Mapper - generates Tailwind visibility classes
+// Visibility Mapper - generates Tailwind visibility classes based on presence
 export {
   getVisibilityClasses,
   getVisibilityConfig,
@@ -27,23 +22,12 @@ export {
   type VisibilityConfig,
 } from './visibility-mapper';
 
-// Tailwind Responsive - generates mobile-first responsive classes
+// SimpleAltNode Merger - matches elements and computes responsive style diffs
 export {
-  extractStyleDifferences,
-  addResponsivePrefix,
-  generateResponsiveClasses,
-  mergeStyleSets,
-  createEmptyStyleSet,
-  createUniformStyleSet,
-  type StyleSet,
-} from './tailwind-responsive';
+  mergeSimpleAltNodes,
+  toUnifiedElement,
+  getSourceNodeId,
+} from './merge-simple-alt-nodes';
 
 // Note: merge-engine is server-only (uses merge-store which uses fs)
 // Import directly from '@/lib/merge/merge-engine' in API routes only
-
-// Merged Code Generator - generates framework-specific code with pre-merged Tailwind classes
-export {
-  generateMergedReactTailwind,
-  generateMergedHTMLCSS,
-  type MergedCodeOutput,
-} from './merged-code-generator';

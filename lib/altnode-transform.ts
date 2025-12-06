@@ -75,6 +75,14 @@ export interface SimpleAltNode {
     md?: Record<string, string | number>;  // Tablet overrides (md: prefix)
     lg?: Record<string, string | number>;  // Desktop overrides (lg: prefix)
   };
+
+  // WP08: Presence tracking for merge feature
+  // Indicates which breakpoints contained this element before merging
+  presence?: {
+    mobile: boolean;
+    tablet: boolean;
+    desktop: boolean;
+  };
 }
 
 // WP32: Fill data structure for multi-layer rendering
