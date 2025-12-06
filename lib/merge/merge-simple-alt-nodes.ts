@@ -27,15 +27,331 @@ interface MergedNodeResult {
 }
 
 // ============================================================================
+// Style Normalization Constants
+// ============================================================================
+
+/**
+ * Properties that are Figma-specific and should be excluded from CSS output.
+ * These don't translate to valid CSS and create noise in the style diff.
+ */
+const FIGMA_SPECIFIC_PROPS = new Set([
+  'fills',
+  'strokes',
+  'mix-blend-mode',
+  'mixBlendMode',
+  'stroke-linecap',
+  'stroke-linejoin',
+  'stroke-linecap (SVG)',
+  'stroke-linejoin (SVG)',
+]);
+
+/**
+ * CSS default values that are implicit and don't need to be specified.
+ * Key: property name (kebab-case), Value: default value
+ */
+const CSS_DEFAULT_VALUES: Record<string, string> = {
+  'flex-grow': '0',
+  'flex-shrink': '1',
+  'flex-wrap': 'nowrap',
+  'overflow': 'visible',
+  'align-self': 'auto',
+  'order': '0',
+  'opacity': '1',
+  'z-index': 'auto',
+};
+
+/**
+ * Figma-specific values that should be excluded
+ */
+const FIGMA_SPECIFIC_VALUES = new Set([
+  'PASS_THROUGH',  // Figma's mix-blend-mode default
+]);
+
+/**
+ * Mapping from camelCase to kebab-case for normalization
+ */
+const CAMEL_TO_KEBAB: Record<string, string> = {
+  'flexDirection': 'flex-direction',
+  'flexGrow': 'flex-grow',
+  'flexShrink': 'flex-shrink',
+  'flexWrap': 'flex-wrap',
+  'alignItems': 'align-items',
+  'alignSelf': 'align-self',
+  'justifyContent': 'justify-content',
+  'borderRadius': 'border-radius',
+  'paddingTop': 'padding-top',
+  'paddingBottom': 'padding-bottom',
+  'paddingLeft': 'padding-left',
+  'paddingRight': 'padding-right',
+  'marginTop': 'margin-top',
+  'marginBottom': 'margin-bottom',
+  'marginLeft': 'margin-left',
+  'marginRight': 'margin-right',
+  'borderWidth': 'border-width',
+  'borderRightWidth': 'border-right-width',
+  'borderLeftWidth': 'border-left-width',
+  'borderTopWidth': 'border-top-width',
+  'borderBottomWidth': 'border-bottom-width',
+  'mixBlendMode': 'mix-blend-mode',
+  'backgroundImage': 'background-image',
+  'backgroundColor': 'background-color',
+  'backgroundSize': 'background-size',
+  'lineHeight': 'line-height',
+  'fontFamily': 'font-family',
+  'fontSize': 'font-size',
+  'fontWeight': 'font-weight',
+  'textAlign': 'text-align',
+  'verticalAlign': 'vertical-align',
+  'maxWidth': 'max-width',
+  'maxHeight': 'max-height',
+  'minWidth': 'min-width',
+  'minHeight': 'min-height',
+};
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
 /**
+ * Normalize property name to kebab-case
+ */
+function normalizePropertyName(prop: string): string {
+  return CAMEL_TO_KEBAB[prop] || prop;
+}
+
+/**
+ * Check if a property should be excluded (Figma-specific)
+ */
+function isFigmaSpecificProp(prop: string): boolean {
+  const normalized = normalizePropertyName(prop).toLowerCase();
+  return FIGMA_SPECIFIC_PROPS.has(normalized) || FIGMA_SPECIFIC_PROPS.has(prop);
+}
+
+/**
+ * Check if a value is Figma-specific and should be excluded
+ */
+function isFigmaSpecificValue(value: string | number): boolean {
+  return FIGMA_SPECIFIC_VALUES.has(String(value));
+}
+
+/**
+ * Check if a value contains serialization bug ([object Object])
+ */
+function hasSerializationBug(value: string | number): boolean {
+  return String(value).includes('[object Object]');
+}
+
+/**
+ * Check if a property has its CSS default value
+ */
+function isDefaultValue(prop: string, value: string | number): boolean {
+  const normalized = normalizePropertyName(prop).toLowerCase();
+  const defaultVal = CSS_DEFAULT_VALUES[normalized];
+  return defaultVal !== undefined && String(value) === defaultVal;
+}
+
+/**
+ * Extract numeric value from a CSS value string (e.g., "10.5px" → 10.5)
+ * Handles scientific notation (e.g., "1.5e-7px" → 0.00000015)
+ */
+function extractNumericValue(value: string | number): number | null {
+  const str = String(value);
+  // Match numbers including scientific notation
+  const match = str.match(/^([-\d.]+(?:e[-+]?\d+)?)/i);
+  if (match) {
+    const num = parseFloat(match[1]);
+    return isNaN(num) ? null : num;
+  }
+  return null;
+}
+
+/**
+ * Round a numeric CSS value to 2 decimal places
+ * e.g., "133.3333282470703px" → "133.33px"
+ */
+function roundCssValue(value: string | number): string {
+  const str = String(value);
+  const num = extractNumericValue(value);
+
+  if (num === null) return str;
+
+  // Extract the unit
+  const unit = str.replace(/^[-\d.]+(?:e[-+]?\d+)?/i, '');
+
+  // Round to 2 decimal places
+  const rounded = Math.round(num * 100) / 100;
+
+  // If the value is essentially 0 (< 0.01), return "0" + unit
+  if (Math.abs(rounded) < 0.01) {
+    return `0${unit}`;
+  }
+
+  // Format without unnecessary decimals
+  const formatted = rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+
+  return `${formatted}${unit}`;
+}
+
+/**
+ * Check if a value is essentially zero (including scientific notation)
+ */
+function isEssentiallyZero(value: string | number): boolean {
+  const num = extractNumericValue(value);
+  return num !== null && Math.abs(num) < 0.01;
+}
+
+/**
+ * Check if two values are equivalent within a tolerance (for floating point noise)
+ * Returns true if they should be considered the same (no diff needed)
+ */
+function areValuesEquivalent(
+  baseValue: string | number | undefined,
+  compareValue: string | number,
+  tolerance: number = 0.5
+): boolean {
+  // If base is undefined, they're not equivalent
+  if (baseValue === undefined) return false;
+
+  const baseStr = String(baseValue);
+  const compareStr = String(compareValue);
+
+  // Exact string match
+  if (baseStr === compareStr) return true;
+
+  // Try numeric comparison with tolerance
+  const baseNum = extractNumericValue(baseValue);
+  const compareNum = extractNumericValue(compareValue);
+
+  if (baseNum !== null && compareNum !== null) {
+    // Both are numeric - compare with tolerance
+    const diff = Math.abs(baseNum - compareNum);
+    if (diff < tolerance) {
+      // Also check the unit is the same
+      const baseUnit = baseStr.replace(/^[-\d.]+/, '');
+      const compareUnit = compareStr.replace(/^[-\d.]+/, '');
+      return baseUnit === compareUnit;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Properties where 0 is a meaningful reset value (not noise)
+ */
+const ZERO_IS_MEANINGFUL = new Set([
+  'min-width', 'min-height', 'max-width', 'max-height',
+  'gap', 'row-gap', 'column-gap',
+  'padding', 'margin', 'border-width', 'border-radius',
+]);
+
+/**
+ * Shorthand to longhand property mappings.
+ * When shorthand is present and all longhands match it, remove the longhands.
+ */
+const SHORTHAND_LONGHANDS: Record<string, string[]> = {
+  'padding': ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+  'margin': ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
+  'border-width': ['border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'],
+  'border-radius': ['border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius'],
+  'gap': ['row-gap', 'column-gap'],
+};
+
+/**
+ * Remove redundant longhand properties when shorthand covers them.
+ * e.g., if padding: 10px and padding-top: 10px, padding-right: 10px, etc. all exist,
+ * remove the longhands as they're redundant.
+ */
+function removeRedundantLonghands(styles: Record<string, string | number>): Record<string, string | number> {
+  const result = { ...styles };
+
+  for (const [shorthand, longhands] of Object.entries(SHORTHAND_LONGHANDS)) {
+    const shorthandValue = result[shorthand];
+    if (shorthandValue === undefined) continue;
+
+    // Check if all longhands exist and match the shorthand value
+    const allLonghandsMatch = longhands.every(longhand => {
+      const longhandValue = result[longhand];
+      if (longhandValue === undefined) return true; // Missing is OK
+      return areValuesEquivalent(shorthandValue, longhandValue, 0.1);
+    });
+
+    if (allLonghandsMatch) {
+      // Remove all longhand properties
+      for (const longhand of longhands) {
+        delete result[longhand];
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Clean and normalize a styles object:
+ * - Remove Figma-specific properties
+ * - Remove values with serialization bugs
+ * - Normalize property names to kebab-case
+ * - Round numeric values to 2 decimal places
+ * - Filter out essentially-zero position values (noise)
+ * - Optionally remove CSS default values
+ */
+function cleanStyles(
+  styles: Record<string, string | number>,
+  removeDefaults: boolean = false
+): Record<string, string | number> {
+  const cleaned: Record<string, string | number> = {};
+
+  for (const [key, value] of Object.entries(styles)) {
+    // Skip undefined/empty values
+    if (value === undefined || value === '') continue;
+
+    // Skip Figma-specific properties
+    if (isFigmaSpecificProp(key)) continue;
+
+    // Skip Figma-specific values
+    if (isFigmaSpecificValue(value)) continue;
+
+    // Skip values with serialization bug
+    if (hasSerializationBug(value)) continue;
+
+    // Normalize property name
+    const normalizedKey = normalizePropertyName(key);
+
+    // Skip if we already have this property (avoid duplicates from camelCase/kebab-case)
+    if (normalizedKey !== key && normalizedKey in cleaned) continue;
+
+    // Round numeric values
+    const roundedValue = roundCssValue(value);
+
+    // Skip essentially-zero position values (noise from Figma)
+    // But keep 0 for properties where it's meaningful (like min-width, gap, etc.)
+    if (isEssentiallyZero(value) && !ZERO_IS_MEANINGFUL.has(normalizedKey)) {
+      // For position properties (left, right, top, bottom), skip ~0 values
+      if (['left', 'right', 'top', 'bottom'].includes(normalizedKey)) {
+        continue;
+      }
+    }
+
+    // Optionally skip default values
+    if (removeDefaults && isDefaultValue(normalizedKey, roundedValue)) continue;
+
+    cleaned[normalizedKey] = roundedValue;
+  }
+
+  // Remove redundant longhands when shorthand covers them
+  return removeRedundantLonghands(cleaned);
+}
+
+/**
  * Compute style differences between two style objects.
- * Returns only the properties that are different in 'compare' vs 'base'.
+ * Returns only the properties that are meaningfully different in 'compare' vs 'base'.
  *
- * WP08: Also handles properties that exist in 'base' but not in 'compare'.
- * For these, we generate reset values (e.g., width: 100% in base, absent in compare → width: auto)
+ * Improvements:
+ * - Filters out Figma-specific properties
+ * - Ignores floating-point noise (< 0.5px differences)
+ * - Normalizes property names (camelCase → kebab-case)
+ * - Handles reset values for missing properties
  */
 function computeStyleDiff(
   base: Record<string, string | number>,
@@ -43,20 +359,24 @@ function computeStyleDiff(
 ): Record<string, string | number> {
   const diff: Record<string, string | number> = {};
 
+  // Clean both style objects
+  const cleanedBase = cleanStyles(base, false);
+  const cleanedCompare = cleanStyles(compare, false);
+
   // Check properties in compare that differ from base
-  for (const [key, value] of Object.entries(compare)) {
-    const baseValue = base[key];
-    // Only include if different (stringify for deep comparison)
-    if (JSON.stringify(baseValue) !== JSON.stringify(value)) {
-      diff[key] = value;
-    }
+  for (const [key, value] of Object.entries(cleanedCompare)) {
+    const baseValue = cleanedBase[key];
+
+    // Skip if values are equivalent (handles floating point noise)
+    if (areValuesEquivalent(baseValue, value)) continue;
+
+    // Include in diff if different
+    diff[key] = value;
   }
 
-  // WP08: Check properties in base that don't exist in compare (need reset)
-  // This handles cases like: mobile has width:100%, desktop has flex-grow:1 (no width)
-  for (const [key, baseValue] of Object.entries(base)) {
-    if (!(key in compare) && baseValue !== undefined && baseValue !== '') {
-      // Generate reset value based on property type
+  // Check properties in base that don't exist in compare (need reset)
+  for (const [key, baseValue] of Object.entries(cleanedBase)) {
+    if (!(key in cleanedCompare)) {
       const resetValue = getResetValue(key, baseValue);
       if (resetValue !== null) {
         diff[key] = resetValue;
@@ -68,11 +388,11 @@ function computeStyleDiff(
 }
 
 /**
- * WP08: Get the CSS reset value for a property that should be "unset" at a breakpoint.
+ * Get the CSS reset value for a property that should be "unset" at a breakpoint.
  * Returns null if no reset is needed.
  */
 function getResetValue(property: string, _baseValue: string | number): string | number | null {
-  const prop = property.toLowerCase();
+  const prop = normalizePropertyName(property).toLowerCase();
 
   // Width/height: reset to auto
   if (prop === 'width' || prop === 'height') {
@@ -80,25 +400,32 @@ function getResetValue(property: string, _baseValue: string | number): string | 
   }
 
   // Flex properties
-  if (prop === 'flex-grow' || prop === 'flexgrow') {
-    return '0'; // Reset to default
+  if (prop === 'flex-grow') {
+    return '0';
+  }
+  if (prop === 'flex-shrink') {
+    return '1';
   }
 
-  // Min/max dimensions: reset to 0 or none
-  if (prop.startsWith('min-width') || prop.startsWith('minwidth')) {
+  // Min/max dimensions
+  if (prop === 'min-width' || prop === 'min-height') {
     return '0';
   }
-  if (prop.startsWith('min-height') || prop.startsWith('minheight')) {
-    return '0';
+  if (prop === 'max-width' || prop === 'max-height') {
+    return 'none';
   }
 
   // Align-self: reset to auto
-  if (prop === 'align-self' || prop === 'alignself') {
+  if (prop === 'align-self') {
     return 'auto';
   }
 
+  // Gap: reset to 0
+  if (prop === 'gap' || prop === 'row-gap' || prop === 'column-gap') {
+    return '0';
+  }
+
   // For most other properties, don't generate reset
-  // They either don't need reset or have complex defaults
   return null;
 }
 
@@ -336,16 +663,16 @@ function generateElementId(name: string): string {
 /**
  * Convert SimpleAltNode styles to Tailwind class string.
  * This is a simplified version - the full conversion happens in the code generator.
+ *
+ * Uses cleanStyles to filter out Figma-specific props, serialization bugs,
+ * and normalize property names.
  */
 function stylesToTailwindClasses(styles: Record<string, string | number>): string {
-  // For stats/UI purposes, we just need a rough approximation
-  // The actual code generation uses the full react-tailwind.ts pipeline
-  const classes: string[] = [];
+  // Clean styles: remove Figma-specific props, normalize names, remove defaults in base
+  const cleaned = cleanStyles(styles, true);
 
-  for (const [key, value] of Object.entries(styles)) {
-    if (value === undefined || value === '') continue;
-    // Just collect the CSS property names for now
-    // The real conversion is handled by the code generator
+  const classes: string[] = [];
+  for (const [key, value] of Object.entries(cleaned)) {
     classes.push(`[${key}:${value}]`);
   }
 
