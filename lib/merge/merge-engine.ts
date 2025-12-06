@@ -340,14 +340,19 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
   const unifiedTree = toUnifiedElement(mergedNode);
 
   // Wrap in root element with merge metadata
+  // Inherit layout properties from the merged tree root
   const rootElement: UnifiedElement = {
     id: 'root',
     name: input.name,
-    type: 'FRAME',
+    type: unifiedTree.type || 'FRAME',
+    layoutMode: unifiedTree.layoutMode,
+    layoutWrap: unifiedTree.layoutWrap,
+    primaryAxisAlignItems: unifiedTree.primaryAxisAlignItems,
+    originalType: unifiedTree.originalType,
     presence: { mobile: true, tablet: true, desktop: true },
     visibilityClasses: '',
-    styles: { base: '', combined: '' },
-    mergedTailwindClasses: '',
+    styles: unifiedTree.styles || { base: '', combined: '' },
+    mergedTailwindClasses: unifiedTree.mergedTailwindClasses || '',
     children: unifiedTree.children ? [...unifiedTree.children] : [unifiedTree],
     sources: {
       mobile: mobileData ? { nodeId: mobileData.id, name: mobileData.name } : undefined,

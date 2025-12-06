@@ -988,10 +988,20 @@ export function toUnifiedElement(node: SimpleAltNode): UnifiedElement {
     ? node.children.map(child => toUnifiedElement(child))
     : undefined;
 
+  // Extract layout properties from originalNode (mobile-first)
+  const originalNode = node.originalNode as any;
+  const layoutMode = originalNode?.layoutMode as 'HORIZONTAL' | 'VERTICAL' | 'NONE' | undefined;
+  const layoutWrap = originalNode?.layoutWrap as 'WRAP' | 'NO_WRAP' | undefined;
+  const primaryAxisAlignItems = originalNode?.primaryAxisAlignItems as 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN' | undefined;
+
   return {
     id: generateElementId(node.name),
     name: node.name,
     type: node.type as FigmaNodeType,
+    layoutMode,
+    layoutWrap,
+    primaryAxisAlignItems,
+    originalType: node.originalType, // For INSTANCE detection
     presence,
     visibilityClasses,
     styles,

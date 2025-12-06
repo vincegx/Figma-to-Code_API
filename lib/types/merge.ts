@@ -196,6 +196,18 @@ export interface UnifiedElement {
   /** Element type from Figma */
   readonly type: FigmaNodeType;
 
+  /** Layout mode (HORIZONTAL, VERTICAL, NONE) - from mobile source */
+  readonly layoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE';
+
+  /** Layout wrap (WRAP, NO_WRAP) - from mobile source */
+  readonly layoutWrap?: 'WRAP' | 'NO_WRAP';
+
+  /** Primary axis alignment (MIN, CENTER, MAX, SPACE_BETWEEN) - from mobile source */
+  readonly primaryAxisAlignItems?: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+
+  /** Original Figma type (for INSTANCE detection) */
+  readonly originalType?: string;
+
   /** Which breakpoints contain this element */
   readonly presence: {
     readonly mobile: boolean;
