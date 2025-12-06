@@ -699,9 +699,9 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   if (prop === 'right') return `right-[${cssValue}]`;
 
   // WP25: Flex grow
-  // WP31: flex-grow-0 est le défaut, ne pas le générer
+  // WP31: flex-grow-0 must be explicit for responsive resets (md:grow-0)
   if (prop === 'flexgrow') {
-    if (cssValue === '0') return ''; // WP31: Skip - c'est le défaut
+    if (cssValue === '0') return 'grow-0'; // Explicit for responsive contexts
     if (cssValue === '1') return 'flex-grow';
     return `flex-grow-[${cssValue}]`;
   }

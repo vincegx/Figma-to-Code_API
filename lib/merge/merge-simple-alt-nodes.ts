@@ -780,6 +780,15 @@ function mergeElement(
   // Use mobile styles as base
   merged.styles = { ...mobileStyles };
 
+  // FIX: Add width: 100% when flex-grow is present but width is missing
+  // This ensures responsive overrides (md:w-[Xpx]) work correctly
+  // Without this, elements with flex-grow lose their fill behavior when tablet overrides kick in
+  const hasFlexGrow = merged.styles['flex-grow'] === '1' || merged.styles['flexGrow'] === '1';
+  const hasNoWidth = !merged.styles.width && !merged.styles['width'];
+  if (hasFlexGrow && hasNoWidth) {
+    merged.styles.width = '100%';
+  }
+
   // Compute responsive overrides
   const mdDiff = computeStyleDiff(mobileStyles, tabletStyles);
   const lgDiff = computeStyleDiff(tabletStyles, desktopStyles);

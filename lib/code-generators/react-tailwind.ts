@@ -1261,7 +1261,16 @@ function generateTailwindJSXElement(
     // WP28 T211: Rules come LAST so they override fallback base classes
     // This ensures semantic classes from rules (text-sm) beat raw fallbacks (text-[14px])
     // Architecture: fallbacks provide CSS guarantee → rules optimize to semantic classes
-    const ruleClasses = properties.className.split(/\s+/).filter(Boolean);
+    let ruleClasses = properties.className.split(/\s+/).filter(Boolean);
+
+    // WP31 FIX: Filter out rule classes that conflict with responsive overrides
+    // When we have md:grow-0 (responsive reset), don't add grow/basis-0/flex-grow from rules
+    // because unprefixed classes apply to ALL breakpoints, breaking responsive behavior
+    const hasResponsiveGrowReset = responsiveClasses.some(c => c.includes(':grow-0'));
+    if (hasResponsiveGrowReset) {
+      ruleClasses = ruleClasses.filter(c => c !== 'grow' && c !== 'basis-0' && c !== 'flex-grow');
+    }
+
     // WP08: Include responsive classes (md:, lg:) after base classes
     const allClasses = [...structuralClasses, ...baseClasses, ...responsiveClasses, ...ruleClasses];
 
