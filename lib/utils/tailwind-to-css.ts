@@ -53,6 +53,166 @@ export function parseCSSToMap(css: string): Map<string, Record<string, string>> 
 }
 
 /**
+ * Parse media queries from CSS string
+ * Returns a map of media query string → array of rules
+ *
+ * Supports both traditional and Tailwind v4 nested formats:
+ * - Traditional: @media (min-width: 768px) { .class { ... } }
+ * - Tailwind v4: .md\:class { @media (width >= 768px) { ... } }
+ */
+export function parseMediaQueries(css: string): ParsedMediaQueries {
+  const queries = new Map<string, MediaQueryRule[]>();
+
+  // Extract content from @layer utilities if present (Tailwind v4)
+  let cssToSearch = css;
+  const layerMatch = css.match(/@layer\s+utilities\s*\{/);
+  if (layerMatch && layerMatch.index !== undefined) {
+    // Find matching closing brace using brace counting
+    let depth = 1;
+    const startIdx = layerMatch.index + layerMatch[0].length;
+    let endIdx = startIdx;
+    for (let i = startIdx; i < css.length; i++) {
+      if (css[i] === '{') depth++;
+      else if (css[i] === '}') {
+        depth--;
+        if (depth === 0) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    cssToSearch = css.slice(startIdx, endIdx);
+  }
+
+  // Tailwind v4 format: .selector { @media (...) { properties } }
+  // Match class rules that contain nested @media
+  // Use a simpler approach: find all classes, then check if they have @media inside
+  const allSelectorsWithMedia: Array<{ selector: string; content: string }> = [];
+
+  // Find all .class { ... } blocks that contain @media
+  let searchIdx = 0;
+  while (searchIdx < cssToSearch.length) {
+    const dotIdx = cssToSearch.indexOf('.', searchIdx);
+    if (dotIdx === -1) break;
+
+    // Find the selector (until { or space)
+    let selectorEnd = dotIdx + 1;
+    while (selectorEnd < cssToSearch.length && !/[\s{]/.test(cssToSearch[selectorEnd])) {
+      selectorEnd++;
+    }
+    const selector = cssToSearch.slice(dotIdx + 1, selectorEnd);
+
+    // Find opening brace
+    const braceIdx = cssToSearch.indexOf('{', selectorEnd);
+    if (braceIdx === -1) break;
+
+    // Find matching closing brace
+    let depth = 1;
+    let closeIdx = braceIdx + 1;
+    while (closeIdx < cssToSearch.length && depth > 0) {
+      if (cssToSearch[closeIdx] === '{') depth++;
+      else if (cssToSearch[closeIdx] === '}') depth--;
+      closeIdx++;
+    }
+
+    const content = cssToSearch.slice(braceIdx + 1, closeIdx - 1);
+
+    // Check if this block contains @media
+    if (content.includes('@media')) {
+      allSelectorsWithMedia.push({ selector, content });
+    }
+
+    searchIdx = closeIdx;
+  }
+
+  // Now parse each selector's @media content
+  for (const { selector, content } of allSelectorsWithMedia) {
+    // Extract nested @media from within the class
+    const nestedMediaRegex = /@media\s*\(([^)]+)\)\s*\{([^}]*)\}/g;
+    let mediaMatch;
+
+    while ((mediaMatch = nestedMediaRegex.exec(content)) !== null) {
+      const mediaCondition = mediaMatch[1].trim();
+      const mediaContent = mediaMatch[2].trim();
+
+      // Parse properties inside the @media
+      const properties: Record<string, string> = {};
+      const propRegex = /([a-z-]+)\s*:\s*([^;]+);?/gi;
+
+      let propMatch;
+      while ((propMatch = propRegex.exec(mediaContent)) !== null) {
+        const prop = propMatch[1].trim();
+        const value = propMatch[2].trim();
+        properties[prop] = value;
+      }
+
+      if (Object.keys(properties).length > 0) {
+        const mediaQuery = `(${mediaCondition})`;
+        const existing = queries.get(mediaQuery) || [];
+        queries.set(mediaQuery, [...existing, { selector, properties }]);
+      }
+    }
+  }
+
+  // Also try traditional format: @media { .class { } } (for v3 compatibility)
+  const traditionalMediaRegex = /@media\s*([^{]+)\s*\{/g;
+  let startMatch;
+
+  while ((startMatch = traditionalMediaRegex.exec(css)) !== null) {
+    const mediaQuery = startMatch[1].trim();
+    const startIndex = startMatch.index + startMatch[0].length;
+
+    // Skip if this looks like nested media (inside a class rule)
+    const beforeMatch = css.slice(Math.max(0, startMatch.index - 50), startMatch.index);
+    if (beforeMatch.includes('{') && !beforeMatch.includes('}')) {
+      continue; // This is nested inside a class, already handled above
+    }
+
+    // Count braces to find matching close
+    let depth = 1;
+    let endIndex = startIndex;
+    for (let i = startIndex; i < css.length; i++) {
+      if (css[i] === '{') depth++;
+      else if (css[i] === '}') {
+        depth--;
+        if (depth === 0) {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    const mediaContent = css.slice(startIndex, endIndex);
+
+    // Parse rules inside media query
+    const ruleRegex = /\.([^\s{,]+)\s*\{([^}]*)\}/g;
+    let ruleMatch;
+
+    while ((ruleMatch = ruleRegex.exec(mediaContent)) !== null) {
+      const selector = ruleMatch[1];
+      const propertiesStr = ruleMatch[2];
+
+      const properties: Record<string, string> = {};
+      const propRegex = /([a-z-]+)\s*:\s*([^;]+);?/gi;
+
+      let propMatch;
+      while ((propMatch = propRegex.exec(propertiesStr)) !== null) {
+        const prop = propMatch[1].trim();
+        const value = propMatch[2].trim();
+        properties[prop] = value;
+      }
+
+      if (Object.keys(properties).length > 0) {
+        const existing = queries.get(mediaQuery) || [];
+        queries.set(mediaQuery, [...existing, { selector, properties }]);
+      }
+    }
+  }
+
+  return { queries };
+}
+
+/**
  * Extract @layer theme block (CSS variables) from v4 output
  * Uses brace counting to handle nested blocks like :root, :host { ... }
  */
@@ -110,9 +270,32 @@ export interface CompiledElement {
   cssProperties: Record<string, string>;
 }
 
+/**
+ * Media query rule with selector and properties
+ */
+export interface MediaQueryRule {
+  selector: string;
+  properties: Record<string, string>;
+}
+
+/**
+ * Parsed media queries grouped by query string
+ */
+export interface ParsedMediaQueries {
+  queries: Map<string, MediaQueryRule[]>;
+}
+
 // ============================================================================
 // Direct Compilation (Node.js fallback)
 // ============================================================================
+
+/**
+ * Custom breakpoints for responsive CSS generation
+ */
+export interface CustomBreakpoints {
+  mobileWidth: number;
+  tabletWidth: number;
+}
 
 /**
  * Compile Tailwind classes directly using PostCSS (Node.js only)
@@ -123,24 +306,42 @@ export interface CompiledElement {
  *
  * @param code - Code containing Tailwind classes (HTML or JSX)
  * @param version - Tailwind version ('v3' or 'v4')
+ * @param breakpoints - Optional custom breakpoints
  * @returns Generated CSS string
  */
 async function compileTailwindDirect(
   code: string,
-  version: 'v3' | 'v4' = 'v4'
+  version: 'v3' | 'v4' = 'v4',
+  breakpoints?: CustomBreakpoints
 ): Promise<string> {
   try {
     // Use eval to prevent Next.js static analysis from bundling these modules
     // eslint-disable-next-line no-eval
     const dynamicRequire = eval('require');
 
+    // Default breakpoints
+    const bp = breakpoints || { mobileWidth: 480, tabletWidth: 960 };
+
     if (version === 'v4') {
-      // Tailwind v4: Use compile API directly
+      // Tailwind v4: Use compile API directly with custom breakpoints
       const { compile } = dynamicRequire('tailwindcss-v4');
       const { readFileSync } = dynamicRequire('fs');
       const path = dynamicRequire('path');
 
-      const compiler = await compile('@import "tailwindcss";', {
+      // Build CSS with custom @theme breakpoints
+      const customCSS = `
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-sm: ${bp.mobileWidth}px;
+  --breakpoint-md: ${bp.mobileWidth}px;
+  --breakpoint-lg: ${bp.tabletWidth}px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+      `;
+
+      const compiler = await compile(customCSS, {
         loadStylesheet: async (id: string, base: string) => {
           if (id === 'tailwindcss') {
             const cssPath = path.join(process.cwd(), 'node_modules/tailwindcss-v4/index.css');
@@ -168,10 +369,10 @@ async function compileTailwindDirect(
       }
 
       const css = compiler.build([...new Set(classes)]);
-      console.log('[tailwind-to-css] V4 direct compilation successful');
+      console.log('[tailwind-to-css] V4 direct compilation successful with breakpoints:', bp);
       return css;
     } else {
-      // Tailwind v3: Use PostCSS
+      // Tailwind v3: Use PostCSS with custom screens
       const postcss = dynamicRequire('postcss');
       const tailwindcss = dynamicRequire('tailwindcss');
 
@@ -183,7 +384,16 @@ async function compileTailwindDirect(
 
       const tailwindConfig = {
         content: [{ raw: code, extension: 'html' }],
-        theme: { extend: {} },
+        theme: {
+          screens: {
+            sm: `${bp.mobileWidth}px`,
+            md: `${bp.mobileWidth}px`,
+            lg: `${bp.tabletWidth}px`,
+            xl: '1280px',
+            '2xl': '1536px',
+          },
+          extend: {},
+        },
         corePlugins: { preflight: false },
       };
 
@@ -191,7 +401,7 @@ async function compileTailwindDirect(
         tailwindcss(tailwindConfig),
       ]).process(inputCSS, { from: undefined });
 
-      console.log('[tailwind-to-css] V3 direct compilation successful');
+      console.log('[tailwind-to-css] V3 direct compilation successful with breakpoints:', bp);
       return result.css;
     }
   } catch (error) {
@@ -214,16 +424,18 @@ async function compileTailwindDirect(
  *
  * @param code - Code containing Tailwind classes (HTML or JSX)
  * @param version - Tailwind version ('v3' or 'v4')
+ * @param breakpoints - Optional custom breakpoints for responsive design
  * @returns Generated CSS string
  */
 export async function compileTailwindViaAPI(
   code: string,
-  version: 'v3' | 'v4' = 'v4'
+  version: 'v3' | 'v4' = 'v4',
+  breakpoints?: CustomBreakpoints
 ): Promise<string> {
   // Node.js: Use direct compilation (API not available)
   if (isNode) {
     console.log('[tailwind-to-css] Node.js detected, using direct compilation');
-    return compileTailwindDirect(code, version);
+    return compileTailwindDirect(code, version, breakpoints);
   }
 
   // Browser: Use API
@@ -231,7 +443,7 @@ export async function compileTailwindViaAPI(
     const response = await fetch('/api/generate-tailwind-css', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, version }),
+      body: JSON.stringify({ code, version, breakpoints }),
     });
 
     if (!response.ok) {
@@ -291,10 +503,17 @@ export function mergeTailwindClasses(
       // WP38: Fallback for arbitrary classes not compiled by Tailwind v4
       // Handle border-[color] and border-{t,r,b,l}-[color]
       // Color values: var(...), rgba(...), rgb(...), hsl(...), #hex
+      // Also handles Tailwind's color: prefix syntax: border-t-[color:var(...)]
       const borderMatch = cls.match(/^border(-[trbl])?-\[(.+)\]$/);
       if (borderMatch) {
         const side = borderMatch[1]; // -t, -r, -b, -l, or undefined
-        const value = borderMatch[2];
+        let value = borderMatch[2];
+
+        // Strip "color:" prefix if present (Tailwind arbitrary value syntax for colors)
+        if (value.startsWith('color:')) {
+          value = value.slice(6); // Remove "color:" prefix
+        }
+
         // Check if value looks like a color (not a width like "1px" or "2px_0_0")
         const isColor = /^(var\(|rgba?\(|hsla?\(|#)/.test(value);
         if (isColor) {
@@ -354,11 +573,15 @@ function resolveCSSVariables(value: string, vars: Map<string, string>): string {
  *
  * @param elements - Array of compiled elements with semantic names
  * @param themeCSS - Theme layer CSS (variable definitions)
+ * @param mediaQueries - Optional parsed media queries
+ * @param classMapping - Optional map of Tailwind class → semantic class names (one-to-many)
  * @returns Complete CSS string
  */
 export function generateFinalCSS(
   elements: CompiledElement[],
-  themeCSS: string
+  themeCSS: string,
+  mediaQueries?: ParsedMediaQueries,
+  classMapping?: Map<string, string[]>
 ): string {
   const rules: string[] = [];
 
@@ -384,6 +607,51 @@ export function generateFinalCSS(
       .join('\n');
 
     rules.push(`.${element.semanticClass} {\n${propsStr}\n}`);
+  }
+
+  // Generate media query rules with semantic class names
+  if (mediaQueries && classMapping) {
+    for (const [mediaQuery, mediaRules] of mediaQueries.queries) {
+      // Convert Tailwind v4 syntax (width >= Xpx) to standard (min-width: Xpx)
+      let standardMediaQuery = mediaQuery
+        .replace(/width\s*>=\s*(\d+)/g, 'min-width: $1')
+        .replace(/width\s*<=\s*(\d+)/g, 'max-width: $1');
+
+      // Group properties by semantic class to avoid duplicate selectors
+      const groupedByClass = new Map<string, Record<string, string>>();
+
+      for (const rule of mediaRules) {
+        // Convert Tailwind selector (e.g., "md\:flex-row") to semantic classes
+        // The selector is the escaped Tailwind class
+        const tailwindClass = rule.selector.replace(/\\/g, '');
+        const semanticClasses = classMapping.get(tailwindClass);
+
+        if (semanticClasses && semanticClasses.length > 0) {
+          // Apply to ALL semantic classes that use this Tailwind class
+          for (const semanticClass of semanticClasses) {
+            const existing = groupedByClass.get(semanticClass) || {};
+            for (const [prop, value] of Object.entries(rule.properties)) {
+              const resolvedValue = resolveCSSVariables(value, cssVars);
+              existing[prop] = resolvedValue;
+            }
+            groupedByClass.set(semanticClass, existing);
+          }
+        }
+      }
+
+      // Generate rules from grouped properties
+      const semanticRules: string[] = [];
+      for (const [semanticClass, properties] of groupedByClass) {
+        const propsStr = Object.entries(properties)
+          .map(([prop, value]) => `    ${prop}: ${value};`)
+          .join('\n');
+        semanticRules.push(`  .${semanticClass} {\n${propsStr}\n  }`);
+      }
+
+      if (semanticRules.length > 0) {
+        rules.push(`@media ${standardMediaQuery} {\n${semanticRules.join('\n\n')}\n}`);
+      }
+    }
   }
 
   return rules.join('\n\n');

@@ -29,6 +29,7 @@ import { mergeSimpleAltNodes, toUnifiedElement } from './merge-simple-alt-nodes'
 import { transformToAltNode, resetNameCounters, type SimpleAltNode } from '../altnode-transform';
 import { setCachedVariablesMap } from '../utils/variable-css';
 import { generateReactTailwind } from '../code-generators/react-tailwind';
+import { generateHTMLTailwindCSS } from '../code-generators/html-tailwind-css';
 import type { MultiFrameworkRule } from '../types/rules';
 import type { AltNode } from '../types/altnode';
 
@@ -42,9 +43,9 @@ import type { AltNode } from '../types/altnode';
 export interface MergeInput {
   readonly name: string;
   readonly sourceNodes: readonly [
-    { readonly breakpoint: 'mobile'; readonly nodeId: string },
-    { readonly breakpoint: 'tablet'; readonly nodeId: string },
-    { readonly breakpoint: 'desktop'; readonly nodeId: string }
+    { readonly breakpoint: 'mobile'; readonly nodeId: string; readonly width?: number },
+    { readonly breakpoint: 'tablet'; readonly nodeId: string; readonly width?: number },
+    { readonly breakpoint: 'desktop'; readonly nodeId: string; readonly width?: number }
   ];
 }
 
@@ -389,10 +390,29 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
     nodeIdPrefix
   );
 
+  // Extract custom breakpoints from input widths (for HTML/CSS generation)
+  const mobileWidth = mobileInput.width || 420;
+  const tabletWidth = tabletInput.width || 960;
+  const customBreakpoints = {
+    mobileWidth,
+    tabletWidth,
+  };
+
+  const htmlCssOutput = await generateHTMLTailwindCSS(
+    mergedNode,
+    {},
+    allRules,
+    'html-css',
+    undefined,
+    undefined,
+    nodeIdPrefix,
+    customBreakpoints
+  );
+
   const generatedCode = {
     'react-tailwind': reactTailwindOutput.code,
     'react-tailwind-v4': reactTailwindV4Output.code,
-    'html-css': '<!-- HTML/CSS generation handled by viewer -->', // Placeholder - handled by viewer pipeline
+    'html-css': htmlCssOutput.code + (htmlCssOutput.css ? '\n/* CSS */\n' + htmlCssOutput.css : ''),
   };
 
   const googleFontsUrl = reactTailwindOutput.googleFontsUrl;
@@ -483,11 +503,28 @@ export async function generateCodeForMergeNode(
   const allRules = await loadRulesForMerge();
   const nodeIdPrefix = mobileData?.id || 'unknown';
 
+  if (framework === 'html-css') {
+    const output = await generateHTMLTailwindCSS(
+      targetNode,
+      {},
+      allRules,
+      'html-css',
+      undefined,
+      undefined,
+      nodeIdPrefix
+    );
+    return {
+      altNode: targetNode,
+      code: output.code + (output.css ? '\n/* CSS */\n' + output.css : ''),
+      css: output.css,
+    };
+  }
+
   const output = await generateReactTailwind(
     targetNode,
     {},
     allRules,
-    framework === 'html-css' ? 'react-tailwind' : framework,
+    framework,
     undefined,
     undefined,
     nodeIdPrefix
@@ -570,20 +607,17 @@ export async function createMerge(request: CreateMergeRequest): Promise<Merge> {
  * Re-execute a merge (regenerate result from same sources).
  */
 export async function reexecuteMerge(merge: Merge): Promise<Merge> {
+  // Include widths in source nodes input for proper breakpoint handling
   const sourceNodesInput = merge.sourceNodes.map((node) => ({
     breakpoint: node.breakpoint,
     nodeId: node.nodeId,
-  })) as unknown as CreateMergeRequest['sourceNodes'];
-
-  const request: CreateMergeRequest = {
-    name: merge.name,
-    sourceNodes: sourceNodesInput,
-  };
+    width: node.width,
+  })) as unknown as MergeInput['sourceNodes'];
 
   try {
     const result = await executeMerge({
-      name: request.name,
-      sourceNodes: request.sourceNodes,
+      name: merge.name,
+      sourceNodes: sourceNodesInput,
     });
 
     const updatedMerge: Merge = {

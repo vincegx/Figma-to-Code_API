@@ -15,10 +15,12 @@ import { generateReactTailwindV4 } from './react-tailwind-v4';
 import {
   compileTailwindViaAPI,
   parseCSSToMap,
+  parseMediaQueries,
   extractThemeLayer,
   mergeTailwindClasses,
   generateFinalCSS,
   type CompiledElement,
+  type CustomBreakpoints,
 } from '../utils/tailwind-to-css';
 import { toPascalCase } from './helpers';
 
@@ -237,7 +239,8 @@ export async function generateHTMLTailwindCSS(
   _framework: FrameworkType = 'html-css',
   figmaFileKey?: string,
   figmaAccessToken?: string,
-  nodeId?: string
+  nodeId?: string,
+  breakpoints?: CustomBreakpoints
 ): Promise<GeneratedCodeOutput> {
   // Step 1: Generate React Tailwind v4 code (99% fidelity)
   const reactResult = await generateReactTailwindV4(
@@ -257,6 +260,7 @@ export async function generateHTMLTailwindCSS(
   let css = '';
   let themeCSS = '';
   let cssMap = new Map<string, Record<string, string>>();
+  let mediaQueries = { queries: new Map() as Map<string, { selector: string; properties: Record<string, string> }[]> };
 
   // Collect all unique classes
   const allClasses = new Set<string>();
@@ -268,22 +272,25 @@ export async function generateHTMLTailwindCSS(
     try {
       // Build a fake HTML with all classes for the API
       const fakeHtml = `<div class="${Array.from(allClasses).join(' ')}"></div>`;
-      const compiledCSS = await compileTailwindViaAPI(fakeHtml, 'v4');
+      const compiledCSS = await compileTailwindViaAPI(fakeHtml, 'v4', breakpoints);
 
-      // Extract theme layer and parse CSS
+      // Extract theme layer and parse CSS (including media queries)
       themeCSS = extractThemeLayer(compiledCSS);
       cssMap = parseCSSToMap(compiledCSS);
+      mediaQueries = parseMediaQueries(compiledCSS);
 
-      console.log('[HTML-TW-CSS] Compiled', allClasses.size, 'classes →', cssMap.size, 'CSS rules');
+      console.log('[HTML-TW-CSS] Compiled', allClasses.size, 'classes →', cssMap.size, 'CSS rules,', mediaQueries.queries.size, 'media queries');
     } catch (error) {
       console.warn('[HTML-TW-CSS] Compilation failed:', error);
     }
   }
 
-  // Step 4: Build compiled elements with merged CSS
+  // Step 4: Build compiled elements with merged CSS (base styles only)
   const compiledElements: CompiledElement[] = [];
   for (const [, { semanticClass, classes }] of classMappings) {
-    const cssProperties = mergeTailwindClasses(classes, cssMap);
+    // Filter out responsive classes (md:, lg:, etc.) for base styles
+    const baseClasses = classes.filter(c => !c.match(/^(sm|md|lg|xl|2xl):/));
+    const cssProperties = mergeTailwindClasses(baseClasses, cssMap);
     compiledElements.push({
       semanticClass,
       tailwindClasses: classes,
@@ -291,10 +298,25 @@ export async function generateHTMLTailwindCSS(
     });
   }
 
-  // Step 5: Generate final CSS with semantic class names
-  css = generateFinalCSS(compiledElements, themeCSS);
+  // Step 5: Build mapping from Tailwind responsive class → semantic classes (one-to-many)
+  // e.g., "md:flex-row" used by ["TitleSection", "OverviewCards", "AccountInfo"]
+  // FIX: Changed from Map<string, string> to Map<string, string[]>
+  // because multiple elements can use the same responsive class
+  const responsiveClassMapping = new Map<string, string[]>();
+  for (const [, { semanticClass, classes }] of classMappings) {
+    for (const cls of classes) {
+      if (cls.match(/^(sm|md|lg|xl|2xl):/)) {
+        const existing = responsiveClassMapping.get(cls) || [];
+        existing.push(semanticClass);
+        responsiveClassMapping.set(cls, existing);
+      }
+    }
+  }
 
-  // Step 6: Extract and remove inline CSS variables from React code BEFORE conversion
+  // Step 6: Generate final CSS with semantic class names and media queries
+  css = generateFinalCSS(compiledElements, themeCSS, mediaQueries, responsiveClassMapping);
+
+  // Step 7: Extract and remove inline CSS variables from React code BEFORE conversion
   let inlineCSS = '';
   let cleanedReactCode = reactResult.code;
 
@@ -306,7 +328,7 @@ export async function generateHTMLTailwindCSS(
     cleanedReactCode = cleanedReactCode.replace(/<style\s+dangerouslySetInnerHTML=\{\{\s*__html:\s*`[\s\S]*?`\s*\}\}\s*\/>\s*/g, '');
   }
 
-  // Step 7: Convert JSX to HTML with semantic class names
+  // Step 8: Convert JSX to HTML with semantic class names
   const htmlContent = jsxToHtmlWithSemanticClasses(cleanedReactCode, classMappings);
 
   // Combine CSS: merge Figma vars into @layer theme

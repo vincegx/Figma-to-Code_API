@@ -422,7 +422,7 @@ function computeStyleDiff(
   // Check properties in base that don't exist in compare (need reset)
   for (const [key, baseValue] of Object.entries(cleanedBase)) {
     if (!(key in cleanedCompare)) {
-      const resetValue = getResetValue(key, baseValue);
+      const resetValue = getResetValue(key, baseValue, cleanedCompare);
       if (resetValue !== null) {
         diff[key] = resetValue;
       }
@@ -435,12 +435,30 @@ function computeStyleDiff(
 /**
  * Get the CSS reset value for a property that should be "unset" at a breakpoint.
  * Returns null if no reset is needed.
+ * @param compareStyles - The styles of the compare breakpoint (to check for flex-grow context)
  */
-function getResetValue(property: string, _baseValue: string | number): string | number | null {
+function getResetValue(
+  property: string,
+  baseValue: string | number,
+  compareStyles?: Record<string, string | number>
+): string | number | null {
   const prop = normalizePropertyName(property).toLowerCase();
 
-  // Width/height: reset to auto
+  // Width/height: reset to auto, BUT not if base is 100% (FILL) AND compare doesn't have flex-grow
+  // When base is 100% and compare has flex-grow, we need w-auto for flex-grow to work properly
   if (prop === 'width' || prop === 'height') {
+    // Check if compare has flex-grow (which needs w-auto to work)
+    const compareHasFlexGrow = compareStyles && (
+      compareStyles['flex-grow'] === '1' ||
+      compareStyles['flex-grow'] === 1 ||
+      compareStyles['flexGrow'] === '1' ||
+      compareStyles['flexGrow'] === 1
+    );
+
+    // Don't reset if base value is 100% (FILL) AND compare doesn't have flex-grow
+    if (baseValue === '100%' && !compareHasFlexGrow) {
+      return null;
+    }
     return 'auto';
   }
 

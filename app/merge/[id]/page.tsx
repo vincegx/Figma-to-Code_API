@@ -15,6 +15,7 @@ import {
 import {
   ChevronRight,
   RefreshCw,
+  RotateCcw,
   Download,
   Monitor,
   Grid3x3,
@@ -414,6 +415,23 @@ export default function MergeViewerPage() {
         {/* Right: Actions */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch(`/api/merges/${mergeId}`, { method: 'PATCH' });
+                  if (response.ok) {
+                    // Reload page to get fresh data
+                    window.location.reload();
+                  }
+                } catch (error) {
+                  console.error('Regenerate failed:', error);
+                }
+              }}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
+              title="Regenerate merge"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
             <button
               onClick={() => setIframeKey((k) => k + 1)}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
