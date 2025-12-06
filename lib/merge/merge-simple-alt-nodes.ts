@@ -247,7 +247,7 @@ const ZERO_IS_MEANINGFUL = new Set([
 
 /**
  * Shorthand to longhand property mappings.
- * When shorthand is present and all longhands match it, remove the longhands.
+ * Order matters: [top, right, bottom, left] for box model properties
  */
 const SHORTHAND_LONGHANDS: Record<string, string[]> = {
   'padding': ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
@@ -258,9 +258,50 @@ const SHORTHAND_LONGHANDS: Record<string, string[]> = {
 };
 
 /**
+ * Parse a CSS shorthand value into individual values for each side.
+ * CSS shorthand rules:
+ * - 1 value: all sides same (10px → [10px, 10px, 10px, 10px])
+ * - 2 values: top/bottom, left/right (10px 20px → [10px, 20px, 10px, 20px])
+ * - 3 values: top, left/right, bottom (10px 20px 30px → [10px, 20px, 30px, 20px])
+ * - 4 values: top, right, bottom, left
+ *
+ * For gap: 1 value = both, 2 values = [row, column]
+ */
+function parseShorthandValue(value: string | number, property: string): string[] {
+  const str = String(value).trim();
+  const parts = str.split(/\s+/);
+
+  // Gap is special: only 2 values [row, column]
+  if (property === 'gap') {
+    if (parts.length === 1) {
+      return [parts[0], parts[0]];
+    }
+    return [parts[0], parts[1]];
+  }
+
+  // Box model properties: 4 values [top, right, bottom, left]
+  switch (parts.length) {
+    case 1:
+      return [parts[0], parts[0], parts[0], parts[0]];
+    case 2:
+      return [parts[0], parts[1], parts[0], parts[1]];
+    case 3:
+      return [parts[0], parts[1], parts[2], parts[1]];
+    case 4:
+      return [parts[0], parts[1], parts[2], parts[3]];
+    default:
+      return parts;
+  }
+}
+
+/**
  * Remove redundant longhand properties when shorthand covers them.
- * e.g., if padding: 10px and padding-top: 10px, padding-right: 10px, etc. all exist,
- * remove the longhands as they're redundant.
+ * Parses CSS shorthand values to compare individual sides.
+ *
+ * Example:
+ *   padding: 14px 0px (→ top=14px, right=0px, bottom=14px, left=0px)
+ *   padding-top: 14px ✓ matches expanded[0], remove
+ *   padding-bottom: 14px ✓ matches expanded[2], remove
  */
 function removeRedundantLonghands(styles: Record<string, string | number>): Record<string, string | number> {
   const result = { ...styles };
@@ -269,16 +310,20 @@ function removeRedundantLonghands(styles: Record<string, string | number>): Reco
     const shorthandValue = result[shorthand];
     if (shorthandValue === undefined) continue;
 
-    // Check if all longhands exist and match the shorthand value
-    const allLonghandsMatch = longhands.every(longhand => {
-      const longhandValue = result[longhand];
-      if (longhandValue === undefined) return true; // Missing is OK
-      return areValuesEquivalent(shorthandValue, longhandValue, 0.1);
-    });
+    // Parse shorthand into individual values
+    const expandedValues = parseShorthandValue(shorthandValue, shorthand);
 
-    if (allLonghandsMatch) {
-      // Remove all longhand properties
-      for (const longhand of longhands) {
+    // Check each longhand individually
+    for (let i = 0; i < longhands.length; i++) {
+      const longhand = longhands[i];
+      const longhandValue = result[longhand];
+
+      if (longhandValue === undefined) continue;
+
+      // Compare longhand with corresponding expanded shorthand value
+      const expectedValue = expandedValues[i];
+      if (expectedValue && areValuesEquivalent(expectedValue, longhandValue, 0.1)) {
+        // Longhand matches shorthand - it's redundant, remove it
         delete result[longhand];
       }
     }
