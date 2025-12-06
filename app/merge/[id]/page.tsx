@@ -194,6 +194,7 @@ export default function MergeViewerPage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [previewFramework, setPreviewFramework] = useState<MergeFrameworkType>('react-tailwind');
   const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component');
+  const [withProps, setWithProps] = useState(false); // Generate React components with props interface
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedRawData, setCopiedRawData] = useState(false);
   const [rawDataLimit, setRawDataLimit] = useState(2000);
@@ -286,8 +287,10 @@ export default function MergeViewerPage() {
     async function fetchCode() {
       setIsLoadingCode(true);
       try {
+        const params = new URLSearchParams({ framework: previewFramework });
+        if (withProps) params.set('withProps', 'true');
         const response = await fetch(
-          `/api/merges/${mergeId}/node/${encodeURIComponent(sourceNodeId!)}?framework=${previewFramework}`
+          `/api/merges/${mergeId}/node/${encodeURIComponent(sourceNodeId!)}?${params}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -305,7 +308,7 @@ export default function MergeViewerPage() {
     }
 
     fetchCode();
-  }, [mergeId, selectedNode, previewFramework]);
+  }, [mergeId, selectedNode, previewFramework, withProps]);
 
   // Send highlight message to iframe when selection changes
   // Use source nodeId (original Figma ID) because that's what's in data-node-id attributes
@@ -682,11 +685,37 @@ export default function MergeViewerPage() {
                 >
                   Styles
                 </button>
+                {/* Props checkbox - only visible for React frameworks */}
+                {(previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') && (
+                  <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer ml-2">
+                    <input
+                      type="checkbox"
+                      checked={withProps}
+                      onChange={(e) => setWithProps(e.target.checked)}
+                      className="h-3 w-3 rounded border-gray-600 accent-accent"
+                    />
+                    Props
+                  </label>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={async () => {
-                    await navigator.clipboard.writeText(displayCode || generatedCode);
+                    let contentToCopy: string;
+                    if (codeActiveTab === 'styles') {
+                      if (previewFramework === 'html-css') {
+                        contentToCopy = displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '';
+                      } else {
+                        contentToCopy = '/* Tailwind classes are inline - no separate styles needed */';
+                      }
+                    } else {
+                      if (previewFramework === 'html-css') {
+                        contentToCopy = displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
+                      } else {
+                        contentToCopy = displayCode || generatedCode;
+                      }
+                    }
+                    await navigator.clipboard.writeText(contentToCopy);
                     setCopiedCode(true);
                     setTimeout(() => setCopiedCode(false), 2000);
                   }}
@@ -697,8 +726,23 @@ export default function MergeViewerPage() {
                 </button>
                 <button
                   onClick={() => {
-                    const ext = previewFramework === 'html-css' ? 'html' : 'tsx';
-                    const blob = new Blob([displayCode || generatedCode], { type: 'text/plain' });
+                    const isStylesHtmlCss = codeActiveTab === 'styles' && previewFramework === 'html-css';
+                    const ext = isStylesHtmlCss ? 'css' : (previewFramework === 'html-css' ? 'html' : 'tsx');
+                    let content: string;
+                    if (codeActiveTab === 'styles') {
+                      if (previewFramework === 'html-css') {
+                        content = displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '';
+                      } else {
+                        content = '/* Tailwind classes are inline - no separate styles needed */';
+                      }
+                    } else {
+                      if (previewFramework === 'html-css') {
+                        content = displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
+                      } else {
+                        content = displayCode || generatedCode;
+                      }
+                    }
+                    const blob = new Blob([content], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -723,8 +767,21 @@ export default function MergeViewerPage() {
               )}
               <Highlight
                 theme={codeTheme}
-                code={displayCode || generatedCode}
-                language={previewFramework === 'html-css' ? 'markup' : 'tsx'}
+                code={(() => {
+                  if (codeActiveTab === 'styles') {
+                    if (previewFramework === 'html-css') {
+                      return displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '/* No CSS */';
+                    } else {
+                      return '/* Tailwind classes are inline - no separate styles needed */';
+                    }
+                  }
+                  // Component tab
+                  if (previewFramework === 'html-css') {
+                    return displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
+                  }
+                  return displayCode || generatedCode;
+                })()}
+                language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
                   <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[420px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
@@ -743,7 +800,18 @@ export default function MergeViewerPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>No errors</span>
               <span>•</span>
-              <span>{(displayCode || generatedCode).split('\n').length} lines</span>
+              <span>{(() => {
+                if (codeActiveTab === 'styles') {
+                  if (previewFramework === 'html-css') {
+                    return (displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '').split('\n').length;
+                  }
+                  return 1; // "Tailwind classes are inline" message
+                }
+                if (previewFramework === 'html-css') {
+                  return (displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode).split('\n').length;
+                }
+                return (displayCode || generatedCode).split('\n').length;
+              })()} lines</span>
             </div>
           </div>
 

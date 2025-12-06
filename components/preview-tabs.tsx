@@ -77,12 +77,7 @@ export default function PreviewTabs({
             fontsUrl = result.googleFontsUrl;
             break;
           case 'html-css':
-            console.log('[PREVIEW-TABS] Calling generateHTMLTailwindCSS...');
             result = await generateHTMLTailwindCSS(currentNode, resolvedProperties, [], 'html-css', figmaFileKey, figmaAccessToken, nodeId);
-            console.log('[PREVIEW-TABS] HTML length:', result.code?.length || 0);
-            console.log('[PREVIEW-TABS] CSS length:', result.css?.length || 0);
-            console.log('[PREVIEW-TABS] HTML preview:', result.code?.substring(0, 300));
-            console.log('[PREVIEW-TABS] CSS preview:', result.css?.substring(0, 300));
             codeOutput = result.code;
             if (result.css) {
               codeOutput += '\n\n/* CSS */\n' + result.css;

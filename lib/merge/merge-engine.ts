@@ -445,7 +445,8 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
 export async function generateCodeForMergeNode(
   merge: Merge,
   nodeId: string,
-  framework: 'react-tailwind' | 'react-tailwind-v4' | 'html-css' = 'react-tailwind'
+  framework: 'react-tailwind' | 'react-tailwind-v4' | 'html-css' = 'react-tailwind',
+  options?: { withProps?: boolean }
 ): Promise<{ altNode: SimpleAltNode | null; code: string; css?: string }> {
   // Re-execute merge to get mergedNode
   const sourceNodesInput = merge.sourceNodes.map((node) => ({
@@ -527,7 +528,8 @@ export async function generateCodeForMergeNode(
     framework,
     undefined,
     undefined,
-    nodeIdPrefix
+    nodeIdPrefix,
+    options
   );
 
   return {

@@ -5,6 +5,7 @@
  *
  * Query parameters:
  * - framework: 'react-tailwind' | 'react-tailwind-v4' | 'html-css' (default: 'react-tailwind')
+ * - withProps: 'true' to generate React components with props interface
  *
  * Returns:
  * - altNode: The SimpleAltNode subtree
@@ -24,6 +25,7 @@ export async function GET(
     const { id, nodeId } = await params;
     const { searchParams } = new URL(request.url);
     const framework = (searchParams.get('framework') || 'react-tailwind') as 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
+    const withProps = searchParams.get('withProps') === 'true';
 
     // Load the merge
     const merge = await getMerge(id);
@@ -35,7 +37,7 @@ export async function GET(
     }
 
     // Generate code for the specific node
-    const result = await generateCodeForMergeNode(merge, nodeId, framework);
+    const result = await generateCodeForMergeNode(merge, nodeId, framework, { withProps });
 
     return NextResponse.json({
       success: true,
