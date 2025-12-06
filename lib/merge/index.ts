@@ -41,8 +41,9 @@ export {
 // Note: merge-engine is server-only (uses merge-store which uses fs)
 // Import directly from '@/lib/merge/merge-engine' in API routes only
 
-// Responsive Code Generator - generates framework-specific code
+// Merged Code Generator - generates framework-specific code with pre-merged Tailwind classes
 export {
-  generateResponsiveCode,
-  generateElementCode,
-} from './responsive-code-generator';
+  generateMergedReactTailwind,
+  generateMergedHTMLCSS,
+  type MergedCodeOutput,
+} from './merged-code-generator';

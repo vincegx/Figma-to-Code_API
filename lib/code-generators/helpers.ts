@@ -146,10 +146,11 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // Flex direction
-  // WP31: flex-row est le défaut, ne pas le générer (comme MCP)
+  // WP08: Generate flex-row explicitly for responsive overrides (e.g., lg:flex-row)
+  // Even though flex-row is the default, we need it to override flex-col from mobile base styles
   if (prop === 'flexdirection') {
     const directionMap: Record<string, string> = {
-      row: '', // WP31: Skip - c'est le défaut
+      row: 'flex-row', // WP08: Explicit for responsive overrides
       column: 'flex-col',
       'row-reverse': 'flex-row-reverse',
       'column-reverse': 'flex-col-reverse',
@@ -229,11 +230,12 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
         const colorClass = hexToTailwindColor(color, 'border');
         return colorClass ? `${borderClass} ${colorClass}` : borderClass;
       } else if (color.startsWith('var(')) {
-        // WP31: CSS variable - Tailwind v3: border-[var(--name)]
+        // WP08: CSS variable - use color: prefix to fix Tailwind parsing bug
+        // Without the color: prefix, Tailwind generates broken CSS with empty border-*-color properties
         const varMatch = color.match(/var\((--[\w-]+)/);
         if (varMatch) {
           const varName = varMatch[1];
-          return `${borderClass} border-[var(${varName})] border-solid`;
+          return `${borderClass} border-[color:var(${varName})] border-solid`;
         }
         return `${borderClass} border-solid`;
       } else {
@@ -609,26 +611,45 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   }
 
   // WP31: Individual border colors - use Tailwind arbitrary value syntax
-  // Syntax: border-b-[rgba(40,40,40,1)] (no spaces, no "color:" prefix)
+  // WP08: Use color: prefix for CSS variables to fix Tailwind parsing bug
+  // Without the color: prefix, Tailwind generates broken CSS with empty border-*-color properties
   if (prop === 'bordertopcolor') {
     const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    if (colorNoSpaces.startsWith('var(')) {
+      return `border-t-[color:${colorNoSpaces}]`;
+    }
     return `border-t-[${colorNoSpaces}]`;
   }
   if (prop === 'borderrightcolor') {
     const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    if (colorNoSpaces.startsWith('var(')) {
+      return `border-r-[color:${colorNoSpaces}]`;
+    }
     return `border-r-[${colorNoSpaces}]`;
   }
   if (prop === 'borderbottomcolor') {
     const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    if (colorNoSpaces.startsWith('var(')) {
+      return `border-b-[color:${colorNoSpaces}]`;
+    }
     return `border-b-[${colorNoSpaces}]`;
   }
   if (prop === 'borderleftcolor') {
     const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    if (colorNoSpaces.startsWith('var(')) {
+      return `border-l-[color:${colorNoSpaces}]`;
+    }
     return `border-l-[${colorNoSpaces}]`;
   }
   // WP31: Generic border-color like MCP: border-[#282828] or border-[rgba(...)]
+  // WP08: Use border-[color:var(...)] syntax for CSS variables to fix Tailwind parsing bug
+  // Without the color: prefix, Tailwind generates broken CSS with empty border-*-color properties
   if (prop === 'bordercolor') {
     const colorNoSpaces = cssValue.replace(/\s+/g, '');
+    // Check if it's a CSS variable
+    if (colorNoSpaces.startsWith('var(')) {
+      return `border-[color:${colorNoSpaces}]`;
+    }
     return `border-[${colorNoSpaces}]`;
   }
   // WP31: Border style conversion
@@ -800,6 +821,11 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
  * @returns Tailwind class string
  */
 function convertSizeToTailwind(value: string, prefix: string): string {
+  // WP08: Handle 'auto' value with native Tailwind class
+  if (value === 'auto') {
+    return `${prefix}-auto`;
+  }
+
   // WP31: Handle percentage values with standard Tailwind classes
   const percentMap: Record<string, string> = {
     '100%': 'full',

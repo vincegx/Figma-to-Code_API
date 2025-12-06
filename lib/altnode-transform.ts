@@ -67,6 +67,14 @@ export interface SimpleAltNode {
   // When a GROUP has isMask: true on first child, masked children get this imageRef
   // The generator resolves the URL and applies CSS mask-image
   maskImageRef?: string;
+
+  // WP08: Responsive styles for merge feature
+  // Contains style overrides for tablet (md:) and desktop (lg:) breakpoints
+  // Base styles in 'styles' field = mobile-first
+  responsiveStyles?: {
+    md?: Record<string, string | number>;  // Tablet overrides (md: prefix)
+    lg?: Record<string, string | number>;  // Desktop overrides (lg: prefix)
+  };
 }
 
 // WP32: Fill data structure for multi-layer rendering
@@ -727,8 +735,11 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
       node.layoutMode === figmaConfig.constants.layoutModes.VERTICAL) {
     const hasSameLayoutMode = parentLayoutMode === node.layoutMode;
     altNode.styles.display = hasSameLayoutMode ? 'flex' : 'inline-flex';
+    // WP08: Add flexDirection to styles for merge comparison
+    // Without this, merge can't detect row vs column differences between breakpoints
+    altNode.styles.flexDirection = node.layoutMode === figmaConfig.constants.layoutModes.HORIZONTAL ? 'row' : 'column';
   }
-  // NOTE: layoutMode HORIZONTAL/VERTICAL flexDirection, gap handled by rules
+  // NOTE: gap handled by rules
   // NOTE: counterAxisSpacing handled by official-counteraxisspacing rules
 
   // NOTE: layoutGrow handled by official-layoutgrow rules

@@ -27,7 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listMerges } from '@/lib/store/merge-store';
 import { createMerge } from '@/lib/merge/merge-engine';
-import type { MergeStatus, CreateMergeRequest, ListMergesOptions } from '@/lib/types/merge';
+import type { MergeStatus, CreateMergeRequest, ListMergesOptions, Breakpoint } from '@/lib/types/merge';
 
 export async function GET(request: NextRequest) {
   try {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate required breakpoints
-    const requiredBreakpoints = ['mobile', 'tablet', 'desktop'];
+    const requiredBreakpoints: Breakpoint[] = ['mobile', 'tablet', 'desktop'];
     for (const bp of requiredBreakpoints) {
       if (!breakpoints.has(bp)) {
         return NextResponse.json(

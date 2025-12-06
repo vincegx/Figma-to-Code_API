@@ -151,137 +151,20 @@ export function getDisambiguatedNames(index: ElementIndex): Set<string> {
 /**
  * Match elements across 3 breakpoints by layer name.
  * Returns matched elements in mobile's order (as base), with unmatched elements appended.
+ *
+ * IMPORTANT: This function only matches the DIRECT CHILDREN of the root nodes,
+ * not the entire flattened tree. Recursive matching is handled by buildUnifiedElement
+ * via matchChildren.
  */
 export function matchElements(
   mobile: AltNode,
   tablet: AltNode,
   desktop: AltNode,
-  maxDepth: number = 10
+  _maxDepth: number = 10
 ): MatchResult {
-  const mobileIndex = buildElementIndex(mobile, maxDepth);
-  const tabletIndex = buildElementIndex(tablet, maxDepth);
-  const desktopIndex = buildElementIndex(desktop, maxDepth);
-
-  const warnings: MergeWarning[] = [];
-  const elements: MatchedElement[] = [];
-  const processedNames = new Set<string>();
-
-  // Collect all disambiguation warnings
-  const allDuplicateNames = new Set([
-    ...mobileIndex.duplicateNames,
-    ...tabletIndex.duplicateNames,
-    ...desktopIndex.duplicateNames,
-  ]);
-
-  for (const name of allDuplicateNames) {
-    const breakpoints: Breakpoint[] = [];
-    if (mobileIndex.duplicateNames.has(name)) breakpoints.push('mobile');
-    if (tabletIndex.duplicateNames.has(name)) breakpoints.push('tablet');
-    if (desktopIndex.duplicateNames.has(name)) breakpoints.push('desktop');
-
-    warnings.push({
-      type: 'duplicate-layer-name',
-      message: `Layer name "${name}" appears multiple times and was disambiguated`,
-      elementName: name,
-      breakpoints,
-    });
-  }
-
-  // Get all unique names across all breakpoints
-  const allNames = new Set([
-    ...getDisambiguatedNames(mobileIndex),
-    ...getDisambiguatedNames(tabletIndex),
-    ...getDisambiguatedNames(desktopIndex),
-  ]);
-
-  // First, process elements in mobile order
-  for (const node of mobileIndex.orderedNodes) {
-    // Find this node's disambiguated name
-    for (const [name, indexedNode] of mobileIndex.disambiguated.entries()) {
-      if (indexedNode === node && !processedNames.has(name)) {
-        processedNames.add(name);
-
-        const mobileNode = mobileIndex.disambiguated.get(name);
-        const tabletNode = tabletIndex.disambiguated.get(name);
-        const desktopNode = desktopIndex.disambiguated.get(name);
-
-        // Determine original name (before disambiguation suffix)
-        const originalName = name.replace(/_\d+$/, '');
-        const wasDisambiguated = name !== originalName || allDuplicateNames.has(name);
-
-        elements.push({
-          name,
-          originalName,
-          mobile: mobileNode,
-          tablet: tabletNode,
-          desktop: desktopNode,
-          wasDisambiguated,
-        });
-
-        // Generate warning for unmatched elements
-        const presence: Breakpoint[] = [];
-        if (mobileNode) presence.push('mobile');
-        if (tabletNode) presence.push('tablet');
-        if (desktopNode) presence.push('desktop');
-
-        if (presence.length < 3) {
-          const missing = (['mobile', 'tablet', 'desktop'] as Breakpoint[])
-            .filter((bp) => !presence.includes(bp));
-
-          warnings.push({
-            type: 'unmatched-element',
-            message: `Element "${name}" only exists in ${presence.join(', ')} breakpoint${presence.length > 1 ? 's' : ''}, missing from ${missing.join(', ')}`,
-            elementName: name,
-            breakpoints: presence,
-          });
-        }
-        break;
-      }
-    }
-  }
-
-  // Then, add elements that exist only in tablet or desktop
-  for (const name of allNames) {
-    if (!processedNames.has(name)) {
-      processedNames.add(name);
-
-      const mobileNode = mobileIndex.disambiguated.get(name);
-      const tabletNode = tabletIndex.disambiguated.get(name);
-      const desktopNode = desktopIndex.disambiguated.get(name);
-
-      const originalName = name.replace(/_\d+$/, '');
-      const wasDisambiguated = name !== originalName || allDuplicateNames.has(name);
-
-      elements.push({
-        name,
-        originalName,
-        mobile: mobileNode,
-        tablet: tabletNode,
-        desktop: desktopNode,
-        wasDisambiguated,
-      });
-
-      // Generate warning for elements not in mobile (partial presence)
-      const presence: Breakpoint[] = [];
-      if (mobileNode) presence.push('mobile');
-      if (tabletNode) presence.push('tablet');
-      if (desktopNode) presence.push('desktop');
-
-      if (presence.length < 3) {
-        const missing = (['mobile', 'tablet', 'desktop'] as Breakpoint[])
-          .filter((bp) => !presence.includes(bp));
-
-        warnings.push({
-          type: 'unmatched-element',
-          message: `Element "${name}" only exists in ${presence.join(', ')} breakpoint${presence.length > 1 ? 's' : ''}, missing from ${missing.join(', ')}`,
-          elementName: name,
-          breakpoints: presence,
-        });
-      }
-    }
-  }
-
-  return { elements, warnings };
+  // Only match direct children of the roots, NOT the entire flattened tree
+  // This prevents duplication when buildUnifiedElement recursively processes children
+  return matchChildren(mobile, tablet, desktop);
 }
 
 /**

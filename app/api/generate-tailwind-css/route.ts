@@ -26,10 +26,42 @@ async function getTailwindCSSContent(): Promise<string> {
  * which causes CSS from previous requests to pollute subsequent requests.
  * Example: if request A uses font-[550], request B would incorrectly include that CSS too.
  */
-async function createV4Compiler() {
-  const tailwindCSS = await getTailwindCSSContent();
+// WP08: Breakpoints interface from merge config
+// mobileWidth = width of mobile design (used as sm breakpoint)
+// tabletWidth = width of tablet design (used as md breakpoint, triggers tablet styles)
+// Desktop styles (lg:) trigger at tabletWidth since desktop is typically > tablet
+interface CustomBreakpoints {
+  mobileWidth: number;  // sm breakpoint (mobile max width)
+  tabletWidth: number;  // md breakpoint (tablet styles start here)
+}
 
-  return compileTailwindV4('@import "tailwindcss";', {
+// Default breakpoints (fallback when not provided)
+const DEFAULT_BREAKPOINTS: CustomBreakpoints = {
+  mobileWidth: 480,   // sm: 480px
+  tabletWidth: 960,   // md: 960px
+};
+
+async function createV4Compiler(breakpoints?: CustomBreakpoints) {
+  const tailwindCSS = await getTailwindCSSContent();
+  const bp = breakpoints || DEFAULT_BREAKPOINTS;
+
+  // WP08 FIX: Correct breakpoint mapping for mobile-first responsive design
+  // Base (0 - mobileWidth-1) = mobile styles
+  // md (mobileWidth - tabletWidth-1) = tablet styles
+  // lg (tabletWidth+) = desktop styles
+  const customCSS = `
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-sm: ${bp.mobileWidth}px;
+  --breakpoint-md: ${bp.mobileWidth}px;
+  --breakpoint-lg: ${bp.tabletWidth}px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+  `;
+
+  return compileTailwindV4(customCSS, {
     loadStylesheet: async (id: string, base: string) => {
       if (id === 'tailwindcss') {
         return {
@@ -79,7 +111,7 @@ function extractClasses(code: string): string[] {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { code, version = 'v3' } = await request.json();
+    const { code, version = 'v3', breakpoints } = await request.json();
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json(
@@ -88,11 +120,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // WP08: Use custom breakpoints from merge config, or defaults
+    const bp: CustomBreakpoints = breakpoints || DEFAULT_BREAKPOINTS;
+
     let css: string;
 
     if (version === 'v4') {
       // WP38 FIX: Create fresh compiler for each request to avoid class accumulation
-      const compiler = await createV4Compiler();
+      const compiler = await createV4Compiler(bp);
       const classes = extractClasses(code);
       css = compiler.build(classes);
     } else {
@@ -106,6 +141,17 @@ export async function POST(request: NextRequest) {
       const tailwindConfig = {
         content: [{ raw: code, extension: 'html' }],
         theme: {
+          // WP08 FIX: Correct breakpoint mapping for mobile-first responsive design
+          // Base (0 - mobileWidth-1) = mobile styles
+          // md (mobileWidth - tabletWidth-1) = tablet styles
+          // lg (tabletWidth+) = desktop styles
+          screens: {
+            sm: `${bp.mobileWidth}px`,
+            md: `${bp.mobileWidth}px`,
+            lg: `${bp.tabletWidth}px`,
+            xl: '1280px',
+            '2xl': '1536px',
+          },
           extend: {},
         },
         corePlugins: {

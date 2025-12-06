@@ -8,6 +8,7 @@
  */
 
 import type { FigmaNodeType } from './figma';
+import type { FillData } from '../altnode-transform';
 
 // ============================================================================
 // Breakpoint Types
@@ -110,6 +111,9 @@ export interface MergeResult {
     readonly 'html-css': string;
   };
 
+  /** WP08: Google Fonts URL for fonts used in the design */
+  readonly googleFontsUrl?: string;
+
   /** Warnings generated during merge */
   readonly warnings: readonly MergeWarning[];
 
@@ -138,6 +142,48 @@ export interface ElementSource {
 }
 
 /**
+ * Image data for a specific breakpoint
+ */
+export interface BreakpointImageData {
+  readonly imageRef: string;
+  readonly nodeId: string;
+  readonly scaleMode: string;
+}
+
+/**
+ * SVG data for a specific breakpoint
+ */
+export interface BreakpointSvgData {
+  readonly fillGeometry?: unknown[];
+  readonly strokeGeometry?: unknown[];
+  readonly fills?: unknown[];
+  readonly strokes?: unknown[];
+  readonly strokeWeight?: number;
+  readonly bounds: { x: number; y: number; width: number; height: number };
+}
+
+/**
+ * Assets (images, SVG, fills) for a specific breakpoint
+ */
+export interface BreakpointAssets {
+  readonly fillsData?: readonly FillData[];
+  readonly imageData?: BreakpointImageData;
+  readonly svgData?: BreakpointSvgData;
+}
+
+/**
+ * Assets organized by breakpoint for responsive rendering
+ * When assets differ between breakpoints, all are kept with visibility classes
+ */
+export interface ResponsiveAssets {
+  readonly mobile?: BreakpointAssets;
+  readonly tablet?: BreakpointAssets;
+  readonly desktop?: BreakpointAssets;
+  /** True if assets are identical across all breakpoints (optimization) */
+  readonly isUniform: boolean;
+}
+
+/**
  * A node in the unified component tree with responsive style mappings
  */
 export interface UnifiedElement {
@@ -162,6 +208,19 @@ export interface UnifiedElement {
 
   /** Responsive style mappings */
   readonly styles: ResponsiveStyles;
+
+  /**
+   * Pre-merged Tailwind classes ready for code generation.
+   * Contains base classes + md: overrides + lg: overrides already combined.
+   * Example: "flex flex-col gap-4 md:flex-row md:gap-6 lg:gap-8"
+   */
+  readonly mergedTailwindClasses: string;
+
+  /**
+   * Assets (images, SVG, fills) organized by breakpoint.
+   * When assets differ between breakpoints, all are preserved with visibility classes.
+   */
+  readonly assets?: ResponsiveAssets;
 
   /** Text content (if TEXT node) - uses mobile as base */
   readonly textContent?: string;

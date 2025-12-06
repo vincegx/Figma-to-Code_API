@@ -95,12 +95,50 @@ function parseClassName(className: string): ParsedClass {
 /**
  * Split a class string into individual classes.
  * Handles multiple spaces and trims whitespace.
+ *
+ * WP08 FIX: Handles Tailwind arbitrary values with spaces inside brackets.
+ * e.g., "bg-[var(--var, rgba(38, 38, 38, 1))]" should NOT be split.
  */
 function splitClasses(classString: string): string[] {
-  return classString
-    .trim()
-    .split(/\s+/)
-    .filter((c) => c.length > 0);
+  const trimmed = classString.trim();
+  if (!trimmed) return [];
+
+  // If no brackets, use simple split
+  if (!trimmed.includes('[')) {
+    return trimmed.split(/\s+/).filter((c) => c.length > 0);
+  }
+
+  // Handle arbitrary values with spaces inside brackets
+  const classes: string[] = [];
+  let current = '';
+  let bracketDepth = 0;
+
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+
+    if (char === '[') {
+      bracketDepth++;
+      current += char;
+    } else if (char === ']') {
+      bracketDepth--;
+      current += char;
+    } else if (/\s/.test(char) && bracketDepth === 0) {
+      // Space outside brackets - end of class
+      if (current.length > 0) {
+        classes.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  // Don't forget the last class
+  if (current.length > 0) {
+    classes.push(current);
+  }
+
+  return classes;
 }
 
 /**
@@ -231,20 +269,18 @@ export function generateResponsiveClasses(styles: StyleSet): ResponsiveStyles {
  * @returns Merged StyleSet
  */
 export function mergeStyleSets(...styleSets: StyleSet[]): StyleSet {
-  const merged: StyleSet = {
-    mobile: '',
-    tablet: '',
-    desktop: '',
-  };
+  // Use mutable type for building, then return as readonly
+  let mobile = '';
+  let tablet = '';
+  let desktop = '';
 
   for (const styleSet of styleSets) {
-    merged.mobile = joinClasses([...splitClasses(merged.mobile), ...splitClasses(styleSet.mobile)]);
-    merged.tablet = joinClasses([...splitClasses(merged.tablet), ...splitClasses(styleSet.tablet)]);
-    merged.desktop = joinClasses([...splitClasses(merged.desktop), ...splitClasses(styleSet.desktop)]);
+    mobile = joinClasses([...splitClasses(mobile), ...splitClasses(styleSet.mobile)]);
+    tablet = joinClasses([...splitClasses(tablet), ...splitClasses(styleSet.tablet)]);
+    desktop = joinClasses([...splitClasses(desktop), ...splitClasses(styleSet.desktop)]);
   }
 
-  // Cast the mutable object to readonly StyleSet
-  return merged as StyleSet;
+  return { mobile, tablet, desktop };
 }
 
 /**

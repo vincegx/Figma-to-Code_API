@@ -9,6 +9,52 @@ import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAs
 import { generateCssVariableDefinitions } from '../utils/variable-css';
 
 /**
+ * WP08: Smart split for Tailwind classes that preserves arbitrary values with spaces.
+ * e.g., "border border-[var(--var, rgba(38, 38, 38, 1))] border-solid" should split correctly.
+ */
+function smartSplitTailwindClasses(classString: string): string[] {
+  const trimmed = classString.trim();
+  if (!trimmed) return [];
+
+  // If no brackets, use simple split
+  if (!trimmed.includes('[')) {
+    return trimmed.split(/\s+/).filter((c) => c.length > 0);
+  }
+
+  // Handle arbitrary values with spaces inside brackets
+  const classes: string[] = [];
+  let current = '';
+  let bracketDepth = 0;
+
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+
+    if (char === '[') {
+      bracketDepth++;
+      current += char;
+    } else if (char === ']') {
+      bracketDepth--;
+      current += char;
+    } else if (/\s/.test(char) && bracketDepth === 0) {
+      // Space outside brackets - end of class
+      if (current.length > 0) {
+        classes.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  // Don't forget the last class
+  if (current.length > 0) {
+    classes.push(current);
+  }
+
+  return classes;
+}
+
+/**
  * WP47: Collect all text and image props from the node tree
  * Traverses the AltNode tree and collects TEXT nodes and IMAGE fills
  *
@@ -1133,6 +1179,36 @@ function generateTailwindJSXElement(
     .map(([cssProperty, cssValue]) => cssPropToTailwind(cssProperty, cssValue))
     .filter(Boolean);
 
+  // WP08: Add responsive classes from responsiveStyles (md: and lg: prefixes)
+  // Note: cssPropToTailwind may return multiple classes (e.g., "border border-[color] border-solid")
+  // We need to prefix EACH class with md: or lg:
+  // Use smartSplitTailwindClasses to handle arbitrary values with spaces inside brackets
+  const responsiveClasses: string[] = [];
+  if (node.responsiveStyles?.md) {
+    for (const [cssProperty, cssValue] of Object.entries(node.responsiveStyles.md)) {
+      const twClass = cssPropToTailwind(cssProperty, String(cssValue));
+      if (twClass) {
+        // Smart split to preserve arbitrary values, then prefix each class
+        const classes = smartSplitTailwindClasses(twClass);
+        for (const cls of classes) {
+          responsiveClasses.push(`md:${cls}`);
+        }
+      }
+    }
+  }
+  if (node.responsiveStyles?.lg) {
+    for (const [cssProperty, cssValue] of Object.entries(node.responsiveStyles.lg)) {
+      const twClass = cssPropToTailwind(cssProperty, String(cssValue));
+      if (twClass) {
+        // Smart split to preserve arbitrary values, then prefix each class
+        const classes = smartSplitTailwindClasses(twClass);
+        for (const cls of classes) {
+          responsiveClasses.push(`lg:${cls}`);
+        }
+      }
+    }
+  }
+
   // WP31: Add MCP-style structural classes
   const structuralClasses: string[] = [];
 
@@ -1175,7 +1251,8 @@ function generateTailwindJSXElement(
     // This ensures semantic classes from rules (text-sm) beat raw fallbacks (text-[14px])
     // Architecture: fallbacks provide CSS guarantee → rules optimize to semantic classes
     const ruleClasses = properties.className.split(/\s+/).filter(Boolean);
-    const allClasses = [...structuralClasses, ...baseClasses, ...ruleClasses]; // WP31: structural first, then baseClasses, rules last
+    // WP08: Include responsive classes (md:, lg:) after base classes
+    const allClasses = [...structuralClasses, ...baseClasses, ...responsiveClasses, ...ruleClasses];
 
     // WP28 T211: Deduplicate classes with correct priority
     // Rules win: text-sm overrides text-[14px], flex-col overrides flex-column
@@ -1192,7 +1269,8 @@ function generateTailwindJSXElement(
     tailwindClasses = uniqueClasses.join(' ');
   } else {
     // No rules - just use structural + base classes (fallbacks)
-    const allClasses = [...structuralClasses, ...baseClasses];
+    // WP08: Include responsive classes (md:, lg:) after base classes
+    const allClasses = [...structuralClasses, ...baseClasses, ...responsiveClasses];
     tailwindClasses = allClasses.join(' ');
   }
 

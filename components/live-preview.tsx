@@ -19,6 +19,12 @@ interface LivePreviewProps {
   framework: FrameworkType;
   language: 'html' | 'tsx' | 'jsx' | 'typescript' | 'css';
   googleFontsUrl?: string; // WP31: Google Fonts URL for dynamic font loading
+  // WP08: Custom breakpoints from merge config (in pixels)
+  // md: triggers at mobileWidth, lg: triggers at tabletWidth
+  breakpoints?: {
+    mobileWidth: number;  // md breakpoint
+    tabletWidth: number;  // lg breakpoint
+  };
 }
 
 /**
@@ -43,6 +49,14 @@ function getRenderingStrategy(framework: FrameworkType): 'html' | 'react' | 'non
  * Build complete HTML document from generated HTML/CSS code
  * WP35: Includes highlight styles and script for selection overlay
  */
+// Get base URL for resolving relative paths in srcDoc iframe
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'http://localhost:3000'; // Fallback for SSR
+}
+
 function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
   // Split generated code on '/* CSS */' marker
   const parts = code.split('/* CSS */');
@@ -58,6 +72,7 @@ function buildHTMLDocument(code: string, googleFontsUrl?: string): string {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="${getBaseUrl()}/">
     ${fontLink}
     <style>
       body {
@@ -108,6 +123,7 @@ function buildReactDocument(
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="${getBaseUrl()}/">
     ${fontLink}
     <style>
       body {
@@ -200,7 +216,7 @@ export interface LivePreviewHandle {
 }
 
 const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function LivePreview(
-  { code, framework, language, googleFontsUrl },
+  { code, framework, language, googleFontsUrl, breakpoints },
   ref
 ) {
   // console.log('🟢 [PERF] LIVE PREVIEW RENDER', { codeLen: code.length, framework });
@@ -277,6 +293,8 @@ const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function Liv
               body: JSON.stringify({
                 code: sourceCode,
                 version: fw === 'react-tailwind-v4' ? 'v4' : 'v3',
+                // WP08: Pass custom breakpoints from merge config
+                breakpoints: breakpoints,
               }),
             })
           : Promise.resolve(null),
@@ -305,7 +323,7 @@ const LivePreview = forwardRef<LivePreviewHandle, LivePreviewProps>(function Liv
     } finally {
       setIsLoading(false);
     }
-  }, [googleFontsUrl]);
+  }, [googleFontsUrl, breakpoints]);
 
   // Generate iframe content (HTML/CSS synchronously, React asynchronously)
   useEffect(() => {
