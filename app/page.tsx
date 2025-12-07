@@ -33,6 +33,7 @@ import { QuotaIndicator } from '@/components/quota/quota-indicator';
 import { ConversionPipeline } from '@/components/conversion-pipeline';
 import { HealthScore } from '@/components/health-score';
 import { RecentImportsCarousel } from '@/components/recent-imports-carousel';
+import { RecentMergesCarousel } from '@/components/recent-merges-carousel';
 
 // WP43: Tooltip data type for hover info
 interface TooltipData {
@@ -457,8 +458,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Recent Imports */}
-        <RecentImportsCarousel />
+        {/* Recent Imports + Recent Merges */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <RecentImportsCarousel />
+          <RecentMergesCarousel />
+        </div>
       </div>
     </div>
   );
