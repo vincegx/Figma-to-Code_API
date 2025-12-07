@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import {
   ChevronRight,
+  ChevronLeft,
   RefreshCw,
   RotateCcw,
   Download,
@@ -197,6 +198,7 @@ export default function MergeViewerPage() {
   const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component');
   const [withProps, setWithProps] = useState(false); // Generate React components with props interface
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedClasses, setCopiedClasses] = useState(false);
   const [copiedRawData, setCopiedRawData] = useState(false);
   const [rawDataLimit, setRawDataLimit] = useState(2000);
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false);
@@ -206,6 +208,44 @@ export default function MergeViewerPage() {
   const [displayAltNode, setDisplayAltNode] = useState<any>(null); // SimpleAltNode for Layout block
   const [isLoadingCode, setIsLoadingCode] = useState(false);
   const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
+  const [allMergeIds, setAllMergeIds] = useState<string[]>([]); // For prev/next navigation
+
+  // Load all merge IDs for navigation
+  useEffect(() => {
+    async function loadMergeIds() {
+      try {
+        const response = await fetch('/api/merges');
+        if (response.ok) {
+          const data = await response.json();
+          // Sort by createdAt desc (newest first) and extract IDs
+          const sortedIds = (data.merges || [])
+            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((m: any) => m.id);
+          setAllMergeIds(sortedIds);
+        }
+      } catch (error) {
+        console.error('Failed to load merge IDs:', error);
+      }
+    }
+    loadMergeIds();
+  }, []);
+
+  // Navigation functions
+  const currentIndex = allMergeIds.indexOf(mergeId as string);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < allMergeIds.length - 1 && currentIndex !== -1;
+
+  const goToPrevMerge = () => {
+    if (hasPrev) {
+      router.push(`/merge/${allMergeIds[currentIndex - 1]}`);
+    }
+  };
+
+  const goToNextMerge = () => {
+    if (hasNext) {
+      router.push(`/merge/${allMergeIds[currentIndex + 1]}`);
+    }
+  };
 
   // Load rules on mount
   useEffect(() => {
@@ -375,6 +415,18 @@ export default function MergeViewerPage() {
     }).length;
   }, [displayAltNode, multiFrameworkRules]);
 
+  // Extract Tailwind/CSS classes from generated code for selected node
+  const nodeClasses = useMemo(() => {
+    if (!displayCode) return '';
+    // For React: extract first className="..."
+    // For HTML: extract first class="..."
+    const reactMatch = displayCode.match(/className="([^"]+)"/);
+    if (reactMatch) return reactMatch[1];
+    const htmlMatch = displayCode.match(/class="([^"]+)"/);
+    if (htmlMatch) return htmlMatch[1];
+    return '';
+  }, [displayCode]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -470,21 +522,21 @@ export default function MergeViewerPage() {
                   console.error('Regenerate failed:', error);
                 }
               }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
               title="Regenerate merge"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setIframeKey((k) => k + 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
               title="Refresh preview"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors" title="Export">
+                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors" title="Export">
                   <Download className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -510,6 +562,35 @@ export default function MergeViewerPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            {/* Prev/Next navigation */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPrevMerge}
+                disabled={!hasPrev}
+                className={cn(
+                  "w-8 h-8 flex items-center justify-center rounded-lg border border-border-primary transition-colors",
+                  hasPrev
+                    ? "bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary"
+                    : "bg-bg-secondary/50 text-text-muted/30 cursor-not-allowed"
+                )}
+                title={hasPrev ? "Previous merge" : "No previous merge"}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={goToNextMerge}
+                disabled={!hasNext}
+                className={cn(
+                  "w-8 h-8 flex items-center justify-center rounded-lg border border-border-primary transition-colors",
+                  hasNext
+                    ? "bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary"
+                    : "bg-bg-secondary/50 text-text-muted/30 cursor-not-allowed"
+                )}
+                title={hasNext ? "Next merge" : "No next merge"}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
             <Select value={previewFramework} onValueChange={(v) => setPreviewFramework(v as MergeFrameworkType)}>
               <SelectTrigger className="h-8 w-[160px] bg-bg-secondary border-border-primary text-xs text-text-muted hover:bg-bg-hover">
                 <SelectValue />
@@ -865,22 +946,47 @@ export default function MergeViewerPage() {
                 <div><span className="text-text-muted text-xs block mb-1">Type</span><span className="flex gap-1"><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">div</span><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">{displayNode?.type || 'FRAME'}</span></span></div>
                 <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.sources?.mobile?.nodeId || displayNode?.sources?.tablet?.nodeId || displayNode?.sources?.desktop?.nodeId || displayNode?.id}</span></div>
                 <div><span className="text-text-muted text-xs block mb-1">Children</span><span className="text-text-primary text-sm">{countChildren(displayNode)} nodes</span></div>
-                <div className="col-span-2">
+                {/* Sources + Tailwind/CSS Classes side by side */}
+                <div>
                   <span className="text-text-muted text-xs block mb-1">Sources</span>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {merge.sourceNodes.map((source) => (
                       <Link
                         key={source.breakpoint}
                         href={`/viewer/${source.nodeId}`}
-                        className="flex items-center gap-1.5 px-2 py-1 bg-bg-secondary rounded text-xs text-text-primary hover:bg-bg-hover transition-colors"
+                        className="flex items-center gap-1 px-1.5 py-1 bg-bg-secondary rounded text-xs text-text-primary hover:bg-bg-hover transition-colors"
                         title={source.nodeName}
                       >
                         {source.breakpoint === 'mobile' && <Smartphone className="w-3 h-3" />}
                         {source.breakpoint === 'tablet' && <Tablet className="w-3 h-3" />}
                         {source.breakpoint === 'desktop' && <Monitor className="w-3 h-3" />}
-                        <span className="capitalize">{source.breakpoint}</span>
                       </Link>
                     ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-text-muted text-xs">
+                      {previewFramework === 'html-css' ? 'CSS Classes' : 'Tailwind'}
+                    </span>
+                    {nodeClasses && (
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(nodeClasses);
+                          setCopiedClasses(true);
+                          setTimeout(() => setCopiedClasses(false), 2000);
+                        }}
+                        className="text-text-muted hover:text-text-primary transition-colors"
+                        title="Copy classes"
+                      >
+                        {copiedClasses ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    )}
+                  </div>
+                  <div className="bg-bg-secondary rounded p-1.5 h-10 overflow-auto">
+                    <code className="text-xs text-text-primary font-mono break-all leading-relaxed line-clamp-2">
+                      {nodeClasses || '—'}
+                    </code>
                   </div>
                 </div>
                 <div className="col-span-2">

@@ -242,6 +242,7 @@ export default function ViewerPage() {
   const [displayCss, setDisplayCss] = useState<string>(''); // WP42: CSS for Styles tab (selected node)
   const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component'); // WP42: Active tab state
   const [copiedCode, setCopiedCode] = useState(false); // WP42: Copy feedback
+  const [copiedClasses, setCopiedClasses] = useState(false); // Copy feedback for Tailwind classes
   const [copiedRawData, setCopiedRawData] = useState(false); // WP42: Copy feedback for Raw Data
   const [rawDataLimit, setRawDataLimit] = useState(2000); // WP38: Expandable raw data limit
   const [googleFontsUrl, setGoogleFontsUrl] = useState<string | undefined>(undefined); // WP31
@@ -321,6 +322,18 @@ export default function ViewerPage() {
       return nodeTypes.length === 0 || nodeTypes.includes(displayNode.type || '');
     }).length;
   }, [displayNode, multiFrameworkRules, previewFramework]);
+
+  // Extract Tailwind/CSS classes from generated code for selected node
+  const nodeClasses = useMemo(() => {
+    if (!displayCode) return '';
+    // For React: extract first className="..."
+    // For HTML: extract first class="..."
+    const reactMatch = displayCode.match(/className="([^"]+)"/);
+    if (reactMatch) return reactMatch[1];
+    const htmlMatch = displayCode.match(/class="([^"]+)"/);
+    if (htmlMatch) return htmlMatch[1];
+    return '';
+  }, [displayCode]);
 
   // Load multi-framework rules from API (WP20: 3-tier system)
   useEffect(() => {
@@ -978,7 +991,7 @@ export default function ViewerPage() {
                 language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[420px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[510px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -1009,6 +1022,31 @@ export default function ViewerPage() {
                 <div><span className="text-text-muted text-xs block mb-1">Type</span><span className="flex gap-1"><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">div</span><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">{displayNode?.type || 'FRAME'}</span></span></div>
                 <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.id}</span></div>
                 <div><span className="text-text-muted text-xs block mb-1">Children</span><span className="text-text-primary text-sm">{countChildren(displayNode)} nodes</span></div>
+                <div className="col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-text-muted text-xs">
+                      {previewFramework === 'html-css' ? 'CSS Classes' : 'Tailwind'}
+                    </span>
+                    {nodeClasses && (
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(nodeClasses);
+                          setCopiedClasses(true);
+                          setTimeout(() => setCopiedClasses(false), 2000);
+                        }}
+                        className="text-text-muted hover:text-text-primary transition-colors"
+                        title="Copy classes"
+                      >
+                        {copiedClasses ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    )}
+                  </div>
+                  <div className="bg-bg-secondary rounded p-1.5 h-10 overflow-auto">
+                    <code className="text-xs text-text-primary font-mono break-all leading-relaxed line-clamp-2">
+                      {nodeClasses || '—'}
+                    </code>
+                  </div>
+                </div>
                 <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Status</span><span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400 text-sm">Visible</span><span className="text-text-muted text-sm">• Not Locked</span></span></div>
               </div>
             </div>
