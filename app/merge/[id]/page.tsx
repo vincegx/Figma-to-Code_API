@@ -29,7 +29,6 @@ import {
   X,
   Home,
   Eye,
-  AlertTriangle,
 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 import {
@@ -41,8 +40,10 @@ import {
 import UnifiedTreeView from '@/components/unified-tree-view';
 import { ResizablePreviewViewport } from '@/components/resizable-preview-viewport';
 import LivePreview, { type LivePreviewHandle } from '@/components/live-preview';
+import { RulesPanel } from '@/components/rules-panel';
 import { cn } from '@/lib/utils';
 import type { Merge, UnifiedElement } from '@/lib/types/merge';
+import type { MultiFrameworkRule } from '@/lib/types/rules';
 
 // ============================================================================
 // Types
@@ -202,7 +203,31 @@ export default function MergeViewerPage() {
   const [iframeKey, setIframeKey] = useState(0);
   const [displayCode, setDisplayCode] = useState<string>(''); // Code for selected node
   const [displayCss, setDisplayCss] = useState<string>(''); // CSS for selected node
+  const [displayAltNode, setDisplayAltNode] = useState<any>(null); // SimpleAltNode for Layout block
   const [isLoadingCode, setIsLoadingCode] = useState(false);
+  const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
+
+  // Load rules on mount
+  useEffect(() => {
+    async function loadRules() {
+      try {
+        const response = await fetch('/api/rules');
+        if (response.ok) {
+          const data = await response.json();
+          // Combine all 3 tiers of rules
+          const allRules = [
+            ...(data.officialRules || []),
+            ...(data.communityRules || []),
+            ...(data.customRules || []),
+          ];
+          setMultiFrameworkRules(allRules);
+        }
+      } catch (error) {
+        console.error('Failed to load rules:', error);
+      }
+    }
+    loadRules();
+  }, []);
 
   // Load merge data
   useEffect(() => {
@@ -271,6 +296,7 @@ export default function MergeViewerPage() {
     if (!mergeId || !selectedNode) {
       setDisplayCode('');
       setDisplayCss('');
+      setDisplayAltNode(null);
       return;
     }
 
@@ -281,6 +307,7 @@ export default function MergeViewerPage() {
 
     if (!sourceNodeId) {
       setDisplayCode('// No source node ID found');
+      setDisplayAltNode(null);
       return;
     }
 
@@ -296,12 +323,15 @@ export default function MergeViewerPage() {
           const data = await response.json();
           setDisplayCode(data.code || '');
           setDisplayCss(data.css || '');
+          setDisplayAltNode(data.altNode || null);
         } else {
           setDisplayCode('// Failed to generate code');
+          setDisplayAltNode(null);
         }
       } catch (error) {
         console.error('Failed to fetch node code:', error);
         setDisplayCode('// Error generating code');
+        setDisplayAltNode(null);
       } finally {
         setIsLoadingCode(false);
       }
@@ -330,6 +360,20 @@ export default function MergeViewerPage() {
       viewerHighlightEnabled
     );
   }, [selectedNodeId, selectedNode, viewerHighlightEnabled]);
+
+  // Count applied rules for the selected node (must be before early returns)
+  const appliedRulesCount = useMemo(() => {
+    if (!displayAltNode || !multiFrameworkRules.length) return 0;
+    // Count rules that match the current node type
+    return multiFrameworkRules.filter(rule => {
+      if (!rule.enabled) return false;
+      const selector = rule.selector;
+      if (!selector) return false;
+      // Simple check: if rule has type selector, match against node type
+      if (selector.type && displayAltNode.type !== selector.type) return false;
+      return true;
+    }).length;
+  }, [displayAltNode, multiFrameworkRules]);
 
   // Loading state
   if (isLoading) {
@@ -384,10 +428,6 @@ export default function MergeViewerPage() {
     if (!node?.children) return 0;
     return node.children.length;
   };
-
-  // Stats from merge result
-  const stats = merge.result?.stats;
-  const warnings = merge.result?.warnings || [];
 
   return (
     <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
@@ -815,83 +855,79 @@ export default function MergeViewerPage() {
             </div>
           </div>
 
-          {/* Block: Node Info + Hierarchy + Stats */}
+          {/* Block: Node Info + Hierarchy + Layout */}
           <div className="flex flex-col gap-4">
             {/* Node Info */}
             <div className="bg-bg-card rounded-xl border border-border-primary p-4">
-              <span className="text-sm font-medium text-text-primary mb-4 block">Element Info</span>
+              <span className="text-sm font-medium text-text-primary mb-4 block">Node Info</span>
               <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                 <div><span className="text-text-muted text-xs block mb-1">Name</span><span className="text-text-primary text-sm">{displayNode?.name}</span></div>
                 <div><span className="text-text-muted text-xs block mb-1">Type</span><span className="flex gap-1"><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">div</span><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">{displayNode?.type || 'FRAME'}</span></span></div>
-                <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.id}</span></div>
+                <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.sources?.mobile?.nodeId || displayNode?.sources?.tablet?.nodeId || displayNode?.sources?.desktop?.nodeId || displayNode?.id}</span></div>
                 <div><span className="text-text-muted text-xs block mb-1">Children</span><span className="text-text-primary text-sm">{countChildren(displayNode)} nodes</span></div>
                 <div className="col-span-2">
-                  <span className="text-text-muted text-xs block mb-1">Presence</span>
-                  <div className="flex items-center gap-2">
-                    {displayNode?.presence.mobile && <span className="flex items-center gap-1 text-xs"><Smartphone className="w-3 h-3" /> Mobile</span>}
-                    {displayNode?.presence.tablet && <span className="flex items-center gap-1 text-xs"><Tablet className="w-3 h-3" /> Tablet</span>}
-                    {displayNode?.presence.desktop && <span className="flex items-center gap-1 text-xs"><Monitor className="w-3 h-3" /> Desktop</span>}
-                  </div>
+                  <span className="text-text-muted text-xs block mb-1">Status</span>
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-emerald-400 text-sm">Visible</span>
+                    <span className="text-text-muted text-sm">•</span>
+                    {displayNode?.presence.mobile && <span className="flex items-center gap-1 text-xs text-text-muted"><Smartphone className="w-3 h-3" /></span>}
+                    {displayNode?.presence.tablet && <span className="flex items-center gap-1 text-xs text-text-muted"><Tablet className="w-3 h-3" /></span>}
+                    {displayNode?.presence.desktop && <span className="flex items-center gap-1 text-xs text-text-muted"><Monitor className="w-3 h-3" /></span>}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Hierarchy + Stats side by side */}
+            {/* Hierarchy + Layout side by side */}
             <div className="grid grid-cols-2 gap-4">
               <HierarchyBlock node={displayNode} />
 
-              {/* Merge Stats */}
+              {/* Layout */}
               <div className="bg-bg-card rounded-xl border border-border-primary p-4">
-                <span className="text-sm font-medium text-text-primary mb-4 block">Merge Stats</span>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div><span className="text-text-muted text-xs block mb-1">Total Elements</span><span className="text-text-primary text-sm">{stats?.totalElements || 0}</span></div>
-                  <div><span className="text-text-muted text-xs block mb-1">Common</span><span className="text-text-primary text-sm">{stats?.commonElements || 0}</span></div>
-                  <div><span className="text-text-muted text-xs block mb-1">Unique</span><span className="text-text-primary text-sm">{(stats?.uniqueElements?.mobile || 0) + (stats?.uniqueElements?.tablet || 0) + (stats?.uniqueElements?.desktop || 0)}</span></div>
-                  <div><span className="text-text-muted text-xs block mb-1">Warnings</span><span className={cn("text-sm", warnings.length > 0 ? "text-amber-400" : "text-text-primary")}>{warnings.length}</span></div>
+                <span className="text-sm font-medium text-text-primary mb-4 block">Layout</span>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div><span className="text-text-muted text-xs block mb-1">Width</span><span className="text-text-primary text-sm">{Math.round(displayAltNode?.originalNode?.absoluteBoundingBox?.width || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Height</span><span className="text-text-primary text-sm">{Math.round(displayAltNode?.originalNode?.absoluteBoundingBox?.height || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">X</span><span className="text-text-primary text-sm">{Math.round(displayAltNode?.originalNode?.absoluteBoundingBox?.x || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Y</span><span className="text-text-primary text-sm">{Math.round(displayAltNode?.originalNode?.absoluteBoundingBox?.y || 0)}px</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Mode</span><span className="text-text-primary text-sm">{((displayAltNode?.originalNode as any)?.layoutMode || 'NONE').charAt(0) + ((displayAltNode?.originalNode as any)?.layoutMode || 'NONE').slice(1).toLowerCase()}</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Gap</span><span className="text-text-primary text-sm">{(displayAltNode?.originalNode as any)?.itemSpacing || 0}px</span></div>
+                  <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Padding</span><span className="text-text-primary text-sm font-mono tracking-wider">{(displayAltNode?.originalNode as any)?.paddingTop || 0} &nbsp; {(displayAltNode?.originalNode as any)?.paddingRight || 0} &nbsp; {(displayAltNode?.originalNode as any)?.paddingBottom || 0} &nbsp; {(displayAltNode?.originalNode as any)?.paddingLeft || 0}</span></div>
                 </div>
-                {warnings.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border-primary">
-                    <div className="flex items-center gap-1 text-xs text-amber-400 mb-2">
-                      <AlertTriangle className="w-3 h-3" />
-                      <span>Warnings</span>
-                    </div>
-                    <ul className="text-xs text-text-muted space-y-1 max-h-20 overflow-auto">
-                      {warnings.slice(0, 5).map((w, i) => (
-                        <li key={i}>• {w.message}</li>
-                      ))}
-                      {warnings.length > 5 && (
-                        <li className="text-text-muted">+{warnings.length - 5} more...</li>
-                      )}
-                    </ul>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ========== ROW 3: Source Nodes + Raw Data ========== */}
-        <div className="grid grid-cols-2 gap-4 mt-4 pb-6">
-          {/* Source Nodes */}
-          <div className="bg-bg-card rounded-xl border border-border-primary p-4">
-            <span className="text-sm font-medium text-text-primary mb-4 block">Source Nodes</span>
-            <div className="grid grid-cols-3 gap-4">
-              {merge.sourceNodes.map((source) => (
-                <div key={source.breakpoint} className="bg-bg-secondary rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    {source.breakpoint === 'mobile' && <Smartphone className="w-4 h-4 text-text-muted" />}
-                    {source.breakpoint === 'tablet' && <Tablet className="w-4 h-4 text-text-muted" />}
-                    {source.breakpoint === 'desktop' && <Monitor className="w-4 h-4 text-text-muted" />}
-                    <span className="text-sm font-medium text-text-primary capitalize">{source.breakpoint}</span>
-                  </div>
-                  <div className="text-xs text-text-muted truncate">{source.nodeName}</div>
-                  <div className="text-xs text-text-muted mt-1">{source.width}px</div>
+        {/* ========== ROW 3: Appearance/Constraints + Unified Element Data + Rules ========== */}
+        <div className="grid grid-cols-3 gap-4 mt-4 pb-6 items-stretch">
+          {/* Column 1: Appearance + Constraints */}
+          <div className="flex flex-col gap-4">
+            {/* Appearance */}
+            <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
+              <span className="text-sm font-medium text-text-primary mb-4 block">Appearance</span>
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-x-8">
+                  <div><span className="text-text-muted text-xs block mb-1">Fills</span><span className="text-text-primary text-sm">{(displayAltNode?.originalNode as any)?.fills?.length || 0} fill(s)</span></div>
+                  <div><span className="text-text-muted text-xs block mb-1">Blend Mode</span><span className="text-text-primary text-sm">{((displayAltNode?.originalNode as any)?.blendMode || 'PASS_THROUGH').split('_').map((w: string) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}</span></div>
                 </div>
-              ))}
+                <div><span className="text-text-muted text-xs block mb-1">Opacity</span><span className="text-text-primary text-sm">{Math.round(((displayAltNode?.originalNode as any)?.opacity ?? 1) * 100)}%</span></div>
+              </div>
+            </div>
+
+            {/* Constraints */}
+            <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex-1">
+              <span className="text-sm font-medium text-text-primary mb-4 block">Constraints</span>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div><span className="text-text-muted text-xs block mb-1">Horizontal</span><span className="text-text-primary text-sm">{(displayAltNode?.originalNode?.constraints?.horizontal || 'LEFT').charAt(0) + (displayAltNode?.originalNode?.constraints?.horizontal || 'LEFT').slice(1).toLowerCase()}</span></div>
+                <div><span className="text-text-muted text-xs block mb-1">Vertical</span><span className="text-text-primary text-sm">{(displayAltNode?.originalNode?.constraints?.vertical || 'TOP').charAt(0) + (displayAltNode?.originalNode?.constraints?.vertical || 'TOP').slice(1).toLowerCase()}</span></div>
+                <div className="col-span-2"><span className="text-text-muted text-xs block mb-1">Clipping</span><span className="flex items-center gap-1 text-sm">{(displayAltNode?.originalNode as any)?.clipsContent ? (<><span className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400">Yes</span></>) : (<><span className="w-2 h-2 rounded-full bg-text-muted" /><span className="text-text-muted">No</span></>)}</span></div>
+              </div>
             </div>
           </div>
 
-          {/* Raw Data */}
+          {/* Column 2: Unified Element Data */}
           <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <span className="text-sm font-medium text-text-primary">Unified Element Data</span>
@@ -924,7 +960,7 @@ export default function MergeViewerPage() {
                 language="json"
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-3 overflow-auto h-48 font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                  <pre className="text-xs rounded-lg p-3 overflow-auto h-64 font-mono leading-5" style={{ ...style, background: 'transparent' }}>
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -940,6 +976,8 @@ export default function MergeViewerPage() {
               <div className="flex items-center gap-2 text-xs text-text-muted">
                 <span className="w-2 h-2 rounded-full bg-graph-2" />
                 <span>No errors</span>
+                <span>•</span>
+                <span>{JSON.stringify(displayNode, null, 2)?.split('\n').length || 0} lines</span>
               </div>
               {(() => {
                 const jsonLength = JSON.stringify(displayNode, null, 2)?.length || 0;
@@ -954,6 +992,19 @@ export default function MergeViewerPage() {
                 ) : null;
               })()}
             </div>
+          </div>
+
+          {/* Column 3: Rules */}
+          <div className="bg-bg-card rounded-xl border border-border-primary p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-text-primary">Rules</span>
+              <span className="text-xs text-text-muted">Applied rules <span className="text-text-primary">{appliedRulesCount}/{multiFrameworkRules.length}</span></span>
+            </div>
+            <RulesPanel
+              node={displayAltNode}
+              selectedFramework={previewFramework}
+              allRules={multiFrameworkRules}
+            />
           </div>
         </div>
       </main>
