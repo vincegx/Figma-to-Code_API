@@ -824,7 +824,7 @@ export default function MergeViewerPage() {
                 language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
               >
                 {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[420px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
+                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[490px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
                     {tokens.map((line, i) => (
                       <div key={i} {...getLineProps({ line })}>
                         {line.map((token, key) => (
@@ -865,6 +865,24 @@ export default function MergeViewerPage() {
                 <div><span className="text-text-muted text-xs block mb-1">Type</span><span className="flex gap-1"><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">div</span><span className="px-1.5 py-0.5 bg-bg-secondary rounded text-xs text-text-primary">{displayNode?.type || 'FRAME'}</span></span></div>
                 <div><span className="text-text-muted text-xs block mb-1">ID</span><span className="text-text-primary text-sm font-mono">{displayNode?.sources?.mobile?.nodeId || displayNode?.sources?.tablet?.nodeId || displayNode?.sources?.desktop?.nodeId || displayNode?.id}</span></div>
                 <div><span className="text-text-muted text-xs block mb-1">Children</span><span className="text-text-primary text-sm">{countChildren(displayNode)} nodes</span></div>
+                <div className="col-span-2">
+                  <span className="text-text-muted text-xs block mb-1">Sources</span>
+                  <div className="flex items-center gap-3">
+                    {merge.sourceNodes.map((source) => (
+                      <Link
+                        key={source.breakpoint}
+                        href={`/viewer/${source.nodeId}`}
+                        className="flex items-center gap-1.5 px-2 py-1 bg-bg-secondary rounded text-xs text-text-primary hover:bg-bg-hover transition-colors"
+                        title={source.nodeName}
+                      >
+                        {source.breakpoint === 'mobile' && <Smartphone className="w-3 h-3" />}
+                        {source.breakpoint === 'tablet' && <Tablet className="w-3 h-3" />}
+                        {source.breakpoint === 'desktop' && <Monitor className="w-3 h-3" />}
+                        <span className="capitalize">{source.breakpoint}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
                 <div className="col-span-2">
                   <span className="text-text-muted text-xs block mb-1">Status</span>
                   <span className="flex items-center gap-2">

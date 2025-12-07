@@ -84,9 +84,10 @@ interface NodeDropdownProps {
   disabledNodeIds: string[];
   disabled?: boolean;
   isLoading?: boolean;
+  openDirection?: 'down' | 'up';
 }
 
-function NodeDropdown({ value, onChange, nodes, disabledNodeIds, disabled, isLoading }: NodeDropdownProps) {
+function NodeDropdown({ value, onChange, nodes, disabledNodeIds, disabled, isLoading, openDirection = 'down' }: NodeDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectedNode = nodes.find((n) => n.id === value);
@@ -137,7 +138,10 @@ function NodeDropdown({ value, onChange, nodes, disabledNodeIds, disabled, isLoa
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border-primary bg-bg-card shadow-lg">
+        <div className={cn(
+          "absolute z-50 max-h-60 w-full overflow-auto rounded-md border border-border-primary bg-bg-card shadow-lg",
+          openDirection === 'up' ? 'bottom-full mb-1' : 'top-full mt-1'
+        )}>
           {nodes.length === 0 ? (
             <div className="p-4 text-center text-sm text-text-muted">
               No nodes in library. Import some nodes first.
@@ -242,18 +246,51 @@ export function MergeCreationModal({
     }
   };
 
-  const handleNodeSelect = (breakpoint: Breakpoint, nodeId: string) => {
+  const handleNodeSelect = async (breakpoint: Breakpoint, nodeId: string) => {
+    // Update selection immediately with nodeId
     setSelections((prev) => ({
       ...prev,
       [breakpoint]: { ...prev[breakpoint], nodeId },
     }));
     setError(null);
+
+    // Fetch node data to get actual width
+    try {
+      const selectedNode = libraryNodes.find((n) => n.id === nodeId);
+      if (selectedNode) {
+        const response = await fetch(`/api/figma/node/${selectedNode.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          const rawWidth = data.nodeData?.absoluteBoundingBox?.width;
+
+          if (rawWidth) {
+            // Auto-fill width from node, clamped to valid range [100, 3000]
+            const autoWidth = Math.max(100, Math.min(3000, Math.round(rawWidth)));
+            setSelections((prev) => ({
+              ...prev,
+              [breakpoint]: { ...prev[breakpoint], width: autoWidth },
+            }));
+          }
+        }
+      }
+    } catch (err) {
+      // Silently fail - user can still manually enter width
+      console.error('Failed to fetch node dimensions:', err);
+    }
   };
 
   const handleWidthChange = (breakpoint: Breakpoint, width: number) => {
     setSelections((prev) => ({
       ...prev,
       [breakpoint]: { ...prev[breakpoint], width },
+    }));
+  };
+
+  const handleResetSelection = (breakpoint: Breakpoint) => {
+    const config = BREAKPOINT_CONFIGS.find((c) => c.breakpoint === breakpoint);
+    setSelections((prev) => ({
+      ...prev,
+      [breakpoint]: { nodeId: null, width: config?.defaultWidth || 375 },
     }));
   };
 
@@ -376,6 +413,7 @@ export function MergeCreationModal({
                       disabledNodeIds={getDisabledNodeIds(config.breakpoint)}
                       disabled={isSubmitting}
                       isLoading={isLoadingNodes}
+                      openDirection={config.breakpoint === 'desktop' ? 'up' : 'down'}
                     />
                   </div>
 
@@ -395,21 +433,32 @@ export function MergeCreationModal({
                     </div>
                   </div>
 
-                  {/* Thumbnail preview */}
+                  {/* Thumbnail preview + Reset button */}
                   {selections[config.breakpoint].nodeId && (
-                    <div className="h-10 w-10 overflow-hidden rounded border border-border-primary bg-bg-primary flex-shrink-0">
-                      {getNodeById(selections[config.breakpoint].nodeId)?.thumbnail ? (
-                        <img
-                          src={getNodeById(selections[config.breakpoint].nodeId)?.thumbnail}
-                          alt={config.label}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-text-muted">
-                          {config.breakpoint.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
+                    <>
+                      <div className="h-10 w-10 overflow-hidden rounded border border-border-primary bg-bg-primary flex-shrink-0">
+                        {getNodeById(selections[config.breakpoint].nodeId)?.thumbnail ? (
+                          <img
+                            src={getNodeById(selections[config.breakpoint].nodeId)?.thumbnail}
+                            alt={config.label}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-text-muted">
+                            {config.breakpoint.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSelection(config.breakpoint)}
+                        disabled={isSubmitting}
+                        className="h-10 w-10 flex items-center justify-center rounded border border-border-primary bg-bg-secondary hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-500 transition-colors flex-shrink-0"
+                        title="Clear selection"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
