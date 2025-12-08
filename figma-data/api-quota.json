@@ -622,6 +622,14 @@
       {
         "ts": 1765190981783,
         "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1765197945066,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765197950032,
+        "endpoint": "fetchSVGBatch"
       }
     ],
     "tier2": [
@@ -668,6 +676,14 @@
       {
         "ts": 1765196737191,
         "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765197936877,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765197937818,
+        "endpoint": "fetchNode"
       }
     ]
   }
