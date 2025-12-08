@@ -66,11 +66,12 @@ export function NodeRow({
         <div className="w-10 h-10 rounded-lg bg-bg-secondary overflow-hidden relative flex-shrink-0">
           {node.thumbnail ? (
             <Image
-              src={node.thumbnail}
+              src={`${node.thumbnail}?w=80`}
               alt={node.name}
               fill
               className="object-cover object-top"
               sizes="40px"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

@@ -135,11 +135,12 @@ export function RecentMergesCarousel() {
                   >
                     {node.thumbnail ? (
                       <Image
-                        src={node.thumbnail}
+                        src={`${node.thumbnail}?w=160`}
                         alt={node.nodeName}
                         width={80}
                         height={64}
                         className="w-full h-full object-cover object-top"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-text-muted">

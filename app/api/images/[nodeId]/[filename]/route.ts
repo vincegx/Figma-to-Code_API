@@ -5,11 +5,30 @@
  * - screenshot.png: figma-data/{nodeId}/screenshot.png (thumbnail)
  * - PNG/JPG: figma-data/{nodeId}/img/{filename}
  * - SVG: figma-data/{nodeId}/svg/{filename}
+ *
+ * Query params (for screenshot.png only):
+ * - ?w=224 : resize to width (maintains aspect ratio)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+
+// Simple PNG resize using canvas-less approach (quality reduction)
+// For screenshots only - reduces file size significantly
+async function resizeScreenshot(buffer: Buffer, targetWidth: number): Promise<Buffer> {
+  // Dynamic import to avoid issues if sharp not installed
+  try {
+    const sharp = (await import('sharp')).default;
+    return await sharp(buffer)
+      .resize(targetWidth, null, { fit: 'inside', withoutEnlargement: true })
+      .png({ quality: 80, compressionLevel: 9 })
+      .toBuffer();
+  } catch {
+    // sharp not installed, return original
+    return buffer;
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -26,7 +45,8 @@ export async function GET(
   let filePath: string;
 
   // Special case: screenshot.png is at root level
-  if (filename === 'screenshot.png') {
+  const isScreenshot = filename === 'screenshot.png';
+  if (isScreenshot) {
     filePath = path.join(process.cwd(), 'figma-data', realNodeId, 'screenshot.png');
   } else {
     // Other files in subdirectories
@@ -40,7 +60,18 @@ export async function GET(
   }
 
   // Read file
-  const fileBuffer = fs.readFileSync(filePath);
+  let fileBuffer: Buffer = fs.readFileSync(filePath);
+
+  // Resize screenshot if width param provided
+  if (isScreenshot) {
+    const widthParam = request.nextUrl.searchParams.get('w');
+    if (widthParam) {
+      const targetWidth = parseInt(widthParam, 10);
+      if (targetWidth > 0 && targetWidth < 2000) {
+        fileBuffer = await resizeScreenshot(fileBuffer, targetWidth);
+      }
+    }
+  }
 
   // Determine content type
   let contentType = 'image/png';

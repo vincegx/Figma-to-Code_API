@@ -149,11 +149,12 @@ export function RecentImportsCarousel() {
                       {/* Thumbnail Image */}
                       {node.thumbnail ? (
                         <Image
-                          src={node.thumbnail}
+                          src={`${node.thumbnail}?w=448`}
                           alt={node.name}
                           fill
                           className="object-cover"
                           sizes="224px"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
