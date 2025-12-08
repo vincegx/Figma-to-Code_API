@@ -1,0 +1,837 @@
+@layer theme {
+  :root, :host {
+    /* Figma Variables */
+    --var-8691-146-size: 1440px;
+      --var-8691-139-spacing: 24px;
+      --var-8691-133-spacing: 64px;
+      --var-8691-142-size: 1280px;
+      --var-8742-19-color: #ffffff;
+      --var-8659-266-spacing: 12px;
+      --var-10249-3-other: false;
+      --var-8742-85-color: #f8d900;
+      --var-8742-38-color: #3f3f3f;
+      --var-8714-2-spacing: 24px;
+      --var-10249-6-other: 0;
+      --var-8659-267-spacing: 8px;
+      --var-8659-263-spacing: 24px;
+      --var-8691-160-other: 0;
+      --var-8742-96-color: #f8d900;
+      --var-8742-10-color: #000000;
+      --var-8742-81-color: #3f3f3f;
+      --var-8659-259-spacing: 64px;
+      --var-8659-264-spacing: 20px;
+      --var-8742-58-color: #3f3f3f;
+      --var-8742-75-color: #f8d900;
+      --var-8742-16-color: #000000;
+      --var-8742-95-color: #f8d900;
+      --var-8659-262-spacing: 32px;
+      --var-8659-265-spacing: 16px;
+      --var-8742-40-color: #000000;
+      --var-8691-150-spacing: 80px;
+      --var-8691-131-spacing: 32px;
+      --var-8691-137-spacing: 8px;
+      --var-8668-104-size: 327px;
+      --var-8590-16-color: #f8d900;
+      --var-8691-140-size: 628px;
+      --var-8590-97-color: #ffffff;
+      --var-8691-125-color: #ffffff;
+      --var-8668-127-spacing: 24px;
+      --var-8691-136-spacing: 16px;
+      --var-8655-232-spacing: 4px;
+    /* Tailwind Variables */
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --color-black: #000;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --font-weight-normal: 400;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --blur-xl: 24px;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+
+.HeroHeader {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 1440px;
+  height: auto;
+}
+
+.TopContainer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  gap: calc(0.25rem * 6);
+}
+
+.HeaderNavigation {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 1440px;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  padding-block: calc(0.25rem * 6);
+  justify-content: flex-start;
+}
+
+.TopContainer2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  align-self: stretch;
+  gap: calc(0.25rem * 16);
+  justify-content: flex-start;
+}
+
+.Navigation {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 1280px;
+  height: calc(0.25rem * 20);
+  align-items: center;
+  justify-content: space-between;
+  padding-right: calc(0.25rem * 6);
+}
+
+.Navigation2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  padding-block: calc(0.25rem * 0);
+  padding-inline: calc(0.25rem * 6);
+  height: 100%;
+  align-self: stretch;
+  flex-grow: 1;
+  gap: calc(0.25rem * 6);
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.ButtonCtaVariables {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: 100%;
+  overflow: hidden;
+  align-items: center;
+  align-self: stretch;
+  gap: calc(0.25rem * 2);
+  padding-left: calc(0.25rem * 6);
+  padding-right: calc(0.25rem * 2);
+  padding-block: calc(0.25rem * 3);
+  justify-content: flex-start;
+}
+
+.Text {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #3F3F3F;
+  font-family: 'Oswald';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ButtonAndSubmenu {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: calc(0.25rem * 20);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.ButtonCtaVariables2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: calc(0.25rem * 20);
+  overflow: hidden;
+  align-items: center;
+  gap: calc(0.25rem * 2);
+  padding-left: calc(0.25rem * 6);
+  padding-right: calc(0.25rem * 2);
+  padding-block: calc(0.25rem * 3);
+  justify-content: flex-start;
+}
+
+.DefaultIconAndShape {
+  padding: calc(0.25rem * 3);
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  justify-content: flex-start;
+}
+
+.IconsArrowDownForm {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(0.25rem * 3);
+  height: calc(0.25rem * 3);
+  overflow: hidden;
+}
+
+.Vector {
+  display: block;
+  max-width: none;
+  width: 12px;
+  height: 7px;
+  position: absolute;
+  top: 3px;
+  left: calc(0.25rem * 0);
+}
+
+.Vector2 {
+  display: block;
+  max-width: none;
+  width: 73px;
+  height: 55px;
+}
+
+.TextContainer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-self: stretch;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-inline: calc(0.25rem * 20);
+  padding-block: calc(0.25rem * 16);
+  gap: calc(0.25rem * 8);
+  align-items: flex-start;
+}
+
+.LeftBlock {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 2);
+  min-width: 327px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.TextContainer2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 1);
+  justify-content: flex-start;
+}
+
+.Phrase01 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #3F3F3F;
+  font-family: 'Oswald';
+  --tw-leading: 1.56;
+  line-height: 1.56;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 18px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 2px;
+  letter-spacing: 2px;
+}
+
+.ContainerYellow {
+  padding: calc(0.25rem * 1);
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  justify-content: center;
+}
+
+.Phrase02 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #3F3F3F;
+  font-family: 'Oswald';
+  --tw-leading: 1.56;
+  line-height: 1.56;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 2px;
+  letter-spacing: 2px;
+}
+
+.RightBlock {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  gap: calc(0.25rem * 2.5);
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  min-width: 327px;
+  max-width: 628px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Title {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #fff;
+  font-family: 'Oswald';
+  --tw-leading: 1.25;
+  line-height: 1.25;
+  align-self: stretch;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 64px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.SocialContainer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 78px;
+  align-items: flex-end;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  justify-content: flex-end;
+}
+
+.SocialShare {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  background-color: #000;
+  --tw-backdrop-blur: blur(24px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  align-items: center;
+  gap: calc(0.25rem * 5);
+  padding-inline: calc(0.25rem * 5);
+  padding-block: calc(0.25rem * 3);
+  justify-content: flex-start;
+}
+
+.Text2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #fff;
+  font-family: 'Oswald';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 12px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.CtaContainer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 5);
+  justify-content: flex-start;
+}
+
+.ButtonCtaVariables3 {
+  padding: calc(0.25rem * 3);
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-8590-97-color);
+  --tw-border-style: solid;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+
+.Content {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.IconsTwitter {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(0.25rem * 6);
+  height: calc(0.25rem * 6);
+  overflow: hidden;
+}
+
+.Vector3 {
+  display: block;
+  max-width: none;
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+.Vector4 {
+  display: block;
+  max-width: none;
+  width: 11px;
+  height: 24px;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  left: 7px;
+}
+
+.IconsShare {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 2.5);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Group10148 {
+  display: block;
+  max-width: none;
+  width: 24px;
+  height: 24px;
+}
+
+.BottomContainer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 20);
+  align-self: stretch;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.Breadcrumb {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  padding-block: calc(0.25rem * 0);
+  padding-inline: calc(0.25rem * 6);
+  width: 375px;
+  height: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.Content2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  align-items: center;
+  gap: calc(0.25rem * 2);
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  padding-block: calc(0.25rem * 4);
+  justify-content: flex-start;
+}
+
+.ButtonCtaVariables4 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  overflow: hidden;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.TextContainer3 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-bottom-color: rgba(248,217,0,1);
+  border-style: solid;
+  border-width: 0px;
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: 2px;
+  --tw-border-style: solid;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 1.5);
+  padding-top: calc(0.25rem * 1.5);
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.Text3 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #000;
+  font-family: 'Oswald';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.IconsArrowRightForm {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(0.25rem * 2.5);
+  height: calc(0.25rem * 2.5);
+  overflow: hidden;
+}
+
+.Vector5 {
+  display: block;
+  max-width: none;
+  width: 6px;
+  height: 10px;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  left: calc(0.25rem * 0.5);
+}
+
+.TextContainer4 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 1.5);
+  padding-top: calc(0.25rem * 1.5);
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.Text4 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #3F3F3F;
+  font-family: 'Oswald';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 12px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.JoinUsBlock {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 4);
+  padding-inline: calc(0.25rem * 20);
+  padding-block: calc(0.25rem * 6);
+  justify-content: flex-start;
+}
+
+.TextContainer5 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-right-color: rgba(63,63,63,1);
+  border-style: solid;
+  border-width: 0px;
+  border-right-style: var(--tw-border-style);
+  border-right-width: 1px;
+  --tw-border-style: solid;
+  align-items: center;
+  padding-right: calc(0.25rem * 4);
+  justify-content: flex-start;
+}
+
+.Text5 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #3F3F3F;
+  font-family: 'Oswald';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: left;
+  text-transform: uppercase;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ButtonCtaVariables5 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-bottom-color: rgba(248,217,0,1);
+  border-style: solid;
+  border-width: 0px;
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: 2px;
+  --tw-border-style: solid;
+  overflow: hidden;
+  align-items: center;
+  gap: calc(0.25rem * 4);
+  padding-inline: calc(0.25rem * 1);
+  padding-block: calc(0.25rem * 2);
+  justify-content: flex-start;
+}
+
+.IconsArrowRight {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(0.25rem * 3.5);
+  height: calc(0.25rem * 3.5);
+  overflow: hidden;
+}
+
+.Vector6 {
+  display: block;
+  max-width: none;
+  width: 13px;
+  height: 14px;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  left: calc(0.25rem * 0);
+}
+
+.Absolute {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  pointer-events: none;
+}
+
+.Absolute2 {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.Absolute3 {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+}

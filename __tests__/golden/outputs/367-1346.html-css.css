@@ -1,0 +1,1293 @@
+@layer theme {
+  :root, :host {
+    /* Figma Variables */
+    --var-125-11-spacing: 32px;
+      --var-128-217-borderRadius: 28px;
+      --var-125-12-spacing: 24px;
+      --var-112-32-color: #2a587c;
+      --var-128-143-spacing: 20px;
+      --var-123-148-spacing: 8px;
+      --var-129-241-spacing: 12px;
+      --var-128-135-spacing: 8px;
+      --var-126-129-borderRadius: 8px;
+      --var-112-554-color: #ffffff;
+      --var-126-53-fontSize: 0px;
+      --var-128-137-size: 32px;
+      --var-128-144-spacing: 16px;
+      --var-123-142-borderRadius: 4px;
+      --var-112-35-color: #a1141f;
+      --var-126-54-fontSize: 0px;
+      --var-128-146-fontSize: 0px;
+      --var-128-170-fontSize: 0px;
+      --var-128-138-spacing: 32px;
+      --var-125-13-spacing: 40px;
+      --var-123-295-size: 380px;
+      --var-128-164-other: leftImage;
+      --var-126-6-borderRadius: 20px;
+      --var-123-162-other: 0;
+      --var-123-320-size: 480px;
+      --var-126-45-fontSize: 0px;
+      --var-123-299-size: 340px;
+      --var-112-559-color: #000000;
+      --var-126-112-fontSize: 0px;
+      --var-128-134-spacing: 20px;
+      --var-128-136-spacing: 12px;
+      --var-114-2-size: 1440px;
+      --var-112-36-color: #f0d9b5;
+      --var-112-34-color: #1a3453;
+      --var-126-55-fontSize: 0px;
+    /* Tailwind Variables */
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --spacing: 0.25rem;
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
+    --text-7xl: 4.5rem;
+    --text-7xl--line-height: 1;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+
+.Home {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 1440px;
+  height: 7423px;
+  background-color: #F3F5F7;
+  overflow: hidden;
+}
+
+.Header {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 124px;
+  left: calc(0.25rem * 0);
+  width: auto;
+  height: auto;
+  background-color: #1F1F1F;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: 120px;
+  padding-inline: calc(0.25rem * 20);
+  padding-top: calc(0.25rem * 20);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Header2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: 60px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.WeAreInnovativeVisual {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 1144px;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 110px;
+  text-align: left;
+  --tw-tracking: -3px;
+  letter-spacing: -3px;
+}
+
+.Vector1 {
+  display: block;
+  max-width: none;
+  width: 1280px;
+  height: 620px;
+}
+
+.Text {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+}
+
+.DigitalDesignerPortfolioTemplate {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 1280px;
+  height: calc(0.25rem * 60);
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: left;
+  grid-area: 1 / 1;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Services {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 5);
+  grid-area: 1 / 1;
+  margin-left: 696px;
+  margin-top: calc(0.25rem * 80);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.StrategyAndInsight {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.OurWork {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 1970px;
+  left: calc(0.25rem * 0);
+  width: auto;
+  height: auto;
+  background-color: #F3F5F7;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: 120px;
+  padding-inline: calc(0.25rem * 20);
+  padding-top: 120px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Content {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 20);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Title {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 6);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.OurWorks {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 121px;
+  height: calc(0.25rem * 9);
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 24px;
+  text-align: left;
+  grid-area: 1 / 1;
+  margin-left: calc(0.25rem * 10);
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Line7 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 120px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #414141;
+  --tw-border-style: solid;
+  rotate: 0deg;
+  grid-area: 1 / 1;
+  margin-top: calc(0.25rem * 11);
+}
+
+.EveryProjectIsA {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 1022px;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 98px;
+  text-align: left;
+  --tw-tracking: -3px;
+  letter-spacing: -3px;
+}
+
+.Works {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Line5 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 1280px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #414141;
+  --tw-border-style: solid;
+}
+
+.Content2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 1280px;
+  height: auto;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Frame427320600 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 10);
+  justify-content: flex-start;
+}
+
+.Component01 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 32px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.CredoWebsite {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 72px;
+  text-align: left;
+  --tw-tracking: -2px;
+  letter-spacing: -2px;
+}
+
+.Line6 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 1280px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #F3F5F7;
+  --tw-border-style: solid;
+}
+
+.Content3 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 1280px;
+  height: 108px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.MobileApp {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 169px;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 32px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Rectangle1326 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  left: 625px;
+  top: -46px;
+  width: 360px;
+  height: 200px;
+  position: absolute;
+  object-fit: cover;
+}
+
+.WebsiteDesign {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 227px;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 32px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.About {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 3524px;
+  left: calc(0.25rem * 0);
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 24);
+  padding-left: calc(0.25rem * 20);
+  padding-right: 120px;
+  padding-top: calc(0.25rem * 24);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.About2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  gap: 433px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.AboutUs {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100px;
+  height: calc(0.25rem * 9);
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 24px;
+  text-align: left;
+  grid-area: 1 / 1;
+  margin-left: calc(0.25rem * 10);
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Line72 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 120px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #414141;
+  --tw-border-style: solid;
+  grid-area: 1 / 1;
+  margin-top: calc(0.25rem * 11);
+}
+
+.AtSimplexWeStrive {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 650px;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Image {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 667px;
+  height: 520px;
+  object-fit: cover;
+}
+
+.Testimonial {
+  padding: calc(0.25rem * 20);
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 5488px;
+  left: calc(0.25rem * 0);
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 2.5);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Content4 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 20);
+  justify-content: flex-start;
+}
+
+.Icon {
+  display: block;
+  max-width: none;
+  width: 60px;
+  height: 60px;
+}
+
+.Content5 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: 60px;
+  justify-content: flex-start;
+}
+
+.Review {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 998px;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 6);
+  justify-content: flex-start;
+}
+
+.Man {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 4);
+  justify-content: center;
+}
+
+.Rectangle1212 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: calc(0.25rem * 20);
+  height: calc(0.25rem * 20);
+  border-radius: 70px;
+  object-fit: cover;
+}
+
+.AlexDc {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 32px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.CeoOfBravva {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 24px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.TheTraditionalAgencySystem {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 998px;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: center;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Component15 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.BrandIdentity {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 6056px;
+  left: -606px;
+  width: auto;
+  height: auto;
+  align-items: center;
+  padding-bottom: calc(0.25rem * 20);
+  padding-top: calc(0.25rem * 20);
+  justify-content: center;
+}
+
+.Image20 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 534px;
+  height: 209px;
+  background-color: #1F1F1F;
+  grid-area: 1 / 1;
+}
+
+.Image19 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 464px;
+  height: 190px;
+  background-color: #1F1F1F;
+  grid-area: 1 / 1;
+}
+
+.Image192 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 607px;
+  height: calc(0.25rem * 48);
+  background-color: #1F1F1F;
+  grid-area: 1 / 1;
+}
+
+.Image193 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 645px;
+  height: 180px;
+  background-color: #1F1F1F;
+  grid-area: 1 / 1;
+}
+
+.Image15 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 458px;
+  height: 177px;
+  background-color: #1F1F1F;
+  grid-area: 1 / 1;
+}
+
+.OurTeam {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 4549px;
+  left: calc(0.25rem * 0);
+  width: 1440px;
+  height: auto;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 24);
+  padding-inline: calc(0.25rem * 20);
+  padding-top: calc(0.25rem * 24);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Content6 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 1358px;
+  height: auto;
+  gap: calc(0.25rem * 16);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Title2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 1240px;
+  height: auto;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.OurTeam2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 101px;
+  height: calc(0.25rem * 9);
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 24px;
+  text-align: left;
+  grid-area: 1 / 1;
+  margin-left: calc(0.25rem * 10);
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.TeamMember {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: flex-end;
+  gap: calc(0.25rem * 8);
+  justify-content: flex-start;
+}
+
+.TeamMembars {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 4);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Image2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 400px;
+  height: 520px;
+  object-fit: cover;
+}
+
+.Content7 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: calc(0.25rem * 4);
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.KawserMahmud {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #1F1F1F;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.SocialMediaLink {
+  display: block;
+  max-width: none;
+  width: 144px;
+  height: 24px;
+}
+
+.MohibullaMamun {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #414141;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Image3 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 400px;
+  height: 520px;
+}
+
+.Fotter {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: -0.0001220703125px;
+  left: calc(0.25rem * 0);
+  width: auto;
+  height: auto;
+  background-color: #1F1F1F;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: 120px;
+  padding-inline: calc(0.25rem * 20);
+  padding-top: calc(0.25rem * 24);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Cta {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 362px;
+  gap: 76px;
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Cta2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+}
+
+.LetsWorkTogether {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 876px;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 110px;
+  text-align: left;
+  --tw-tracking: -3px;
+  letter-spacing: -3px;
+}
+
+.IconButton {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  background-color: #F3F5F7;
+  border-radius: 100px;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 10);
+  padding-left: calc(0.25rem * 36);
+  padding-right: calc(0.25rem * 36);
+  padding-top: calc(0.25rem * 10);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Icon2 {
+  display: block;
+  max-width: none;
+  width: 80px;
+  height: 80px;
+}
+
+.Line9 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 1280px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #414141;
+  --tw-border-style: solid;
+  rotate: 0deg;
+}
+
+.Fotter2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 96);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.TextAndSubscribe {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: 59px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.DontMissOutOn {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 468px;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Email {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: 13px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Subscribe {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 72);
+  justify-content: flex-start;
+}
+
+.EmailAddress {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Line8 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 620px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #F3F5F7;
+  --tw-border-style: solid;
+}
+
+.Service {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: calc(0.25rem * 8);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Home2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  align-self: stretch;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: left;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Navigation {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  left: calc(0.25rem * 0);
+  width: 1440px;
+  height: auto;
+  background-color: #1F1F1F;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 8);
+  padding-inline: calc(0.25rem * 20);
+  padding-top: calc(0.25rem * 8);
+  justify-content: center;
+}
+
+.LogoAndManubar {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: 60px;
+  align-items: center;
+  align-self: stretch;
+  flex-grow: 1;
+  justify-content: space-between;
+  flex-basis: calc(0.25rem * 0);
+}
+
+.Uidex {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #F3F5F7;
+  font-family: 'Space Grotesk';
+  --tw-leading: 1.50;
+  line-height: 1.50;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 40px;
+  text-align: center;
+  --tw-tracking: -1px;
+  letter-spacing: -1px;
+}
+
+.Frame427320597 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 75px;
+  height: auto;
+  gap: calc(0.25rem * 4);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Line4 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 75px;
+  height: calc(0.25rem * 0);
+  border-style: var(--tw-border-style);
+  border-width: 4px;
+  border-color: #F3F5F7;
+  --tw-border-style: solid;
+}
+
+.Absolute {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  pointer-events: none;
+}
+
+.Absolute2 {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

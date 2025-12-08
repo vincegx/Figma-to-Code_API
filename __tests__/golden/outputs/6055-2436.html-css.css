@@ -1,0 +1,1794 @@
+@layer theme {
+  :root, :host {
+    /* Figma Variables */
+    --var-2010-33-color: #262626;
+      --var-2057-165-color: #00e377;
+      --var-2019-138-color: #a6a6a6;
+      --var-47-1-color: #373737;
+      --var-11-9-color: #ffffff;
+      --var-2019-228-color: #e8e9e9;
+      --var-2021-490-color: #00c7ee;
+    /* Tailwind Variables */
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --text-xl: 1.25rem;
+    --text-xl--line-height: calc(1.75 / 1.25);
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --radius-sm: 0.25rem;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+
+.BgsHomepage1440px {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 1557px;
+  height: auto;
+  background-color: #FCFCFC;
+  overflow: hidden;
+  align-items: center;
+}
+
+.Header {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  padding-bottom: calc(0.25rem * 3.5);
+  padding-top: calc(0.25rem * 3.5);
+  justify-content: center;
+}
+
+.Container {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  padding-block: calc(0.25rem * 0);
+  padding-inline: calc(0.25rem * 5);
+  width: 100%;
+  height: calc(0.25rem * 9);
+  align-items: center;
+  max-width: 1320px;
+  justify-content: space-between;
+}
+
+.Image1 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 142px;
+  height: calc(0.25rem * 9);
+  object-fit: cover;
+}
+
+.MenuRight {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 3.5);
+  justify-content: flex-start;
+}
+
+.HelpMenu {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-right-color: rgba(82,84,88,1);
+  border-style: solid;
+  border-width: 0px;
+  border-right-style: var(--tw-border-style);
+  border-right-width: 1px;
+  --tw-border-style: solid;
+  align-items: center;
+  gap: calc(0.25rem * 6);
+  padding-bottom: 5px;
+  padding-right: 17px;
+  padding-top: 5px;
+  justify-content: flex-start;
+}
+
+.NeedAnyHelp {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 17px;
+  line-height: var(--text-sm--line-height);
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006947 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  background-color: #4A4A4A;
+  border-radius: 4px;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: calc(0.25rem * 1);
+  padding-inline: calc(0.25rem * 2);
+  padding-top: calc(0.25rem * 1);
+  justify-content: center;
+}
+
+.Eng {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #fff;
+  font-family: 'Inter';
+  --tw-leading: 17px;
+  line-height: var(--text-sm--line-height);
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Vector1366 {
+  display: block;
+  max-width: none;
+  width: 7px;
+  height: 3px;
+}
+
+.UserMenu {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  border-style: var(--tw-border-style);
+  border-width: 0px;
+  border-left-style: var(--tw-border-style);
+  border-left-width: 1px;
+  align-items: center;
+  gap: calc(0.25rem * 6);
+  justify-content: flex-start;
+}
+
+.Icons {
+  display: block;
+  max-width: none;
+  width: 116px;
+  height: 20px;
+}
+
+.Avatar {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 35px;
+  height: 35px;
+  background-color: #D9D9D9;
+  border-radius: calc(infinity * 1px);
+  overflow: hidden;
+}
+
+.Body {
+  padding: calc(0.25rem * 6);
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  justify-content: flex-start;
+}
+
+.Container2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: calc(0.25rem * 6);
+  max-width: 1280px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.TitleSection {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  align-self: stretch;
+  justify-content: space-between;
+}
+
+.Welcom {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: 5px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.WelcomeBack {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 18px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ChandlerBing {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #262626;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 39px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ButtonsSet {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 372px;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2);
+  justify-content: flex-start;
+}
+
+.RequestPayment {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2057-165-color);
+  --tw-border-style: solid;
+  border-radius: 4px;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  flex-grow: 1;
+  padding-bottom: calc(0.25rem * 4);
+  padding-inline: 18px;
+  padding-top: calc(0.25rem * 4);
+  justify-content: center;
+  flex-basis: calc(0.25rem * 0);
+}
+
+.RequestPayment2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.SendMoney {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  background-color: #00E377;
+  border-radius: 4px;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  flex-grow: 1;
+  padding-bottom: calc(0.25rem * 4);
+  padding-inline: 18px;
+  padding-top: calc(0.25rem * 4);
+  justify-content: center;
+  flex-basis: calc(0.25rem * 0);
+}
+
+.Group1000001422 {
+  display: block;
+  max-width: none;
+  width: 11px;
+  height: 9px;
+}
+
+.AccountOverview {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: calc(0.25rem * 3.5);
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.HeresAnOverviewOf {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 18px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.OverviewCards {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 3);
+  align-self: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.AccountInfo {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  align-items: center;
+  gap: calc(0.25rem * 3);
+  flex-grow: 1;
+  min-width: 500px;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+}
+
+.CardAccount {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2019-228-color);
+  --tw-border-style: solid;
+  border-radius: 11px;
+  gap: calc(0.25rem * 6);
+  flex-grow: 1;
+  max-width: 360px;
+  padding-bottom: calc(0.25rem * 9);
+  padding-inline: 30px;
+  padding-top: calc(0.25rem * 9);
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Frame1000006951 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 214px;
+  height: auto;
+  gap: calc(0.25rem * 2);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.CheckingAccount {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006952 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2);
+  justify-content: flex-start;
+}
+
+.Streamlinebank {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(0.25rem * 4);
+  height: calc(0.25rem * 4);
+  overflow: hidden;
+}
+
+.Vector {
+  display: block;
+  max-width: none;
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+}
+
+.Component03254819 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Component1054000 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #262626;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 32px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.IconBars {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  right: calc(0.25rem * 5);
+  top: calc(0.25rem * 5);
+  width: calc(0.25rem * 5);
+  height: calc(0.25rem * 5);
+  overflow: hidden;
+  position: absolute;
+}
+
+.Vector2 {
+  display: block;
+  max-width: none;
+  width: 16px;
+  height: 18px;
+  position: absolute;
+  top: 1px;
+  left: calc(0.25rem * 0.5);
+}
+
+.RegisterCard {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  background-color: #00C7EE;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: #00C7EE;
+  --tw-border-style: solid;
+  border-radius: 11px;
+  align-items: center;
+  gap: calc(0.25rem * 6);
+  flex-grow: 1;
+  min-width: 500px;
+  padding-bottom: calc(0.25rem * 6);
+  padding-inline: 26px;
+  padding-top: calc(0.25rem * 6);
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+}
+
+.Frame1000006962 {
+  display: block;
+  max-width: none;
+  width: 77px;
+  height: 96px;
+}
+
+.Frame1000006964 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  gap: 9px;
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Frame1000006966 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: calc(0.25rem * 1);
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.RegisterABusinessAccount {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.40;
+  line-height: 1.40;
+  align-self: stretch;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 20px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.HaveDedicatedFinancialTools {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.40;
+  line-height: 1.40;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006961 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  background-color: #03EE7D;
+  border-radius: 17px;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: calc(0.25rem * 2);
+  padding-inline: calc(0.25rem * 4);
+  padding-top: calc(0.25rem * 2);
+  justify-content: flex-start;
+}
+
+.SetupYourAccount {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 1.40;
+  line-height: 1.40;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.QuickActions {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006981 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  background-color: #03EE7D;
+  border-radius: 27px;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  padding-bottom: calc(0.25rem * 1.5);
+  padding-left: calc(0.25rem * 3.5);
+  padding-right: calc(0.25rem * 3.5);
+  padding-top: calc(0.25rem * 1.5);
+  justify-content: center;
+}
+
+.Customise {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ActionButtons {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.Calltoactioncard {
+  padding: calc(0.25rem * 4);
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 133px;
+  height: auto;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2019-228-color);
+  --tw-border-style: solid;
+  border-radius: 11px;
+  align-items: center;
+  gap: calc(0.25rem * 3.5);
+  justify-content: flex-start;
+}
+
+.Icon {
+  display: block;
+  max-width: none;
+  width: 24px;
+  height: 24px;
+}
+
+.Text {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: 42px;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: center;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Text2 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: center;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.ActivitySection {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  gap: 30px;
+  align-self: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.ActivityLeft {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  gap: 30px;
+  flex-grow: 1;
+  min-width: 500px;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.QuickSend {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 18px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.People {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 5);
+  align-self: stretch;
+  justify-content: flex-start;
+}
+
+.Frame1000006954 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  align-items: center;
+  gap: 9px;
+  flex-grow: 1;
+  justify-content: center;
+  flex-basis: calc(0.25rem * 0);
+}
+
+.Frame1000006955 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 60px;
+  height: 58px;
+}
+
+.Ellipse1994 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  left: calc(0.25rem * 0);
+  width: 59px;
+  height: 58px;
+  background-color: #D9D9D9;
+  border-radius: calc(infinity * 1px);
+  overflow: hidden;
+}
+
+.Group1000001420 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  right: 1px;
+  bottom: -0.4584808349609375px;
+}
+
+.Ellipse1993 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+  border-color: #fff;
+  --tw-border-style: solid;
+  border-radius: calc(infinity * 1px);
+  overflow: hidden;
+  grid-area: 1 / 1;
+}
+
+.Group1000001419 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  width: calc(0.25rem * 3);
+  height: 9px;
+  grid-area: 1 / 1;
+  margin-left: 3px;
+  margin-top: calc(0.25rem * 1);
+}
+
+.Rectangle34624482 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 9px;
+  height: calc(0.25rem * 1.5);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2010-33-color);
+  --tw-border-style: solid;
+  border-top-right-radius: 3.3454864025115967px;
+  border-bottom-right-radius: 3.3454864025115967px;
+  border-bottom-left-radius: 2.2408406734466553px;
+  grid-area: 1 / 1;
+}
+
+.Rectangle34624483 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 9px;
+  height: calc(0.25rem * 1.5);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2010-33-color);
+  --tw-border-style: solid;
+  border-top-right-radius: 3.3454864025115967px;
+  border-bottom-right-radius: 3.3454864025115967px;
+  border-bottom-left-radius: 3.3454864025115967px;
+  grid-area: 1 / 1;
+  margin-left: 3px;
+  margin-top: calc(0.25rem * 0.5);
+}
+
+.JosephYoh {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: center;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame10000069552 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 59px;
+  height: 58px;
+}
+
+.Group10000014202 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  right: -0.074462890625px;
+  bottom: -0.4584808349609375px;
+}
+
+.Ellipse19932 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+  border-color: #fff;
+  --tw-border-style: solid;
+  border-radius: calc(infinity * 1px);
+  overflow: hidden;
+  grid-area: 1 / 1;
+}
+
+.D {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  grid-area: 1 / 1;
+  margin-left: 5px;
+  margin-top: calc(0.25rem * 1);
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame10000069553 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+}
+
+.Group10000014203 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  right: -1.074462890625px;
+  bottom: -0.4584808349609375px;
+}
+
+.Ellipse19933 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+  border-color: #fff;
+  --tw-border-style: solid;
+  border-radius: calc(infinity * 1px);
+  overflow: hidden;
+  grid-area: 1 / 1;
+}
+
+.C {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: calc(0.25rem * 2.5);
+  height: 9px;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  grid-area: 1 / 1;
+  margin-left: 3px;
+  margin-top: calc(0.25rem * 1);
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Group10000014204 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  right: -1.0744552612304688px;
+  bottom: -0.4584808349609375px;
+}
+
+.T {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: calc(0.25rem * 2);
+  height: 9px;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  grid-area: 1 / 1;
+  margin-left: 5px;
+  margin-top: calc(0.25rem * 1);
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.CardActions {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--var-2019-228-color);
+  --tw-border-style: solid;
+  border-radius: 11px;
+  align-items: center;
+  align-self: stretch;
+  padding-bottom: calc(0.25rem * 3.5);
+  padding-inline: calc(0.25rem * 4);
+  padding-top: calc(0.25rem * 4);
+  justify-content: space-between;
+}
+
+.IconTransfer {
+  display: block;
+  max-width: none;
+  width: 37px;
+  height: 37px;
+}
+
+.Frame1000006982 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  gap: 1px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.FundTransfer {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.TransferFromSavingsTo {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006983 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: auto;
+  align-items: flex-end;
+  gap: 1px;
+  justify-content: center;
+}
+
+.Component100000 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.IconSpotify {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 37px;
+  height: 37px;
+}
+
+.Vector3 {
+  display: block;
+  max-width: none;
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+}
+
+.Component50000 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 600;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006991 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  gap: calc(0.25rem * 8);
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.Frame10000069822 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 287px;
+  height: 172px;
+  background-color: #03EE7D;
+  overflow: hidden;
+  border-radius: 11px;
+  padding-bottom: calc(0.25rem * 7);
+  padding-inline: calc(0.25rem * 5);
+  padding-top: calc(0.25rem * 7);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.Group10000014192 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: max-content;
+  grid-template-rows: max-content;
+  place-items: start;
+  position: absolute;
+  width: 231px;
+  height: calc(0.25rem * 44);
+  left: 123px;
+  top: calc(0.25rem * 6);
+  mix-blend-mode: lighten;
+}
+
+.Rectangle346244822 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  position: absolute;
+  top: calc(0.25rem * 0);
+  right: 52px;
+  width: 179px;
+  height: 127px;
+  border-style: var(--tw-border-style);
+  border-width: 29px;
+  border-color: #71FFBB;
+  mix-blend-mode: screen;
+  --tw-border-style: solid;
+  border-top-right-radius: 66.49861145019531px;
+  border-bottom-right-radius: 66.49861145019531px;
+  border-bottom-left-radius: 44.541439056396484px;
+}
+
+.Rectangle346244832 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  position: absolute;
+  top: calc(0.25rem * 12);
+  right: calc(0.25rem * 0);
+  width: 179px;
+  height: 127px;
+  border-style: var(--tw-border-style);
+  border-width: 29px;
+  border-color: #71FFBB;
+  mix-blend-mode: screen;
+  --tw-border-style: solid;
+  border-top-right-radius: 66.49861145019531px;
+  border-bottom-right-radius: 66.49861145019531px;
+  border-bottom-left-radius: 66.49861145019531px;
+}
+
+.CreditCard {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  align-self: stretch;
+  --tw-font-weight: 500;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Component02542108 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Group1000001423 {
+  display: block;
+  max-width: none;
+  width: 38px;
+  height: 30px;
+  position: absolute;
+  right: calc(0.25rem * 5);
+  top: calc(0.25rem * 5);
+}
+
+.Component5210530 {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #262626;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 700;
+  font-weight: 700;
+  font-size: 20px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006987 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 1px;
+  gap: calc(0.25rem * 3);
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.QuickLinks {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #A6A6A6;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Frame1000006993 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  gap: 11px;
+  align-self: stretch;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.CreditCardStatement {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  color: #373737;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  align-self: stretch;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 16px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Vector4 {
+  display: block;
+  max-width: none;
+  width: 34px;
+  height: 34px;
+  position: absolute;
+  top: calc(0.25rem * 0.5);
+  left: calc(0.25rem * 0.5);
+}
+
+.Today {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 1.30;
+  line-height: 1.30;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Vector5 {
+  display: block;
+  max-width: none;
+  width: 34px;
+  height: 35px;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+}
+
+.Footer {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  border-top-color: rgba(232,233,233,1);
+  border-style: solid;
+  border-width: 0px;
+  border-top-style: var(--tw-border-style);
+  border-top-width: 1px;
+  --tw-border-style: solid;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  align-self: stretch;
+  padding-bottom: calc(0.25rem * 3.5);
+  padding-inline: calc(0.25rem * 6);
+  padding-top: calc(0.25rem * 3.5);
+  justify-content: center;
+}
+
+.Container3 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  max-width: 1280px;
+  justify-content: space-between;
+}
+
+.Copyright {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 1px;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  flex-grow: 1;
+  flex-basis: calc(0.25rem * 0);
+  justify-content: flex-start;
+}
+
+.Frame1000007004 {
+  box-sizing: border-box;
+  align-content: stretch;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: calc(0.25rem * 2.5);
+  justify-content: flex-start;
+}
+
+.PrivacyPolicy {
+  box-sizing: border-box;
+  align-content: stretch;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  color: #00E377;
+  font-family: 'Inter';
+  --tw-leading: 1.00;
+  line-height: 1.00;
+  --tw-font-weight: 400;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  --tw-tracking: 0px;
+  letter-spacing: 0px;
+}
+
+.Socials {
+  display: block;
+  max-width: none;
+  width: 97px;
+  height: 26px;
+}
+
+.Absolute {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.Absolute2 {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  border-radius: inherit;
+}
+
+.Absolute3 {
+  position: absolute;
+  inset: calc(0.25rem * 0);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}

@@ -12,6 +12,8 @@
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "golden:capture": "npx ts-node --project tsconfig.golden.json __tests__/golden/capture.ts",
+    "golden:verify": "npx ts-node --project tsconfig.golden.json __tests__/golden/verify.ts",
     "copy-preview-assets": "node scripts/copy-preview-assets.js && node scripts/generate-tailwind-full.js"
   },
   "dependencies": {
@@ -79,6 +81,7 @@
     "jsdom": "24.0.0",
     "postcss": "8.5.6",
     "tailwindcss": "3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.3.3",
     "vitest": "1.2.0"
   }
