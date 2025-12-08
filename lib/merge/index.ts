@@ -27,7 +27,7 @@ export {
   mergeSimpleAltNodes,
   toUnifiedElement,
   getSourceNodeId,
-} from './merge-simple-alt-nodes';
+} from './alt-nodes';
 
 // Note: merge-engine is server-only (uses merge-store which uses fs)
 // Import directly from '@/lib/merge/merge-engine' in API routes only

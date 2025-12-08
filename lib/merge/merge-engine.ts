@@ -25,7 +25,7 @@ import type {
   CreateMergeRequest,
 } from '../types/merge';
 import { generateMergeId, saveMerge } from '../store/merge-store';
-import { mergeSimpleAltNodes, toUnifiedElement } from './merge-simple-alt-nodes';
+import { mergeSimpleAltNodes, toUnifiedElement } from './alt-nodes';
 import { transformToAltNode, resetNameCounters, type SimpleAltNode } from '../altnode-transform';
 import { setCachedVariablesMap } from '../utils/variable-css';
 import { generateReactTailwind } from '../code-generators/react-tailwind';

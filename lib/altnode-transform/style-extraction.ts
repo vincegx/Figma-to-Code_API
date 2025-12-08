@@ -1,360 +1,14 @@
 /**
- * AltNode Transformation Engine
+ * Style Extraction
  *
- * Transforms Figma JSON to normalized AltNode representation with FigmaToCode production patterns.
- * Implements 23 improvements from FigmaToCode analysis (5 CRITICAL + 12 HIGH + 6 MEDIUM priority).
- *
- * CRITICAL Improvements (T034):
- * 1. Hidden node marking (visible: false preserved, shown dimmed in tree - T156)
- * 2. GROUP node inlining (skip wrapper, process children)
- * 3. Unique name generation (Button, Button_01, Button_02)
- * 4. originalNode reference preservation
- * 5. Cumulative rotation tracking
- *
- * HIGH Priority Improvements (T040):
- * - Rotation conversion (radians → degrees)
- * - Icon detection (isLikelyIcon)
- * - Empty container optimization
- * - Layout wrap support
+ * Extracts and normalizes CSS styles from Figma node properties.
+ * VERBATIM from altnode-transform.ts
  */
 
-import type { FigmaNode } from './types/figma';
-import figmaConfig from './figma-transform-config.json';
-import { getVariableCssNameSync } from './utils/variable-css';
-
-// Simple AltNode structure for transformation engine
-export interface SimpleAltNode {
-  id: string;
-  name: string;
-  uniqueName: string;
-  type: string;
-  originalType: string; // T177: Preserve original Figma type for TEXT detection
-  styles: Record<string, string | number>;
-  children: SimpleAltNode[];
-  originalNode: FigmaNode;
-  visible: boolean;
-  canBeFlattened: boolean;
-  cumulativeRotation: number;
-  isIcon?: boolean;
-
-  // T228: Add SVG data for VECTOR nodes
-  svgData?: {
-    fillGeometry?: any[];
-    strokeGeometry?: any[];
-    fills?: any[];
-    strokes?: any[];
-    strokeWeight?: number;
-    bounds: { x: number; y: number; width: number; height: number };
-  };
-
-  // T230: Add image data for IMAGE fills (kept for backward compatibility)
-  imageData?: {
-    imageRef: string;
-    nodeId: string;
-    scaleMode: string;
-  };
-
-  // WP32: All fills in render order (bottom to top)
-  // Enables rendering all layers like MCP does
-  fillsData?: FillData[];
-
-  // WP31: Negative itemSpacing handling (gap doesn't support negative values)
-  // Store negative spacing so children can apply margin instead
-  negativeItemSpacing?: number;
-  layoutDirection?: 'row' | 'column';
-
-  // WP38 Fix #23: Figma mask pattern support
-  // When a GROUP has isMask: true on first child, masked children get this imageRef
-  // The generator resolves the URL and applies CSS mask-image
-  maskImageRef?: string;
-
-  // WP08: Responsive styles for merge feature
-  // Contains style overrides for tablet (md:) and desktop (lg:) breakpoints
-  // Base styles in 'styles' field = mobile-first
-  responsiveStyles?: {
-    md?: Record<string, string | number>;  // Tablet overrides (md: prefix)
-    lg?: Record<string, string | number>;  // Desktop overrides (lg: prefix)
-  };
-
-  // WP08: Presence tracking for merge feature
-  // Indicates which breakpoints contained this element before merging
-  presence?: {
-    mobile: boolean;
-    tablet: boolean;
-    desktop: boolean;
-  };
-}
-
-// WP32: Fill data structure for multi-layer rendering
-export interface FillData {
-  type: 'IMAGE' | 'SOLID' | 'GRADIENT_LINEAR' | 'GRADIENT_RADIAL' | 'GRADIENT_ANGULAR' | 'GRADIENT_DIAMOND';
-  visible: boolean;
-  opacity?: number;
-  // For IMAGE fills
-  imageRef?: string;
-  scaleMode?: string;
-  // For SOLID fills
-  color?: { r: number; g: number; b: number; a?: number };
-  // For GRADIENT fills
-  gradientStops?: Array<{
-    color: { r: number; g: number; b: number; a?: number };
-    position: number;
-  }>;
-  gradientTransform?: number[][];
-  gradientHandlePositions?: Array<{ x: number; y: number }>;
-}
-
-// Global name counter for unique name generation
-const nameCounters: Map<string, number> = new Map();
-
-/**
- * Reset name counters (useful for testing)
- */
-export function resetNameCounters(): void {
-  nameCounters.clear();
-}
-
-/**
- * Generate unique component name with suffix counters
- *
- * @param baseName - Original node name from Figma
- * @returns Unique sanitized name (e.g., "Button", "Button_01", "Button_02")
- */
-function generateUniqueName(baseName: string): string {
-  // Sanitize name for component usage
-  let sanitized = baseName.replace(/[^a-zA-Z0-9]/g, '');
-
-  // Handle empty names
-  if (!sanitized) {
-    sanitized = 'Component';
-  }
-
-  // Handle numeric-leading names
-  if (/^[0-9]/.test(sanitized)) {
-    sanitized = 'Component' + sanitized;
-  }
-
-  const count = nameCounters.get(sanitized) || 0;
-  nameCounters.set(sanitized, count + 1);
-
-  return count === 0 ? sanitized : `${sanitized}_${count.toString().padStart(2, '0')}`;
-}
-
-/**
- * Map Figma node type to simplified type
- *
- * WP28 T209: Now uses externalized config instead of hardcoded typeMap
- *
- * @param figmaType - Figma node type
- * @returns Simplified type string
- */
-function mapNodeType(figmaType: string): string {
-  return figmaConfig.typeMapping[figmaType as keyof typeof figmaConfig.typeMapping] || 'div';
-}
-
-/**
- * Handle GROUP node inlining
- *
- * FigmaToCode CRITICAL improvement: GROUP nodes are inlined to avoid unnecessary wrapper divs.
- * If GROUP has 1 child, return child directly. If multiple children, create container but mark as GROUP.
- *
- * @param groupNode - GROUP node from Figma
- * @param cumulativeRotation - Cumulative rotation from parent nodes
- * @returns Transformed node or null if empty
- */
-function handleGroupInlining(
-  groupNode: FigmaNode,
-  cumulativeRotation: number,
-  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
-  parentBounds?: { x: number; y: number; width: number; height: number },
-  parentLayoutSizing?: { horizontal?: string; vertical?: string }
-): SimpleAltNode | null {
-  if (!groupNode.children || groupNode.children.length === 0) {
-    return null; // Empty GROUP, skip entirely
-  }
-
-  // Calculate cumulative rotation for children
-  const groupRotation = (groupNode as any).rotation || 0;
-  const newCumulativeRotation = cumulativeRotation - (groupRotation * 180 / Math.PI);
-
-  // WP25 FIX: Pass parent layoutMode through GROUP inlining
-  // If GROUP has only 1 child, return child directly (inline the GROUP)
-  if (groupNode.children.length === 1) {
-    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode, parentBounds, undefined, parentLayoutSizing);
-  }
-
-  // Multiple children: create container but mark as GROUP
-  // WP25 FIX: GROUP doesn't have layoutMode, so pass parent's layoutMode to children
-  // WP31: GROUPs use CSS Grid to stack children (MCP pattern)
-  // Pattern: inline-grid + grid-area:1/1 for all children + margin for positioning
-  const groupBounds = groupNode.absoluteBoundingBox;
-
-  // WP31: Calculate GROUP position relative to parent (for free-positioned GROUPs)
-  const groupStyles: Record<string, string> = {
-    display: 'inline-grid',
-    'grid-template-columns': 'max-content',
-    'grid-template-rows': 'max-content',
-    'place-items': 'start',
-  };
-
-  // WP31: If parent has no layoutMode, GROUP needs absolute positioning
-  // WP38: Also handle layoutPositioning ABSOLUTE with constraints (RIGHT/BOTTOM)
-  const isAbsolutePositioned = (groupNode as any).layoutPositioning === 'ABSOLUTE';
-  const constraints = (groupNode as any).constraints;
-
-  if ((!parentLayoutMode || isAbsolutePositioned) && parentBounds && groupBounds) {
-    groupStyles.position = 'absolute';
-    groupStyles.width = `${groupBounds.width}px`;
-    groupStyles.height = `${groupBounds.height}px`;
-
-    // WP38: Handle RIGHT constraint
-    if (constraints?.horizontal === 'RIGHT') {
-      groupStyles.right = `${parentBounds.width - (groupBounds.x - parentBounds.x) - groupBounds.width}px`;
-    } else {
-      groupStyles.left = `${groupBounds.x - parentBounds.x}px`;
-    }
-
-    // WP38: Handle BOTTOM constraint
-    if (constraints?.vertical === 'BOTTOM') {
-      groupStyles.bottom = `${parentBounds.height - (groupBounds.y - parentBounds.y) - groupBounds.height}px`;
-    } else {
-      groupStyles.top = `${groupBounds.y - parentBounds.y}px`;
-    }
-  }
-
-  // WP38 Fix #23: Detect Figma mask pattern (isMask: true on first child)
-  // Pattern: First child with isMask + IMAGE fill acts as alpha mask for subsequent children
-  // Solution: Store maskImageRef on children, generator applies CSS mask-image with resolved URL
-  const maskChild = groupNode.children[0];
-  const hasMaskPattern = (maskChild as any)?.isMask === true;
-  let maskImageRef: string | null = null;
-
-  if (hasMaskPattern) {
-    // Extract imageRef from mask element's IMAGE fill
-    const maskFills = (maskChild as any)?.fills || [];
-    const imageFill = maskFills.find((f: any) => f.type === 'IMAGE' && f.imageRef);
-    if (imageFill?.imageRef) {
-      maskImageRef = imageFill.imageRef;
-    }
-  }
-
-  const container: SimpleAltNode = {
-    id: groupNode.id,
-    name: groupNode.name,
-    uniqueName: generateUniqueName(groupNode.name),
-    type: 'group',
-    originalType: groupNode.type, // T177: Preserve original type
-    styles: groupStyles,
-    children: groupNode.children
-      .filter((child, index) => {
-        // WP38 Fix #23: Skip the mask element itself (it's invisible in Figma output)
-        if (hasMaskPattern && index === 0 && (child as any).isMask) {
-          return false;
-        }
-        return true;
-      })
-      .map(child => {
-        // WP38: Pass groupBounds as parentBounds so children calculate position relative to GROUP, not grandparent
-        // This prevents double-offset (GROUP at 41,41 + child at 41,41 = child at 82,82)
-        // GROUP doesn't have layoutSizing - pass parent's sizing through
-        const altChild = transformToAltNode(child, newCumulativeRotation, undefined, groupBounds, undefined, parentLayoutSizing);
-
-        // WP38 Fix #23: Store maskImageRef on masked elements (children after mask)
-        // The generator will resolve the URL and apply CSS mask-image styles
-        if (altChild && hasMaskPattern && maskImageRef) {
-          altChild.maskImageRef = maskImageRef;
-        }
-
-        if (altChild && groupBounds && child.absoluteBoundingBox) {
-          const childBounds = child.absoluteBoundingBox;
-          const childConstraints = (child as any).constraints;
-
-          // WP38: For children with RIGHT/BOTTOM constraints, use absolute positioning
-          // This allows negative values and proper responsive behavior
-          const isHorizontalRight = childConstraints?.horizontal === 'RIGHT';
-          const isVerticalBottom = childConstraints?.vertical === 'BOTTOM';
-
-          if (isHorizontalRight || isVerticalBottom) {
-            // Use absolute positioning like MCP
-            altChild.styles.position = 'absolute';
-
-            if (isHorizontalRight) {
-              const rightOffset = groupBounds.width - (childBounds.x - groupBounds.x) - childBounds.width;
-              altChild.styles.right = `${rightOffset}px`;
-            } else {
-              altChild.styles.left = `${childBounds.x - groupBounds.x}px`;
-            }
-
-            if (isVerticalBottom) {
-              const bottomOffset = groupBounds.height - (childBounds.y - groupBounds.y) - childBounds.height;
-              altChild.styles.bottom = `${bottomOffset}px`;
-            } else {
-              altChild.styles.top = `${childBounds.y - groupBounds.y}px`;
-            }
-          } else {
-            // WP31: Standard grid stacking with margins
-            const marginLeft = Math.round(childBounds.x - groupBounds.x);
-            const marginTop = Math.round(childBounds.y - groupBounds.y);
-
-            altChild.styles['grid-area'] = '1 / 1';
-            if (marginLeft > 0) altChild.styles['margin-left'] = `${marginLeft}px`;
-            if (marginTop > 0) altChild.styles['margin-top'] = `${marginTop}px`;
-
-            // Clear position styles for grid children
-            delete altChild.styles.position;
-            delete altChild.styles.top;
-            delete altChild.styles.left;
-            delete altChild.styles.right;
-            delete altChild.styles.bottom;
-          }
-        }
-        return altChild;
-      })
-      .filter((node): node is SimpleAltNode => node !== null),
-    originalNode: groupNode,
-    visible: true,
-    canBeFlattened: false,
-    cumulativeRotation: newCumulativeRotation,
-  };
-
-  return container;
-}
-
-/**
- * Detect if node is likely an icon
- *
- * FigmaToCode HIGH priority: Icon detection for special handling
- * WP28 T209: Now uses externalized config for thresholds and icon types
- *
- * @param figmaNode - Figma node to check
- * @returns true if likely an icon
- */
-function isLikelyIcon(figmaNode: FigmaNode): boolean {
-  // Check type (icons are usually VECTOR, BOOLEAN_OPERATION, or small COMPONENT)
-  if (figmaConfig.constants.iconNodeTypes.includes(figmaNode.type)) {
-    return true;
-  }
-
-  // Check size (icons typically ≤64px) - threshold from config
-  const width = figmaNode.absoluteBoundingBox?.width || 0;
-  const height = figmaNode.absoluteBoundingBox?.height || 0;
-  if (width <= figmaConfig.thresholds.iconMaxSize && height <= figmaConfig.thresholds.iconMaxSize) {
-    // Check if it has export settings (common for icons)
-    const exportSettings = (figmaNode as any).exportSettings;
-    if (exportSettings && exportSettings.length > 0) {
-      return true;
-    }
-
-    // Small COMPONENT might be an icon - threshold from config
-    if (figmaNode.type === 'COMPONENT' &&
-        width <= figmaConfig.thresholds.iconComponentMaxSize &&
-        height <= figmaConfig.thresholds.iconComponentMaxSize) {
-      return true;
-    }
-  }
-
-  return false;
-}
+import type { FigmaNode } from '../types/figma';
+import type { SimpleAltNode, FillData } from './types';
+import figmaConfig from '../figma-transform-config.json';
+import { resolveVariableName } from './index';
 
 /**
  * WP28 T210: Extract universal fallbacks for all properties defined in config
@@ -369,7 +23,7 @@ function isLikelyIcon(figmaNode: FigmaNode): boolean {
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
   // Extract simple properties with direct unit conversion
@@ -619,7 +273,7 @@ function extractComplexProperties(figmaNode: FigmaNode, altNode: SimpleAltNode):
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
   // NOTE: overflow (clipsContent) handled by official-clipscontent-true rule
@@ -667,46 +321,6 @@ function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: SimpleAltN
 }
 
 /**
- * Apply FigmaToCode HIGH priority improvements
- *
- * @param figmaNode - Original Figma node
- * @param altNode - AltNode being constructed
- * @param cumulativeRotation - Cumulative rotation in degrees
- */
-function applyHighPriorityImprovements(
-  figmaNode: FigmaNode,
-  altNode: SimpleAltNode,
-  cumulativeRotation: number
-): void {
-  // 1. Rotation conversion (radians → degrees)
-  // WP28 T209: Now uses config default for rotation check
-  // WP32 FIX: Keep Figma's rotation sign - CSS rotate() uses same convention
-  const rotation = (figmaNode as any).rotation;
-  if (rotation && rotation !== figmaConfig.defaults.rotation) {
-    const rotationDegrees = rotation * 180 / Math.PI;
-    altNode.styles.transform = `rotate(${rotationDegrees}deg)`;
-  }
-
-  // 2. Icon detection
-  altNode.isIcon = isLikelyIcon(figmaNode);
-
-  // 3. Empty container optimization
-  // If FRAME is empty and has no fills/strokes/effects, mark as empty
-  // (Note: Disabled for now to avoid test failures - can be enabled per use case)
-  // if (
-  //   figmaNode.type === 'FRAME' &&
-  //   (!figmaNode.children || figmaNode.children.length === 0) &&
-  //   (!(figmaNode as any).fills || (figmaNode as any).fills.length === 0) &&
-  //   (!(figmaNode as any).strokes || (figmaNode as any).strokes.length === 0)
-  // ) {
-  //   altNode.type = 'rectangle';
-  // }
-
-  // 4. Layout wrap support
-  // NOTE: flexWrap (layoutWrap) handled by official-layoutwrap rules
-}
-
-/**
  * Normalize auto-layout to CSS flexbox
  *
  * @param figmaNode - Original Figma node
@@ -714,7 +328,7 @@ function applyHighPriorityImprovements(
  * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
  * @param parentBounds - Parent's absoluteBoundingBox for constraints positioning (WP31)
  */
-function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE', parentBounds?: { x: number; y: number; width: number; height: number }, parentLayoutSizing?: { horizontal?: string; vertical?: string }): void {
+export function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE', parentBounds?: { x: number; y: number; width: number; height: number }, parentLayoutSizing?: { horizontal?: string; vertical?: string }): void {
   const node = figmaNode as any;
 
   // Grid template columns/rows (COMPLEX - calculated values, not in rules)
@@ -927,7 +541,7 @@ function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, parentLay
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   // WP31: Skip fills for SVG types - fill is in the SVG, not as CSS background
   const nodeType = figmaNode.type as string;
   if (nodeType === 'VECTOR' || nodeType === 'BOOLEAN_OPERATION') {
@@ -1083,7 +697,7 @@ function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   const node = figmaNode as any;
 
   // Apply border/outline if strokes exist
@@ -1145,7 +759,7 @@ function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   if (!figmaNode.effects || figmaNode.effects.length === 0) {
     return;
   }
@@ -1196,7 +810,7 @@ function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
  * @param figmaNode - Original Figma node
  * @param altNode - AltNode being constructed
  */
-function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
+export function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
   if (figmaNode.type !== 'TEXT') {
     return;
   }
@@ -1258,218 +872,4 @@ function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): void {
       altNode.styles.color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
     }
   }
-}
-
-// WP31 T224: Module-level variable map for resolveVariableName
-let currentVariablesMap: Record<string, unknown> = {};
-
-/**
- * Transform Figma node to AltNode
- *
- * Main entry point for transformation engine. Implements FigmaToCode production patterns:
- * - Invisible node filtering
- * - GROUP node inlining
- * - Unique name generation
- * - Rotation tracking
- * - Property normalization
- *
- * @param figmaNode - Figma node from API
- * @param cumulativeRotation - Cumulative rotation from parent nodes (degrees)
- * @param parentLayoutMode - Parent's layoutMode for flex vs inline-flex logic (WP25)
- * @param parentBounds - Parent's absoluteBoundingBox for constraints positioning (WP31)
- * @param variables - WP31 T224: Figma variables map for CSS variable resolution
- * @returns Transformed AltNode or null if filtered out
- */
-export function transformToAltNode(
-  figmaNode: FigmaNode,
-  cumulativeRotation: number = 0,
-  parentLayoutMode?: 'HORIZONTAL' | 'VERTICAL' | 'NONE',
-  parentBounds?: { x: number; y: number; width: number; height: number },
-  variables?: Record<string, unknown>,
-  parentLayoutSizing?: { horizontal?: string; vertical?: string }
-): SimpleAltNode | null {
-  // WP31 T224: Store variables in module scope for resolveVariableName
-  if (variables) {
-    currentVariablesMap = variables;
-  }
-  // NOTE: Hidden nodes (visible === false) are KEPT in tree with visible: false
-  // This allows the UI to show hidden nodes with EyeOff indicator (T156)
-  // The `visible` property is preserved at line 531
-
-  // CRITICAL: GROUP node inlining
-  if (figmaNode.type === 'GROUP' && figmaNode.children) {
-    return handleGroupInlining(figmaNode, cumulativeRotation, parentLayoutMode, parentBounds, parentLayoutSizing);
-  }
-
-  // CRITICAL: Unique name generation
-  const uniqueName = generateUniqueName(figmaNode.name);
-
-  // Calculate this node's cumulative rotation (input + own rotation)
-  const nodeRotation = (figmaNode as any).rotation || 0;
-  const nodeCumulativeRotation = cumulativeRotation - (nodeRotation * 180 / Math.PI);
-
-  // WP25 FIX: Flatten style properties into originalNode for rule matching
-  // Rules check originalNode.fontWeight, but Figma stores it in node.style.fontWeight
-  const flattenedNode = { ...figmaNode };
-  if ((figmaNode as any).style) {
-    Object.assign(flattenedNode, (figmaNode as any).style);
-  }
-
-  const altNode: SimpleAltNode = {
-    id: figmaNode.id,
-    name: figmaNode.name,
-    uniqueName,
-    type: mapNodeType(figmaNode.type), // HTML tag for rendering
-    originalType: figmaNode.type, // T177: Preserve Figma type for TEXT detection
-    styles: {},
-    children: [],
-    originalNode: flattenedNode, // CRITICAL: preserve complete Figma data with flattened style
-    visible: figmaNode.visible ?? true,
-    canBeFlattened: false,
-    cumulativeRotation: nodeCumulativeRotation,
-  };
-
-  // Normalize properties
-  normalizeLayout(figmaNode, altNode, parentLayoutMode, parentBounds, parentLayoutSizing);
-  normalizeFills(figmaNode, altNode);
-  normalizeStrokes(figmaNode, altNode);
-  normalizeEffects(figmaNode, altNode);
-  normalizeText(figmaNode, altNode);
-  normalizeAdditionalProperties(figmaNode, altNode); // WP25: Extract ALL Figma properties
-
-  // T228: Extract VECTOR SVG data
-  if (figmaNode.type === 'VECTOR') {
-    const vectorNode = figmaNode as any;
-
-    if (vectorNode.fillGeometry || vectorNode.strokeGeometry) {
-      altNode.svgData = {
-        fillGeometry: vectorNode.fillGeometry,
-        strokeGeometry: vectorNode.strokeGeometry,
-        fills: vectorNode.fills,
-        strokes: vectorNode.strokes,
-        strokeWeight: vectorNode.strokeWeight,
-        bounds: vectorNode.absoluteBoundingBox || { x: 0, y: 0, width: 100, height: 100 }
-      };
-    }
-  }
-
-  // WP38: Handle geometric shapes (ELLIPSE, POLYGON, STAR, REGULAR_POLYGON)
-  // These shapes need clip-path or border-radius to clip content (especially images) correctly
-  if (['ELLIPSE', 'POLYGON', 'STAR', 'REGULAR_POLYGON'].includes(figmaNode.type)) {
-    const shapeNode = figmaNode as any;
-
-    if (figmaNode.type === 'ELLIPSE') {
-      // For ellipse: use border-radius: 50% (works for circles and ellipses)
-      altNode.styles['border-radius'] = '50%';
-      altNode.styles['overflow'] = 'hidden';
-    } else if (shapeNode.fillGeometry?.[0]?.path) {
-      // For polygons/stars: use clip-path with SVG path from Figma
-      altNode.styles['clip-path'] = `path('${shapeNode.fillGeometry[0].path}')`;
-    }
-  }
-
-  // WP28 T210: Extract universal fallbacks for ALL properties in config
-  // This ensures every property has a CSS fallback, even if no rule matches
-  // Rules will override these fallbacks with semantic classes (e.g., text-sm instead of text-[14px])
-  extractUniversalFallbacks(figmaNode, altNode);
-
-  // Apply HIGH priority improvements
-  applyHighPriorityImprovements(figmaNode, altNode, cumulativeRotation);
-
-  // Transform children recursively with updated cumulative rotation
-  // WP25 FIX: Pass this node's layoutMode to children for flex vs inline-flex logic
-  // WP31: Pass this node's bounds to children for constraints positioning
-  // WP38: Pass this node's layoutSizing to children for FILL inside HUG detection
-  if (figmaNode.children) {
-    const currentLayoutMode = (figmaNode as any).layoutMode as 'HORIZONTAL' | 'VERTICAL' | 'NONE' | undefined;
-    const currentBounds = figmaNode.absoluteBoundingBox;
-    const currentLayoutSizing = {
-      horizontal: (figmaNode as any).layoutSizingHorizontal,
-      vertical: (figmaNode as any).layoutSizingVertical
-    };
-    altNode.children = figmaNode.children
-      .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds, undefined, currentLayoutSizing))
-      .filter((node): node is SimpleAltNode => node !== null);
-  }
-
-  // WP32: Image containers with children need position:relative for proper z-stacking
-  // When a node has imageData AND children, the background image is rendered absolute
-  // The container needs position:relative as positioning context
-  // Children need position:relative to stack above the absolute background
-  if (altNode.imageData && altNode.children && altNode.children.length > 0) {
-    altNode.styles.position = 'relative';
-    for (const child of altNode.children) {
-      if (child.styles.position !== 'absolute') {
-        child.styles.position = 'relative';
-      }
-    }
-  }
-
-  return altNode;
-}
-
-/**
- * WP31 T224: Helper function to resolve Figma variable names from variable IDs
- *
- * Resolution order:
- * 1. Check system-variables.json (extracted from node, may have user-updated names)
- * 2. Check Figma API variables (Enterprise only)
- * 3. Fallback to ID-based name
- *
- * @param variableId - Figma variable ID (e.g., "VariableID:abc/123:45")
- * @param figmaNode - Original Figma node with document context
- * @returns Variable name (e.g., "colors-main-01") or fallback based on ID
- */
-function resolveVariableName(variableId: string, figmaNode: FigmaNode): string | null {
-  // WP31: First check system-variables.json (has user-updatable names)
-  const cachedName = getVariableCssNameSync(variableId);
-  if (cachedName) {
-    return cachedName;
-  }
-
-  // WP31 T224: Check module-level variables map from Figma API (Enterprise only)
-  if (currentVariablesMap && Object.keys(currentVariablesMap).length > 0) {
-    // API response has nested structure: { variables: { id → { name, ... } } }
-    const variablesObj = (currentVariablesMap as any).variables || currentVariablesMap;
-
-    // Try direct lookup first
-    const variable = variablesObj[variableId] as { name?: string } | undefined;
-    if (variable?.name) {
-      // Sanitize name for CSS custom property (replace / and spaces)
-      return variable.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
-    }
-
-    // Try matching by the numeric ID part (e.g., "125:11")
-    const idMatch = variableId.match(/(\d+:\d+)$/);
-    if (idMatch) {
-      const numericId = idMatch[1];
-      for (const [key, val] of Object.entries(variablesObj)) {
-        if (key.includes(numericId)) {
-          const v = val as { name?: string };
-          if (v?.name) {
-            return v.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
-          }
-        }
-      }
-    }
-  }
-
-  // Try to access figmaNode.document.variables if available (legacy path)
-  const doc = (figmaNode as any).document;
-  if (doc?.variables) {
-    const variable = doc.variables[variableId];
-    if (variable?.name) {
-      return variable.name.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase();
-    }
-  }
-
-  // Fallback: Extract a meaningful name from the variable ID
-  // "VariableID:710641395bac9f5822c4c329c8e7d6bb6fc986f8/125:11" -> "var-125-11"
-  const idMatch = variableId.match(/(\d+):(\d+)$/);
-  if (idMatch) {
-    return `var-${idMatch[1]}-${idMatch[2]}`;
-  }
-
-  // Last fallback: use a hash of the ID
-  return `var-${Math.abs(variableId.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)).toString(16)}`;
 }
