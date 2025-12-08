@@ -43,7 +43,6 @@ import {
 import { useApiQuota } from '@/hooks/use-api-quota';
 import { QuotaIndicator } from '@/components/quota/quota-indicator';
 import { Highlight, themes } from 'prism-react-renderer';
-import { RefetchButton } from '@/components/refetch-button';
 import { RefetchDialog } from '@/components/refetch-dialog';
 import { VersionDropdown } from '@/components/version-dropdown';
 import { useRefetch } from '@/hooks/use-refetch';
@@ -53,7 +52,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Image from 'next/image';
 import FigmaTreeView from '@/components/figma-tree-view';
 import { InformationPanel } from '@/components/information-panel';
 import { RulesPanel } from '@/components/rules-panel';

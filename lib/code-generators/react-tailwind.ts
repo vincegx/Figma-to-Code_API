@@ -1,5 +1,5 @@
 import type { SimpleAltNode, FillData } from '../altnode-transform';
-import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind, truncateLayerName, toCamelCase, uniquePropName } from './helpers';
+import { toPascalCase, cssPropToTailwind, extractTextContent, extractComponentDataAttributes, scaleModeToTailwind, truncateLayerName, uniquePropName } from './helpers';
 import { GeneratedCodeOutput, GeneratedAsset } from './react';
 import type { MultiFrameworkRule, FrameworkType } from '../types/rules';
 import type { CollectedProp, GenerateOptions } from '../types/code-generator';
@@ -8,6 +8,7 @@ import { vectorToDataURL, convertVectorToSVG } from '../utils/svg-converter';
 import { fetchFigmaImages, extractImageNodes, extractSvgContainers, fetchNodesAsSVG, generateSvgFilename, SvgExportNode } from '../utils/image-fetcher';
 import { generateCssVariableDefinitions } from '../utils/variable-css';
 import { getVisibilityClasses } from '../merge/visibility-mapper';
+import { TAILWIND_SPACING_SCALE_REDUCED } from '../constants';
 
 /**
  * WP08: Smart split for Tailwind classes that preserves arbitrary values with spaces.
@@ -663,30 +664,8 @@ function consolidateSemanticSpacing(classes: string[]): string[] {
   const result: string[] = [];
   const consumed = new Set<number>();
 
-  // Tailwind spacing scale (px → class suffix)
-  const standardSpacing: Record<number, string> = {
-    0: '0',
-    1: 'px',
-    4: '1',
-    8: '2',
-    12: '3',
-    16: '4',
-    20: '5',
-    24: '6',
-    28: '7',
-    32: '8',
-    36: '9',
-    40: '10',
-    44: '11',
-    48: '12',
-    // Tailwind skips 13, 15 - no w-13 or w-15 classes exist
-    56: '14',
-    64: '16',
-    // WP38 FIX: gap-18 does NOT exist in Tailwind V3 (skips from 16 to 20)
-    // 72: '18',  // REMOVED - not valid in V3
-    80: '20',
-    96: '24',
-  };
+  // Use imported constant instead of local duplicate
+  const standardSpacing = TAILWIND_SPACING_SCALE_REDUCED;
 
   // Extract value from class (pl-12 → 12, pl-[48px] → 48)
   function extractValue(cls: string, prefix: string): number | null {
@@ -889,14 +868,12 @@ export async function generateReactTailwind(
       const filename = `${realNodeId}_${imgNode.imageRef.substring(0, 8)}.png`;
       imageUrls[imgNode.imageRef] = `/api/images/${nodeId}/${filename}`;
     }
-    // console.log(`✅ Using ${Object.keys(imageUrls).length} local image paths`);
   } else if (figmaFileKey && figmaAccessToken) {
     // Export mode: fetch from Figma API
     const imageNodes = extractImageNodes(altNode);
     const imageRefs = imageNodes.map(n => n.imageRef);
     if (imageRefs.length > 0) {
       imageUrls = await fetchFigmaImages(figmaFileKey, imageRefs, figmaAccessToken);
-      // console.log(`✅ Fetched ${Object.keys(imageUrls).length} image URLs from Figma API`);
     }
   }
 
@@ -929,14 +906,12 @@ export async function generateReactTailwind(
       const filename = generateSvgFilename(svgNode.name, svgNode.nodeId);
       svgDataUrls[svgNode.nodeId] = `/api/images/${nodeId}/${filename}`;
     }
-    // console.log(`✅ Using ${Object.keys(svgDataUrls).length} local SVG paths for viewer`);
   } else if (!isViewerMode && svgNodes.length > 0) {
     // WP32: Export mode - fetch from Figma API
     let svgContent: Record<string, string> = {};
     if (figmaFileKey && figmaAccessToken) {
       const nodeIds = svgNodes.map(n => n.nodeId);
       svgContent = await fetchNodesAsSVG(figmaFileKey, nodeIds, figmaAccessToken);
-      // console.log(`✅ Fetched ${Object.keys(svgContent).length} SVGs from Figma API`);
     }
 
     for (const svgNode of svgNodes) {
@@ -1001,9 +976,7 @@ export async function generateReactTailwind(
   );
 
   // WP31: Generate CSS variable definitions for React-Tailwind
-  // console.log('[REACT-TAILWIND] Calling generateCssVariableDefinitions...');
   const cssVariables = generateCssVariableDefinitions();
-  // console.log('[REACT-TAILWIND] cssVariables length:', cssVariables.length);
 
   // Build style tag with CSS variables (if any)
   const styleTag = cssVariables
@@ -1091,7 +1064,6 @@ function generateTailwindJSXElement(
     const altText = node.name || 'svg';
 
     // WP32 DEBUG
-    // console.log(`🔍 SVG: ${node.name} (${node.id}) - bounds: ${JSON.stringify(svgBounds)}`);
 
     // Build data attributes
     // WP38: Truncate long layer names (TEXT nodes often use full text content)

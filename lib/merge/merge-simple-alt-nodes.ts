@@ -12,7 +12,7 @@
  * 5. Return merged SimpleAltNode with responsiveStyles
  */
 
-import type { SimpleAltNode, FillData } from '../altnode-transform';
+import type { SimpleAltNode } from '../altnode-transform';
 import type { UnifiedElement, ResponsiveStyles } from '../types/merge';
 import type { FigmaNodeType } from '../types/figma';
 import { getVisibilityClasses } from './visibility-mapper';

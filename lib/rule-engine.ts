@@ -174,30 +174,15 @@ export function selectorMatches(
     // Access property from originalNode (where Figma properties live)
     const actualValue = (altNode.originalNode as any)?.[key];
 
-    // DEBUG: Disabled for now
-    // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
-    //   console.log(`  Checking ${key}: actual=${actualValue}, expected=${JSON.stringify(expectedValue)}`);
-    // }
-
     // If selector specifies this property but node doesn't have it → no match
     if (actualValue === undefined) {
-      // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
-      //   console.log(`  ❌ ${key} is undefined in originalNode`);
-      // }
       return false;
     }
 
     // Compare values (handle arrays, objects, primitives)
     if (!valuesMatch(actualValue, expectedValue)) {
-      // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
-      //   console.log(`  ❌ ${key} values don't match`);
-      // }
       return false;
     }
-
-    // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
-    //   console.log(`  ✅ ${key} matches`);
-    // }
   }
 
   // All checks passed - selector matches
@@ -398,15 +383,6 @@ export function evaluateMultiFrameworkRules(
   rules: MultiFrameworkRule[],
   framework: FrameworkType
 ): ResolvedProperties {
-  // DEBUG: Disabled for now
-  // if (altNode.name === 'Tab' || altNode.name === 'Tab titleleft') {
-  //   console.log(`\n=== EVALUATING ${altNode.name} ===`);
-  //   console.log(`Type: ${altNode.originalType}`);
-  //   console.log(`Total rules: ${rules.length}`);
-  //   console.log(`originalNode.itemSpacing: ${(altNode.originalNode as any)?.itemSpacing}`);
-  //   console.log(`originalNode.opacity: ${(altNode.originalNode as any)?.opacity}`);
-  // }
-
   // Filter to rules that:
   // 1. Are enabled
   // 2. Have a transformer for the selected framework (or fallback for v4)
@@ -418,13 +394,6 @@ export function evaluateMultiFrameworkRules(
     (rule.transformers[framework] !== undefined || rule.transformers[effectiveFramework] !== undefined) &&
     selectorMatches(altNode, rule.selector)
   );
-
-  // DEBUG: Disabled
-  // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
-  //   console.log(`\n=== ${altNode.name} - ${framework} ===`);
-  //   console.log(`Matching rules: ${matchingRules.length}`);
-  //   matchingRules.forEach(r => console.log(`  - ${r.id}`));
-  // }
 
   // Sort by priority (descending - highest first)
   const sortedRules = matchingRules.sort((a, b) => b.priority - a.priority);
@@ -461,11 +430,6 @@ function resolveMultiFrameworkConflicts(
     // Extract properties from transformer based on framework
     const ruleProperties = extractTransformerProperties(transformer, framework, altNode, rule.selector);
 
-    // DEBUG: Disabled
-    // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
-    //   console.log(`  ${rule.id} extracted:`, ruleProperties);
-    // }
-
     for (const [propName, propValue] of Object.entries(ruleProperties)) {
       if (properties[propName] === undefined) {
         // No conflict - this rule owns the property
@@ -486,12 +450,6 @@ function resolveMultiFrameworkConflicts(
       }
     }
   }
-
-  // DEBUG: Disabled
-  // if ((altNode.name === 'Tab' || altNode.name === 'Tab titleleft') && framework === 'react-tailwind') {
-  //   console.log(`Final properties:`, properties);
-  //   console.log('');
-  // }
 
   // Build conflicts array
   const conflicts = Array.from(conflictMap.entries()).map(([property, ruleIds]) => ({

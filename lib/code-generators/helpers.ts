@@ -685,18 +685,7 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
     return standards[cssValue] || `z-[${cssValue}]`;
   }
 
-  // WP31: Position and inset properties for constraints-based positioning
-  if (prop === 'position') {
-    if (cssValue === 'absolute') return 'absolute';
-    if (cssValue === 'relative') return 'relative';
-    if (cssValue === 'fixed') return 'fixed';
-    if (cssValue === 'sticky') return 'sticky';
-    return '';
-  }
-  if (prop === 'top') return `top-[${cssValue}]`;
-  if (prop === 'bottom') return `bottom-[${cssValue}]`;
-  if (prop === 'left') return `left-[${cssValue}]`;
-  if (prop === 'right') return `right-[${cssValue}]`;
+  // NOTE: Position properties handled earlier at line ~524 (no duplicate here)
 
   // WP25: Flex grow
   // WP31: flex-grow-0 must be explicit for responsive resets (md:grow-0)
