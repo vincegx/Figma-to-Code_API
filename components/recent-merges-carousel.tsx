@@ -89,18 +89,8 @@ export function RecentMergesCarousel() {
         )}
       </div>
 
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex-shrink-0 w-56">
-              <div className="h-32 rounded-lg bg-bg-secondary border border-border-primary animate-pulse" />
-              <div className="h-3 w-24 bg-bg-secondary rounded mt-3 animate-pulse" />
-              <div className="h-2 w-16 bg-bg-secondary rounded mt-2 animate-pulse" />
-            </div>
-          ))}
-        </div>
-      ) : recentMerges.length === 0 ? (
+      {/* Empty State (also shown during loading to avoid skeleton flash) */}
+      {isLoading || recentMerges.length === 0 ? (
         /* Empty State */
         <div className="text-center py-12">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-bg-secondary flex items-center justify-center">
