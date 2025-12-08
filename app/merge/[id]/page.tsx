@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Resizable } from 're-resizable';
 import { useUIStore } from '@/lib/store';
@@ -13,11 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  ChevronRight,
-  ChevronLeft,
-  RefreshCw,
-  RotateCcw,
-  Download,
   Monitor,
   Grid3x3,
   PanelLeftClose,
@@ -28,26 +23,20 @@ import {
   Check,
   Maximize2,
   X,
-  Home,
   Eye,
+  Download,
 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import UnifiedTreeView from '@/components/unified-tree-view';
 import { ResizablePreviewViewport } from '@/components/resizable-preview-viewport';
 import LivePreview, { type LivePreviewHandle } from '@/components/live-preview';
 import { RulesPanel } from '@/components/rules-panel';
 import { cn } from '@/lib/utils';
-import type { Merge, UnifiedElement } from '@/lib/types/merge';
-import type { MultiFrameworkRule } from '@/lib/types/rules';
+import type { UnifiedElement } from '@/lib/types/merge';
 
-// Phase 3: Extracted components
-import { HierarchyBlock } from './_components/HierarchyBlock';
+// Phase 3: Extracted hooks and components
+import { useMergeData, useMergeCode } from './_hooks';
+import { HierarchyBlock, MergeHeader, MergeCodePanel } from './_components';
 
 // ============================================================================
 // Types
@@ -56,27 +45,11 @@ import { HierarchyBlock } from './_components/HierarchyBlock';
 type MergeFrameworkType = 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
 
 // ============================================================================
-// Helper: Find node in unified tree
-// ============================================================================
-
-function findNodeInTree(tree: UnifiedElement, nodeId: string): UnifiedElement | null {
-  if (tree.id === nodeId) return tree;
-  if (tree.children) {
-    for (const child of tree.children) {
-      const found = findNodeInTree(child, nodeId);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-// ============================================================================
 // Main Component
 // ============================================================================
 
 export default function MergeViewerPage() {
   const params = useParams();
-  const router = useRouter();
   const mergeId = params.id as string;
 
   // UI Store for panel collapse and responsive mode
@@ -102,196 +75,59 @@ export default function MergeViewerPage() {
   const currentTheme = useUIStore((state) => state.theme);
   const codeTheme = currentTheme === 'light' ? themes.github : themes.nightOwl;
 
-  // State
-  const [merge, setMerge] = useState<Merge | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  // Local UI state
   const [previewFramework, setPreviewFramework] = useState<MergeFrameworkType>('react-tailwind');
-  const [codeActiveTab, setCodeActiveTab] = useState<'component' | 'styles'>('component');
-  const [withProps, setWithProps] = useState(false); // Generate React components with props interface
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [withProps, setWithProps] = useState(false);
   const [copiedClasses, setCopiedClasses] = useState(false);
   const [copiedRawData, setCopiedRawData] = useState(false);
   const [rawDataLimit, setRawDataLimit] = useState(2000);
   const [isCanvasFullscreen, setIsCanvasFullscreen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
-  const [displayCode, setDisplayCode] = useState<string>(''); // Code for selected node
-  const [displayCss, setDisplayCss] = useState<string>(''); // CSS for selected node
-  const [displayAltNode, setDisplayAltNode] = useState<any>(null); // SimpleAltNode for Layout block
-  const [isLoadingCode, setIsLoadingCode] = useState(false);
-  const [multiFrameworkRules, setMultiFrameworkRules] = useState<MultiFrameworkRule[]>([]);
-  const [allMergeIds, setAllMergeIds] = useState<string[]>([]); // For prev/next navigation
 
-  // Load all merge IDs for navigation
-  useEffect(() => {
-    async function loadMergeIds() {
-      try {
-        const response = await fetch('/api/merges');
-        if (response.ok) {
-          const data = await response.json();
-          // Sort by createdAt desc (newest first) and extract IDs
-          const sortedIds = (data.merges || [])
-            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .map((m: any) => m.id);
-          setAllMergeIds(sortedIds);
-        }
-      } catch (error) {
-        console.error('Failed to load merge IDs:', error);
-      }
-    }
-    loadMergeIds();
-  }, []);
+  // Phase 3: Data hook
+  const mergeData = useMergeData({ mergeId });
 
-  // Navigation functions
-  const currentIndex = allMergeIds.indexOf(mergeId as string);
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < allMergeIds.length - 1 && currentIndex !== -1;
+  // Phase 3: Code generation hook
+  const mergeCode = useMergeCode({
+    mergeId,
+    selectedNode: mergeData.selectedNode,
+    previewFramework,
+    withProps,
+  });
 
-  const goToPrevMerge = () => {
-    if (hasPrev) {
-      router.push(`/merge/${allMergeIds[currentIndex - 1]}`);
-    }
-  };
+  // Aliases for cleaner code (keeping original variable names)
+  const {
+    merge,
+    isLoading,
+    error,
+    selectedNodeId,
+    setSelectedNodeId,
+    multiFrameworkRules,
+    hasPrev,
+    hasNext,
+    goToPrevMerge,
+    goToNextMerge,
+    unifiedTree,
+    googleFontsUrl,
+    breakpoints,
+    selectedNode,
+    displayNode,
+  } = mergeData;
 
-  const goToNextMerge = () => {
-    if (hasNext) {
-      router.push(`/merge/${allMergeIds[currentIndex + 1]}`);
-    }
-  };
+  const {
+    displayCode,
+    displayCss,
+    displayAltNode,
+    isLoadingCode,
+  } = mergeCode;
 
-  // Load rules on mount
-  useEffect(() => {
-    async function loadRules() {
-      try {
-        const response = await fetch('/api/rules');
-        if (response.ok) {
-          const data = await response.json();
-          // Combine all 3 tiers of rules
-          const allRules = [
-            ...(data.officialRules || []),
-            ...(data.communityRules || []),
-            ...(data.customRules || []),
-          ];
-          setMultiFrameworkRules(allRules);
-        }
-      } catch (error) {
-        console.error('Failed to load rules:', error);
-      }
-    }
-    loadRules();
-  }, []);
-
-  // Load merge data
-  useEffect(() => {
-    async function loadMerge() {
-      if (!mergeId) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`/api/merges/${mergeId}`);
-        if (!response.ok) {
-          throw new Error(`Failed to load merge: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setMerge(data.merge);
-
-        // Select root node by default
-        if (data.merge?.result?.unifiedTree) {
-          setSelectedNodeId(data.merge.result.unifiedTree.id);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadMerge();
-  }, [mergeId]);
-
-  // Get unified tree and generated code
-  const unifiedTree = merge?.result?.unifiedTree || null;
+  // Get generated code for LivePreview (full component)
   const generatedCode = merge?.result?.generatedCode?.[previewFramework] || '';
-  // WP08: Get Google Fonts URL for font loading
-  const googleFontsUrl = merge?.result?.googleFontsUrl;
-
-  // WP08: Extract breakpoints from merge sourceNodes for responsive CSS
-  const breakpoints = useMemo(() => {
-    if (!merge?.sourceNodes) return undefined;
-    const mobileNode = merge.sourceNodes.find(n => n.breakpoint === 'mobile');
-    const tabletNode = merge.sourceNodes.find(n => n.breakpoint === 'tablet');
-    if (!mobileNode || !tabletNode) return undefined;
-    return {
-      mobileWidth: mobileNode.width,
-      tabletWidth: tabletNode.width,
-    };
-  }, [merge?.sourceNodes]);
-
-  // Find selected node in tree
-  const selectedNode = useMemo(() => {
-    if (!unifiedTree || !selectedNodeId) return null;
-    return findNodeInTree(unifiedTree, selectedNodeId);
-  }, [unifiedTree, selectedNodeId]);
-
-  // Display node (selected or root)
-  const displayNode = selectedNode || unifiedTree;
 
   // Reset raw data limit when selected node changes
   useEffect(() => {
     setRawDataLimit(2000);
   }, [selectedNodeId]);
-
-  // Generate code for selected node (like 1-node viewer)
-  useEffect(() => {
-    if (!mergeId || !selectedNode) {
-      setDisplayCode('');
-      setDisplayCss('');
-      setDisplayAltNode(null);
-      return;
-    }
-
-    // Get the source nodeId (original Figma ID)
-    const sourceNodeId = selectedNode.sources?.mobile?.nodeId
-      || selectedNode.sources?.tablet?.nodeId
-      || selectedNode.sources?.desktop?.nodeId;
-
-    if (!sourceNodeId) {
-      setDisplayCode('// No source node ID found');
-      setDisplayAltNode(null);
-      return;
-    }
-
-    async function fetchCode() {
-      setIsLoadingCode(true);
-      try {
-        const params = new URLSearchParams({ framework: previewFramework });
-        if (withProps) params.set('withProps', 'true');
-        const response = await fetch(
-          `/api/merges/${mergeId}/node/${encodeURIComponent(sourceNodeId!)}?${params}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setDisplayCode(data.code || '');
-          setDisplayCss(data.css || '');
-          setDisplayAltNode(data.altNode || null);
-        } else {
-          setDisplayCode('// Failed to generate code');
-          setDisplayAltNode(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch node code:', error);
-        setDisplayCode('// Error generating code');
-        setDisplayAltNode(null);
-      } finally {
-        setIsLoadingCode(false);
-      }
-    }
-
-    fetchCode();
-  }, [mergeId, selectedNode, previewFramework, withProps]);
 
   // Send highlight message to iframe when selection changes
   // Use source nodeId (original Figma ID) because that's what's in data-node-id attributes
@@ -397,126 +233,19 @@ export default function MergeViewerPage() {
   return (
     <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
       {/* ========== HEADER ========== */}
-      <header className="flex-shrink-0 flex justify-between px-5 py-3">
-        {/* Left: Title + Breadcrumb */}
-        <div>
-          <div className="flex items-center gap-4 mb-1">
-            <h1 className="text-2xl font-semibold text-text-primary">{merge.name}</h1>
-            <span className={cn(
-              'px-2 py-0.5 text-xs rounded',
-              merge.status === 'ready' ? 'bg-emerald-500/20 text-emerald-400' :
-              merge.status === 'error' ? 'bg-red-500/20 text-red-400' :
-              'bg-amber-500/20 text-amber-400'
-            )}>
-              {merge.status}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-text-muted hover:text-text-primary"><Home className="w-4 h-4" /></Link>
-            <ChevronRight className="w-4 h-4 text-text-muted" />
-            <Link href="/merges" className="text-text-muted hover:text-text-primary">Merges</Link>
-            <ChevronRight className="w-4 h-4 text-text-muted" />
-            <span className="text-text-primary">{displayNode?.name || merge.name}</span>
-          </div>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={async () => {
-                try {
-                  const response = await fetch(`/api/merges/${mergeId}`, { method: 'PATCH' });
-                  if (response.ok) {
-                    // Reload page to get fresh data
-                    window.location.reload();
-                  }
-                } catch (error) {
-                  console.error('Regenerate failed:', error);
-                }
-              }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
-              title="Regenerate merge"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setIframeKey((k) => k + 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors"
-              title="Refresh preview"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary border border-border-primary hover:bg-bg-hover text-text-muted hover:text-text-primary transition-colors" title="Export">
-                  <Download className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-bg-card border border-border-primary">
-                <DropdownMenuItem onClick={async () => { await navigator.clipboard.writeText(generatedCode); }}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy to Clipboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  const ext = previewFramework === 'html-css' ? 'html' : 'tsx';
-                  const blob = new Blob([generatedCode], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${merge.name}.${ext}`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Code File
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* Prev/Next navigation */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPrevMerge}
-                disabled={!hasPrev}
-                className={cn(
-                  "w-8 h-8 flex items-center justify-center rounded-lg border border-border-primary transition-colors",
-                  hasPrev
-                    ? "bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary"
-                    : "bg-bg-secondary/50 text-text-muted/30 cursor-not-allowed"
-                )}
-                title={hasPrev ? "Previous merge" : "No previous merge"}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goToNextMerge}
-                disabled={!hasNext}
-                className={cn(
-                  "w-8 h-8 flex items-center justify-center rounded-lg border border-border-primary transition-colors",
-                  hasNext
-                    ? "bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary"
-                    : "bg-bg-secondary/50 text-text-muted/30 cursor-not-allowed"
-                )}
-                title={hasNext ? "Next merge" : "No next merge"}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <Select value={previewFramework} onValueChange={(v) => setPreviewFramework(v as MergeFrameworkType)}>
-              <SelectTrigger className="h-8 w-[160px] bg-bg-secondary border-border-primary text-xs text-text-muted hover:bg-bg-hover">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-bg-card border border-border-primary">
-                <SelectItem value="react-tailwind" className="text-xs">React + Tailwind</SelectItem>
-                <SelectItem value="react-tailwind-v4" className="text-xs">React + Tailwind v4</SelectItem>
-                <SelectItem value="html-css" className="text-xs">HTML + CSS</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </header>
+      <MergeHeader
+        merge={merge}
+        mergeId={mergeId}
+        displayNodeName={displayNode?.name}
+        previewFramework={previewFramework}
+        generatedCode={generatedCode}
+        hasPrev={hasPrev}
+        hasNext={hasNext}
+        onFrameworkChange={setPreviewFramework}
+        onRefreshPreview={() => setIframeKey((k) => k + 1)}
+        goToPrevMerge={goToPrevMerge}
+        goToNextMerge={goToNextMerge}
+      />
 
       {/* ========== MAIN CONTENT ========== */}
       <main className="flex-1 overflow-auto p-4">
@@ -697,157 +426,17 @@ export default function MergeViewerPage() {
         {/* ========== ROW 2: Generated Code + Node Info ========== */}
         <div className="grid grid-cols-2 gap-4">
           {/* Block: Generated Code */}
-          <div className="bg-bg-card rounded-xl border border-border-primary p-4 flex flex-col">
-            <div className="flex items-center justify-between mb-4 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-text-primary">Generated Code</span>
-                <button
-                  onClick={() => setCodeActiveTab('component')}
-                  className={cn(
-                    'px-2 py-0.5 text-xs rounded transition-colors',
-                    codeActiveTab === 'component' ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover'
-                  )}
-                >
-                  Component
-                </button>
-                <button
-                  onClick={() => setCodeActiveTab('styles')}
-                  className={cn(
-                    'px-2 py-0.5 text-xs rounded transition-colors',
-                    codeActiveTab === 'styles' ? 'bg-toggle-active-bg text-toggle-active-text' : 'text-text-muted hover:bg-bg-hover'
-                  )}
-                >
-                  Styles
-                </button>
-                {/* Props checkbox - only visible for React frameworks */}
-                {(previewFramework === 'react-tailwind' || previewFramework === 'react-tailwind-v4') && (
-                  <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer ml-2">
-                    <input
-                      type="checkbox"
-                      checked={withProps}
-                      onChange={(e) => setWithProps(e.target.checked)}
-                      className="h-3 w-3 rounded border-gray-600 accent-accent"
-                    />
-                    Props
-                  </label>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={async () => {
-                    let contentToCopy: string;
-                    if (codeActiveTab === 'styles') {
-                      if (previewFramework === 'html-css') {
-                        contentToCopy = displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '';
-                      } else {
-                        contentToCopy = '/* Tailwind classes are inline - no separate styles needed */';
-                      }
-                    } else {
-                      if (previewFramework === 'html-css') {
-                        contentToCopy = displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
-                      } else {
-                        contentToCopy = displayCode || generatedCode;
-                      }
-                    }
-                    await navigator.clipboard.writeText(contentToCopy);
-                    setCopiedCode(true);
-                    setTimeout(() => setCopiedCode(false), 2000);
-                  }}
-                  className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
-                  title="Copy to clipboard"
-                >
-                  {copiedCode ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={() => {
-                    const isStylesHtmlCss = codeActiveTab === 'styles' && previewFramework === 'html-css';
-                    const ext = isStylesHtmlCss ? 'css' : (previewFramework === 'html-css' ? 'html' : 'tsx');
-                    let content: string;
-                    if (codeActiveTab === 'styles') {
-                      if (previewFramework === 'html-css') {
-                        content = displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '';
-                      } else {
-                        content = '/* Tailwind classes are inline - no separate styles needed */';
-                      }
-                    } else {
-                      if (previewFramework === 'html-css') {
-                        content = displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
-                      } else {
-                        content = displayCode || generatedCode;
-                      }
-                    }
-                    const blob = new Blob([content], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${selectedNode?.name || merge.name}.${ext}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  }}
-                  className="w-7 h-7 flex items-center justify-center rounded text-text-muted hover:bg-bg-hover"
-                  title="Download file"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 overflow-hidden relative">
-              {isLoadingCode && (
-                <div className="absolute inset-0 bg-bg-primary/50 flex items-center justify-center z-10">
-                  <div className="animate-spin h-5 w-5 border-2 border-accent-primary border-t-transparent rounded-full" />
-                </div>
-              )}
-              <Highlight
-                theme={codeTheme}
-                code={(() => {
-                  if (codeActiveTab === 'styles') {
-                    if (previewFramework === 'html-css') {
-                      return displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '/* No CSS */';
-                    } else {
-                      return '/* Tailwind classes are inline - no separate styles needed */';
-                    }
-                  }
-                  // Component tab
-                  if (previewFramework === 'html-css') {
-                    return displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode;
-                  }
-                  return displayCode || generatedCode;
-                })()}
-                language={codeActiveTab === 'styles' ? 'css' : (previewFramework === 'html-css' ? 'markup' : 'tsx')}
-              >
-                {({ style, tokens, getLineProps, getTokenProps }) => (
-                  <pre className="text-xs rounded-lg p-4 overflow-auto max-h-[490px] font-mono leading-5" style={{ ...style, background: 'transparent' }}>
-                    {tokens.map((line, i) => (
-                      <div key={i} {...getLineProps({ line })}>
-                        {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
-                        ))}
-                      </div>
-                    ))}
-                  </pre>
-                )}
-              </Highlight>
-            </div>
-            <div className="flex items-center gap-2 mt-3 text-xs text-text-muted flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>No errors</span>
-              <span>•</span>
-              <span>{(() => {
-                if (codeActiveTab === 'styles') {
-                  if (previewFramework === 'html-css') {
-                    return (displayCss || generatedCode.split('/* CSS */')[1]?.trim() || '').split('\n').length;
-                  }
-                  return 1; // "Tailwind classes are inline" message
-                }
-                if (previewFramework === 'html-css') {
-                  return (displayCode || generatedCode.split('/* CSS */')[0]?.trim() || generatedCode).split('\n').length;
-                }
-                return (displayCode || generatedCode).split('\n').length;
-              })()} lines</span>
-            </div>
-          </div>
+          <MergeCodePanel
+            displayCode={displayCode}
+            displayCss={displayCss}
+            generatedCode={generatedCode}
+            selectedNodeName={selectedNode?.name}
+            mergeName={merge.name}
+            previewFramework={previewFramework}
+            withProps={withProps}
+            isLoadingCode={isLoadingCode}
+            onWithPropsChange={setWithProps}
+          />
 
           {/* Block: Node Info + Hierarchy + Layout */}
           <div className="flex flex-col gap-4">
