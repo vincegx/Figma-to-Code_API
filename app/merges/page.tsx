@@ -34,87 +34,14 @@ import { MergeCreationModal } from '@/components/merge/merge-creation-modal';
 import { DeleteMergeDialog } from '@/components/merge/delete-merge-dialog';
 import type { MergeListItem, MergeStatus } from '@/lib/types/merge';
 
+// Phase 3: Extracted components
+import { StatusBadge, MergeCardSkeleton, EmptyState } from './_components';
+
 // ============================================================================
 // Types
 // ============================================================================
 
 type StatusFilter = MergeStatus | 'all';
-
-// ============================================================================
-// Status Badge
-// ============================================================================
-
-function StatusBadge({ status }: { status: MergeStatus }) {
-  const config = {
-    ready: { label: 'Ready', className: 'bg-green-500/20 text-green-400' },
-    processing: { label: 'Processing', className: 'bg-yellow-500/20 text-yellow-400' },
-    error: { label: 'Error', className: 'bg-red-500/20 text-red-400' },
-  }[status];
-
-  return (
-    <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', config.className)}>
-      {config.label}
-    </span>
-  );
-}
-
-// ============================================================================
-// Loading Skeleton
-// ============================================================================
-
-function MergeCardSkeleton() {
-  return (
-    <div className="bg-bg-card rounded-xl border border-border-primary overflow-hidden">
-      <div className="aspect-[4/3] bg-bg-secondary animate-pulse" />
-      <div className="p-3 space-y-2">
-        <div className="h-4 w-3/4 bg-bg-secondary animate-pulse rounded" />
-        <div className="h-3 w-1/2 bg-bg-secondary animate-pulse rounded" />
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// Empty State
-// ============================================================================
-
-function EmptyState({
-  onCreateClick,
-  hasFilters,
-  onClearFilters,
-}: {
-  onCreateClick: () => void;
-  hasFilters: boolean;
-  onClearFilters: () => void;
-}) {
-  if (hasFilters) {
-    return (
-      <div className="text-center py-16 bg-bg-card rounded-xl border border-border-primary">
-        <Search className="w-16 h-16 mx-auto mb-4 text-text-muted" />
-        <p className="text-text-muted mb-4">No merges match your filters</p>
-        <Button variant="outline" onClick={onClearFilters}>
-          <X className="mr-2 h-4 w-4" />
-          Clear Filters
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="text-center py-16 bg-bg-card rounded-xl border border-border-primary">
-      <Combine className="w-16 h-16 mx-auto mb-4 text-text-muted" />
-      <p className="text-text-muted mb-4">No merges yet</p>
-      <p className="text-text-muted text-sm mb-6">
-        Create your first responsive merge by combining<br />
-        mobile, tablet, and desktop designs.
-      </p>
-      <Button onClick={onCreateClick}>
-        <Plus className="mr-2 h-4 w-4" />
-        Create Merge
-      </Button>
-    </div>
-  );
-}
 
 // ============================================================================
 // Main Page Component
