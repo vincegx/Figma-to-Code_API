@@ -195,7 +195,7 @@ export default function ViewerPage() {
       <main className="flex-1 overflow-auto p-4">
         {/* ROW 1: Figma Tree + Canvas Preview */}
         <Resizable
-          defaultSize={{ width: '100%', height: 600 }}
+          defaultSize={{ width: '100%', height: '80vh' }}
           minHeight={350}
           enable={{ bottom: true }}
           handleStyles={{ bottom: { height: '20px', cursor: 'ns-resize', bottom: '0px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}}

@@ -202,7 +202,7 @@ export default function MergeViewerPage() {
       <main className="flex-1 overflow-auto p-4">
         {/* Row 1: Unified Tree + Canvas Preview */}
         <Resizable
-          defaultSize={{ width: '100%', height: 600 }}
+          defaultSize={{ width: '100%', height: '80vh' }}
           minHeight={350}
           enable={{ bottom: true }}
           handleStyles={{ bottom: { height: '20px', cursor: 'ns-resize', bottom: '0px', display: 'flex', alignItems: 'center', justifyContent: 'center' } }}
