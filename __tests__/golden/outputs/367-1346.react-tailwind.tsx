@@ -36,6 +36,7 @@ export function Home() {
   --var-114-2-size: 1440px;
   --var-112-36-color: #f0d9b5;
   --var-112-34-color: #1a3453;
+  --var-118-1-color: #f1f4f9;
   --var-126-55-fontSize: 0px;
 }` }} />
   <div data-layer="home" data-node-id="367:1346" className="box-border content-stretch relative shrink-0 w-[1440px] h-[7423px] bg-[#F3F5F7] overflow-hidden" style={{ backgroundColor: "rgba(243, 245, 247, 1)" }}>

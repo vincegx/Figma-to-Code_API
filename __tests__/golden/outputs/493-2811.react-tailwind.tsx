@@ -36,6 +36,7 @@ export function HomeLong() {
   --var-114-2-size: 1440px;
   --var-112-36-color: #f0d9b5;
   --var-112-34-color: #1a3453;
+  --var-118-1-color: #f1f4f9;
   --var-126-55-fontSize: 0px;
 }` }} />
   <div data-layer="home-long" data-node-id="493:2811" className="box-border content-stretch relative shrink-0 flex flex-col w-[1440px] h-auto bg-[#F0D9B5] overflow-hidden justify-start items-start" style={{ backgroundColor: "rgba(240, 217, 181, 1)" }}>
@@ -163,7 +164,7 @@ export function HomeLong() {
               <div data-layer="iconleft" data-node-id="I493:2816;114:1218;112:1124;112:878" data-visible="true" data-name="surfboard#4" className="box-border content-stretch relative shrink-0 flex items-center justify-center w-8 h-8 overflow-hidden">
                 <img data-layer="vector" data-node-id="I493:2816;114:1218;112:1124;112:878;112:498" className="block max-w-none w-[29px] h-[32px] absolute top-0 left-px" alt="Vector" src="/api/images/493:2811/vector-I493-2816-114-1218-112-1124-112-878-112-498.svg" />
               </div>
-              <span data-layer="our-surf-experience" data-node-id="I493:2816;114:1218;112:1124;112:413" data-visible="true" className="box-border content-stretch shrink-0 w-auto h-auto text-[#1A3453] font-['Poppins'] leading-[21px] text-sm font-normal leading-[1.50] text-left text-[14px] tracking-[0px]">Our Surf Experience</span>
+              <span data-layer="our-surf-experience" data-node-id="I493:2816;114:1218;112:1124;112:413" data-visible="true" className="box-border content-stretch shrink-0 w-auto h-auto text-[#F1F4F9] font-['Poppins'] leading-[21px] text-sm font-normal leading-[1.50] text-left text-[14px] tracking-[0px]">Our Surf Experience</span>
             </div>
             <div data-layer="button02" data-node-id="I493:2816;114:1218;112:1125" data-show-text="true" data-show-icon-right="true" data-show-icon-left="true" data-type="Filled - Default" className="box-border content-stretch relative shrink-0 flex flex-row w-auto h-auto border border-[color:var(--var-112-36-color)] border-solid border-solid overflow-hidden rounded-[var(--var-126-129-borderRadius)] items-center pb-[var(--var-128-136-spacing, 12px)] pl-[var(--var-128-134-spacing, 20px)] pr-[var(--var-128-134-spacing, 20px)] pt-[var(--var-128-136-spacing, 12px)] justify-center border gap-2 rounded-[8px] px-5 py-3">
               <span data-layer="our-surf-experience" data-node-id="I493:2816;114:1218;112:1125;112:942" className="box-border content-stretch shrink-0 w-auto h-auto text-[#F0D9B5] font-['Poppins'] leading-6 text-base font-normal leading-[1.50] text-left text-[16px] tracking-[0px]">What’s included</span>

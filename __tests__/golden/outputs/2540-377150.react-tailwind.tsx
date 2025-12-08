@@ -36,6 +36,7 @@ export function Homepage() {
   --var-114-2-size: 1440px;
   --var-112-36-color: #f0d9b5;
   --var-112-34-color: #1a3453;
+  --var-118-1-color: #f1f4f9;
   --var-126-55-fontSize: 0px;
 }` }} />
   <div data-layer="homepage" data-node-id="2540:377150" className="box-border content-stretch relative shrink-0 flex flex-col w-[1440px] h-auto bg-white overflow-hidden items-center justify-start" style={{ backgroundColor: "rgba(255, 255, 255, 1)" }}>
