@@ -1,165 +1,188 @@
-# Figma Rules Builder
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Figma Code Export" width="120" />
+</p>
 
-Multi-node library manager for Figma components with rule-based code generation.
+<h1 align="center">Figma Code Export</h1>
 
-## Architecture Overview
+<p align="center">
+  <strong>Transform Figma designs into production-ready code.</strong><br>
+  Platform agnostic. Responsive by design. 100% local.
+</p>
 
-This application is a multi-node library manager that allows you to:
-- Import Figma components into a local library
-- Create rule-based transformations to customize code generation
-- Generate React, React+Tailwind, or HTML/CSS code from Figma designs
-- Manage and version your component library offline
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#responsive-merge">Responsive Merge</a> •
+  <a href="docs/INSTALLATION.md">Installation</a> •
+  <a href="docs/USAGE.md">Usage</a> •
+  <a href="docs/FAQ.md">FAQ</a>
+</p>
 
-### Application Structure
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Next.js-14-black" alt="Next.js 14">
+  <img src="https://img.shields.io/badge/TypeScript-5.3+-3178C6" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind-3.4+-38B2AC" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Figma-API-F24E1E" alt="Figma API">
+</p>
 
-```
-┌─────────────┐
-│  Homepage   │  Dashboard with stats, recent nodes, import
-│  Dashboard  │
-└──────┬──────┘
-       │
-┌──────┴──────────────────────────────┐
-│                                     │
-┌──────┴──────┐  ┌────────┴────────┐  ┌─────┴─────┐
-│   Library   │  │     Viewer      │  │   Rules   │
-│   Page      │  │  (Code/Render)  │  │  Manager  │
-└─────────────┘  └─────────────────┘  └───────────┘
-```
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="Demo" width="800" />
+</p>
 
-## Prerequisites
+---
 
-- Node.js 18 or higher
-- npm (comes with Node.js)
-- Figma personal access token ([Get one here](https://www.figma.com/developers/api#access-tokens))
+## Why Figma Code Export?
 
-## Installation
+**Stop copying CSS by hand.** Import your Figma designs and get clean, semantic code in seconds.
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+| Problem | Solution |
+|---------|----------|
+| Manual CSS extraction is slow | One-click import from Figma URL |
+| Designs don't match code | High-fidelity output (colors, spacing, typography) |
+| Responsive requires 3x work | **Merge 3 breakpoints → 1 component** |
+| Vendor lock-in | Platform agnostic, multiple export formats |
+| Cloud privacy concerns | **100% local** — your designs never leave your machine |
 
-3. Set up Figma API access:
-   ```bash
-   # Copy the example environment file
-   cp .env.local.example .env.local
-
-   # Edit .env.local and add your Figma personal access token
-   # Get your token from: https://www.figma.com/settings
-   # Navigate to: Settings → Account → Personal Access Tokens → Generate new token
-   FIGMA_ACCESS_TOKEN=your_actual_figma_token_here
-   ```
-
-## Development
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Testing
-
-### Unit Tests (Vitest)
-```bash
-npm test                 # Run tests in watch mode
-npm run test:ui          # Run with UI
-npm run test:coverage    # Run with coverage report
-```
-
-### E2E Tests (Playwright)
-```bash
-npm run test:e2e         # Run E2E tests
-npm run test:e2e:ui      # Run with Playwright UI
-```
-
-## Building for Production
-
-```bash
-npm run build
-npm start
-```
-
-## Project Structure
-
-```
-app/                     # Next.js App Router
-├── api/                 # API routes
-│   ├── figma/           # Figma API integration
-│   ├── library/         # Library management endpoints
-│   └── rules/           # Rule management endpoints
-├── nodes/               # Node Library page
-├── viewer/              # Viewer page (code/render preview)
-├── rules/               # Rule Manager page
-└── settings/            # Settings page
-components/ui/           # Shadcn/ui components
-lib/
-├── types/               # TypeScript types and interfaces
-├── utils/               # Utility functions
-├── store/               # Zustand state management stores
-└── code-generators/     # Code generation modules
-hooks/                   # Custom React hooks
-__tests__/               # Test files
-├── unit/                # Unit tests
-├── integration/         # Integration tests
-├── e2e/                 # End-to-end tests
-└── components/          # Component tests
-figma-data/             # Local storage for imported Figma nodes (gitignored)
-mapping-rules.json      # User-created rules (gitignored)
-```
-
-## Constitutional Principles
-
-This project follows a set of constitutional principles:
-
-1. **Developer Experience First** - Zero-config startup for common use cases
-2. **Type Safety Throughout** - TypeScript strict mode non-negotiable
-3. **Simple Before Clever** - Start with working setup, not complex abstractions
-4. **Separation of Pages** - Distinct pages for viewing, editing, and management
-
-## API Routes
-
-### Figma Integration
-
-**POST /api/figma/import**
-- Import a Figma node by URL
-- Request: `{ "url": "https://www.figma.com/file/{fileKey}/...?node-id={nodeId}" }`
-- Response: `{ "success": true, "nodeId": "123:456", "metadata": {...} }`
-
-**GET /api/figma/library**
-- Get all nodes in the library with filtering and sorting
-- Query params: `search`, `type`, `coverage`, `sortBy`, `sortOrder`
-- Response: `{ "success": true, "nodes": [...], "totalNodes": 10 }`
-
-**GET /api/figma/node/[id]**
-- Get a specific node's data and metadata
-- Response: `{ "success": true, "metadata": {...}, "nodeData": {...} }`
-
-**POST /api/figma/node/[id]**
-- Refresh node data from Figma API
-- Response: `{ "success": true, "metadata": {...}, "updated": true }`
-
-**PATCH /api/figma/node/[id]**
-- Update node metadata (tags, category, description)
-- Request: `{ "tags": ["ui", "button"], "category": "Components" }`
-
-**DELETE /api/figma/library**
-- Delete a node from the library
-- Request: `{ "nodeId": "lib-123-456" }`
+---
 
 ## Features
 
-- ✅ Multi-node library management
-- ✅ Offline-first architecture (fetch once, operate offline)
-- ✅ File-based storage (no database required)
-- ✅ Figma REST API v1 integration
-- ✅ Automatic retry with exponential backoff
-- ✅ Multi-node directory structure
-- ✅ Library index management
-- ✅ Rule-based code generation
-- ✅ Real-time preview updates
-- ✅ Monaco Editor integration
-- ✅ Export to React JSX, React+Tailwind, or HTML/CSS
+- **Multi-format export** — React/Tailwind, Tailwind v4, HTML/CSS (extensible)
+- **Responsive merge** — Combine mobile + tablet + desktop into one component
+- **Live preview** — See rendered output with breakpoint simulation
+- **Rule engine** — Customize how Figma properties map to code
+- **Node library** — Save, organize, and manage imported designs
+- **Offline-first** — Fetch once, work offline forever
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/vincegx/Figma-Code-Export.git
+cd Figma-Code-Export
+npm install
+```
+
+```bash
+# Add your Figma API token
+cp .env.local.example .env.local
+# Edit .env.local → FIGMA_ACCESS_TOKEN=your_token
+```
+
+```bash
+npm run dev
+# Open http://localhost:3000
+```
+
+**Get your Figma token:** [Figma Settings → Personal Access Tokens](https://www.figma.com/settings) → Generate new token
+
+📖 **Full guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+
+---
+
+## Responsive Merge
+
+The killer feature. Import 3 Figma frames and merge them into **one responsive component**.
+
+### How it works
+
+1. **Import** your mobile, tablet, and desktop frames
+2. **Create merge** — assign each frame to a breakpoint
+3. **Get code** — automatic Tailwind responsive classes
+
+### Before & After
+
+```
+BEFORE: 3 separate Figma frames
+┌─────────┐  ┌───────────────┐  ┌─────────────────────┐
+│ Mobile  │  │    Tablet     │  │       Desktop       │
+│  375px  │  │     768px     │  │       1280px        │
+└─────────┘  └───────────────┘  └─────────────────────┘
+     ↓              ↓                    ↓
+```
+
+```jsx
+// AFTER: 1 responsive component
+<Hero
+  className="
+    p-4 md:p-8 lg:p-12
+    text-sm md:text-base lg:text-xl
+    flex-col md:flex-row
+  "
+/>
+```
+
+### The algorithm
+
+- **Element matching** by layer name across breakpoints
+- **Mobile-first** class generation (`base` → `md:` → `lg:`)
+- **Visibility classes** for breakpoint-specific elements (`hidden lg:block`)
+- **Style deduplication** — only outputs differences
+
+📖 **Full guide:** [docs/USAGE.md#responsive-merge](docs/USAGE.md#responsive-merge)
+
+---
+
+## Export Formats
+
+| Format | Status | Output |
+|--------|--------|--------|
+| React + Tailwind | ✅ | `.tsx` with Tailwind classes |
+| React + Tailwind v4 | ✅ | `.tsx` with Tailwind v4 syntax |
+| HTML + CSS | ✅ | `.html` + `.css` files |
+| Vue + Tailwind | 🔜 | Coming soon |
+| Svelte | 🔜 | Coming soon |
+
+---
+
+## Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [Installation](docs/INSTALLATION.md) | Setup, requirements, configuration |
+| [Usage](docs/USAGE.md) | Import, export, merge, rules |
+| [Technical](docs/TECHNICAL.md) | Architecture, API, extending |
+| [FAQ](docs/FAQ.md) | Common questions & troubleshooting |
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript 5.3+ (strict mode)
+- **Styling:** Tailwind CSS 3.4+
+- **UI Components:** Radix UI + shadcn/ui
+- **Code Editor:** Monaco Editor
+- **State:** Zustand
+- **API:** Figma REST API v1
+
+---
+
+## Contributing
+
+Contributions welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
+
+```bash
+# Run tests
+npm test
+
+# Run linter
+npm run lint
+
+# Build for production
+npm run build
+```
+
+---
+
+## License
+
+MIT © [vincegx](https://github.com/vincegx)
+
+---
+
+<p align="center">
+  <sub>Built for the design-to-code community</sub>
+</p>
