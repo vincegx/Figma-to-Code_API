@@ -11,30 +11,24 @@
  * - Filter by type and date
  * - Sort by date, name, nodes count
  * - Pagination with per page selector
- * - Hover gradient on grid cards
- * - Fully clickable list rows
- * - Open Preview fullscreen
+ *
+ * Phase 3 refactoring: extracted NodeCard and NodeRow components
  */
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNodesStore } from '@/lib/store';
-import { Search, Grid, List, Trash2, MoreVertical, Eye, Maximize2, Box, Layers, Zap, FileText, BarChart3 } from 'lucide-react';
+import { Search, Grid, List, Box, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { DeleteConfirmDialog } from '@/components/delete-confirm-dialog';
 import { FilterPopover, type FilterState } from '@/components/library/filter-popover';
 import { SortSelect, type SortOption } from '@/components/library/sort-select';
 import { LibraryPagination } from '@/components/library/library-pagination';
 import { PerPageSelect } from '@/components/library/per-page-select';
+
+// Phase 3: Extracted components
+import { NodeCard, NodeRow } from './_components';
 
 export default function NodesLibraryPage() {
   const router = useRouter();
@@ -265,97 +259,15 @@ export default function NodesLibraryPage() {
       ) : viewMode === 'grid' ? (
         /* Grid View - 5 columns */
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {paginatedNodes.map((node) => {
-            const stats = getNodeStats(node);
-            return (
-              <div
-                key={node.id}
-                className="group bg-bg-card rounded-xl border border-border-primary overflow-hidden hover:border-border-secondary transition-all"
-              >
-                {/* Preview Image with Hover Gradient */}
-                <Link href={`/viewer/${node.id}`} className="block">
-                  <div className="aspect-[4/3] bg-bg-secondary flex items-start justify-center relative">
-                    {/* Hover Gradient Overlay (T395) */}
-                    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none rounded-t-xl" />
-
-                    {node.thumbnail ? (
-                      <Image
-                        src={node.thumbnail}
-                        alt={node.name}
-                        fill
-                        className="object-cover object-top"
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                      />
-                    ) : (
-                      <Box className="w-12 h-12 text-text-muted" />
-                    )}
-
-                    {/* Kebab Menu - z-index above gradient */}
-                    <div className="absolute top-2 right-2 z-20">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                          <button className="p-1.5 bg-bg-card/90 backdrop-blur-sm rounded-lg hover:bg-bg-card">
-                            <MoreVertical className="w-4 h-4 text-text-primary" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/viewer/${node.id}`}>
-                              <Eye className="w-4 h-4 mr-2" />
-                              View node
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleOpenPreview(node.id)}>
-                            <Maximize2 className="w-4 h-4 mr-2" />
-                            Open preview
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-500 focus:text-red-500"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setDeleteDialogNode({ id: node.id, name: node.name });
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </Link>
-
-                {/* Card Footer - Name, Date, Stats */}
-                <div className="p-3">
-                  <h3 className="font-medium text-text-primary truncate text-xs mb-1">{node.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-text-muted">
-                      {new Date(node.addedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
-                    <div className="flex items-center gap-1.5 text-xs text-text-muted">
-                      <span className="flex items-center gap-0.5">
-                        <Box className="w-3 h-3 text-blue-400" />
-                        {stats.elements}
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <Layers className="w-3 h-3 text-white" />
-                        {stats.layers}
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <Zap className="w-3 h-3 text-blue-400" />
-                        {stats.rules}
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <FileText className="w-3 h-3 text-white" />
-                        {stats.exports}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {paginatedNodes.map((node) => (
+            <NodeCard
+              key={node.id}
+              node={node}
+              stats={getNodeStats(node)}
+              onOpenPreview={handleOpenPreview}
+              onDelete={setDeleteDialogNode}
+            />
+          ))}
         </div>
       ) : (
         /* List View with Clickable Rows (T396) */
@@ -386,104 +298,18 @@ export default function NodesLibraryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-primary">
-              {paginatedNodes.map((node) => {
-                const stats = getNodeStats(node);
-                return (
-                  <tr
-                    key={node.id}
-                    onClick={() => router.push(`/viewer/${node.id}`)}
-                    className="cursor-pointer hover:bg-bg-hover transition-colors"
-                  >
-                    {/* Checkbox - stop propagation */}
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={selectedNodeIds.has(node.id)}
-                        onChange={() => toggleSelection(node.id)}
-                        className="rounded border-border-primary"
-                      />
-                    </td>
-                    <td className="px-2 py-3">
-                      <div className="w-10 h-10 rounded-lg bg-bg-secondary overflow-hidden relative flex-shrink-0">
-                        {node.thumbnail ? (
-                          <Image
-                            src={node.thumbnail}
-                            alt={node.name}
-                            fill
-                            className="object-cover object-top"
-                            sizes="40px"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Box className="w-5 h-5 text-text-muted" />
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-medium text-text-primary hover:text-accent-primary">
-                        {node.name}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-muted">
-                      {getShortNodeId(node.id)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-muted">
-                      {new Date(node.addedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3 text-sm text-text-muted">
-                        <span className="flex items-center gap-1">
-                          <Box className="w-4 h-4 text-blue-400" />
-                          {stats.elements}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Layers className="w-4 h-4 text-white" />
-                          {stats.layers}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Zap className="w-4 h-4 text-blue-400" />
-                          {stats.rules}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <FileText className="w-4 h-4 text-white" />
-                          {stats.exports}
-                        </span>
-                      </div>
-                    </td>
-                    {/* Actions - stop propagation */}
-                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="p-1.5 hover:bg-bg-secondary rounded-lg transition-colors">
-                            <MoreVertical className="w-4 h-4 text-text-muted" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/viewer/${node.id}`}>
-                              <Eye className="w-4 h-4 mr-2" />
-                              View node
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleOpenPreview(node.id)}>
-                            <Maximize2 className="w-4 h-4 mr-2" />
-                            Open preview
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-500 focus:text-red-500"
-                            onClick={() => setDeleteDialogNode({ id: node.id, name: node.name })}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                );
-              })}
+              {paginatedNodes.map((node) => (
+                <NodeRow
+                  key={node.id}
+                  node={node}
+                  stats={getNodeStats(node)}
+                  shortId={getShortNodeId(node.id)}
+                  isSelected={selectedNodeIds.has(node.id)}
+                  onToggleSelection={toggleSelection}
+                  onOpenPreview={handleOpenPreview}
+                  onDelete={setDeleteDialogNode}
+                />
+              ))}
             </tbody>
           </table>
         </div>

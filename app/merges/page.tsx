@@ -5,12 +5,12 @@
  *
  * Main page for browsing and managing responsive merges.
  * Styled to match the /nodes page.
+ *
+ * Phase 3 refactoring: extracted MergeCard and MergeRow components
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { Plus, Layers, Search, X, MoreVertical, Eye, Trash2, Combine, Grid, List, AlertTriangle, Smartphone, Tablet, Monitor } from 'lucide-react';
-import Image from 'next/image';
+import { Plus, Combine, Search, X, Grid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,19 +23,12 @@ import {
 import { SortSelect, type SortOption } from '@/components/library/sort-select';
 import { LibraryPagination } from '@/components/library/library-pagination';
 import { PerPageSelect } from '@/components/library/per-page-select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { MergeCreationModal } from '@/components/merge/merge-creation-modal';
 import { DeleteMergeDialog } from '@/components/merge/delete-merge-dialog';
 import type { MergeListItem, MergeStatus } from '@/lib/types/merge';
 
 // Phase 3: Extracted components
-import { StatusBadge, MergeCardSkeleton, EmptyState } from './_components';
+import { StatusBadge, MergeCardSkeleton, EmptyState, MergeCard, MergeRow } from './_components';
 
 // ============================================================================
 // Types
@@ -48,8 +41,6 @@ type StatusFilter = MergeStatus | 'all';
 // ============================================================================
 
 export default function MergesPage() {
-  const router = useRouter();
-
   // Data state
   const [merges, setMerges] = useState<MergeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -337,95 +328,12 @@ export default function MergesPage() {
         /* Grid View */
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {paginatedMerges.map((merge) => (
-            <div
+            <MergeCard
               key={merge.id}
-              className="group bg-bg-card rounded-xl border border-border-primary overflow-hidden hover:border-border-secondary transition-all cursor-pointer"
-              onClick={() => router.push(`/merge/${merge.id}`)}
-            >
-              {/* Preview thumbnails */}
-              <div className="aspect-[4/3] bg-bg-secondary flex items-center justify-center relative">
-                {/* Hover Gradient Overlay */}
-                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none rounded-t-xl" />
-
-                {/* Thumbnails row */}
-                <div className="flex items-center justify-center gap-2 p-3">
-                  {merge.sourceNodes.map((node, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        'rounded overflow-hidden bg-bg-primary border border-border-primary',
-                        node.breakpoint === 'mobile' && 'w-14 h-20',
-                        node.breakpoint === 'tablet' && 'w-20 h-16',
-                        node.breakpoint === 'desktop' && 'w-28 h-16'
-                      )}
-                    >
-                      {node.thumbnail ? (
-                        <Image
-                          src={node.thumbnail}
-                          alt={node.nodeName}
-                          width={112}
-                          height={80}
-                          className="w-full h-full object-cover object-top"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-text-muted">
-                          <Layers className="w-4 h-4" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Kebab Menu */}
-                <div className="absolute top-2 right-2 z-20">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <button className="p-1.5 bg-bg-card/90 backdrop-blur-sm rounded-lg hover:bg-bg-card">
-                        <MoreVertical className="w-4 h-4 text-text-primary" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => router.push(`/merge/${merge.id}`)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        View merge
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-500 focus:text-red-500"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteClick(merge);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              {/* Card Footer */}
-              <div className="p-3">
-                <h3 className="font-medium text-text-primary truncate text-sm mb-1">
-                  {merge.name}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-text-muted">
-                    {formatRelativeTime(merge.createdAt)}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {merge.warningCount > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-amber-400">
-                        <AlertTriangle className="w-3 h-3" />
-                        {merge.warningCount}
-                      </span>
-                    )}
-                    <StatusBadge status={merge.status} />
-                  </div>
-                </div>
-              </div>
-            </div>
+              merge={merge}
+              onDeleteClick={handleDeleteClick}
+              formatRelativeTime={formatRelativeTime}
+            />
           ))}
         </div>
       ) : (
@@ -459,112 +367,13 @@ export default function MergesPage() {
             </thead>
             <tbody className="divide-y divide-border-primary">
               {paginatedMerges.map((merge) => (
-                <tr
+                <MergeRow
                   key={merge.id}
-                  onClick={() => router.push(`/merge/${merge.id}`)}
-                  className="cursor-pointer hover:bg-bg-hover transition-colors"
-                >
-                  {/* Checkbox */}
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={selectedMergeIds.has(merge.id)}
-                      onChange={() => toggleSelection(merge.id)}
-                      className="rounded border-border-primary"
-                    />
-                  </td>
-                  {/* Thumbnails */}
-                  <td className="px-2 py-3">
-                    <div className="flex items-center gap-0.5">
-                      {merge.sourceNodes.map((node, idx) => (
-                        <div
-                          key={idx}
-                          className={cn(
-                            'rounded overflow-hidden bg-bg-secondary border border-border-primary',
-                            node.breakpoint === 'mobile' && 'w-5 h-8',
-                            node.breakpoint === 'tablet' && 'w-7 h-6',
-                            node.breakpoint === 'desktop' && 'w-9 h-6'
-                          )}
-                        >
-                          {node.thumbnail ? (
-                            <Image
-                              src={node.thumbnail}
-                              alt={node.nodeName}
-                              width={36}
-                              height={32}
-                              className="w-full h-full object-cover object-top"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-text-muted">
-                              <Layers className="w-2 h-2" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                  {/* Name */}
-                  <td className="px-4 py-3">
-                    <span className="font-medium text-text-primary hover:text-accent-primary">
-                      {merge.name}
-                    </span>
-                  </td>
-                  {/* Status */}
-                  <td className="px-4 py-3">
-                    <StatusBadge status={merge.status} />
-                  </td>
-                  {/* Sources */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 text-text-muted">
-                      {merge.sourceNodes.map((node, idx) => (
-                        <span key={idx} title={node.nodeName}>
-                          {node.breakpoint === 'mobile' && <Smartphone className="w-4 h-4" />}
-                          {node.breakpoint === 'tablet' && <Tablet className="w-4 h-4" />}
-                          {node.breakpoint === 'desktop' && <Monitor className="w-4 h-4" />}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  {/* Created */}
-                  <td className="px-4 py-3 text-sm text-text-muted">
-                    {new Date(merge.createdAt).toLocaleDateString()}
-                  </td>
-                  {/* Warnings */}
-                  <td className="px-4 py-3">
-                    {merge.warningCount > 0 ? (
-                      <span className="flex items-center gap-1 text-sm text-amber-400">
-                        <AlertTriangle className="w-4 h-4" />
-                        {merge.warningCount}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-text-muted">-</span>
-                    )}
-                  </td>
-                  {/* Actions */}
-                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="p-1.5 hover:bg-bg-secondary rounded-lg transition-colors">
-                          <MoreVertical className="w-4 h-4 text-text-muted" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/merge/${merge.id}`)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          View merge
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-500 focus:text-red-500"
-                          onClick={() => handleDeleteClick(merge)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
+                  merge={merge}
+                  isSelected={selectedMergeIds.has(merge.id)}
+                  onToggleSelection={toggleSelection}
+                  onDeleteClick={handleDeleteClick}
+                />
               ))}
             </tbody>
           </table>

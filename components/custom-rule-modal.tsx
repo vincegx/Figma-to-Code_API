@@ -152,7 +152,7 @@ export function CustomRuleModal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-primary rounded-xl border border-border-primary shadow-2xl z-50 w-[90vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+        <Dialog.Content aria-describedby={undefined} className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-primary rounded-xl border border-border-primary shadow-2xl z-50 w-[90vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-primary bg-bg-card">
             <Dialog.Title className="text-lg font-semibold text-text-primary">

@@ -8,3 +8,5 @@
 export { StatusBadge } from './StatusBadge';
 export { MergeCardSkeleton } from './MergeCardSkeleton';
 export { EmptyState } from './EmptyState';
+export { MergeCard } from './MergeCard';
+export { MergeRow } from './MergeRow';

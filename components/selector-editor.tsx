@@ -22,7 +22,9 @@ const NODE_TYPES = [
 ] as const;
 
 export function SelectorEditor({ selector, onChange }: SelectorEditorProps) {
-  const [type, setType] = useState(selector.type || '');
+  // Handle type which can be string or array - for select, use first value or empty string
+  const initialType = Array.isArray(selector.type) ? (selector.type[0] || '') : (selector.type || '');
+  const [type, setType] = useState(initialType);
   const [name, setName] = useState(selector.name?.toString() || '');
   const [widthMin, setWidthMin] = useState(selector.width?.min?.toString() || '');
   const [widthMax, setWidthMax] = useState(selector.width?.max?.toString() || '');
