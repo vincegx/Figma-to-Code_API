@@ -57,7 +57,11 @@ merges-data/*.json
 !figma-data/
 !figma-data/rules/
 !figma-data/rules/*.json
-!figma-data/library-index.json
+
+# User data files - use .template.json versions for fresh installs
+figma-data/api-quota.json
+figma-data/library-index.json
+figma-data/stats-history.json
 
 # Editor
 .vscode/
