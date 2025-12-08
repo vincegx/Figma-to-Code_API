@@ -246,13 +246,6 @@ function smartSplitClasses(classString: string): string[] {
 // ============================================================================
 
 /**
- * Generate a unique element ID from a name
- */
-function generateElementId(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
-/**
  * Convert SimpleAltNode styles to Tailwind class string.
  * This is a simplified version - the full conversion happens in the code generator.
  *
@@ -318,7 +311,7 @@ export function toUnifiedElement(node: SimpleAltNode): UnifiedElement {
   const primaryAxisAlignItems = originalNode?.primaryAxisAlignItems as 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN' | undefined;
 
   return {
-    id: generateElementId(node.name),
+    id: node.id, // Use Figma node ID for unique identification (matches data-node-id in generated code)
     name: node.name,
     // Use originalType (Figma type like FRAME, TEXT) for icons, not node.type (HTML tag like div, span)
     type: (node.originalType || node.type) as FigmaNodeType,
