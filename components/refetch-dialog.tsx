@@ -86,7 +86,7 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
     const newColor = extractColor(newValue[0]);
     if (oldColor && newColor && oldColor !== newColor) {
       return {
-        label: 'Couleur',
+        label: 'Color',
         oldDisplay: <ColorBadge color={oldColor} />,
         newDisplay: <ColorBadge color={newColor} />,
       };
@@ -96,7 +96,7 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   // Handle text content
   if (property === 'characters') {
     return {
-      label: 'Texte',
+      label: 'Text',
       oldDisplay: <span className="text-text-muted">&quot;{String(oldValue).slice(0, 20)}&quot;</span>,
       newDisplay: <span className="text-text-primary">&quot;{String(newValue).slice(0, 20)}&quot;</span>,
     };
@@ -105,7 +105,7 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   // Handle dimensions
   if (['width', 'height'].includes(property)) {
     return {
-      label: property === 'width' ? 'Largeur' : 'Hauteur',
+      label: property === 'width' ? 'Width' : 'Height',
       oldDisplay: <span className="text-text-muted">{Math.round(Number(oldValue))}px</span>,
       newDisplay: <span className="text-text-primary font-medium">{Math.round(Number(newValue))}px</span>,
     };
@@ -114,16 +114,16 @@ function formatChange(change: PropertyChange): { label: string; oldDisplay: Reac
   // Handle visibility
   if (property === 'visible') {
     return {
-      label: 'Visibilité',
-      oldDisplay: <span className="text-text-muted">{oldValue ? 'Visible' : 'Masqué'}</span>,
-      newDisplay: <span className="text-text-primary font-medium">{newValue ? 'Visible' : 'Masqué'}</span>,
+      label: 'Visibility',
+      oldDisplay: <span className="text-text-muted">{oldValue ? 'Visible' : 'Hidden'}</span>,
+      newDisplay: <span className="text-text-primary font-medium">{newValue ? 'Visible' : 'Hidden'}</span>,
     };
   }
 
   // Handle opacity
   if (property === 'opacity') {
     return {
-      label: 'Opacité',
+      label: 'Opacity',
       oldDisplay: <span className="text-text-muted">{Math.round(Number(oldValue) * 100)}%</span>,
       newDisplay: <span className="text-text-primary font-medium">{Math.round(Number(newValue) * 100)}%</span>,
     };
@@ -230,7 +230,7 @@ export function RefetchDialog({
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Unknown';
     try {
-      return new Date(dateStr).toLocaleString('fr-FR', {
+      return new Date(dateStr).toLocaleString('en-US', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -247,7 +247,7 @@ export function RefetchDialog({
       <DialogContent className="sm:max-w-md bg-bg-card border border-border-primary" onInteractOutside={(e) => e.preventDefault()}>
         {/* Screen reader description - always present */}
         <DialogDescription className="sr-only">
-          Synchroniser le composant {nodeName} depuis Figma
+          Sync component {nodeName} from Figma
         </DialogDescription>
 
         {/* Confirmation State */}
@@ -258,7 +258,7 @@ export function RefetchDialog({
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
                   <CloudDownload className="w-4 h-4 text-blue-400" />
                 </div>
-                Synchroniser depuis Figma
+                Sync from Figma
               </DialogTitle>
             </DialogHeader>
 
@@ -273,17 +273,17 @@ export function RefetchDialog({
 
               {/* Last sync info */}
               <div className="text-sm text-text-muted">
-                Dernière synchronisation : {formatDate(lastSyncDate)}
+                Last sync: {formatDate(lastSyncDate)}
               </div>
             </div>
 
             <div className="flex justify-end gap-2">
               <button onClick={handleClose} className="h-8 px-4 rounded-lg text-sm font-medium border border-border-primary text-text-secondary hover:bg-bg-hover transition-colors">
-                Annuler
+                Cancel
               </button>
               <button onClick={handleConfirm} className="h-8 px-4 flex items-center gap-2 rounded-lg bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium transition-colors">
                 <RefreshCw className="w-4 h-4" />
-                Synchroniser
+                Sync
               </button>
             </div>
           </>
@@ -297,7 +297,7 @@ export function RefetchDialog({
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center">
                   <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
                 </div>
-                Synchronisation Figma
+                Figma Sync
               </DialogTitle>
             </DialogHeader>
 
@@ -354,21 +354,21 @@ export function RefetchDialog({
                     <div className="w-9 h-9 rounded-xl bg-red-500/20 flex items-center justify-center">
                       <span className="text-red-400 text-sm font-bold">✕</span>
                     </div>
-                    Erreur
+                    Error
                   </>
                 ) : result?.status === 'up_to_date' ? (
                   <>
                     <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                       <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     </div>
-                    Déjà à jour
+                    Already up to date
                   </>
                 ) : (
                   <>
                     <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                       <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     </div>
-                    Synchronisation terminée
+                    Sync completed
                   </>
                 )}
               </DialogTitle>
@@ -379,7 +379,7 @@ export function RefetchDialog({
                 <p className="text-red-400 text-sm">{error}</p>
               ) : result?.status === 'up_to_date' ? (
                 <p className="text-text-muted text-sm">
-                  Aucun changement détecté depuis la dernière synchronisation.
+                  No changes detected since last sync.
                 </p>
               ) : (
                 <ResultContent result={result} />
@@ -388,7 +388,7 @@ export function RefetchDialog({
 
             <div className="flex justify-end">
               <button onClick={handleClose} className="h-8 px-4 rounded-lg bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium transition-colors">
-                {result?.status === 'up_to_date' ? 'OK' : 'Fermer'}
+                {result?.status === 'up_to_date' ? 'OK' : 'Close'}
               </button>
             </div>
           </>
@@ -407,7 +407,7 @@ function ResultContent({
   result: RefetchResult | null;
 }) {
   if (!result) {
-    return <p className="text-text-muted text-sm">Mise à jour effectuée.</p>;
+    return <p className="text-text-muted text-sm">Update completed.</p>;
   }
 
   // Filter noisy diffs for display
@@ -424,7 +424,7 @@ function ResultContent({
   const totalChanges = summary.modified + summary.added + summary.removed;
 
   if (totalChanges === 0 && summary.images === 0) {
-    return <p className="text-text-muted text-sm">Mise à jour effectuée (modifications mineures).</p>;
+    return <p className="text-text-muted text-sm">Update completed (minor changes).</p>;
   }
 
   return (
@@ -434,19 +434,19 @@ function ResultContent({
         {summary.modified > 0 && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
             <Pencil className="w-3 h-3" />
-            {summary.modified} modifié{summary.modified > 1 ? 's' : ''}
+            {summary.modified} modified
           </span>
         )}
         {summary.added > 0 && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
             <Plus className="w-3 h-3" />
-            {summary.added} ajouté{summary.added > 1 ? 's' : ''}
+            {summary.added} added
           </span>
         )}
         {summary.removed > 0 && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400">
             <Minus className="w-3 h-3" />
-            {summary.removed} supprimé{summary.removed > 1 ? 's' : ''}
+            {summary.removed} removed
           </span>
         )}
         {summary.images > 0 && (
