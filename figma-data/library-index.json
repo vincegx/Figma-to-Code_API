@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-12-06T00:02:04.344Z",
+  "lastUpdated": "2025-12-08T10:49:44.509Z",
   "nodes": [
     {
       "id": "lib-425-4344",
@@ -337,8 +337,8 @@
       "altNode": null,
       "thumbnail": "/api/images/493-2811/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-03T20:28:28.042Z",
-      "lastModified": "2025-12-03T20:28:28.042Z",
+      "addedAt": "2025-12-08T10:21:13.293Z",
+      "lastModified": "2025-12-08T10:21:13.293Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -365,10 +365,10 @@
         "imagesCount": 6,
         "iconsCount": 51,
         "gradientsCount": 1,
-        "semanticCount": 1596,
+        "semanticCount": 1654,
         "arbitraryCount": 116,
         "variablesUsed": 333,
-        "computedAt": "2025-12-03T20:28:20.580Z"
+        "computedAt": "2025-12-08T10:21:05.996Z"
       }
     },
     {
@@ -378,8 +378,8 @@
       "altNode": null,
       "thumbnail": "/api/images/465-16388/screenshot.png",
       "tags": [],
-      "addedAt": "2025-12-01T23:36:59.233Z",
-      "lastModified": "2025-12-01T23:36:59.233Z",
+      "addedAt": "2025-12-08T10:49:44.503Z",
+      "lastModified": "2025-12-08T10:49:44.503Z",
       "usage": {
         "viewCount": 0,
         "exportCount": 0
@@ -388,6 +388,27 @@
         "fileKey": "S7pdTdfq93HbMiVz8aAnOG",
         "fileName": "Sans titre",
         "nodeUrl": "https://www.figma.com/file/S7pdTdfq93HbMiVz8aAnOG?node-id=465:16388"
+      },
+      "transformStats": {
+        "totalNodes": 59,
+        "maxDepth": 8,
+        "nodesByType": {
+          "FRAME": 7,
+          "INSTANCE": 17,
+          "VECTOR": 26,
+          "TEXT": 8,
+          "GROUP": 1
+        },
+        "autoLayoutCount": 14,
+        "absolutePositionedCount": 0,
+        "groupsInlined": 1,
+        "imagesCount": 1,
+        "iconsCount": 26,
+        "gradientsCount": 1,
+        "semanticCount": 493,
+        "arbitraryCount": 38,
+        "variablesUsed": 99,
+        "computedAt": "2025-12-08T10:49:38.731Z"
       }
     },
     {

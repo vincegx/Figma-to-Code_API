@@ -178,7 +178,7 @@ export function ViewerHeader({
             </DropdownMenuContent>
           </DropdownMenu>
           <button
-            onClick={() => prevNode && router.push(`/viewer/${prevNode.id}`)}
+            onClick={() => prevNode && router.push(`/node/${prevNode.id}`)}
             disabled={!prevNode}
             className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
             title="Previous node"
@@ -186,7 +186,7 @@ export function ViewerHeader({
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
-            onClick={() => nextNode && router.push(`/viewer/${nextNode.id}`)}
+            onClick={() => nextNode && router.push(`/node/${nextNode.id}`)}
             disabled={!nextNode}
             className="w-8 h-8 flex items-center justify-center rounded-lg bg-bg-secondary hover:bg-bg-hover text-text-muted hover:text-text-primary disabled:opacity-30 transition-colors"
             title="Next node"

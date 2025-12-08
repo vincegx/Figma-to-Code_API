@@ -29,7 +29,7 @@ export default function RecentNodes() {
         {recentNodes.map((node) => (
           <Link
             key={node.id}
-            href={`/viewer/${node.id}`}
+            href={`/node/${node.id}`}
             className="flex items-center gap-4 p-3 rounded-lg hover:bg-bg-hover transition-colors"
           >
             {/* Thumbnail */}

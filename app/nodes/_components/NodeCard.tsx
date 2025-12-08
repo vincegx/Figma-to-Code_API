@@ -37,7 +37,7 @@ export function NodeCard({ node, stats, onOpenPreview, onDelete }: NodeCardProps
   return (
     <div className="group bg-bg-card rounded-xl border border-border-primary overflow-hidden hover:border-border-secondary transition-all">
       {/* Preview Image with Hover Gradient */}
-      <Link href={`/viewer/${node.id}`} className="block">
+      <Link href={`/node/${node.id}`} className="block">
         <div className="aspect-[4/3] bg-bg-secondary flex items-start justify-center relative">
           {/* Hover Gradient Overlay (T395) */}
           <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none rounded-t-xl" />
@@ -64,7 +64,7 @@ export function NodeCard({ node, stats, onOpenPreview, onDelete }: NodeCardProps
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href={`/viewer/${node.id}`}>
+                  <Link href={`/node/${node.id}`}>
                     <Eye className="w-4 h-4 mr-2" />
                     View node
                   </Link>

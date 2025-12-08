@@ -170,7 +170,7 @@ export default function ImportDialog() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => (window.location.href = `/viewer/${importedNode.id}`)}
+              onClick={() => (window.location.href = `/node/${importedNode.id}`)}
             >
               View in Viewer
             </Button>

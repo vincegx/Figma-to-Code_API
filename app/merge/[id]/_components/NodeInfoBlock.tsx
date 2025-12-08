@@ -71,7 +71,7 @@ export function NodeInfoBlock({
             {sourceNodes.map((source) => (
               <Link
                 key={source.breakpoint}
-                href={`/viewer/${source.nodeId}`}
+                href={`/node/${source.nodeId}`}
                 className="flex items-center gap-1 px-1.5 py-1 bg-bg-secondary rounded text-xs text-text-primary hover:bg-bg-hover transition-colors"
                 title={source.nodeName}
               >

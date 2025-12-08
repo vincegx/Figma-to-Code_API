@@ -580,5 +580,95 @@
         "endpoint": "fetchNode"
       }
     ]
+  },
+  "2025-12-08": {
+    "tier1": [
+      {
+        "ts": 1765187521896,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765187529362,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1765188699110,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765188709437,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1765189257115,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765189269551,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1765189564079,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765189570084,
+        "endpoint": "fetchSVGBatch"
+      },
+      {
+        "ts": 1765190976363,
+        "endpoint": "fetchScreenshot"
+      },
+      {
+        "ts": 1765190981783,
+        "endpoint": "fetchSVGBatch"
+      }
+    ],
+    "tier2": [
+      {
+        "ts": 1765187514049,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765187515906,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1765188683525,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765188684900,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1765189237852,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765189239490,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1765189556604,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765189558414,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1765190967641,
+        "endpoint": "fetchFileMetadata"
+      },
+      {
+        "ts": 1765190969503,
+        "endpoint": "fetchNode"
+      },
+      {
+        "ts": 1765196737191,
+        "endpoint": "fetchFileMetadata"
+      }
+    ]
   }
 }

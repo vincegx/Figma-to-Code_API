@@ -50,7 +50,7 @@ next-env.d.ts
 
 # Merge JSON files (002-responsive-merge-manager)
 # Keep directory structure but exclude user-created merge data
-merges/*.json
+merges-data/*.json
 
 # BUT: Allow rules files in figma-data/rules/ (WP20 3-tier system)
 # These are committed as part of the codebase

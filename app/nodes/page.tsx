@@ -158,7 +158,7 @@ export default function NodesLibraryPage() {
   };
 
   const handleOpenPreview = (nodeId: string) => {
-    router.push(`/viewer/${nodeId}?fullscreen=true`);
+    router.push(`/node/${nodeId}?fullscreen=true`);
   };
 
   return (

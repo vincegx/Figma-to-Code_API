@@ -192,7 +192,7 @@ export type RulesStore = RulesStoreState & RulesStoreActions;
 // UI Store Types
 // ============================================================================
 
-export type AppPage = 'home' | 'library' | 'viewer' | 'rules' | 'settings';
+export type AppPage = 'home' | 'library' | 'node' | 'rules' | 'settings';
 
 export type Theme = 'light' | 'dark' | 'system';
 

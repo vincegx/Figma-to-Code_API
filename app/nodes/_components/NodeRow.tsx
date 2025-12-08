@@ -50,7 +50,7 @@ export function NodeRow({
 
   return (
     <tr
-      onClick={() => router.push(`/viewer/${node.id}`)}
+      onClick={() => router.push(`/node/${node.id}`)}
       className="cursor-pointer hover:bg-bg-hover transition-colors"
     >
       {/* Checkbox - stop propagation */}
@@ -120,7 +120,7 @@ export function NodeRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/viewer/${node.id}`}>
+              <Link href={`/node/${node.id}`}>
                 <Eye className="w-4 h-4 mr-2" />
                 View node
               </Link>

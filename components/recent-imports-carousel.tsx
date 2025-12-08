@@ -135,7 +135,7 @@ export function RecentImportsCarousel() {
                 return (
                   <Link
                     key={node.id}
-                    href={`/viewer/${node.id}`}
+                    href={`/node/${node.id}`}
                     className="flex-shrink-0 w-56 group"
                   >
                     {/* Card with Thumbnail */}

@@ -46,7 +46,7 @@ export function AppSidebar() {
     if (href === '/') {
       return pathname === '/';
     }
-    if (href === '/nodes' && pathname.startsWith('/viewer')) {
+    if (href === '/nodes' && pathname.startsWith('/node')) {
       return true;
     }
     // /merge/[id] should highlight Merges nav item

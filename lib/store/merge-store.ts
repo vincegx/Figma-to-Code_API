@@ -4,7 +4,7 @@
  * Server-side file-based storage for merge JSON files.
  * Provides type-safe CRUD operations for merge persistence.
  *
- * Storage: merges/{id}.json
+ * Storage: merges-data/{id}.json
  */
 
 import { promises as fs } from 'fs';
@@ -24,7 +24,7 @@ import type {
  * Base directory for merge storage.
  * Relative to project root (figma-rules-builder/).
  */
-const MERGES_DIR = path.join(process.cwd(), 'merges');
+const MERGES_DIR = path.join(process.cwd(), 'merges-data');
 
 // ============================================================================
 // Helper Functions

@@ -34,7 +34,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect, onDelete }:
         onMouseLeave={() => setShowActions(false)}
       >
         {/* Thumbnail */}
-        <Link href={`/viewer/${node.id}`} className="block relative">
+        <Link href={`/node/${node.id}`} className="block relative">
           <div className="aspect-video bg-bg-secondary relative overflow-hidden">
             {node.thumbnail ? (
               <Image
@@ -73,7 +73,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect, onDelete }:
             {showActions && (
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center gap-2">
                 <Link
-                  href={`/viewer/${node.id}`}
+                  href={`/node/${node.id}`}
                   className="p-2 bg-bg-card rounded-full hover:bg-bg-hover transition-colors"
                   title="View"
                 >
@@ -108,7 +108,7 @@ export default function NodeCard({ node, isSelected, onToggleSelect, onDelete }:
         {/* Card Content */}
         <div className="p-4">
           <Link
-            href={`/viewer/${node.id}`}
+            href={`/node/${node.id}`}
             className="block mb-2"
           >
             <h3 className="font-semibold text-text-primary truncate hover:text-accent-primary">
