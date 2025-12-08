@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadVersion, versionExists, getHistoryScreenshotUrl } from '@/lib/utils/history-manager';
 import { transformToAltNode, resetNameCounters } from '@/lib/altnode-transform';
+import { setCachedVariablesMap } from '@/lib/utils/variable-css';
 import type { VersionDataResponse } from '@/lib/types/versioning';
 
 interface RouteParams {
@@ -58,9 +59,19 @@ export async function GET(
       );
     }
 
-    // Transform to AltNode for preview
+    // WP31: Cache variables for CSS variable resolution (same as current version API)
+    const variables = versionData.variables || {};
+    if (Object.keys(variables).length > 0) {
+      setCachedVariablesMap({
+        variables: variables as Record<string, any>,
+        lastUpdated: new Date().toISOString(),
+        version: 1
+      });
+    }
+
+    // Transform to AltNode for preview - pass variables for proper style resolution
     resetNameCounters();
-    const altNode = transformToAltNode(versionData.data);
+    const altNode = transformToAltNode(versionData.data, 0, undefined, undefined, variables);
 
     const response: VersionDataResponse = {
       folder: decodedFolder,

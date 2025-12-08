@@ -4,7 +4,7 @@
  * HierarchyBlock Component
  *
  * Displays the hierarchy tree of a node's children with expand/collapse functionality.
- * VERBATIM from viewer/[nodeId]/page.tsx lines 72-154 - Phase 3 refactoring
+ * VERBATIM from viewer/[nodeId]/page.tsx - Phase 3 refactoring
  */
 
 import { useState } from 'react';
@@ -12,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
 
-interface HierarchyBlockProps {
+export interface HierarchyBlockProps {
   node: SimpleAltNode | null;
 }
 
