@@ -19,6 +19,7 @@ import {
   Home,
   Copy,
   Package,
+  Scissors,
 } from 'lucide-react';
 import {
   Select,
@@ -54,6 +55,7 @@ interface ViewerHeaderProps {
   onRefetchClick: () => void;
   onRefreshPreview: () => void;
   onFrameworkChange: (framework: FrameworkType) => void;
+  onSplitClick: () => void;
 }
 
 export function ViewerHeader({
@@ -72,6 +74,7 @@ export function ViewerHeader({
   onRefetchClick,
   onRefreshPreview,
   onFrameworkChange,
+  onSplitClick,
 }: ViewerHeaderProps) {
   const router = useRouter();
 
@@ -175,6 +178,12 @@ export function ViewerHeader({
                 <Package className="h-4 w-4 mr-2" />
                 Download ZIP Package
               </DropdownMenuItem>
+              {previewFramework !== 'html-css' && (
+                <DropdownMenuItem onClick={onSplitClick}>
+                  <Scissors className="h-4 w-4 mr-2" />
+                  Split into Components...
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <button

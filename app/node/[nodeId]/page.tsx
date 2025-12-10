@@ -33,6 +33,8 @@ import { ResizablePreviewViewport } from '@/components/resizable-preview-viewpor
 import LivePreview, { type LivePreviewHandle } from '@/components/live-preview';
 import { cn } from '@/lib/utils';
 import type { FrameworkType } from '@/lib/types/rules';
+import type { SplitFramework } from '@/lib/types/split';
+import { SplitModal } from '@/components/split';
 
 // Phase 3: Extracted hooks and components
 import { useViewerData, useCodeGeneration } from './_hooks';
@@ -106,6 +108,7 @@ export default function ViewerPage() {
   const [withProps, setWithProps] = useState(false);
   const [rawDataLimit, setRawDataLimit] = useState(2000);
   const [copiedRawData, setCopiedRawData] = useState(false);
+  const [splitModalOpen, setSplitModalOpen] = useState(false);
 
   // Data hook
   const viewerData = useViewerData({
@@ -189,6 +192,7 @@ export default function ViewerPage() {
         onRefetchClick={() => viewerData.setRefetchDialogOpen(true)}
         onRefreshPreview={() => setIframeKey(k => k + 1)}
         onFrameworkChange={setPreviewFramework}
+        onSplitClick={() => setSplitModalOpen(true)}
       />
 
       {/* MAIN CONTENT */}
@@ -340,6 +344,16 @@ export default function ViewerPage() {
       </main>
 
       {/* DIALOGS */}
+      <SplitModal
+        open={splitModalOpen}
+        onOpenChange={setSplitModalOpen}
+        nodeId={nodeId}
+        nodeName={viewerData.currentNode?.name || ''}
+        framework={(previewFramework === 'html-css' ? 'react-tailwind' : previewFramework) as SplitFramework}
+        language={exportLanguage}
+        rootAltNode={viewerData.altNode}
+      />
+
       <RefetchDialog
         open={viewerData.refetchDialogOpen}
         onOpenChange={async (open) => {
