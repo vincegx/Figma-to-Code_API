@@ -133,9 +133,9 @@ function TreeNode({
   const isSelected = selectedIds.includes(node.id);
   const ancestorSelected = hasSelectedAncestor(node.id, selectedIds, nodeMap, parentMap);
 
-  // Skip non-structural types for selection
+  // Skip non-structural types for selection (manual selection = less restrictive)
   const isStructural = ['FRAME', 'INSTANCE', 'COMPONENT', 'GROUP'].includes(node.originalType || '');
-  const canSelect = isStructural && nodeCount >= 3 && !isRoot;
+  const canSelect = isStructural && !isRoot;
 
   // Filter by search
   if (searchTerm && !matchesSearch(node, searchTerm)) {
@@ -281,11 +281,12 @@ export function TreeExplorer({
             <SelectTrigger className="w-16 h-8 text-xs bg-bg-secondary border-border-primary">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-bg-card border-border-primary">
+            <SelectContent className="bg-bg-card border-border-primary z-[100]">
               <SelectItem value="1" className="text-xs">1</SelectItem>
               <SelectItem value="2" className="text-xs">2</SelectItem>
               <SelectItem value="3" className="text-xs">3</SelectItem>
               <SelectItem value="4" className="text-xs">4</SelectItem>
+              <SelectItem value="5" className="text-xs">5</SelectItem>
             </SelectContent>
           </Select>
         </div>
