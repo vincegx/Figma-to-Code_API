@@ -470,8 +470,14 @@ export function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, pa
     }
   }
 
-  // NOTE: justifyContent (primaryAxisAlignItems) handled by official-primaryaxisalignitems rules
-  // NOTE: alignItems (counterAxisAlignItems) handled by official-counteraxisalignitems rules
+  // Extract justify-content/align-items for responsive merge diff
+  const axisMap: Record<string, string> = { MIN: 'flex-start', CENTER: 'center', MAX: 'flex-end', SPACE_BETWEEN: 'space-between', BASELINE: 'baseline' };
+  if ((figmaNode as any).primaryAxisAlignItems && axisMap[(figmaNode as any).primaryAxisAlignItems]) {
+    altNode.styles['justify-content'] = axisMap[(figmaNode as any).primaryAxisAlignItems];
+  }
+  if ((figmaNode as any).counterAxisAlignItems && axisMap[(figmaNode as any).counterAxisAlignItems]) {
+    altNode.styles['align-items'] = axisMap[(figmaNode as any).counterAxisAlignItems];
+  }
 
   // Width and height
   // WP32 FIX: Use node.size for rotated elements (actual dimensions before rotation)

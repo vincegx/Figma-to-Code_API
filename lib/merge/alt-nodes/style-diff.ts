@@ -330,6 +330,11 @@ export function getResetValue(
     return 'auto';
   }
 
+  // Justify-content/align-items: reset to flex-start (Figma default)
+  if (prop === 'justify-content' || prop === 'align-items') {
+    return 'flex-start';
+  }
+
   // Gap: reset to 0
   if (prop === 'gap' || prop === 'row-gap' || prop === 'column-gap') {
     return '0';
