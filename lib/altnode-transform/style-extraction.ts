@@ -110,6 +110,12 @@ export function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleA
           if (cssProp === 'width' && layoutSizingH === 'FILL') continue;
           if (cssProp === 'height' && layoutSizingV === 'FILL') continue;
 
+          // Skip HUG auto when no children (except TEXT) - use pixel dimensions from normalizeLayout
+          const hasNoChildren = !node.children || node.children.length === 0;
+          const isText = figmaNode.type === 'TEXT';
+          if (cssProp === 'width' && layoutSizingH === 'HUG' && hasNoChildren && !isText) continue;
+          if (cssProp === 'height' && layoutSizingV === 'HUG' && hasNoChildren && !isText) continue;
+
           altNode.styles[cssProp] = finalValue;
         }
       }
@@ -511,7 +517,7 @@ export function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, pa
     altNode.styles.height = `${figmaNode.absoluteBoundingBox.height}px`;
   } else if (layoutSizingV === 'FILL') {
     altNode.styles.height = '100%';
-  } else if (layoutSizingV === 'HUG') {
+  } else if (layoutSizingV === 'HUG' && ((figmaNode as any).children?.length > 0 || figmaNode.type === 'TEXT')) {
     altNode.styles.height = 'auto';
   } else if (hasRotation && nodeSize) {
     altNode.styles.height = `${nodeSize.y}px`;

@@ -226,11 +226,28 @@ export function transformToAltNode(
       .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds, undefined, currentLayoutSizing))
       .filter((node): node is SimpleAltNode => node !== null);
 
+    // WP38: Handle itemReverseZIndex (Canvas Stacking "First on Top")
+    // When itemReverseZIndex: true, Figma wants first child on top, but CSS puts last on top
+    // Apply z-index to children to match Figma's visual stacking
+    if ((figmaNode as any).itemReverseZIndex === true && altNode.children.length > 1) {
+      const childCount = altNode.children.length;
+      altNode.children.forEach((child, index) => {
+        child.styles['z-index'] = String(childCount - index);
+      });
+    }
+
     // Parent needs position:relative if any child has layoutPositioning ABSOLUTE
     // But don't overwrite absolute (absolute also acts as positioning context)
     const hasAbsoluteChild = figmaNode.children.some((child: any) => child.layoutPositioning === 'ABSOLUTE');
     if (hasAbsoluteChild && altNode.styles.position !== 'absolute') {
       altNode.styles.position = 'relative';
+      // WP38: Non-absolute siblings need position:relative to stack above absolute elements
+      // In CSS, absolute elements stack on top of static elements by default
+      for (const child of altNode.children) {
+        if (child.styles.position !== 'absolute') {
+          child.styles.position = 'relative';
+        }
+      }
     }
   }
 

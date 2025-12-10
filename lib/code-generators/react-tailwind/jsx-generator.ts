@@ -232,9 +232,9 @@ export function generateTailwindJSXElement(
       : (height > 0 ? `h-[${Math.round(height)}px]` : '');
     const sizeClasses = [widthClass, heightClass].filter(Boolean).join(' ');
 
-    // WP31: Include positioning and GROUP-related styles for SVG containers
+    // WP31: Include positioning and visual styles for SVG containers
     // position/top/left needed for free-positioned SVGs in frames without layoutMode
-    const positioningStyles = ['position', 'top', 'left', 'right', 'bottom', 'grid-area', 'margin-left', 'margin-top', 'margin-right', 'margin-bottom'];
+    const positioningStyles = ['position', 'top', 'left', 'right', 'bottom', 'grid-area', 'margin-left', 'margin-top', 'margin-right', 'margin-bottom', 'opacity'];
     const nodeStyleClasses = Object.entries(node.styles || {})
       .filter(([prop]) => positioningStyles.includes(prop))
       .map(([prop, value]) => cssPropToTailwind(prop, String(value)))

@@ -41,6 +41,36 @@ export function handleGroupInlining(
     const singleChild = groupNode.children[0];
     const altChild = transformToAltNode(singleChild, newCumulativeRotation, parentLayoutMode, parentBounds, undefined, parentLayoutSizing);
 
+    // Transfer GROUP's absolute positioning to the inlined child
+    if (altChild && (groupNode as any).layoutPositioning === 'ABSOLUTE') {
+      altChild.styles.position = 'absolute';
+      const groupBounds = groupNode.absoluteBoundingBox;
+      // WP38: For rotated GROUPs, use absoluteBoundingBox relative to parent
+      // relativeTransform values are in rotated coordinates, not screen coordinates
+      if ((groupNode as any).rotation && parentBounds && groupBounds) {
+        altChild.styles.left = `${groupBounds.x - parentBounds.x}px`;
+        altChild.styles.top = `${groupBounds.y - parentBounds.y}px`;
+        altChild.styles.transform = `rotate(${(groupNode as any).rotation * 180 / Math.PI}deg)`;
+        // Use size (pre-rotation) not absoluteBoundingBox (post-rotation expanded)
+        const groupSize = (groupNode as any).size;
+        if (groupSize) {
+          altChild.styles.width = `${groupSize.x}px`;
+          altChild.styles.height = `${groupSize.y}px`;
+        }
+      } else {
+        const transform = (groupNode as any).relativeTransform;
+        if (transform) {
+          altChild.styles.left = `${transform[0][2]}px`;
+          altChild.styles.top = `${transform[1][2]}px`;
+        }
+      }
+    }
+
+    // Transfer GROUP's opacity to the inlined child
+    if (altChild && (groupNode as any).opacity !== undefined && (groupNode as any).opacity !== 1) {
+      altChild.styles.opacity = String((groupNode as any).opacity);
+    }
+
     // Re-apply relative if altChild has children with position:absolute (positioning context needed)
     if (altChild && altChild.children?.some((c: any) => c.styles?.position === 'absolute')) {
       if (altChild.styles.position !== 'absolute') {
