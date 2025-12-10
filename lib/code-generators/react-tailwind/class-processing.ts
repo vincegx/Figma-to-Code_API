@@ -119,9 +119,8 @@ function normalizeArbitraryValues(classes: string[]): string[] {
         return `${prefix}${standardSpacing[px]}`;
       }
 
-      // WP38: Don't round w-/h- dimensions - MCP keeps exact pixel values
-      // Only apply nearest-value rounding to gap/padding/margin
-      if (prefix === 'w-' || prefix === 'h-' || prefix === 'min-w-' || prefix === 'max-w-' || prefix === 'min-h-' || prefix === 'max-h-') {
+      // WP38: Don't round w-/h- dimensions and ml-/mt- positioning - keep exact pixel values
+      if (prefix === 'w-' || prefix === 'h-' || prefix === 'min-w-' || prefix === 'max-w-' || prefix === 'min-h-' || prefix === 'max-h-' || prefix === 'ml-' || prefix === 'mt-') {
         return cls; // Keep exact arbitrary value
       }
 

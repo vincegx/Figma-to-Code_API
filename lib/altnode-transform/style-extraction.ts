@@ -46,10 +46,10 @@ export function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleA
 
     // WP31: Skip strokeWeight in these cases:
     // 1. When individualStrokeWeights exists (handled separately with shorthand)
-    // 2. When strokes array is empty (no visible border)
+    // 2. When strokes array is empty or all strokes are hidden (no visible border)
     if (figmaProp === 'strokeWeight') {
       if (node.individualStrokeWeights) continue;
-      if (!node.strokes || node.strokes.length === 0) continue;
+      if (!node.strokes || !node.strokes.some((s: any) => s.visible !== false)) continue;
     }
 
     const value = node[figmaProp];
@@ -190,11 +190,7 @@ export function extractUniversalFallbacks(figmaNode: FigmaNode, altNode: SimpleA
       altNode.styles['letter-spacing'] = `${node.style.letterSpacing}px`;
     }
 
-    // Line-height (unitless for responsiveness)
-    if (node.style.lineHeightPercentFontSize) {
-      const unitless = (node.style.lineHeightPercentFontSize / 100).toFixed(2);
-      altNode.styles['line-height'] = unitless;
-    }
+    // Line-height: handled in normalizeText() with PIXELS vs unitless logic
 
     // Text alignment
     if (node.style.textAlignHorizontal) {
@@ -314,8 +310,8 @@ export function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: Sim
     if (left) altNode.styles.borderLeftWidth = `${left}px`;
   }
 
-  // WP31: Stroke style - always needed for border to be visible
-  if (node.strokes && node.strokes.length > 0) {
+  // WP31: Stroke style - only if at least one stroke is visible
+  if (node.strokes && node.strokes.some((s: any) => s.visible !== false)) {
     const style = (node.strokeDashes && node.strokeDashes.length > 0) ? 'dashed' : 'solid';
     altNode.styles['border-style'] = style;
   }
@@ -695,6 +691,20 @@ export function normalizeFills(figmaNode: FigmaNode, altNode: SimpleAltNode): vo
     // Keep background-image style for CSS fallback
     altNode.styles.backgroundImage = `url(${firstFill.imageRef})`;
     altNode.styles.backgroundSize = 'cover';
+
+    // Apply image filters (exposure, contrast) as CSS filters
+    if (firstFill.filters) {
+      const cssFilters: string[] = [];
+      if (firstFill.filters.exposure !== undefined && firstFill.filters.exposure !== 0) {
+        cssFilters.push(`brightness(${1 + firstFill.filters.exposure})`);
+      }
+      if (firstFill.filters.contrast !== undefined && firstFill.filters.contrast !== 0) {
+        cssFilters.push(`contrast(${1 + firstFill.filters.contrast})`);
+      }
+      if (cssFilters.length > 0) {
+        altNode.styles.filter = cssFilters.join(' ');
+      }
+    }
   }
 }
 
@@ -771,12 +781,35 @@ export function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): 
     return;
   }
 
+  const node = figmaNode as any;
+  // Check if this is an image element (PNG detoure needs drop-shadow instead of box-shadow)
+  const hasImageFill = node.fills?.some((f: any) => f.type === 'IMAGE' && f.visible !== false);
+
   // WP28 T209: Now uses config constants for effect types and default color
-  const shadows = figmaNode.effects
+  const dropShadows = figmaNode.effects
     .filter(effect => effect.visible !== false &&
-            (effect.type === figmaConfig.constants.effectTypes.dropShadow ||
-             effect.type === figmaConfig.constants.effectTypes.innerShadow))
-    .map(effect => {
+            effect.type === figmaConfig.constants.effectTypes.dropShadow);
+
+  const innerShadows = figmaNode.effects
+    .filter(effect => effect.visible !== false &&
+            effect.type === figmaConfig.constants.effectTypes.innerShadow);
+
+  // For images: use filter drop-shadow (respects transparency)
+  // drop-shadow doesn't support spread or inset
+  if (hasImageFill && dropShadows.length > 0) {
+    const dropShadowFilters = dropShadows.map(effect => {
+      const { r, g, b } = effect.color || figmaConfig.defaults.color;
+      const a = effect.color?.a ?? 1;
+      const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+      const x = effect.offset?.x || 0;
+      const y = effect.offset?.y || 0;
+      const blur = effect.radius || 0;
+      return `drop-shadow(${x}px ${y}px ${blur}px ${color})`;
+    });
+    altNode.styles.filter = dropShadowFilters.join(' ');
+  } else {
+    // For non-images: use box-shadow (supports spread and inset)
+    const allShadows = [...dropShadows, ...innerShadows].map(effect => {
       const { r, g, b } = effect.color || figmaConfig.defaults.color;
       const a = effect.color?.a ?? 1;
       const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
@@ -785,12 +818,12 @@ export function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): 
       const blur = effect.radius || 0;
       const spread = effect.spread || 0;
       const inset = effect.type === figmaConfig.constants.effectTypes.innerShadow ? 'inset ' : '';
-
       return `${inset}${x}px ${y}px ${blur}px ${spread}px ${color}`;
     });
 
-  if (shadows.length > 0) {
-    altNode.styles.boxShadow = shadows.join(', ');
+    if (allShadows.length > 0) {
+      altNode.styles.boxShadow = allShadows.join(', ');
+    }
   }
 
   // WP25: Handle blur effects
@@ -799,7 +832,11 @@ export function normalizeEffects(figmaNode: FigmaNode, altNode: SimpleAltNode): 
     effect => effect.visible !== false && effect.type === figmaConfig.constants.effectTypes.layerBlur
   );
   if (layerBlur && (layerBlur as any).radius) {
-    altNode.styles.filter = `blur(${(layerBlur as any).radius}px)`;
+    const blurValue = `blur(${(layerBlur as any).radius}px)`;
+    // Combine with existing filter (drop-shadow) if present
+    altNode.styles.filter = altNode.styles.filter
+      ? `${altNode.styles.filter} ${blurValue}`
+      : blurValue;
   }
 
   // WP25: Handle background blur
@@ -837,11 +874,17 @@ export function normalizeText(figmaNode: FigmaNode, altNode: SimpleAltNode): voi
   // NOTE: fontSize handled by official-fontsize rules
   // NOTE: fontWeight handled by official-fontweight rules
 
-  // Line height (COMPLEX - px vs % handling, not in rules)
-  if (style.lineHeightPx) {
-    altNode.styles.lineHeight = `${style.lineHeightPx}px`;
-  } else if (style.lineHeightPercent) {
-    altNode.styles.lineHeight = `${style.lineHeightPercent}%`;
+  // Line height: skip when lineHeight > element height (single-line text in fixed box)
+  const elementHeight = figmaNode.absoluteBoundingBox?.height;
+  const skipLineHeight = elementHeight && style.lineHeightPx && style.lineHeightPx > elementHeight;
+
+  if (!skipLineHeight) {
+    if (style.lineHeightPx && style.lineHeightUnit === 'PIXELS') {
+      altNode.styles['line-height'] = `${style.lineHeightPx}px`;
+    } else if (style.lineHeightPercentFontSize) {
+      const unitless = (style.lineHeightPercentFontSize / 100).toFixed(2);
+      altNode.styles['line-height'] = unitless;
+    }
   }
 
   // NOTE: textAlign handled by official-textalignhorizontal rules

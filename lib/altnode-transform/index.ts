@@ -225,6 +225,13 @@ export function transformToAltNode(
     altNode.children = figmaNode.children
       .map(child => transformToAltNode(child, nodeCumulativeRotation, currentLayoutMode, currentBounds, undefined, currentLayoutSizing))
       .filter((node): node is SimpleAltNode => node !== null);
+
+    // Parent needs position:relative if any child has layoutPositioning ABSOLUTE
+    // But don't overwrite absolute (absolute also acts as positioning context)
+    const hasAbsoluteChild = figmaNode.children.some((child: any) => child.layoutPositioning === 'ABSOLUTE');
+    if (hasAbsoluteChild && altNode.styles.position !== 'absolute') {
+      altNode.styles.position = 'relative';
+    }
   }
 
   // WP32: Image containers with children need position:relative for proper z-stacking

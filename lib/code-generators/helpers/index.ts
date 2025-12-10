@@ -75,6 +75,7 @@ import {
   handleBackdropFilter,
   handleAspectRatio,
   handleMixBlendMode,
+  handleBoxShadow,
 } from './visual';
 
 /**
@@ -528,6 +529,7 @@ export function cssPropToTailwind(cssProperty: string, cssValue: string): string
   if (prop === 'backdropfilter') return handleBackdropFilter(cssValue);
   if (prop === 'aspectratio') return handleAspectRatio(cssValue);
   if (prop === 'mixblendmode') return handleMixBlendMode(cssValue);
+  if (prop === 'boxshadow') return handleBoxShadow(cssValue);
 
   // No mapping found
   return '';

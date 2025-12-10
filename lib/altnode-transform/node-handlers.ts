@@ -38,7 +38,16 @@ export function handleGroupInlining(
   // WP25 FIX: Pass parent layoutMode through GROUP inlining
   // If GROUP has only 1 child, return child directly (inline the GROUP)
   if (groupNode.children.length === 1) {
-    return transformToAltNode(groupNode.children[0], newCumulativeRotation, parentLayoutMode, parentBounds, undefined, parentLayoutSizing);
+    const singleChild = groupNode.children[0];
+    const altChild = transformToAltNode(singleChild, newCumulativeRotation, parentLayoutMode, parentBounds, undefined, parentLayoutSizing);
+
+    // Re-apply relative if altChild has children with position:absolute (positioning context needed)
+    if (altChild && altChild.children?.some((c: any) => c.styles?.position === 'absolute')) {
+      if (altChild.styles.position !== 'absolute') {
+        altChild.styles.position = 'relative';
+      }
+    }
+    return altChild;
   }
 
   // Multiple children: create container but mark as GROUP
@@ -158,12 +167,18 @@ export function handleGroupInlining(
             if (marginLeft > 0) altChild.styles['margin-left'] = `${marginLeft}px`;
             if (marginTop > 0) altChild.styles['margin-top'] = `${marginTop}px`;
 
-            // Clear position styles for grid children
+            // Clear absolute position styles for grid children
             delete altChild.styles.position;
             delete altChild.styles.top;
             delete altChild.styles.left;
             delete altChild.styles.right;
             delete altChild.styles.bottom;
+
+            // Re-apply relative if altChild has children with position:absolute (positioning context needed)
+            const hasAbsoluteChild = altChild.children?.some((c: any) => c.styles?.position === 'absolute');
+            if (hasAbsoluteChild) {
+              altChild.styles.position = 'relative';
+            }
           }
         }
         return altChild;

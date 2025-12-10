@@ -451,6 +451,15 @@ export function handleBorderStyle(cssValue: string): string {
  * WP25: Filter (blur)
  */
 export function handleFilter(cssValue: string): string {
+  // Handle drop-shadow (for images with transparency)
+  if (cssValue.includes('drop-shadow')) {
+    return `[filter:${cssValue.replace(/\s+/g, '_')}]`;
+  }
+  // Handle brightness/contrast (from Figma image filters)
+  if (cssValue.includes('brightness') || cssValue.includes('contrast')) {
+    return `[filter:${cssValue.replace(/\s+/g, '_')}]`;
+  }
+  // Handle blur
   if (cssValue.includes('blur')) {
     const match = cssValue.match(/blur\((\d+)px\)/);
     if (match) {
@@ -520,4 +529,14 @@ export function handleMixBlendMode(cssValue: string): string {
     'luminosity': 'mix-blend-luminosity',
   };
   return blendModes[cssValue] || '';
+}
+
+/**
+ * Convert CSS box-shadow to Tailwind shadow class
+ * Uses arbitrary value syntax for custom shadows
+ */
+export function handleBoxShadow(cssValue: string): string {
+  if (!cssValue || cssValue === 'none') return 'shadow-none';
+  // Use arbitrary value for custom shadows
+  return `shadow-[${cssValue.replace(/\s+/g, '_')}]`;
 }
