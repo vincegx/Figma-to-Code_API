@@ -303,7 +303,8 @@ export function normalizeAdditionalProperties(figmaNode: FigmaNode, altNode: Sim
 
   // WP31: Individual stroke weights - use per-side classes (border-t, border-b, etc.)
   // Reset all borders with border-0 first, then apply individual sides
-  if (node.individualStrokeWeights) {
+  // Only apply if strokes exist (individualStrokeWeights can exist without visible strokes)
+  if (node.individualStrokeWeights && node.strokes && node.strokes.length > 0) {
     const { top, right, bottom, left } = node.individualStrokeWeights;
     // border-0 resets all sides (must come before individual sides)
     altNode.styles.border = '0px';

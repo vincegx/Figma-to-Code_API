@@ -173,7 +173,8 @@ export function generateTailwindJSXElement(
   svgBoundsMap: Map<string, { width: number; height: number }> = new Map(),
   parentNegativeSpacing?: { value: number; direction: 'row' | 'column' },  // WP31: From parent
   isLastChild: boolean = false,  // WP31: Last child doesn't need margin
-  propLookup: Map<string, { propName: string; type: 'text' | 'image' }> = new Map()  // WP47: Props lookup
+  propLookup: Map<string, { propName: string; type: 'text' | 'image' }> = new Map(),  // WP47: Props lookup
+  stubNodes: Map<string, string> = new Map()  // Split export: nodeId → ComponentName to render as <Component />
 ): string {
   // WP32: Skip hidden nodes - they should not be rendered in generated code
   if (node.visible === false) {
@@ -181,6 +182,12 @@ export function generateTailwindJSXElement(
   }
 
   const indent = '  '.repeat(depth + 1);
+
+  // Split export: If this node should be stubbed, render as component reference
+  const stubComponentName = stubNodes.get(node.id);
+  if (stubComponentName) {
+    return `${indent}<${stubComponentName} />\n`;
+  }
 
   // WP32: Handle SVG nodes (VECTORs or multi-VECTOR containers)
   const svgBounds = svgBoundsMap.get(node.id);
@@ -484,7 +491,7 @@ export function generateTailwindJSXElement(
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
           const isLast = i === childrenArray.length - 1;
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup, stubNodes);
         }
       }
 
@@ -546,7 +553,7 @@ export function generateTailwindJSXElement(
           const childResult = evaluateMultiFrameworkRules(child, allRules, framework);
           const childProps = cleanResolvedProperties(childResult.properties);
           const isLast = i === childrenArray.length - 1;
-          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
+          jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup, stubNodes);
         }
         jsxString += `${indent}</${htmlTag}>`;
       } else {
@@ -588,7 +595,7 @@ export function generateTailwindJSXElement(
         const childProps = cleanResolvedProperties(childResult.properties);
         const isLast = i === childrenArray.length - 1;
 
-        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup);
+        jsxString += generateTailwindJSXElement(child, childProps, depth + 1, allRules, framework, imageUrls, svgMap, isViewerMode, svgBoundsMap, childNegativeSpacing, isLast, propLookup, stubNodes);
       }
 
       jsxString += `${indent}</${htmlTag}>`;

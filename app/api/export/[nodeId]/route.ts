@@ -24,7 +24,7 @@ import { evaluateMultiFrameworkRules } from '@/lib/rule-engine';
 import { generateReactTailwind } from '@/lib/code-generators/react-tailwind';
 import { generateReactTailwindV4 } from '@/lib/code-generators/react-tailwind-v4';
 import { generateHTMLTailwindCSS } from '@/lib/code-generators/html-tailwind-css';
-import { convertApiPathsToRelative, getCodeFileExtension, sanitizeComponentName, toPascalCase } from '@/lib/utils/export-utils';
+import { convertApiPathsToRelative, getCodeFileExtension, sanitizeComponentName, toPascalCase, addViteProjectFiles } from '@/lib/utils/export-utils';
 import type { MultiFrameworkRule, FrameworkType } from '@/lib/types/rules';
 
 interface RouteParams {
@@ -276,6 +276,9 @@ body > *:first-child {
     } else {
       // React frameworks - just the component code
       zip.file(`src/${componentName}.${extension}`, processedCode);
+
+      // Add Vite project files for dev server (with Google Fonts if used)
+      addViteProjectFiles(zip, componentName, extension, metadata.name, codeOutput.googleFontsUrl);
     }
 
     // Generate ZIP buffer

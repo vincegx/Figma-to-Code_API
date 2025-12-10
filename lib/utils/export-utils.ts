@@ -90,3 +90,128 @@ export function toPascalCase(name: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join('');
 }
+
+/**
+ * Add Vite project files to ZIP for running a dev server (React exports only)
+ * Allows `npm install && npm run dev` to test the exported component
+ */
+export function addViteProjectFiles(
+  zip: { file: (path: string, content: string) => void },
+  componentName: string,
+  extension: string,
+  projectName: string,
+  googleFontsUrl?: string
+): void {
+  const isTypeScript = extension === 'tsx';
+  const mainExt = isTypeScript ? 'tsx' : 'jsx';
+
+  // package.json
+  const packageJson = {
+    name: sanitizeComponentName(projectName).toLowerCase() || 'figma-export',
+    private: true,
+    version: '0.0.0',
+    type: 'module',
+    scripts: {
+      dev: 'vite',
+      build: 'vite build',
+      preview: 'vite preview',
+    },
+    dependencies: {
+      react: '^18.2.0',
+      'react-dom': '^18.2.0',
+    },
+    devDependencies: {
+      '@vitejs/plugin-react': '^4.2.0',
+      vite: '^5.0.0',
+      ...(isTypeScript
+        ? {
+            '@types/react': '^18.2.0',
+            '@types/react-dom': '^18.2.0',
+            typescript: '^5.3.0',
+          }
+        : {}),
+    },
+  };
+  zip.file('package.json', JSON.stringify(packageJson, null, 2));
+
+  // vite.config.js
+  const viteConfig = `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+});
+`;
+  zip.file('vite.config.js', viteConfig);
+
+  // Google Fonts link (if provided)
+  const googleFontsLink = googleFontsUrl
+    ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="${googleFontsUrl}" rel="stylesheet">`
+    : '';
+
+  // index.html with responsive root styles
+  const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${projectName}</title>
+    ${googleFontsLink}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Make root responsive instead of fixed Figma width */
+      #root > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.${mainExt}"></script>
+  </body>
+</html>
+`;
+  zip.file('index.html', indexHtml);
+
+  // src/main.tsx or src/main.jsx
+  const mainContent = `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { ${componentName} } from './${componentName}';
+
+ReactDOM.createRoot(document.getElementById('root')${isTypeScript ? '!' : ''}).render(
+  <React.StrictMode>
+    <${componentName} />
+  </React.StrictMode>
+);
+`;
+  zip.file(`src/main.${mainExt}`, mainContent);
+
+  // tsconfig.json (TypeScript only)
+  if (isTypeScript) {
+    const tsConfig = {
+      compilerOptions: {
+        target: 'ES2020',
+        useDefineForClassFields: true,
+        lib: ['ES2020', 'DOM', 'DOM.Iterable'],
+        module: 'ESNext',
+        skipLibCheck: true,
+        moduleResolution: 'bundler',
+        allowImportingTsExtensions: true,
+        resolveJsonModule: true,
+        isolatedModules: true,
+        noEmit: true,
+        jsx: 'react-jsx',
+        strict: true,
+        noUnusedLocals: true,
+        noUnusedParameters: true,
+        noFallthroughCasesInSwitch: true,
+      },
+      include: ['src'],
+    };
+    zip.file('tsconfig.json', JSON.stringify(tsConfig, null, 2));
+  }
+}

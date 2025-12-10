@@ -1,5 +1,10 @@
 /**
- * Tests for Smart Component Detection Algorithm
+ * Tests for Smart Component Detection Algorithm (v2)
+ *
+ * The v2 algorithm uses structural detection:
+ * - Descends through wrappers (<=2 children)
+ * - Detects components when finding >2 substantial children
+ * - Stops descending into detected components
  */
 
 import { describe, it, expect } from 'vitest';
@@ -22,14 +27,30 @@ function createMockNode(
   } as FigmaNode;
 }
 
+// Helper to create N children with enough nodes to be substantial
+function createSubstantialChildren(count: number, prefix = 'Section') {
+  return Array(count).fill(null).map((_, i) =>
+    createMockNode(`${prefix}${i + 1}`, 'FRAME', [
+      createMockNode(`Content${i}A`, 'FRAME'),
+      createMockNode(`Content${i}B`, 'TEXT'),
+      createMockNode(`Content${i}C`, 'RECTANGLE'),
+    ])
+  );
+}
+
 describe('detectComponents', () => {
-  it('should detect direct children of root as components', () => {
+  it('should detect components when root has >2 substantial children', () => {
+    // Root with 3 substantial children - should detect all 3
     const root = createMockNode('Page', 'FRAME', [
       createMockNode('Header', 'FRAME', [
         createMockNode('Logo', 'FRAME'),
         createMockNode('Nav', 'FRAME'),
         createMockNode('NavItem1', 'FRAME'),
-        createMockNode('NavItem2', 'FRAME'),
+      ]),
+      createMockNode('Main', 'FRAME', [
+        createMockNode('Hero', 'FRAME'),
+        createMockNode('Content', 'FRAME'),
+        createMockNode('CTA', 'FRAME'),
       ]),
       createMockNode('Footer', 'FRAME', [
         createMockNode('Links', 'FRAME'),
@@ -40,31 +61,72 @@ describe('detectComponents', () => {
 
     const detected = detectComponents(root);
 
-    expect(detected.length).toBeGreaterThan(0);
+    expect(detected.length).toBe(3);
     expect(detected.find(c => c.name === 'Header')).toBeDefined();
+    expect(detected.find(c => c.name === 'Main')).toBeDefined();
     expect(detected.find(c => c.name === 'Footer')).toBeDefined();
   });
 
-  it('should skip wrapper nodes and detect their children', () => {
-    // Create a wrapper with 100+ nodes to trigger wrapper detection
-    const createNestedChildren = (count: number) =>
-      Array(count).fill(null).map((_, i) =>
-        createMockNode(`Section${i}`, 'FRAME', [
-          createMockNode(`Content${i}`, 'FRAME'),
-          createMockNode(`Text${i}`, 'TEXT'),
-          createMockNode(`Image${i}`, 'RECTANGLE'),
-        ])
-      );
-
+  it('should descend through wrapper (<=2 children) and detect inner components', () => {
+    // Root has only 1 child (wrapper), which has 4 substantial children
     const root = createMockNode('Page', 'FRAME', [
-      createMockNode('body', 'FRAME', createNestedChildren(35)),
+      createMockNode('body', 'FRAME', [
+        createMockNode('Container', 'FRAME', createSubstantialChildren(4)),
+      ]),
     ]);
 
     const detected = detectComponents(root);
 
-    // Should skip 'body' wrapper and detect sections
+    // Should skip body and Container (wrappers), detect the 4 sections
     expect(detected.find(c => c.name === 'body')).toBeUndefined();
-    expect(detected.length).toBeGreaterThan(0);
+    expect(detected.find(c => c.name === 'Container')).toBeUndefined();
+    expect(detected.length).toBe(4);
+    expect(detected.find(c => c.name === 'Section1')).toBeDefined();
+    expect(detected.find(c => c.name === 'Section4')).toBeDefined();
+  });
+
+  it('should exclude dominant children (>80% of parent nodes) and descend into them', () => {
+    // Helper to create many nodes to make body dominant (>80% of total)
+    const createManyNodes = (count: number, prefix: string) =>
+      Array(count).fill(null).map((_, i) =>
+        createMockNode(`${prefix}${i}`, 'FRAME', [
+          createMockNode(`${prefix}${i}A`, 'TEXT'),
+          createMockNode(`${prefix}${i}B`, 'TEXT'),
+        ])
+      );
+
+    // Root total will be: 1 (root) + 4 (header) + 4 (footer) + body's nodes
+    // Body needs to have >80% so it needs many more nodes
+    const root = createMockNode('Page', 'FRAME', [
+      createMockNode('Header', 'INSTANCE', [
+        createMockNode('Logo', 'FRAME'),
+        createMockNode('Nav', 'FRAME'),
+        createMockNode('Menu', 'FRAME'),
+      ]),
+      // Body with MANY nested nodes to be dominant (>80%)
+      // Body will have: 1 + 1 + (4*4) + (30*3) = 1 + 1 + 16 + 90 = 108 nodes
+      createMockNode('body', 'FRAME', [
+        createMockNode('Container', 'FRAME', [
+          ...createSubstantialChildren(4, 'Section'),
+          ...createManyNodes(30, 'Extra'),
+        ]),
+      ]),
+      createMockNode('Footer', 'FRAME', [
+        createMockNode('Links', 'FRAME'),
+        createMockNode('Social', 'FRAME'),
+        createMockNode('Copy', 'TEXT'),
+      ]),
+    ]);
+
+    const detected = detectComponents(root);
+
+    // Header and Footer should be detected (not dominant)
+    expect(detected.find(c => c.name === 'Header')).toBeDefined();
+    expect(detected.find(c => c.name === 'Footer')).toBeDefined();
+    // Body should NOT be detected (dominant wrapper >80%)
+    expect(detected.find(c => c.name === 'body')).toBeUndefined();
+    // Body's inner sections should be detected
+    expect(detected.find(c => c.name === 'Section1')).toBeDefined();
   });
 
   it('should score INSTANCE/COMPONENT higher than FRAME', () => {
@@ -78,6 +140,11 @@ describe('detectComponents', () => {
         createMockNode('Title', 'TEXT'),
         createMockNode('Desc', 'TEXT'),
         createMockNode('BG', 'RECTANGLE'),
+      ]),
+      createMockNode('ThirdComponent', 'FRAME', [
+        createMockNode('A', 'TEXT'),
+        createMockNode('B', 'TEXT'),
+        createMockNode('C', 'RECTANGLE'),
       ]),
     ]);
 
@@ -102,15 +169,20 @@ describe('detectComponents', () => {
         createMockNode('Text2', 'TEXT'),
         createMockNode('Box', 'RECTANGLE'),
       ]),
+      createMockNode('Another Section', 'FRAME', [
+        createMockNode('A', 'TEXT'),
+        createMockNode('B', 'TEXT'),
+        createMockNode('C', 'RECTANGLE'),
+      ]),
     ]);
 
     const detected = detectComponents(root);
     const semantic = detected.find(c => c.name === 'Hero Section');
     const generic = detected.find(c => c.name === 'Frame 1');
 
-    if (semantic && generic) {
-      expect(semantic.score).toBeGreaterThan(generic.score);
-    }
+    expect(semantic).toBeDefined();
+    expect(generic).toBeDefined();
+    expect(semantic!.score).toBeGreaterThan(generic!.score);
   });
 
   it('should not detect nodes with fewer than MIN_COMPONENT_NODES', () => {
@@ -118,67 +190,53 @@ describe('detectComponents', () => {
       createMockNode('TooSmall', 'FRAME', [
         createMockNode('Single', 'TEXT'),
       ]),
-      // Create a larger component with enough nodes to meet minimum score
-      createMockNode('LargeEnough', 'INSTANCE', [
+      createMockNode('LargeEnough', 'FRAME', [
         createMockNode('One', 'TEXT'),
         createMockNode('Two', 'TEXT'),
         createMockNode('Three', 'TEXT'),
-        createMockNode('Four', 'TEXT'),
-        createMockNode('Five', 'TEXT'),
+      ]),
+      createMockNode('AlsoLarge', 'FRAME', [
+        createMockNode('A', 'TEXT'),
+        createMockNode('B', 'TEXT'),
+        createMockNode('C', 'TEXT'),
       ]),
     ]);
 
     const detected = detectComponents(root);
 
+    // TooSmall has only 2 nodes (itself + 1 child), below MIN_COMPONENT_NODES (3)
     expect(detected.find(c => c.name === 'TooSmall')).toBeUndefined();
-    // INSTANCE type gives +30 score, depth 1 gives +15, 6 nodes gives +15 = 60 total (> MIN_DETECTION_SCORE=40)
     expect(detected.find(c => c.name === 'LargeEnough')).toBeDefined();
-  });
-
-  it('should give bonus to semantic names', () => {
-    const root = createMockNode('Page', 'FRAME', [
-      createMockNode('Header', 'FRAME', [
-        createMockNode('Logo', 'FRAME'),
-        createMockNode('Nav', 'FRAME'),
-        createMockNode('Menu', 'FRAME'),
-      ]),
-      createMockNode('SomeRandomName', 'FRAME', [
-        createMockNode('Item1', 'FRAME'),
-        createMockNode('Item2', 'FRAME'),
-        createMockNode('Item3', 'FRAME'),
-      ]),
-    ]);
-
-    const detected = detectComponents(root);
-    const header = detected.find(c => c.name === 'Header');
-    const random = detected.find(c => c.name === 'SomeRandomName');
-
-    if (header && random) {
-      // Header should have semantic bonus
-      expect(header.score).toBeGreaterThanOrEqual(random.score);
-    }
+    expect(detected.find(c => c.name === 'AlsoLarge')).toBeDefined();
   });
 
   it('should not detect non-structural types like TEXT', () => {
     const root = createMockNode('Page', 'FRAME', [
       createMockNode('Headline', 'TEXT'),
       createMockNode('Description', 'TEXT'),
-      // Use INSTANCE for higher score to ensure detection
-      createMockNode('Container', 'INSTANCE', [
+      createMockNode('Container', 'FRAME', [
         createMockNode('Content1', 'TEXT'),
         createMockNode('Content2', 'TEXT'),
         createMockNode('Content3', 'RECTANGLE'),
-        createMockNode('Content4', 'FRAME'),
-        createMockNode('Content5', 'FRAME'),
+      ]),
+      createMockNode('AnotherFrame', 'FRAME', [
+        createMockNode('A', 'TEXT'),
+        createMockNode('B', 'TEXT'),
+        createMockNode('C', 'RECTANGLE'),
+      ]),
+      createMockNode('ThirdFrame', 'FRAME', [
+        createMockNode('X', 'TEXT'),
+        createMockNode('Y', 'TEXT'),
+        createMockNode('Z', 'RECTANGLE'),
       ]),
     ]);
 
     const detected = detectComponents(root);
 
-    // TEXT nodes should not be detected as components
+    // TEXT nodes should not be detected as components (not structural)
     expect(detected.find(c => c.name === 'Headline')).toBeUndefined();
     expect(detected.find(c => c.name === 'Description')).toBeUndefined();
-    // INSTANCE should be detected (high score type)
+    // FRAMEs should be detected
     expect(detected.find(c => c.name === 'Container')).toBeDefined();
   });
 
@@ -204,9 +262,33 @@ describe('detectComponents', () => {
     const detected = detectComponents(root);
 
     // Ensure sorted by score descending
+    expect(detected.length).toBeGreaterThan(0);
     for (let i = 1; i < detected.length; i++) {
       expect(detected[i - 1].score).toBeGreaterThanOrEqual(detected[i].score);
     }
+  });
+
+  it('should stop at MAX_DETECTION_DEPTH', () => {
+    // Create deeply nested structure
+    const root = createMockNode('Page', 'FRAME', [
+      createMockNode('Level1', 'FRAME', [
+        createMockNode('Level2', 'FRAME', [
+          createMockNode('Level3', 'FRAME', [
+            createMockNode('Level4', 'FRAME', [
+              createMockNode('Level5', 'FRAME', [
+                // These should not be detected (too deep)
+                ...createSubstantialChildren(4, 'Deep'),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
+    ]);
+
+    const detected = detectComponents(root);
+
+    // Deep sections should not be detected due to MAX_DETECTION_DEPTH
+    expect(detected.find(c => c.name === 'Deep1')).toBeUndefined();
   });
 });
 

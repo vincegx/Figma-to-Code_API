@@ -1,8 +1,15 @@
 /**
- * Smart Component Detection Algorithm
+ * Smart Component Detection Algorithm (v2)
  *
  * Detects potential component boundaries in a Figma node tree
- * using heuristics based on node type, depth, size, and naming.
+ * using a structural approach: descend through wrappers until
+ * finding the right level of granularity.
+ *
+ * Key principle:
+ * - If a node has <= 2 children → it's a wrapper, descend
+ * - If a node has > 2 children → check if they're "substantial"
+ * - Substantial children = components, STOP descending
+ * - Otherwise continue descending
  */
 
 import type { FigmaNode } from '../types/figma';
@@ -31,22 +38,32 @@ export function countNodes(node: FigmaNode): number {
 }
 
 /**
- * Check if a node name suggests it's a structural wrapper
- * Wrappers are traversed deeper instead of being detected as components
+ * Check if a node is a "substantial" component candidate
+ * Substantial = structural type + enough nodes + has children
  */
-function isWrapper(name: string, nodeCount: number): boolean {
-  const wrapperPatterns = [
-    'body', 'container', 'content', 'main', 'wrapper',
-    'root', 'page', 'section', 'layout', 'stack', 'view'
-  ];
-  const normalizedName = name.toLowerCase().trim();
-  return wrapperPatterns.some(p => normalizedName === p || normalizedName.endsWith('-' + p))
-    && nodeCount > 100;
+function isSubstantial(node: FigmaNode, nodeCount: number): boolean {
+  // Must be a structural type
+  const structuralTypes = ['FRAME', 'INSTANCE', 'COMPONENT', 'GROUP'];
+  if (!structuralTypes.includes(node.type)) {
+    return false;
+  }
+
+  // Must have enough nodes
+  if (nodeCount < MIN_COMPONENT_NODES) {
+    return false;
+  }
+
+  // Must have children (not a leaf wrapper)
+  if (!node.children || node.children.length === 0) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
  * Calculate component quality score
- * Higher score = better component candidate
+ * Used for sorting results (higher = better candidate)
  */
 function calculateScore(node: FigmaNode, depth: number, nodeCount: number): number {
   let score = 0;
@@ -79,16 +96,6 @@ function calculateScore(node: FigmaNode, depth: number, nodeCount: number): numb
     score -= 15;
   }
 
-  // Semantic name bonus
-  const semanticPatterns = [
-    /header/i, /footer/i, /nav/i, /sidebar/i,
-    /card/i, /button/i, /modal/i, /form/i,
-    /section/i, /hero/i, /banner/i, /menu/i
-  ];
-  if (semanticPatterns.some(p => p.test(trimmedName))) {
-    score += 10;
-  }
-
   return score;
 }
 
@@ -99,54 +106,27 @@ function calculateScore(node: FigmaNode, depth: number, nodeCount: number): numb
 /**
  * Detect potential component boundaries in a Figma node tree
  *
- * Algorithm:
- * 1. Skip root node, start with its direct children
- * 2. For each node, check if it's a structural wrapper
- * 3. Wrappers are traversed deeper; non-wrappers are scored
- * 4. Nodes meeting MIN_COMPONENT_NODES and MIN_DETECTION_SCORE are detected
- * 5. Results sorted by score (highest first)
+ * Algorithm (v2 - structural approach):
+ * 1. Start with root's children
+ * 2. If <= 2 children → wrapper level, descend deeper
+ * 3. If > 2 children → check if they're "substantial"
+ * 4. If >= 2 substantial → these are components, STOP
+ * 5. Otherwise → descend into each child
+ * 6. Stop at MAX_DETECTION_DEPTH
  *
  * @param rootNode - The root Figma node to analyze
  * @returns Array of detected components sorted by score
  */
 export function detectComponents(rootNode: FigmaNode): DetectedComponent[] {
   const results: DetectedComponent[] = [];
+  const addedIds = new Set<string>();
 
-  function traverse(node: FigmaNode, depth: number): void {
-    // Skip root (depth 0) - we want to detect its children
-    if (depth === 0) {
-      if (node.children) {
-        for (const child of node.children) {
-          traverse(child as FigmaNode, 1);
-        }
-      }
-      return;
-    }
+  function addCandidate(node: FigmaNode, depth: number, nodeCount: number, skipScoreFilter = false): void {
+    if (addedIds.has(node.id)) return;
 
-    // Only consider structural node types
-    const structuralTypes = ['FRAME', 'INSTANCE', 'COMPONENT', 'GROUP'];
-    if (!structuralTypes.includes(node.type)) {
-      return;
-    }
-
-    const nodeCount = countNodes(node);
-
-    // Skip nodes with too few children
-    if (nodeCount < MIN_COMPONENT_NODES) {
-      return;
-    }
-
-    // Check if this is a wrapper to traverse deeper
-    if (isWrapper(node.name, nodeCount) && depth < MAX_DETECTION_DEPTH && node.children) {
-      for (const child of node.children) {
-        traverse(child as FigmaNode, depth + 1);
-      }
-      return;
-    }
-
-    // Calculate score and add if meets threshold
     const score = calculateScore(node, depth, nodeCount);
-    if (score >= MIN_DETECTION_SCORE) {
+    // When skipScoreFilter is true, we found the right structural level - add regardless of score
+    if (skipScoreFilter || score >= MIN_DETECTION_SCORE) {
       results.push({
         id: node.id,
         name: node.name,
@@ -155,18 +135,73 @@ export function detectComponents(rootNode: FigmaNode): DetectedComponent[] {
         depth,
         score,
       });
-    }
-
-    // Continue traversing if we haven't reached max depth
-    // This allows detecting nested components
-    if (depth < MAX_DETECTION_DEPTH && node.children) {
-      for (const child of node.children) {
-        traverse(child as FigmaNode, depth + 1);
-      }
+      addedIds.add(node.id);
     }
   }
 
-  traverse(rootNode, 0);
+  function findComponents(node: FigmaNode, depth: number): void {
+    // Stop at max depth
+    if (depth > MAX_DETECTION_DEPTH) {
+      return;
+    }
+
+    const children = node.children as FigmaNode[] | undefined;
+    if (!children || children.length === 0) {
+      return;
+    }
+
+    // Wrapper detection: <= 2 children → descend
+    if (children.length <= 2) {
+      for (const child of children) {
+        findComponents(child, depth + 1);
+      }
+      return;
+    }
+
+    // > 2 children: check if they're substantial
+    const parentNodeCount = countNodes(node);
+    const childrenWithCounts = children.map(child => ({
+      node: child,
+      nodeCount: countNodes(child),
+    }));
+
+    // Filter substantial children, but exclude "dominant" ones (>80% of parent)
+    // A dominant child is a wrapper, not a component
+    const substantialChildren = childrenWithCounts.filter(
+      ({ node: child, nodeCount }) => {
+        if (!isSubstantial(child, nodeCount)) return false;
+        // If this child contains >80% of parent nodes, it's a wrapper
+        const ratio = nodeCount / parentNodeCount;
+        if (ratio > 0.8) return false;
+        return true;
+      }
+    );
+
+    // If >= 2 substantial children → these are the components
+    if (substantialChildren.length >= 2) {
+      for (const { node: child, nodeCount } of substantialChildren) {
+        // Skip score filter - structural detection found the right level
+        addCandidate(child, depth, nodeCount, true);
+      }
+      // Also descend into dominant/wrapper children to find their components
+      for (const { node: child, nodeCount } of childrenWithCounts) {
+        const ratio = nodeCount / parentNodeCount;
+        if (ratio > 0.8) {
+          // This is a dominant wrapper, descend into it
+          findComponents(child, depth + 1);
+        }
+      }
+      return;
+    }
+
+    // Not enough substantial children → descend into each
+    for (const child of children) {
+      findComponents(child, depth + 1);
+    }
+  }
+
+  // Start from root - treat it like any other node
+  findComponents(rootNode, 0);
 
   // Sort by score (highest first), then by depth (closest to root first)
   return results.sort((a, b) => {

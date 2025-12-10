@@ -25,18 +25,23 @@ export { generateTailwindJSXElement, cleanResolvedProperties } from './jsx-gener
  * @param node - Root AltNode to traverse
  * @param imageUrls - Map of imageRef → URL for images
  * @param propNames - Set to track used prop names (for uniqueness)
+ * @param stubNodeIds - Optional set of node IDs to skip (for split export wrapper)
  * @returns Array of collected props
  */
 function collectProps(
   node: SimpleAltNode,
   imageUrls: Record<string, string>,
-  propNames: Set<string>
+  propNames: Set<string>,
+  stubNodeIds?: Set<string>
 ): CollectedProp[] {
   const props: CollectedProp[] = [];
 
   function traverse(n: SimpleAltNode) {
     // Skip hidden nodes
     if (n.visible === false) return;
+
+    // Skip stubbed nodes entirely (for split export wrapper)
+    if (stubNodeIds?.has(n.id)) return;
 
     // Collect TEXT nodes (skip very short texts like initials "D", "C", "T")
     if (n.originalType === 'TEXT') {
@@ -140,15 +145,15 @@ function generatePropsInterface(componentName: string, props: CollectedProp[]): 
  * @param props - Array of collected props
  * @returns Destructuring string for function parameters
  */
-function generatePropsDestructuring(componentName: string, props: CollectedProp[]): string {
+function generatePropsDestructuring(componentName: string, props: CollectedProp[], isTypeScript = true): string {
   if (props.length === 0) return '';
 
   const escapeValue = (value: string) => value
-    .replace(/\u2028/g, '\\n')  // Line Separator → \n
-    .replace(/\u2029/g, '\\n')  // Paragraph Separator → \n
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n');
+    .replace(/\u2028/g, '\n')   // Line Separator → real newline
+    .replace(/\u2029/g, '\n')   // Paragraph Separator → real newline
+    .replace(/\\/g, '\\\\')     // Escape backslashes
+    .replace(/"/g, '\\"')       // Escape quotes
+    .replace(/\n/g, '\\n');     // Newlines → \n (JS interprets as newline)
 
   const textProps = props.filter(p => p.type === 'text');
   const imageProps = props.filter(p => p.type === 'image');
@@ -166,7 +171,9 @@ function generatePropsDestructuring(componentName: string, props: CollectedProp[
     imageProps.forEach(p => lines.push(`  ${p.name} = "${escapeValue(p.defaultValue)}",`));
   }
 
-  return `{\n${lines.join('\n')}\n}: ${componentName}Props`;
+  // TypeScript: add type annotation, JavaScript: omit it
+  const typeAnnotation = isTypeScript ? `: ${componentName}Props` : '';
+  return `{\n${lines.join('\n')}\n}${typeAnnotation}`;
 }
 
 /**
@@ -403,16 +410,20 @@ export async function generateReactTailwind(
   // WP32: Pass appropriate map based on mode
   const svgMap = isViewerMode ? svgDataUrls : svgVarNames;
 
-  // WP47: Collect props if withProps is enabled
+  // Split export: extract stubNodes from options
+  const stubNodes = options?.stubNodes || new Map<string, string>();
+  const stubNodeIds = stubNodes.size > 0 ? new Set(stubNodes.keys()) : undefined;
+
+  // WP47: Collect props if withProps is enabled (skip stubbed nodes)
   const propNames = new Set<string>();
   const collectedProps = options?.withProps
-    ? collectProps(altNode, imageUrls, propNames)
+    ? collectProps(altNode, imageUrls, propNames, stubNodeIds)
     : [];
   const propLookup = options?.withProps
     ? createPropLookup(collectedProps)
     : new Map();
 
-  // Generate JSX (with prop lookup for withProps mode)
+  // Generate JSX (with prop lookup for withProps mode, and stubs for split export)
   const jsx = generateTailwindJSXElement(
     altNode,
     cleanedProps,
@@ -425,7 +436,8 @@ export async function generateReactTailwind(
     svgBoundsMap,
     undefined,
     false,
-    propLookup
+    propLookup,
+    stubNodes
   );
 
   // WP31: Generate CSS variable definitions for React-Tailwind
@@ -436,13 +448,22 @@ export async function generateReactTailwind(
     ? `      <style dangerouslySetInnerHTML={{ __html: \`${cssVariables}\` }} />\n`
     : '';
 
+  // Split export: Generate imports for stubbed components
+  const stubImports = stubNodes.size > 0
+    ? Array.from(stubNodes.values())
+        .map(compName => `import { ${compName} } from './components/${compName}';`)
+        .join('\n')
+    : '';
+
   // WP47: Build code with props interface if enabled
-  const importSection = svgImports ? `${svgImports}\n\n` : '';
+  const allImports = [svgImports, stubImports].filter(Boolean).join('\n');
+  const importSection = allImports ? `${allImports}\n\n` : '';
 
   let code: string;
+  const isTypeScript = options?.language !== 'javascript';
   if (options?.withProps && collectedProps.length > 0) {
-    const propsInterface = generatePropsInterface(componentName, collectedProps);
-    const propsDestructuring = generatePropsDestructuring(componentName, collectedProps);
+    const propsInterface = isTypeScript ? generatePropsInterface(componentName, collectedProps) : '';
+    const propsDestructuring = generatePropsDestructuring(componentName, collectedProps, isTypeScript);
     code = `${importSection}${propsInterface}export function ${componentName}(${propsDestructuring}) {
   return (
     <>

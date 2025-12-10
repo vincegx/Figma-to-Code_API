@@ -27,4 +27,8 @@ export interface CollectedProp {
 export interface GenerateOptions {
   /** Generate with props interface (true) or inline values (false) */
   withProps?: boolean;
+  /** Split export: Map of nodeId → ComponentName to render as <ComponentName /> stubs */
+  stubNodes?: Map<string, string>;
+  /** Output language: typescript generates interfaces, javascript omits them */
+  language?: 'typescript' | 'javascript';
 }
