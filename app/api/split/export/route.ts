@@ -397,10 +397,18 @@ export async function POST(request: NextRequest) {
           counter++;
         }
 
+        // If name was changed, update the code to match
+        let finalCode = code;
+        if (finalName !== componentName) {
+          finalCode = code
+            .replace(`export function ${componentName}(`, `export function ${finalName}(`)
+            .replace(`${componentName}Props`, `${finalName}Props`);
+        }
+
         const filename = `${finalName}.${extension}`;
 
         // Add to src/components/
-        zip.file(`src/components/${filename}`, code);
+        zip.file(`src/components/${filename}`, finalCode);
         componentNames.push(finalName);
         stubNodes.set(componentId, finalName);
         exportedFiles.push({

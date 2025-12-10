@@ -153,7 +153,9 @@ function generatePropsDestructuring(componentName: string, props: CollectedProp[
     .replace(/\u2029/g, '\n')   // Paragraph Separator → real newline
     .replace(/\\/g, '\\\\')     // Escape backslashes
     .replace(/"/g, '\\"')       // Escape quotes
-    .replace(/\n/g, '\\n');     // Newlines → \n (JS interprets as newline)
+    .replace(/\r\n/g, '\\n')    // CRLF → \n
+    .replace(/\r/g, '\\n')      // CR → \n
+    .replace(/\n/g, '\\n');     // LF → \n
 
   const textProps = props.filter(p => p.type === 'text');
   const imageProps = props.filter(p => p.type === 'image');
