@@ -12,6 +12,7 @@ import { evaluateMultiFrameworkRules } from '../../rule-engine';
 import { vectorToDataURL } from '../../utils/svg-converter';
 import { getVisibilityClasses } from '../../merge/visibility-mapper';
 import { smartSplitTailwindClasses, deduplicateTailwindClasses } from './class-processing';
+import { generateSvgFilename } from '../../utils/image-fetcher';
 
 /**
  * WP32: Convert FillData gradient to CSS gradient string
@@ -176,8 +177,10 @@ export function generateTailwindJSXElement(
   propLookup: Map<string, { propName: string; type: 'text' | 'image' }> = new Map(),  // WP47: Props lookup
   stubNodes: Map<string, string> = new Map()  // Split export: nodeId → ComponentName to render as <Component />
 ): string {
-  // WP32: Skip hidden nodes - they should not be rendered in generated code
-  if (node.visible === false) {
+  // WP32: Skip hidden nodes - but NOT if they have partial visibility (responsive merge)
+  // If node.presence exists with at least one true, render it with visibility classes
+  const hasPartialVisibility = node.presence && (node.presence.mobile || node.presence.tablet || node.presence.desktop);
+  if (node.visible === false && !hasPartialVisibility) {
     return '';
   }
 
@@ -192,7 +195,12 @@ export function generateTailwindJSXElement(
   // WP32: Handle SVG nodes (VECTORs or multi-VECTOR containers)
   const svgBounds = svgBoundsMap.get(node.id);
   if (svgBounds) {
-    const svgValue = svgMap[node.id];
+    // Use node.sourceNodeId if available (for merged nodes with different breakpoint sources)
+    let svgValue = svgMap[node.id];
+    if (isViewerMode && node.sourceNodeId) {
+      const filename = generateSvgFilename(node.name, node.id);
+      svgValue = `/api/images/${node.sourceNodeId}/${filename}`;
+    }
     const altText = node.name || 'svg';
 
     // WP32 DEBUG
@@ -320,9 +328,14 @@ export function generateTailwindJSXElement(
   // Add visibility classes for partial visibility (mobile-only, tablet-only, etc.)
   // This ensures elements are hidden/shown at correct breakpoints
   if (node.presence) {
-    const visibilityClasses = getVisibilityClasses(node.presence);
+    let visibilityClasses = getVisibilityClasses(node.presence);
     if (visibilityClasses) {
-      // Split visibility classes and add them (e.g., "hidden md:block" → ["hidden", "md:block"])
+      // Fix: replace "block" with "flex" for flex containers to preserve layout
+      const isFlexContainer = node.styles?.display === 'flex' || node.styles?.display === 'inline-flex';
+      if (isFlexContainer) {
+        visibilityClasses = visibilityClasses.replace(/md:block/g, 'md:flex').replace(/lg:block/g, 'lg:flex');
+      }
+      // Split visibility classes and add them (e.g., "hidden md:flex" → ["hidden", "md:flex"])
       structuralClasses.push(...visibilityClasses.split(/\s+/).filter(Boolean));
     }
   }
@@ -425,7 +438,12 @@ export function generateTailwindJSXElement(
     }
   } else if (node.originalType === 'VECTOR' && node.svgData) {
     // WP32: SVG rendering - viewer mode uses data URLs, export mode uses import variables
-    const svgValue = svgMap[node.id];
+    let svgValue = svgMap[node.id];
+    // Use node.sourceNodeId if available (for merged nodes with different breakpoint sources)
+    if (isViewerMode && node.sourceNodeId) {
+      const filename = generateSvgFilename(node.name, node.id);
+      svgValue = `/api/images/${node.sourceNodeId}/${filename}`;
+    }
     const altText = node.name || 'vector';
     // Extract width/height from node.styles for proper sizing (JSX style object)
     const width = node.styles?.width || '';

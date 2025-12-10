@@ -68,6 +68,9 @@ export interface SimpleAltNode {
     tablet: boolean;
     desktop: boolean;
   };
+
+  // Source node ID for assets (which library node folder to use for SVGs/images)
+  sourceNodeId?: string;
 }
 
 // WP32: Fill data structure for multi-layer rendering

@@ -40,10 +40,12 @@ interface MergedNodeResult {
 
 /**
  * Deep clone a SimpleAltNode (without children, we'll rebuild those)
+ * @param sourceNodeId - Library node ID for asset URLs (e.g., 'lib-6055-2654')
  */
 function cloneNodeWithoutChildren(
   node: SimpleAltNode,
-  presence?: { mobile: boolean; tablet: boolean; desktop: boolean }
+  presence?: { mobile: boolean; tablet: boolean; desktop: boolean },
+  sourceNodeId?: string
 ): SimpleAltNode {
   return {
     id: node.id,
@@ -65,6 +67,7 @@ function cloneNodeWithoutChildren(
     layoutDirection: node.layoutDirection,
     maskImageRef: node.maskImageRef,
     presence,
+    sourceNodeId,
   };
 }
 
@@ -74,34 +77,54 @@ function cloneNodeWithoutChildren(
 
 /**
  * Merge a single element from 3 breakpoints into one SimpleAltNode with responsiveStyles.
+ * @param parentHidden - Inherited hidden state from parent (if parent is hidden, children are too)
+ * @param sourceNodeIds - Library node IDs for assets (e.g., 'lib-6055-2872')
  */
 function mergeElement(
   mobile: SimpleAltNode | undefined,
   tablet: SimpleAltNode | undefined,
   desktop: SimpleAltNode | undefined,
-  warnings: string[]
+  warnings: string[],
+  parentHidden = { mobile: false, tablet: false, desktop: false },
+  sourceNodeIds = { mobile: '', tablet: '', desktop: '' }
 ): SimpleAltNode | null {
-  // Use mobile as base, fallback to tablet, then desktop
-  const base = mobile || tablet || desktop;
+  // Check if hidden: either explicitly hidden OR parent is hidden on that breakpoint
+  const mobileHidden = mobile?.visible === false || parentHidden.mobile;
+  const tabletHidden = tablet?.visible === false || parentHidden.tablet;
+  const desktopHidden = desktop?.visible === false || parentHidden.desktop;
+
+  // Use first VISIBLE node as base
+  const visibleMobile = !mobileHidden ? mobile : undefined;
+  const visibleTablet = !tabletHidden ? tablet : undefined;
+  const visibleDesktop = !desktopHidden ? desktop : undefined;
+  const base = visibleMobile || visibleTablet || visibleDesktop || mobile || tablet || desktop;
   if (!base) return null;
 
-  // Track which breakpoints contain this element
+  // Track which breakpoints have this element visible (not hidden, including inherited)
   const presence = {
-    mobile: mobile !== undefined,
-    tablet: tablet !== undefined,
-    desktop: desktop !== undefined,
+    mobile: mobile !== undefined && !mobileHidden,
+    tablet: tablet !== undefined && !tabletHidden,
+    desktop: desktop !== undefined && !desktopHidden,
   };
 
-  // Clone the base node with presence info
-  const merged = cloneNodeWithoutChildren(base, presence);
+  // Determine which sourceNodeId to use based on base breakpoint
+  const sourceNodeId = base === mobile ? sourceNodeIds.mobile
+                     : base === tablet ? sourceNodeIds.tablet
+                     : sourceNodeIds.desktop;
+
+  // Clone the base node with presence info and source
+  const merged = cloneNodeWithoutChildren(base, presence, sourceNodeId);
 
   // Get styles from each breakpoint
   const mobileStyles = mobile?.styles || {};
   const tabletStyles = tablet?.styles || {};
   const desktopStyles = desktop?.styles || {};
 
-  // Use mobile styles as base
-  merged.styles = { ...mobileStyles };
+  // Use styles from base node (first visible breakpoint)
+  const baseStyles = base === mobile ? mobileStyles
+                   : base === tablet ? tabletStyles
+                   : desktopStyles;
+  merged.styles = { ...baseStyles };
 
   // FIX: Add width: 100% when flex-grow is present but width is missing
   // This ensures responsive overrides (md:w-[Xpx]) work correctly
@@ -112,9 +135,11 @@ function mergeElement(
     merged.styles.width = '100%';
   }
 
-  // Compute responsive overrides
-  const mdDiff = computeStyleDiff(mobileStyles, tabletStyles);
-  const lgDiff = computeStyleDiff(tabletStyles, desktopStyles);
+  // Compute responsive overrides relative to base breakpoint
+  // If base is tablet (mobile hidden), no mdDiff needed
+  // If base is desktop (mobile+tablet hidden), no diffs needed
+  const mdDiff = base === mobile ? computeStyleDiff(mobileStyles, tabletStyles) : {};
+  const lgDiff = (base === mobile || base === tablet) ? computeStyleDiff(tabletStyles, desktopStyles) : {};
 
   // Only add responsiveStyles if there are differences
   if (Object.keys(mdDiff).length > 0 || Object.keys(lgDiff).length > 0) {
@@ -138,8 +163,11 @@ function mergeElement(
 
   const matchedChildren = matchChildrenByName(mobileChildren, tabletChildren, desktopChildren);
 
+  // Propagate hidden state to children
+  const childHidden = { mobile: mobileHidden, tablet: tabletHidden, desktop: desktopHidden };
+
   for (const match of matchedChildren) {
-    const mergedChild = mergeElement(match.mobile, match.tablet, match.desktop, warnings);
+    const mergedChild = mergeElement(match.mobile, match.tablet, match.desktop, warnings, childHidden, sourceNodeIds);
     if (mergedChild) {
       merged.children.push(mergedChild);
     }
@@ -159,11 +187,13 @@ function mergeElement(
 export function mergeSimpleAltNodes(
   mobile: SimpleAltNode,
   tablet?: SimpleAltNode,
-  desktop?: SimpleAltNode
+  desktop?: SimpleAltNode,
+  sourceNodeIds?: { mobile: string; tablet: string; desktop: string }
 ): MergedNodeResult {
   const warnings: string[] = [];
+  const nodeIds = sourceNodeIds || { mobile: '', tablet: '', desktop: '' };
 
-  const mergedNode = mergeElement(mobile, tablet, desktop, warnings);
+  const mergedNode = mergeElement(mobile, tablet, desktop, warnings, { mobile: false, tablet: false, desktop: false }, nodeIds);
 
   if (!mergedNode) {
     throw new Error('Failed to merge nodes: no valid base node');

@@ -323,10 +323,16 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
   }
 
   // Merge the 3 SimpleAltNodes into one with responsive styles
+  const sourceNodeIds = {
+    mobile: mobileData?.id || '',
+    tablet: tabletData?.id || '',
+    desktop: desktopData?.id || '',
+  };
   const { node: mergedNode, warnings: mergeWarnings } = mergeSimpleAltNodes(
     mobileData.simpleAltNode,
     tabletData?.simpleAltNode,
-    desktopData?.simpleAltNode
+    desktopData?.simpleAltNode,
+    sourceNodeIds
   );
 
   // Add merge warnings
@@ -363,8 +369,13 @@ export async function executeMerge(input: MergeInput): Promise<MergeResult> {
   };
 
   // Generate code for all frameworks
-  // Use the first available node ID for asset URL generation
-  const nodeIdPrefix = mobileData?.id || tabletData?.id || desktopData?.id || 'unknown';
+  // Use first VISIBLE node for asset URL generation (matches merge base logic)
+  const mobileVisible = mobileData?.simpleAltNode?.visible !== false;
+  const tabletVisible = tabletData?.simpleAltNode?.visible !== false;
+  const nodeIdPrefix = (mobileVisible && mobileData?.id)
+    || (tabletVisible && tabletData?.id)
+    || desktopData?.id
+    || 'unknown';
 
   // Load rules for code generation (same rules as node viewer)
   const allRules = await loadRulesForMerge();
@@ -471,10 +482,16 @@ export async function generateCodeForMergeNode(
   }
 
   // Merge the 3 SimpleAltNodes
+  const sourceNodeIds = {
+    mobile: mobileData?.id || '',
+    tablet: tabletData?.id || '',
+    desktop: desktopData?.id || '',
+  };
   const { node: mergedNode } = mergeSimpleAltNodes(
     mobileData.simpleAltNode,
     tabletData?.simpleAltNode,
-    desktopData?.simpleAltNode
+    desktopData?.simpleAltNode,
+    sourceNodeIds
   );
 
   // Find the subtree by nodeId (search by Figma node ID in the merged tree)
