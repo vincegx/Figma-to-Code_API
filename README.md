@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="Figma Code Export" width="120" />
+  <img src="docs/assets/IMG_0.png" alt="Figma Code Export" width="700" />
 </p>
 
 <h1 align="center">Figma Code Export</h1>
@@ -11,8 +11,11 @@
 
 <p align="center">
   <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
+  <a href="#node-explorer">Node Explorer</a> •
+  <a href="#clean-code-export">Clean Code</a> •
+  <a href="#export-options">Export</a> •
   <a href="#responsive-merge">Responsive Merge</a> •
+  <a href="#quick-start">Quick Start</a> •
   <a href="docs/INSTALLATION.md">Installation</a> •
   <a href="docs/USAGE.md">Usage</a> •
   <a href="docs/FAQ.md">FAQ</a>
@@ -26,9 +29,6 @@
   <img src="https://img.shields.io/badge/Figma-API-F24E1E" alt="Figma API">
 </p>
 
-<p align="center">
-  <img src="docs/assets/demo.gif" alt="Demo" width="800" />
-</p>
 
 ---
 
@@ -54,6 +54,89 @@
 - **Rule engine** — Customize how Figma properties map to code
 - **Node library** — Save, organize, and manage imported designs
 - **Offline-first** — Fetch once, work offline forever
+
+---
+
+## Node Explorer
+
+Browse your Figma designs like in Figma itself. Expand layers, inspect properties, see the hierarchy.
+
+<p align="center">
+  <img src="docs/assets/Node explorer.png" alt="Node explorer" width="800" />
+</p>
+
+- **Tree navigation** — Expand/collapse layers like in Figma
+- **Click to select** — Code updates dynamically based on selected node
+- **Search & filter** — Find any node instantly
+- **Visual hierarchy** — See parent-child relationships
+
+---
+
+## Detail Panel
+
+Inspect every Figma property. See exactly what will be exported.
+
+<p align="center">
+  <img src="docs/assets/Node details.png" alt="Node details panel" width="800" />
+</p>
+
+- **All Figma properties** — Fills, strokes, effects, typography
+- **Computed styles** — See the final CSS output
+- **Figma Variables** — Automatically mapped to CSS custom properties
+- **Constraints info** — Understand layout behavior
+
+---
+
+## Clean Code Export
+
+Generate production-ready code that's actually readable. No bloated CSS, no unnecessary wrappers.
+
+<p align="center">
+  <img src="docs/assets/Figma export.png" alt="Clean code export" width="800" />
+</p>
+
+- **Semantic class names** derived from Figma layer names
+- **Tailwind utilities** mapped from Figma properties
+- **Monaco Editor** — Syntax highlighting, copy to clipboard
+- **TypeScript or JavaScript** — Choose your language
+
+---
+
+## Export Options
+
+### Simple Export
+
+Export any node as a standalone component.
+
+<p align="center">
+  <img src="docs/assets/List of exports.png" alt="Export list" width="800" />
+</p>
+
+- **Single file** — Just the code
+- **ZIP package** — Code + assets + Vite project ready to run (`npm install && npm run dev`)
+
+### Split into Components
+
+For complex designs, split into multiple React components with proper imports.
+
+- **Select nodes** to extract as separate components
+- **Auto-generate imports** in the wrapper component
+- **Maintain hierarchy** — Components reference each other correctly
+
+---
+
+## Dashboard
+
+Track your imports, manage your library, monitor API usage.
+
+<p align="center">
+  <img src="docs/assets/Dashboard.png" alt="Dashboard" width="800" />
+</p>
+
+- **Import metrics** with 7-day sparkline trends
+- **Semantic score** — Track code quality
+- **API quota monitoring** — Never hit rate limits
+- **Recent imports & merges** carousels
 
 ---
 
@@ -86,11 +169,19 @@ npm run dev
 
 The killer feature. Import 3 Figma frames and merge them into **one responsive component**.
 
+<p align="center">
+  <img src="docs/assets/Merge explorer.png" alt="Merge explorer" width="800" />
+</p>
+
 ### How it works
 
 1. **Import** your mobile, tablet, and desktop frames
 2. **Create merge** — assign each frame to a breakpoint
 3. **Get code** — automatic Tailwind responsive classes
+
+<p align="center">
+  <img src="docs/assets/List of merges.png" alt="List of merges" width="800" />
+</p>
 
 ### Before & After
 
