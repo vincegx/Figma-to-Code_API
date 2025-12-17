@@ -17,6 +17,7 @@ import { useUIStore } from '@/lib/store';
 import { themes } from 'prism-react-renderer';
 import type { LivePreviewHandle } from '@/components/live-preview';
 import { RulesPanel } from '@/components/rules-panel';
+import { SplitModal } from '@/components/split/split-modal';
 import type { UnifiedElement } from '@/lib/types/merge';
 
 // Phase 3: Extracted hooks and components
@@ -68,10 +69,43 @@ export default function MergeViewerPage() {
   const currentTheme = useUIStore((state) => state.theme);
   const codeTheme = currentTheme === 'light' ? themes.github : themes.nightOwl;
 
+  // Framework for preview (loads from Settings)
+  const [previewFramework, setPreviewFramework] = useState<MergeFrameworkType>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = localStorage.getItem('app-settings');
+        if (settings) {
+          const parsed = JSON.parse(settings);
+          const framework = parsed.defaultFramework;
+          if (framework === 'react-tailwind' || framework === 'react-tailwind-v4' || framework === 'html-css') {
+            return framework as MergeFrameworkType;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    return 'react-tailwind';
+  });
+
+  // Language for export (loads from Settings)
+  const [exportLanguage, setExportLanguage] = useState<'typescript' | 'javascript'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const settings = localStorage.getItem('app-settings');
+        if (settings) {
+          const parsed = JSON.parse(settings);
+          if (parsed.defaultLanguage === 'javascript' || parsed.defaultLanguage === 'typescript') {
+            return parsed.defaultLanguage;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    return 'typescript';
+  });
+
   // Local UI state
-  const [previewFramework, setPreviewFramework] = useState<MergeFrameworkType>('react-tailwind');
   const [withProps, setWithProps] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [splitModalOpen, setSplitModalOpen] = useState(false);
 
   // Phase 3: Data hook
   const mergeData = useMergeData({ mergeId });
@@ -196,6 +230,7 @@ export default function MergeViewerPage() {
         onRefreshPreview={() => setIframeKey((k) => k + 1)}
         goToPrevMerge={goToPrevMerge}
         goToNextMerge={goToNextMerge}
+        onSplitClick={() => setSplitModalOpen(true)}
       />
 
       {/* Main Content */}
@@ -328,6 +363,17 @@ export default function MergeViewerPage() {
           </div>
         </div>
       </main>
+
+      {/* Split Modal */}
+      <SplitModal
+        open={splitModalOpen}
+        onOpenChange={setSplitModalOpen}
+        mergeId={mergeId}
+        mergeName={merge.name}
+        unifiedTree={unifiedTree}
+        framework={previewFramework}
+        language={exportLanguage}
+      />
     </div>
   );
 }

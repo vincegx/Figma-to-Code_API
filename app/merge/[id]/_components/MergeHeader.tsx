@@ -16,6 +16,7 @@ import {
   Download,
   Copy,
   Home,
+  Scissors,
 } from 'lucide-react';
 import {
   Select,
@@ -47,6 +48,7 @@ interface MergeHeaderProps {
   onRefreshPreview: () => void;
   goToPrevMerge: () => void;
   goToNextMerge: () => void;
+  onSplitClick?: () => void;
 }
 
 export function MergeHeader({
@@ -61,6 +63,7 @@ export function MergeHeader({
   onRefreshPreview,
   goToPrevMerge,
   goToNextMerge,
+  onSplitClick,
 }: MergeHeaderProps) {
   return (
     <header className="flex-shrink-0 flex justify-between px-5 py-3">
@@ -138,6 +141,12 @@ export function MergeHeader({
                 <Download className="h-4 w-4 mr-2" />
                 Download Code File
               </DropdownMenuItem>
+              {onSplitClick && (
+                <DropdownMenuItem onClick={onSplitClick}>
+                  <Scissors className="h-4 w-4 mr-2" />
+                  Split into Components...
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           {/* Prev/Next navigation */}

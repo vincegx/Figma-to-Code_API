@@ -457,7 +457,7 @@ export async function generateCodeForMergeNode(
   merge: Merge,
   nodeId: string,
   framework: 'react-tailwind' | 'react-tailwind-v4' | 'html-css' = 'react-tailwind',
-  options?: { withProps?: boolean }
+  options?: { withProps?: boolean; stubNodes?: Map<string, string>; language?: 'typescript' | 'javascript' }
 ): Promise<{ altNode: SimpleAltNode | null; code: string; css?: string }> {
   // Re-execute merge to get mergedNode
   const sourceNodesInput = merge.sourceNodes.map((node) => ({
@@ -522,6 +522,7 @@ export async function generateCodeForMergeNode(
   const nodeIdPrefix = mobileData?.id || 'unknown';
 
   if (framework === 'html-css') {
+    // Note: HTML-CSS generator doesn't support stubNodes yet
     const output = await generateHTMLTailwindCSS(
       targetNode,
       {},
@@ -546,7 +547,7 @@ export async function generateCodeForMergeNode(
     undefined,
     undefined,
     nodeIdPrefix,
-    options
+    { withProps: options?.withProps, stubNodes: options?.stubNodes, language: options?.language }
   );
 
   return {

@@ -123,6 +123,32 @@ export const MIN_DETECTION_SCORE = 40;
 export const LARGE_COMPONENT_THRESHOLD = 200;
 
 // ============================================================================
+// Merge Split Types
+// ============================================================================
+
+/**
+ * Supported frameworks for merge split export (includes html-css)
+ */
+export type MergeSplitFramework = 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
+
+/**
+ * Source type to distinguish between nodes and merges in UI components
+ */
+export type SplitSourceType = 'node' | 'merge';
+
+/**
+ * Request body for merge split export API
+ */
+export interface MergeSplitExportRequest {
+  /** IDs of selected components to export */
+  readonly componentIds: readonly string[];
+  /** Target framework */
+  readonly framework: MergeSplitFramework;
+  /** Export language (typescript or javascript) */
+  readonly language: 'typescript' | 'javascript';
+}
+
+// ============================================================================
 // Type Guards
 // ============================================================================
 
@@ -131,4 +157,11 @@ export const LARGE_COMPONENT_THRESHOLD = 200;
  */
 export function isValidSplitFramework(value: string): value is SplitFramework {
   return value === 'react-tailwind' || value === 'react-tailwind-v4';
+}
+
+/**
+ * Type guard for valid merge split framework
+ */
+export function isValidMergeSplitFramework(value: string): value is MergeSplitFramework {
+  return value === 'react-tailwind' || value === 'react-tailwind-v4' || value === 'html-css';
 }

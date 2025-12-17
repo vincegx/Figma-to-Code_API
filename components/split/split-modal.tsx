@@ -7,6 +7,10 @@
  * Step 1: Smart Detection (detected-list.tsx)
  * Step 1b: Tree Explorer (tree-explorer.tsx) - optional
  * Step 2: Export Progress/Complete (export-progress.tsx)
+ *
+ * Supports two modes:
+ * - Node mode: For splitting a single Figma node (default)
+ * - Merge mode: For splitting a responsive merge (when mergeId is provided)
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -23,28 +27,50 @@ import { Button } from '@/components/ui/button';
 import { DetectedList } from './detected-list';
 import { TreeExplorer } from './tree-explorer';
 import { ExportProgress } from './export-progress';
-import type { DetectedComponent, SplitModalStep, SplitFramework, ExportedFile } from '@/lib/types/split';
+import type { DetectedComponent, SplitModalStep, SplitFramework, MergeSplitFramework, ExportedFile } from '@/lib/types/split';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
+import type { UnifiedElement } from '@/lib/types/merge';
 
 interface SplitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  nodeId: string;
-  nodeName: string;
-  framework: SplitFramework;
+  framework: SplitFramework | MergeSplitFramework;
   language: 'typescript' | 'javascript';
-  rootAltNode: SimpleAltNode | null;
+
+  // Node mode props (original)
+  nodeId?: string;
+  nodeName?: string;
+  rootAltNode?: SimpleAltNode | null;
+
+  // Merge mode props (new)
+  mergeId?: string;
+  mergeName?: string;
+  unifiedTree?: UnifiedElement | null;
 }
 
 export function SplitModal({
   open,
   onOpenChange,
-  nodeId,
-  nodeName,
   framework,
   language,
+  // Node mode
+  nodeId,
+  nodeName,
   rootAltNode,
+  // Merge mode
+  mergeId,
+  mergeName,
+  unifiedTree,
 }: SplitModalProps) {
+  // Detect mode: merge if mergeId is provided, otherwise node
+  const isMergeMode = Boolean(mergeId);
+  const displayName = isMergeMode ? mergeName : nodeName;
+  const sourceId = isMergeMode ? mergeId : nodeId;
+
+  // Tree for explorer: unifiedTree for merge, rootAltNode for node
+  // Both have compatible structure for TreeExplorer (id, name, type, children)
+  const treeRoot = isMergeMode ? unifiedTree : rootAltNode;
+
   // Modal state
   const [step, setStep] = useState<SplitModalStep>('detection');
   const [detectedComponents, setDetectedComponents] = useState<DetectedComponent[]>([]);
@@ -65,14 +91,22 @@ export function SplitModal({
       setError(null);
       fetchDetectedComponents();
     }
-  }, [open, nodeId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, sourceId]);
 
-  // Fetch detected components
+  // Fetch detected components - different API based on mode
   const fetchDetectedComponents = useCallback(async () => {
+    if (!sourceId) return;
+
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/split/detect/${nodeId}`);
+      // Different API endpoints for node vs merge
+      const url = isMergeMode
+        ? `/api/merges/${sourceId}/split/detect`
+        : `/api/split/detect/${sourceId}`;
+
+      const response = await fetch(url);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -88,9 +122,9 @@ export function SplitModal({
     } finally {
       setIsLoading(false);
     }
-  }, [nodeId]);
+  }, [sourceId, isMergeMode]);
 
-  // Handle export
+  // Handle export - different API and request body based on mode
   const handleExport = useCallback(async () => {
     if (selectedIds.length === 0) {
       setError('Select at least one component');
@@ -102,15 +136,19 @@ export function SplitModal({
     setError(null);
 
     try {
-      const response = await fetch('/api/split/export', {
+      // Different API endpoints and request bodies for node vs merge
+      const url = isMergeMode
+        ? `/api/merges/${sourceId}/split/export`
+        : '/api/split/export';
+
+      const body = isMergeMode
+        ? { componentIds: selectedIds, framework, language }
+        : { nodeId: sourceId, componentIds: selectedIds, framework, language };
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodeId,
-          componentIds: selectedIds,
-          framework,
-          language,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -120,17 +158,18 @@ export function SplitModal({
 
       // Get the blob and trigger download
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const url2 = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `${nodeName.replace(/[^a-zA-Z0-9-_]/g, '-')}-components.zip`;
+      a.href = url2;
+      const safeName = (displayName || 'components').replace(/[^a-zA-Z0-9-_]/g, '-');
+      a.download = `${safeName}-components.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url2);
 
       // Build file list from selected components
-      const extension = language === 'typescript' ? 'tsx' : 'jsx';
+      const extension = framework === 'html-css' ? 'html' : (language === 'typescript' ? 'tsx' : 'jsx');
       const files: ExportedFile[] = selectedIds.map(id => {
         const component = detectedComponents.find(c => c.id === id);
         const name = component?.name || 'Component';
@@ -153,10 +192,13 @@ export function SplitModal({
     } finally {
       setIsExporting(false);
     }
-  }, [nodeId, nodeName, selectedIds, framework, language, detectedComponents]);
+  }, [sourceId, displayName, selectedIds, framework, language, detectedComponents, isMergeMode]);
 
   // Framework display name
-  const frameworkLabel = framework === 'react-tailwind-v4' ? 'React + Tailwind v4' : 'React + Tailwind';
+  const frameworkLabel =
+    framework === 'react-tailwind-v4' ? 'React + Tailwind v4' :
+    framework === 'html-css' ? 'HTML + CSS' :
+    'React + Tailwind';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -167,7 +209,7 @@ export function SplitModal({
             Split into Components
           </DialogTitle>
           <DialogDescription className="text-text-muted">
-            {nodeName} &bull; {frameworkLabel}
+            {displayName} &bull; {frameworkLabel}
           </DialogDescription>
         </DialogHeader>
 
@@ -205,7 +247,7 @@ export function SplitModal({
               />
 
               {/* Tree Explorer Link */}
-              {rootAltNode && (
+              {treeRoot && (
                 <div className="flex items-center justify-between pt-2 border-t border-border-primary">
                   <span className="text-xs text-text-muted">Need more control?</span>
                   <Button
@@ -223,7 +265,7 @@ export function SplitModal({
           )}
 
           {/* Step 1b: Tree Explorer */}
-          {!isLoading && step === 'tree-explorer' && rootAltNode && (
+          {!isLoading && step === 'tree-explorer' && treeRoot && (
             <div className="space-y-4">
               <Button
                 variant="ghost"
@@ -236,7 +278,7 @@ export function SplitModal({
               </Button>
 
               <TreeExplorer
-                rootNode={rootAltNode}
+                rootNode={treeRoot as SimpleAltNode}
                 selectedIds={selectedIds}
                 onSelectionChange={setSelectedIds}
               />

@@ -5,6 +5,9 @@
  *
  * Displays the Figma node tree with checkboxes for manual
  * component selection. Supports depth filtering and search.
+ *
+ * Supports both SimpleAltNode (nodes page) and UnifiedElement (merge page)
+ * through a generic TreeNode interface.
  */
 
 import { useState, useMemo } from 'react';
@@ -20,12 +23,31 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { SimpleAltNode } from '@/lib/altnode-transform';
+import type { UnifiedElement } from '@/lib/types/merge';
+
+/**
+ * Generic tree node interface that works with both SimpleAltNode and UnifiedElement
+ */
+interface GenericTreeNode {
+  id: string;
+  name: string;
+  type?: string;
+  originalType?: string;
+  children?: readonly GenericTreeNode[];
+}
 
 interface TreeExplorerProps {
-  rootNode: SimpleAltNode;
+  rootNode: SimpleAltNode | UnifiedElement;
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   disabled?: boolean;
+}
+
+/**
+ * Get the effective type from a node (supports both SimpleAltNode and UnifiedElement)
+ */
+function getNodeType(node: GenericTreeNode): string {
+  return node.originalType || node.type || '';
 }
 
 /**
@@ -49,7 +71,7 @@ function getNodeIcon(type: string) {
 /**
  * Count nodes recursively
  */
-function countNodes(node: SimpleAltNode): number {
+function countNodes(node: GenericTreeNode): number {
   let count = 1;
   if (node.children) {
     for (const child of node.children) {
@@ -62,7 +84,7 @@ function countNodes(node: SimpleAltNode): number {
 /**
  * Check if any ancestor is selected
  */
-function hasSelectedAncestor(nodeId: string, selectedIds: string[], nodeMap: Map<string, SimpleAltNode>, parentMap: Map<string, string>): boolean {
+function hasSelectedAncestor(nodeId: string, selectedIds: string[], nodeMap: Map<string, GenericTreeNode>, parentMap: Map<string, string>): boolean {
   let currentId = parentMap.get(nodeId);
   while (currentId) {
     if (selectedIds.includes(currentId)) {
@@ -76,7 +98,7 @@ function hasSelectedAncestor(nodeId: string, selectedIds: string[], nodeMap: Map
 /**
  * Build maps for parent lookup
  */
-function buildMaps(node: SimpleAltNode, nodeMap: Map<string, SimpleAltNode>, parentMap: Map<string, string>, parentId?: string): void {
+function buildMaps(node: GenericTreeNode, nodeMap: Map<string, GenericTreeNode>, parentMap: Map<string, string>, parentId?: string): void {
   nodeMap.set(node.id, node);
   if (parentId) {
     parentMap.set(node.id, parentId);
@@ -91,7 +113,7 @@ function buildMaps(node: SimpleAltNode, nodeMap: Map<string, SimpleAltNode>, par
 /**
  * Filter tree by search term
  */
-function matchesSearch(node: SimpleAltNode, searchTerm: string): boolean {
+function matchesSearch(node: GenericTreeNode, searchTerm: string): boolean {
   const term = searchTerm.toLowerCase();
   if (node.name.toLowerCase().includes(term)) {
     return true;
@@ -103,14 +125,14 @@ function matchesSearch(node: SimpleAltNode, searchTerm: string): boolean {
 }
 
 interface TreeNodeProps {
-  node: SimpleAltNode;
+  node: GenericTreeNode;
   depth: number;
   maxDepth: number;
   selectedIds: string[];
   onToggle: (id: string) => void;
   isRoot?: boolean;
   searchTerm: string;
-  nodeMap: Map<string, SimpleAltNode>;
+  nodeMap: Map<string, GenericTreeNode>;
   parentMap: Map<string, string>;
   disabled?: boolean;
 }
@@ -133,8 +155,11 @@ function TreeNode({
   const isSelected = selectedIds.includes(node.id);
   const ancestorSelected = hasSelectedAncestor(node.id, selectedIds, nodeMap, parentMap);
 
+  // Get node type (supports both SimpleAltNode.originalType and UnifiedElement.type)
+  const nodeType = getNodeType(node);
+
   // Skip non-structural types for selection (manual selection = less restrictive)
-  const isStructural = ['FRAME', 'INSTANCE', 'COMPONENT', 'GROUP'].includes(node.originalType || '');
+  const isStructural = ['FRAME', 'INSTANCE', 'COMPONENT', 'GROUP'].includes(nodeType);
   const canSelect = isStructural && !isRoot;
 
   // Filter by search
@@ -187,7 +212,7 @@ function TreeNode({
         )}
 
         {/* Icon */}
-        {getNodeIcon(node.originalType || '')}
+        {getNodeIcon(nodeType)}
 
         {/* Name */}
         <span className={cn(
@@ -199,7 +224,7 @@ function TreeNode({
 
         {/* Type badge */}
         <span className="text-[10px] text-text-muted">
-          {node.originalType}
+          {nodeType}
         </span>
 
         {/* Node count */}
@@ -242,9 +267,9 @@ export function TreeExplorer({
 
   // Build lookup maps
   const { nodeMap, parentMap } = useMemo(() => {
-    const nodeMap = new Map<string, SimpleAltNode>();
+    const nodeMap = new Map<string, GenericTreeNode>();
     const parentMap = new Map<string, string>();
-    buildMaps(rootNode, nodeMap, parentMap);
+    buildMaps(rootNode as GenericTreeNode, nodeMap, parentMap);
     return { nodeMap, parentMap };
   }, [rootNode]);
 
@@ -296,7 +321,7 @@ export function TreeExplorer({
       <div className="border border-border-primary rounded-lg overflow-hidden bg-bg-secondary">
         <div className="max-h-[350px] overflow-y-auto py-1">
           <TreeNode
-            node={rootNode}
+            node={rootNode as GenericTreeNode}
             depth={0}
             maxDepth={parseInt(maxDepth)}
             selectedIds={selectedIds}
