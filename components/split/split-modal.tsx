@@ -168,8 +168,8 @@ export function SplitModal({
       document.body.removeChild(a);
       URL.revokeObjectURL(url2);
 
-      // Build file list from selected components
-      const extension = framework === 'html-css' ? 'html' : (language === 'typescript' ? 'tsx' : 'jsx');
+      // Build file list from selected components (split only supports React frameworks)
+      const extension = language === 'typescript' ? 'tsx' : 'jsx';
       const files: ExportedFile[] = selectedIds.map(id => {
         const component = detectedComponents.find(c => c.id === id);
         const name = component?.name || 'Component';
@@ -194,11 +194,9 @@ export function SplitModal({
     }
   }, [sourceId, displayName, selectedIds, framework, language, detectedComponents, isMergeMode]);
 
-  // Framework display name
+  // Framework display name (split only supports React frameworks)
   const frameworkLabel =
-    framework === 'react-tailwind-v4' ? 'React + Tailwind v4' :
-    framework === 'html-css' ? 'HTML + CSS' :
-    'React + Tailwind';
+    framework === 'react-tailwind-v4' ? 'React + Tailwind v4' : 'React + Tailwind';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

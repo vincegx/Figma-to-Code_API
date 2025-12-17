@@ -127,9 +127,11 @@ export const LARGE_COMPONENT_THRESHOLD = 200;
 // ============================================================================
 
 /**
- * Supported frameworks for merge split export (includes html-css)
+ * Supported frameworks for merge split export
+ * Note: html-css is NOT supported for split export because it creates
+ * React components with imports, which doesn't make sense for HTML
  */
-export type MergeSplitFramework = 'react-tailwind' | 'react-tailwind-v4' | 'html-css';
+export type MergeSplitFramework = 'react-tailwind' | 'react-tailwind-v4';
 
 /**
  * Source type to distinguish between nodes and merges in UI components
@@ -161,7 +163,8 @@ export function isValidSplitFramework(value: string): value is SplitFramework {
 
 /**
  * Type guard for valid merge split framework
+ * Note: html-css is excluded because split creates React components with imports
  */
 export function isValidMergeSplitFramework(value: string): value is MergeSplitFramework {
-  return value === 'react-tailwind' || value === 'react-tailwind-v4' || value === 'html-css';
+  return value === 'react-tailwind' || value === 'react-tailwind-v4';
 }

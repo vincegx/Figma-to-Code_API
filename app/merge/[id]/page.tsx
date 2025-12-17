@@ -230,7 +230,7 @@ export default function MergeViewerPage() {
         onRefreshPreview={() => setIframeKey((k) => k + 1)}
         goToPrevMerge={goToPrevMerge}
         goToNextMerge={goToNextMerge}
-        onSplitClick={() => setSplitModalOpen(true)}
+        onSplitClick={previewFramework !== 'html-css' ? () => setSplitModalOpen(true) : undefined}
       />
 
       {/* Main Content */}
@@ -364,14 +364,14 @@ export default function MergeViewerPage() {
         </div>
       </main>
 
-      {/* Split Modal */}
+      {/* Split Modal - only supports React frameworks, not html-css */}
       <SplitModal
         open={splitModalOpen}
         onOpenChange={setSplitModalOpen}
         mergeId={mergeId}
         mergeName={merge.name}
         unifiedTree={unifiedTree}
-        framework={previewFramework}
+        framework={previewFramework === 'html-css' ? 'react-tailwind' : previewFramework}
         language={exportLanguage}
       />
     </div>

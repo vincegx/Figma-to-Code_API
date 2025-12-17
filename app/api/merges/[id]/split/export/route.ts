@@ -36,6 +36,7 @@ import {
   sanitizeComponentName,
   toPascalCase,
   addViteProjectFiles,
+  type CustomBreakpoints,
 } from '@/lib/utils/export-utils';
 import type { MergeSplitFramework, ExportedFile } from '@/lib/types/split';
 import type { Merge } from '@/lib/types/merge';
@@ -46,7 +47,8 @@ import type { Merge } from '@/lib/types/merge';
 
 const MergeSplitExportSchema = z.object({
   componentIds: z.array(z.string()).min(1, 'At least one component required').max(20, 'Maximum 20 components'),
-  framework: z.enum(['react-tailwind', 'react-tailwind-v4', 'html-css']),
+  // Note: html-css not supported for split export (creates React components with imports)
+  framework: z.enum(['react-tailwind', 'react-tailwind-v4']),
   language: z.enum(['typescript', 'javascript']).default('typescript'),
 });
 
@@ -369,8 +371,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
           googleFontsUrl = merge.result.googleFontsUrl;
 
-          // Add Vite project files
-          addViteProjectFiles(zip, wrapperName, extension, merge.name, googleFontsUrl);
+          // Extract custom breakpoints from merge source nodes
+          // Same logic as useMergeData.ts and generate-tailwind-css API:
+          // - mobileWidth: where tablet styles (md:) start
+          // - tabletWidth: where desktop styles (lg:) start
+          const mobileNode = merge.sourceNodes.find(sn => sn.breakpoint === 'mobile');
+          const tabletNode = merge.sourceNodes.find(sn => sn.breakpoint === 'tablet');
+          const customBreakpoints: CustomBreakpoints = {
+            mobileWidth: mobileNode?.width,
+            tabletWidth: tabletNode?.width,
+          };
+
+          // Add Vite project files with custom breakpoints and framework
+          addViteProjectFiles(zip, wrapperName, extension, merge.name, googleFontsUrl, customBreakpoints, framework);
         }
       } catch (err) {
         console.error('[Merge Split Export] Failed to generate wrapper:', err);

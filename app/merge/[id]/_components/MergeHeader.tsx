@@ -17,6 +17,7 @@ import {
   Copy,
   Home,
   Scissors,
+  Package,
 } from 'lucide-react';
 import {
   Select,
@@ -140,6 +141,19 @@ export function MergeHeader({
               }}>
                 <Download className="h-4 w-4 mr-2" />
                 Download Code File
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                // Download ZIP package with code, assets, and project files
+                const url = `/api/merges/${mergeId}/export?framework=${previewFramework}&format=zip`;
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${merge.name}-export.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}>
+                <Package className="h-4 w-4 mr-2" />
+                Download ZIP Package
               </DropdownMenuItem>
               {onSplitClick && (
                 <DropdownMenuItem onClick={onSplitClick}>

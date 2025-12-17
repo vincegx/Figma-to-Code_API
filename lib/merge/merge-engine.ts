@@ -534,7 +534,7 @@ export async function generateCodeForMergeNode(
     );
     return {
       altNode: targetNode,
-      code: output.code + (output.css ? '\n/* CSS */\n' + output.css : ''),
+      code: output.code,
       css: output.css,
     };
   }

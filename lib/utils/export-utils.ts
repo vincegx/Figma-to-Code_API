@@ -92,20 +92,66 @@ export function toPascalCase(name: string): string {
 }
 
 /**
+ * Extract the exported component name from React code
+ * Handles: export function Name(), export const Name =, export default function Name()
+ */
+export function extractExportedComponentName(code: string): string | null {
+  // Match: export function ComponentName(
+  const namedFunctionMatch = code.match(/export\s+function\s+([A-Z][a-zA-Z0-9]*)\s*\(/);
+  if (namedFunctionMatch) {
+    return namedFunctionMatch[1];
+  }
+
+  // Match: export const ComponentName =
+  const constMatch = code.match(/export\s+const\s+([A-Z][a-zA-Z0-9]*)\s*=/);
+  if (constMatch) {
+    return constMatch[1];
+  }
+
+  // Match: export default function ComponentName(
+  const defaultFunctionMatch = code.match(/export\s+default\s+function\s+([A-Z][a-zA-Z0-9]*)\s*\(/);
+  if (defaultFunctionMatch) {
+    return defaultFunctionMatch[1];
+  }
+
+  return null;
+}
+
+/**
+ * Custom breakpoints for Tailwind configuration
+ * These match the responsive design logic:
+ * - mobileWidth: the width where tablet styles start (md: breakpoint)
+ * - tabletWidth: the width where desktop styles start (lg: breakpoint)
+ */
+export interface CustomBreakpoints {
+  mobileWidth?: number;  // md breakpoint - tablet styles start here (default: 480)
+  tabletWidth?: number;  // lg breakpoint - desktop styles start here (default: 960)
+}
+
+/**
  * Add Vite project files to ZIP for running a dev server (React exports only)
  * Allows `npm install && npm run dev` to test the exported component
+ *
+ * @param componentName - The file name for the component (without extension)
+ * @param exportedComponentName - The actual exported function/const name in the code (if different from componentName)
  */
 export function addViteProjectFiles(
   zip: { file: (path: string, content: string) => void },
   componentName: string,
   extension: string,
   projectName: string,
-  googleFontsUrl?: string
+  googleFontsUrl?: string,
+  breakpoints?: CustomBreakpoints,
+  framework: 'react-tailwind' | 'react-tailwind-v4' = 'react-tailwind',
+  exportedComponentName?: string
 ): void {
+  // Use the actual exported name if provided, otherwise use the file name
+  const actualComponentName = exportedComponentName || componentName;
   const isTypeScript = extension === 'tsx';
   const mainExt = isTypeScript ? 'tsx' : 'jsx';
+  const isV4 = framework === 'react-tailwind-v4';
 
-  // package.json
+  // package.json - different deps for v3 (CDN) vs v4 (npm)
   const packageJson = {
     name: sanitizeComponentName(projectName).toLowerCase() || 'figma-export',
     private: true,
@@ -123,6 +169,12 @@ export function addViteProjectFiles(
     devDependencies: {
       '@vitejs/plugin-react': '^4.2.0',
       vite: '^5.0.0',
+      ...(isV4
+        ? {
+            tailwindcss: '^4.0.0',
+            '@tailwindcss/vite': '^4.0.0',
+          }
+        : {}),
       ...(isTypeScript
         ? {
             '@types/react': '^18.2.0',
@@ -134,8 +186,17 @@ export function addViteProjectFiles(
   };
   zip.file('package.json', JSON.stringify(packageJson, null, 2));
 
-  // vite.config.js
-  const viteConfig = `import { defineConfig } from 'vite';
+  // vite.config.js - add tailwind plugin for v4
+  const viteConfig = isV4
+    ? `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+`
+    : `import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -151,15 +212,35 @@ export default defineConfig({
     <link href="${googleFontsUrl}" rel="stylesheet">`
     : '';
 
-  // index.html with responsive root styles
-  const indexHtml = `<!DOCTYPE html>
+  // Breakpoints logic matches generate-tailwind-css API:
+  // - md: mobileWidth (where tablet styles start)
+  // - lg: tabletWidth (where desktop styles start)
+  const hasCustomBreakpoints = breakpoints && (breakpoints.mobileWidth || breakpoints.tabletWidth);
+  const mobileWidth = breakpoints?.mobileWidth || 480;
+  const tabletWidth = breakpoints?.tabletWidth || 960;
+
+  if (isV4) {
+    // Tailwind v4: Create CSS file with @theme for custom breakpoints
+    const tailwindCSS = `@import "tailwindcss";
+${hasCustomBreakpoints ? `
+@theme {
+  --breakpoint-sm: ${mobileWidth}px;
+  --breakpoint-md: ${mobileWidth}px;
+  --breakpoint-lg: ${tabletWidth}px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+` : ''}`;
+    zip.file('src/index.css', tailwindCSS);
+
+    // index.html for v4 (no CDN, CSS imported in main.tsx)
+    const indexHtmlV4 = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${projectName}</title>
     ${googleFontsLink}
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       /* Make root responsive instead of fixed Figma width */
       #root > * {
@@ -175,16 +256,61 @@ export default defineConfig({
   </body>
 </html>
 `;
-  zip.file('index.html', indexHtml);
+    zip.file('index.html', indexHtmlV4);
+  } else {
+    // Tailwind v3: Use CDN with inline config
+    const tailwindConfig = hasCustomBreakpoints
+      ? `
+    <script>
+      tailwind.config = {
+        theme: {
+          screens: {
+            'sm': '${mobileWidth}px',
+            'md': '${mobileWidth}px',
+            'lg': '${tabletWidth}px',
+            'xl': '1280px',
+            '2xl': '1536px',
+          }
+        }
+      }
+    </script>`
+      : '';
 
-  // src/main.tsx or src/main.jsx
+    const indexHtmlV3 = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${projectName}</title>
+    ${googleFontsLink}
+    <script src="https://cdn.tailwindcss.com"></script>${tailwindConfig}
+    <style>
+      /* Make root responsive instead of fixed Figma width */
+      #root > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.${mainExt}"></script>
+  </body>
+</html>
+`;
+    zip.file('index.html', indexHtmlV3);
+  }
+
+  // src/main.tsx or src/main.jsx - import CSS for v4
+  const cssImport = isV4 ? "import './index.css';\n" : '';
   const mainContent = `import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ${componentName} } from './${componentName}';
+${cssImport}import { ${actualComponentName} } from './${componentName}';
 
 ReactDOM.createRoot(document.getElementById('root')${isTypeScript ? '!' : ''}).render(
   <React.StrictMode>
-    <${componentName} />
+    <${actualComponentName} />
   </React.StrictMode>
 );
 `;

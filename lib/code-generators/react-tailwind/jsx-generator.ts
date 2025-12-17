@@ -297,29 +297,36 @@ export function generateTailwindJSXElement(
   // We need to prefix EACH class with md: or lg:
   // Use smartSplitTailwindClasses to handle arbitrary values with spaces inside brackets
   const responsiveClasses: string[] = [];
-  if (node.responsiveStyles?.md) {
-    for (const [cssProperty, cssValue] of Object.entries(node.responsiveStyles.md)) {
+
+  // Helper to process responsive styles for a breakpoint
+  // FIX: When flex-grow is present with w-auto, use basis-0 instead
+  // This fixes Tailwind CDN issue where w-full md:w-auto doesn't work correctly
+  const processResponsiveStyles = (styles: Record<string, string | number>, prefix: 'md' | 'lg') => {
+    const hasFlexGrow = styles['flex-grow'] === '1' || styles['flex-grow'] === 1;
+
+    for (const [cssProperty, cssValue] of Object.entries(styles)) {
+      // Skip width:auto when flex-grow is present - we'll add basis-0 instead
+      if (cssProperty === 'width' && cssValue === 'auto' && hasFlexGrow) {
+        responsiveClasses.push(`${prefix}:basis-0`);
+        continue;
+      }
+
       const twClass = cssPropToTailwind(cssProperty, String(cssValue));
       if (twClass) {
         // Smart split to preserve arbitrary values, then prefix each class
         const classes = smartSplitTailwindClasses(twClass);
         for (const cls of classes) {
-          responsiveClasses.push(`md:${cls}`);
+          responsiveClasses.push(`${prefix}:${cls}`);
         }
       }
     }
+  };
+
+  if (node.responsiveStyles?.md) {
+    processResponsiveStyles(node.responsiveStyles.md, 'md');
   }
   if (node.responsiveStyles?.lg) {
-    for (const [cssProperty, cssValue] of Object.entries(node.responsiveStyles.lg)) {
-      const twClass = cssPropToTailwind(cssProperty, String(cssValue));
-      if (twClass) {
-        // Smart split to preserve arbitrary values, then prefix each class
-        const classes = smartSplitTailwindClasses(twClass);
-        for (const cls of classes) {
-          responsiveClasses.push(`lg:${cls}`);
-        }
-      }
-    }
+    processResponsiveStyles(node.responsiveStyles.lg, 'lg');
   }
 
   // WP31: Add MCP-style structural classes
