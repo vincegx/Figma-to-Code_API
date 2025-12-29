@@ -152,9 +152,9 @@
     "gridColumnSpan": {
       "cssProperty": "grid-column",
       "unit": "",
-      "extract": true,
+      "extract": false,
       "type": "Simple",
-      "comment": "WP27 mapping"
+      "comment": "WP27 - disabled: handled in normalizeLayout with gridColumnAnchorIndex"
     },
     "gridRowGap": {
       "cssProperty": "row-gap",
@@ -166,9 +166,9 @@
     "gridRowSpan": {
       "cssProperty": "grid-row",
       "unit": "",
-      "extract": true,
+      "extract": false,
       "type": "Simple",
-      "comment": "WP27 mapping - normalizeLayout() line 358-366"
+      "comment": "WP27 - disabled: handled in normalizeLayout with gridRowAnchorIndex"
     },
     "itemSpacing": {
       "cssProperty": "gap",

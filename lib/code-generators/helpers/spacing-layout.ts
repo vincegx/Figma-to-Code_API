@@ -84,12 +84,16 @@ export function handleDisplay(cssValue: string): string {
  */
 export function handleGridTemplateColumns(cssValue: string): string {
   if (cssValue === 'max-content') return 'grid-cols-[max-content]';
-  return `grid-cols-[${cssValue}]`;
+  // Tailwind arbitrary values: replace spaces with underscores
+  const escaped = cssValue.replace(/,\s+/g, ',_').replace(/\s+/g, '_');
+  return `grid-cols-[${escaped}]`;
 }
 
 export function handleGridTemplateRows(cssValue: string): string {
   if (cssValue === 'max-content') return 'grid-rows-[max-content]';
-  return `grid-rows-[${cssValue}]`;
+  // Tailwind arbitrary values: replace spaces with underscores
+  const escaped = cssValue.replace(/,\s+/g, ',_').replace(/\s+/g, '_');
+  return `grid-rows-[${escaped}]`;
 }
 
 export function handlePlaceItems(cssValue: string): string {

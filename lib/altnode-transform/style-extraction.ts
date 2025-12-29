@@ -445,12 +445,26 @@ export function normalizeLayout(figmaNode: FigmaNode, altNode: SimpleAltNode, pa
   }
 
 
-  // WP25: Grid child properties
-  if (node.gridRowSpan && node.gridRowSpan > 1) {
-    altNode.styles.gridRowEnd = `span ${node.gridRowSpan}`;
+  // WP25: Grid child properties - use anchorIndex for position (0-indexed in Figma, 1-indexed in CSS)
+  // Only set explicit positions if child has grid properties (is a grid child)
+  if (node.gridColumnAnchorIndex !== undefined || node.gridColumnSpan !== undefined) {
+    const colStart = (node.gridColumnAnchorIndex ?? 0) + 1; // CSS Grid is 1-indexed
+    const colSpan = node.gridColumnSpan ?? 1;
+    if (colSpan > 1) {
+      altNode.styles['grid-column'] = `${colStart} / span ${colSpan}`;
+    } else {
+      // For span 1, don't set explicit position - let CSS Grid auto-place
+      // This avoids conflicts and works better with responsive layouts
+    }
   }
-  if (node.gridColumnSpan && node.gridColumnSpan > 1) {
-    altNode.styles.gridColumnEnd = `span ${node.gridColumnSpan}`;
+  if (node.gridRowAnchorIndex !== undefined || node.gridRowSpan !== undefined) {
+    const rowStart = (node.gridRowAnchorIndex ?? 0) + 1; // CSS Grid is 1-indexed
+    const rowSpan = node.gridRowSpan ?? 1;
+    if (rowSpan > 1) {
+      altNode.styles['grid-row'] = `${rowStart} / span ${rowSpan}`;
+    } else {
+      // For span 1, don't set explicit position - let CSS Grid auto-place
+    }
   }
 
   // Padding
