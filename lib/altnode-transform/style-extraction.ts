@@ -262,7 +262,11 @@ function extractComplexProperties(figmaNode: FigmaNode, altNode: SimpleAltNode):
     const solidFill = node.fills.find((f: any) => f.type === 'SOLID');
     if (solidFill?.color) {
       const { r, g, b, a } = solidFill.color;
-      const rgba = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a ?? 1})`;
+      // Multiply color alpha by fill opacity (both can affect transparency)
+      const colorAlpha = a ?? 1;
+      const fillOpacity = solidFill.opacity ?? 1;
+      const finalAlpha = colorAlpha * fillOpacity;
+      const rgba = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${finalAlpha})`;
       altNode.styles['color'] = rgba;
     }
   }
@@ -741,7 +745,10 @@ export function normalizeStrokes(figmaNode: FigmaNode, altNode: SimpleAltNode): 
       } else if (stroke.color) {
         // Solid color stroke
         const { r, g, b } = stroke.color;
-        const a = stroke.opacity ?? 1;
+        // Multiply color alpha by stroke opacity (both can affect transparency)
+        const colorAlpha = stroke.color.a ?? 1;
+        const strokeOpacity = stroke.opacity ?? 1;
+        const a = colorAlpha * strokeOpacity;
         color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
 
         // WP31 T224: Check for Figma variable bindings on strokes

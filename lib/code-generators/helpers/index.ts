@@ -211,9 +211,18 @@ export function formatCode(code: string, indentSize: number = 2): string {
 export function extractTextContent(node: any): string {
   const rawText = node.originalNode?.characters || '';
 
+  // Escape JSX special characters BEFORE adding <br/> tags
+  // < and > would be parsed as JSX tags, { and } as expressions
+  const escaped = rawText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/{/g, '&#123;')
+    .replace(/}/g, '&#125;');
+
   // Replace double newlines with <br/><br/>
   // Replace single newlines with <br/>
-  return rawText
+  return escaped
     .replace(/\n\n/g, '<br/><br/>')
     .replace(/\n/g, '<br/>');
 }

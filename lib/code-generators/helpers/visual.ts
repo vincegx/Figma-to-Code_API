@@ -15,14 +15,24 @@
  * @returns Tailwind color class
  */
 export function hexToTailwindColor(color: string, prefix: string): string {
-  // Parse rgba() to hex
+  // Parse rgba() - capture alpha if present
   let hex = color;
-  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  let alpha: number | null = null;
+  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
   if (rgbaMatch) {
     const r = parseInt(rgbaMatch[1]);
     const g = parseInt(rgbaMatch[2]);
     const b = parseInt(rgbaMatch[3]);
+    if (rgbaMatch[4] !== undefined) {
+      alpha = parseFloat(rgbaMatch[4]);
+    }
     hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
+  }
+
+  // If alpha < 1, use arbitrary rgba value to preserve transparency
+  if (alpha !== null && alpha < 1) {
+    // Use arbitrary value with full rgba for transparency
+    return `${prefix}-[${color.replace(/\s/g, '')}]`;
   }
 
   // WP25 FIX: Map common colors to standard Tailwind classes

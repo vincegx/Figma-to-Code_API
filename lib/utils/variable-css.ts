@@ -93,9 +93,14 @@ function formatValueForCss(type: VariableType, value: string | number | object):
     }
     // Handle color object stored in value (from FillData)
     if (value && typeof value === 'object' && 'color' in value) {
-      const c = (value as { color: { r: number; g: number; b: number; a?: number } }).color;
-      if (c.a !== undefined && c.a < 1) {
-        return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${c.a})`;
+      const v = value as { color: { r: number; g: number; b: number; a?: number }; opacity?: number };
+      const c = v.color;
+      // Multiply color alpha by fill/stroke opacity (both can affect transparency)
+      const colorAlpha = c.a ?? 1;
+      const fillOpacity = v.opacity ?? 1;
+      const finalAlpha = colorAlpha * fillOpacity;
+      if (finalAlpha < 1) {
+        return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${finalAlpha})`;
       }
       const toHex = (n: number) => Math.round(n * 255).toString(16).padStart(2, '0');
       return `#${toHex(c.r)}${toHex(c.g)}${toHex(c.b)}`;
